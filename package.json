@@ -1,0 +1,19 @@
+{
+  "name": "pura",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PURA Property Management System",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "db:push": "pnpm --filter database db:push",
+    "db:generate": "pnpm --filter database db:generate"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
