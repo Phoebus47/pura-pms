@@ -1,12 +1,12 @@
 {
   "name": "@pura/database",
   "version": "1.0.0",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
@@ -15,7 +15,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
-    "build": "tsc"
+    "postinstall": "prisma generate",
+    "build": "prisma generate && tsc"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",
