@@ -15,7 +15,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
-    "build": "tsc"
+    "postinstall": "prisma generate",
+    "build": "prisma generate && tsc"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",
