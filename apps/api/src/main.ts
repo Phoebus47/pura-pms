@@ -26,7 +26,6 @@ async function bootstrap() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap().catch((err: unknown) => {
   console.error(err);
   process.exit(1);
