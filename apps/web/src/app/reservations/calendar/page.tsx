@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { reservationsAPI, type Reservation } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,7 @@ export default function ReservationCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [propertyFilter, setPropertyFilter] = useState("");
 
-  useEffect(() => {
-    loadReservations();
-  }, [currentDate, propertyFilter]);
-
-  async function loadReservations() {
+  const loadReservations = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -33,7 +29,7 @@ export default function ReservationCalendarPage() {
         0,
       );
 
-      const filters: any = {
+      const filters: Record<string, string> = {
         checkIn: firstDay.toISOString().split("T")[0],
         checkOut: lastDay.toISOString().split("T")[0],
       };
@@ -49,7 +45,11 @@ export default function ReservationCalendarPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [currentDate, propertyFilter]);
+
+  useEffect(() => {
+    loadReservations();
+  }, [loadReservations]);
 
   function previousMonth() {
     setCurrentDate(

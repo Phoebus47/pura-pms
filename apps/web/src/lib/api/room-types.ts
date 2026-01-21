@@ -32,7 +32,7 @@ export interface CreateRoomTypeDto {
   propertyId: string;
 }
 
-export interface UpdateRoomTypeDto extends Partial<CreateRoomTypeDto> {}
+export type UpdateRoomTypeDto = Partial<CreateRoomTypeDto>;
 
 export const roomTypesAPI = {
   async getAll(propertyId?: string): Promise<RoomType[]> {

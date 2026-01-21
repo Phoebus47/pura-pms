@@ -1,4 +1,4 @@
-import { apiClient, getAuthToken } from "./client";
+import { apiClient } from "./client";
 
 export interface LoginDto {
   email: string;

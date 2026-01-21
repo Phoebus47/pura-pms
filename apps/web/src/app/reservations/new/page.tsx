@@ -13,9 +13,7 @@ import { useRouter } from "next/navigation";
 import {
   reservationsAPI,
   roomsAPI,
-  roomTypesAPI,
   type Room,
-  type RoomType,
   type Guest,
   type CreateReservationDto,
 } from "@/lib/api";
@@ -66,7 +64,7 @@ export default function NewReservationPage() {
       });
       setAvailableRooms(rooms);
       setCurrentStep(2);
-    } catch (error) {
+    } catch {
       alert("Failed to load available rooms");
     } finally {
       setLoadingRooms(false);

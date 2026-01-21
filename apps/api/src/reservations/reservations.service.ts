@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { ReservationStatus } from '@pura/database';
+import { Prisma, ReservationStatus } from '@pura/database';
 
 @Injectable()
 export class ReservationsService {
@@ -19,7 +19,9 @@ export class ReservationsService {
 
     // Validate dates
     if (checkIn >= checkOut) {
-      throw new BadRequestException('Check-out date must be after check-in date');
+      throw new BadRequestException(
+        'Check-out date must be after check-in date',
+      );
     }
 
     if (checkIn < new Date(new Date().setHours(0, 0, 0, 0))) {
@@ -140,7 +142,7 @@ export class ReservationsService {
     checkOut?: Date,
     guestId?: string,
   ) {
-    const where: any = {};
+    const where: Prisma.ReservationWhereInput = {};
 
     if (propertyId) {
       where.room = { propertyId };
@@ -151,16 +153,19 @@ export class ReservationsService {
     }
 
     if (checkIn || checkOut) {
-      where.OR = [];
+      const orFilter: Prisma.ReservationWhereInput[] = [];
       if (checkIn) {
-        where.OR.push({
+        orFilter.push({
           checkIn: { gte: checkIn },
         });
       }
       if (checkOut) {
-        where.OR.push({
+        orFilter.push({
           checkOut: { lte: checkOut },
         });
+      }
+      if (orFilter.length > 0) {
+        where.OR = orFilter;
       }
     }
 
@@ -271,7 +276,9 @@ export class ReservationsService {
 
   async update(id: string, updateReservationDto: UpdateReservationDto) {
     const reservation = await this.findOne(id);
-    const updateData: any = { ...updateReservationDto };
+    const updateData: Prisma.ReservationUpdateInput = {
+      ...updateReservationDto,
+    };
 
     // If dates are being updated, check availability
     if (updateReservationDto.checkIn || updateReservationDto.checkOut) {
@@ -336,10 +343,10 @@ export class ReservationsService {
       data: {
         ...updateData,
         checkIn: updateData.checkIn
-          ? new Date(updateData.checkIn)
+          ? new Date(updateData.checkIn as string | Date)
           : undefined,
         checkOut: updateData.checkOut
-          ? new Date(updateData.checkOut)
+          ? new Date(updateData.checkOut as string | Date)
           : undefined,
       },
       include: {
@@ -459,8 +466,13 @@ export class ReservationsService {
     endDate: Date,
     roomTypeId?: string,
   ) {
-    const where: any = {
-      room: { propertyId },
+    const roomWhere: Prisma.RoomWhereInput = { propertyId };
+    if (roomTypeId) {
+      roomWhere.roomTypeId = roomTypeId;
+    }
+
+    const where: Prisma.ReservationWhereInput = {
+      room: roomWhere,
       AND: [
         {
           checkIn: {
@@ -479,10 +491,6 @@ export class ReservationsService {
         },
       ],
     };
-
-    if (roomTypeId) {
-      where.room = { ...where.room, roomTypeId };
-    }
 
     const reservations = await this.prisma.reservation.findMany({
       where,
@@ -506,8 +514,8 @@ export class ReservationsService {
     });
 
     // Get all rooms for the property
-    const roomWhere: any = { propertyId };
-    if (roomTypeId) roomWhere.roomTypeId = roomTypeId;
+    const availabilityRoomWhere: Prisma.RoomWhereInput = { propertyId };
+    if (roomTypeId) availabilityRoomWhere.roomTypeId = roomTypeId;
 
     const rooms = await this.prisma.room.findMany({
       where: roomWhere,

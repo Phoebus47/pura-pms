@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Plus, Users, Search, Star, Ban, Pencil, Trash2 } from "lucide-react";
 import { guestsAPI, type Guest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,7 @@ export default function GuestsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
 
-  useEffect(() => {
-    loadGuests();
-  }, []);
-
-  async function loadGuests() {
+  const loadGuests = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -32,7 +28,11 @@ export default function GuestsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    loadGuests();
+  }, [loadGuests]);
 
   function handleSearch() {
     loadGuests();

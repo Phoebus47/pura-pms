@@ -26,7 +26,7 @@ export interface CreatePropertyDto {
   timezone?: string;
 }
 
-export interface UpdatePropertyDto extends Partial<CreatePropertyDto> {}
+export type UpdatePropertyDto = Partial<CreatePropertyDto>;
 
 export const propertiesAPI = {
   async getAll(): Promise<Property[]> {

@@ -67,10 +67,7 @@ export class GuestsController {
   }
 
   @Patch(':id/vip-level')
-  updateVipLevel(
-    @Param('id') id: string,
-    @Body('vipLevel') vipLevel: number,
-  ) {
+  updateVipLevel(@Param('id') id: string, @Body('vipLevel') vipLevel: number) {
     return this.guestsService.updateVipLevel(id, vipLevel);
   }
 

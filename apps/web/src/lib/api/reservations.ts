@@ -74,7 +74,7 @@ export interface CreateReservationDto {
   status?: ReservationStatus;
 }
 
-export interface UpdateReservationDto extends Partial<CreateReservationDto> {}
+export type UpdateReservationDto = Partial<CreateReservationDto>;
 
 export interface ReservationFilterParams {
   propertyId?: string;
@@ -122,7 +122,7 @@ export const reservationsAPI = {
     );
   },
 
-  async getCalendar(params: CalendarParams): Promise<any> {
+  async getCalendar(params: CalendarParams): Promise<unknown> {
     const token = getAuthToken();
     const queryParams = new URLSearchParams({
       propertyId: params.propertyId,
@@ -131,7 +131,7 @@ export const reservationsAPI = {
     });
     if (params.roomTypeId) queryParams.append("roomTypeId", params.roomTypeId);
 
-    return apiClient.get<any>(
+    return apiClient.get<unknown>(
       `/reservations/calendar?${queryParams.toString()}`,
       token || undefined,
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -23,11 +23,7 @@ export default function ReservationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadReservation();
-  }, [reservationId]);
-
-  async function loadReservation() {
+  const loadReservation = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -40,7 +36,11 @@ export default function ReservationDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [reservationId]);
+
+  useEffect(() => {
+    loadReservation();
+  }, [loadReservation]);
 
   async function handleCheckIn() {
     if (!confirm("Confirm check-in for this reservation?")) return;

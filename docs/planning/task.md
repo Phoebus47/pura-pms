@@ -116,7 +116,10 @@
 - [x] Accessibility improvement plan
 - [x] Fix TypeScript errors
 - [x] Setup Quality Assurance Tools (SonarQube + Coding Standards)
+- [x] Configure strict type-check in CI pipeline
 - [x] Setup CI/CD (GitHub Actions)
+- [x] Configure VS Code Environment (pnpm path)
+- [x] Configure VS Code Environment (pnpm path)
 
 ---
 

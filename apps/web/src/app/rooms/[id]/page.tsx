@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { roomsAPI, type Room } from "@/lib/api";
@@ -16,11 +16,7 @@ export default function RoomDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadRoom();
-  }, [roomId]);
-
-  async function loadRoom() {
+  const loadRoom = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -31,7 +27,11 @@ export default function RoomDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [roomId]);
+
+  useEffect(() => {
+    loadRoom();
+  }, [loadRoom]);
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this room?")) return;

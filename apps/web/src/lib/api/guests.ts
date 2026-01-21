@@ -14,7 +14,7 @@ export interface Guest {
   vipLevel: number;
   isBlacklist: boolean;
   notes?: string;
-  preferences?: any;
+  preferences?: Record<string, unknown>;
   totalStays: number;
   totalRevenue: number;
   createdAt: string;
@@ -37,10 +37,10 @@ export interface CreateGuestDto {
   vipLevel?: number;
   isBlacklist?: boolean;
   notes?: string;
-  preferences?: any;
+  preferences?: Record<string, unknown>;
 }
 
-export interface UpdateGuestDto extends Partial<CreateGuestDto> {}
+export type UpdateGuestDto = Partial<CreateGuestDto>;
 
 export interface GuestSearchParams {
   search?: string;
@@ -79,9 +79,9 @@ export const guestsAPI = {
     return apiClient.get<Guest>(`/guests/${id}`, token || undefined);
   },
 
-  async getHistory(id: string): Promise<any> {
+  async getHistory(id: string): Promise<unknown> {
     const token = getAuthToken();
-    return apiClient.get<any>(`/guests/${id}/history`, token || undefined);
+    return apiClient.get<unknown>(`/guests/${id}/history`, token || undefined);
   },
 
   async create(data: CreateGuestDto): Promise<Guest> {

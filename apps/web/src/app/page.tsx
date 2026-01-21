@@ -149,8 +149,8 @@ export default function Dashboard() {
           </h1>
           <p className="text-slate-600 mt-2 text-base">
             Welcome back,{" "}
-            <span className="text-[#1e4b8e] font-bold">Admin</span>! Here's your
-            property overview.
+            <span className="text-[#1e4b8e] font-bold">Admin</span>! Here&apos;s
+            your property overview.
           </p>
         </div>
         <div className="flex items-center gap-3">
