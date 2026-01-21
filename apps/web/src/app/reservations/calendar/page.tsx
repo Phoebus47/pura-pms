@@ -1,0 +1,270 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { reservationsAPI, type Reservation } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { ReservationStatusBadge } from "@/components/reservation-status-badge";
+import { PropertySelector } from "@/components/property-selector";
+
+export default function ReservationCalendarPage() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [propertyFilter, setPropertyFilter] = useState("");
+
+  useEffect(() => {
+    loadReservations();
+  }, [currentDate, propertyFilter]);
+
+  async function loadReservations() {
+    try {
+      setLoading(true);
+
+      // Get first and last day of current month
+      const firstDay = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1,
+      );
+      const lastDay = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0,
+      );
+
+      const filters: any = {
+        checkIn: firstDay.toISOString().split("T")[0],
+        checkOut: lastDay.toISOString().split("T")[0],
+      };
+
+      if (propertyFilter) {
+        filters.propertyId = propertyFilter;
+      }
+
+      const data = await reservationsAPI.getAll(filters);
+      setReservations(data);
+    } catch (error) {
+      console.error("Failed to load reservations:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function previousMonth() {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+    );
+  }
+
+  function nextMonth() {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+    );
+  }
+
+  function goToToday() {
+    setCurrentDate(new Date());
+  }
+
+  // Generate calendar days
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const daysInMonth = lastDayOfMonth.getDate();
+  const startingDayOfWeek = firstDayOfMonth.getDay();
+
+  const days = [];
+  for (let i = 0; i < startingDayOfWeek; i++) {
+    days.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(i);
+  }
+
+  // Get reservations for a specific day
+  function getReservationsForDay(day: number): Reservation[] {
+    const dateStr = new Date(year, month, day).toISOString().split("T")[0];
+    return reservations.filter((r) => {
+      const checkIn = r.checkIn.split("T")[0];
+      const checkOut = r.checkOut.split("T")[0];
+      return dateStr >= checkIn && dateStr < checkOut;
+    });
+  }
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[#1e4b8e]">
+            Reservation Calendar
+          </h1>
+          <p className="text-slate-600 mt-1">
+            {monthNames[month]} {year}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button onClick={goToToday} variant="outline" className="rounded-xl">
+            Today
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={previousMonth}
+              variant="outline"
+              className="rounded-xl p-2"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={nextMonth}
+              variant="outline"
+              className="rounded-xl p-2"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
+        <div className="flex items-center gap-4">
+          <Filter className="h-5 w-5 text-slate-600" />
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Filter by Property
+            </label>
+            <PropertySelector
+              value={propertyFilter}
+              onChange={setPropertyFilter}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Calendar Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+            <p className="mt-4 text-slate-600">Loading calendar...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl overflow-hidden">
+          {/* Day Headers */}
+          <div className="grid grid-cols-7 gap-2 mb-4">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              <div
+                key={day}
+                className="text-center font-bold text-slate-700 py-2"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar Days */}
+          <div className="grid grid-cols-7 gap-2">
+            {days.map((day, index) => {
+              if (day === null) {
+                return <div key={`empty-${index}`} className="aspect-square" />;
+              }
+
+              const dayReservations = getReservationsForDay(day);
+              const isToday =
+                day === new Date().getDate() &&
+                month === new Date().getMonth() &&
+                year === new Date().getFullYear();
+
+              return (
+                <div
+                  key={day}
+                  className={`aspect-square rounded-2xl border-2 p-2 transition-all ${
+                    isToday
+                      ? "border-[#1e4b8e] bg-[#1e4b8e]/5"
+                      : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex flex-col h-full">
+                    <div
+                      className={`text-sm font-bold mb-1 ${
+                        isToday ? "text-[#1e4b8e]" : "text-slate-700"
+                      }`}
+                    >
+                      {day}
+                    </div>
+                    <div className="flex-1 overflow-y-auto space-y-1">
+                      {dayReservations.slice(0, 3).map((reservation) => (
+                        <div
+                          key={reservation.id}
+                          className="text-xs p-1 rounded bg-white/80 border border-slate-200 truncate cursor-pointer hover:bg-white transition-colors"
+                          title={`${reservation.guest?.firstName} ${reservation.guest?.lastName} - Room ${reservation.room?.number}`}
+                        >
+                          <ReservationStatusBadge
+                            status={reservation.status}
+                            size="xs"
+                          />
+                          <div className="truncate mt-0.5">
+                            {reservation.guest?.firstName}{" "}
+                            {reservation.guest?.lastName}
+                          </div>
+                        </div>
+                      ))}
+                      {dayReservations.length > 3 && (
+                        <div className="text-xs text-slate-500 font-semibold">
+                          +{dayReservations.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Legend */}
+      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
+        <h3 className="text-lg font-bold text-[#1e4b8e] mb-4">Legend</h3>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <ReservationStatusBadge status="CONFIRMED" />
+            <span className="text-sm text-slate-600">Confirmed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ReservationStatusBadge status="CHECKED_IN" />
+            <span className="text-sm text-slate-600">Checked In</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ReservationStatusBadge status="CHECKED_OUT" />
+            <span className="text-sm text-slate-600">Checked Out</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ReservationStatusBadge status="CANCELLED" />
+            <span className="text-sm text-slate-600">Cancelled</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

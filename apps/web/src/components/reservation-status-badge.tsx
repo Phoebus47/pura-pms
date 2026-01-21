@@ -4,6 +4,7 @@ import type { ReservationStatus } from "@/lib/api/reservations";
 interface ReservationStatusBadgeProps {
   status: ReservationStatus;
   className?: string;
+  size?: "default" | "xs";
 }
 
 const statusConfig: Record<
@@ -39,13 +40,15 @@ const statusConfig: Record<
 export function ReservationStatusBadge({
   status,
   className,
+  size = "default",
 }: ReservationStatusBadgeProps) {
   const config = statusConfig[status];
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset",
+        "inline-flex items-center rounded-full font-semibold ring-1 ring-inset",
+        size === "xs" ? "px-1.5 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs",
         config.className,
         className,
       )}
