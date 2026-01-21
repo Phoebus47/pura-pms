@@ -1,4 +1,4 @@
-import { apiClient, getAuthToken } from "./client";
+import { apiClient, getAuthToken } from './client';
 
 export interface Property {
   id: string;
@@ -31,7 +31,7 @@ export type UpdatePropertyDto = Partial<CreatePropertyDto>;
 export const propertiesAPI = {
   async getAll(): Promise<Property[]> {
     const token = getAuthToken();
-    return apiClient.get<Property[]>("/properties", token || undefined);
+    return apiClient.get<Property[]>('/properties', token || undefined);
   },
 
   async getById(id: string): Promise<Property> {
@@ -41,7 +41,7 @@ export const propertiesAPI = {
 
   async create(data: CreatePropertyDto): Promise<Property> {
     const token = getAuthToken();
-    return apiClient.post<Property>("/properties", data, token || undefined);
+    return apiClient.post<Property>('/properties', data, token || undefined);
   },
 
   async update(id: string, data: UpdatePropertyDto): Promise<Property> {

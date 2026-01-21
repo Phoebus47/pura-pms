@@ -13,7 +13,6 @@ export class RoomsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createRoomDto: CreateRoomDto) {
-    // Check if property exists
     const property = await this.prisma.property.findUnique({
       where: { id: createRoomDto.propertyId },
     });
@@ -24,7 +23,6 @@ export class RoomsService {
       );
     }
 
-    // Check if room type exists
     const roomType = await this.prisma.roomType.findUnique({
       where: { id: createRoomDto.roomTypeId },
     });
@@ -35,7 +33,6 @@ export class RoomsService {
       );
     }
 
-    // Check if room number already exists for this property
     const existing = await this.prisma.room.findUnique({
       where: {
         propertyId_number: {
@@ -145,7 +142,6 @@ export class RoomsService {
   async update(id: string, updateRoomDto: UpdateRoomDto) {
     const room = await this.findOne(id);
 
-    // If room number is being updated, check for duplicates
     if (updateRoomDto.number && updateRoomDto.number !== room.number) {
       const existing = await this.prisma.room.findUnique({
         where: {
@@ -198,7 +194,6 @@ export class RoomsService {
   async remove(id: string) {
     await this.findOne(id);
 
-    // Check if room has active reservations
     const activeReservations = await this.prisma.reservation.count({
       where: {
         roomId: id,
@@ -225,7 +220,6 @@ export class RoomsService {
     checkOut: Date,
     roomTypeId?: string,
   ) {
-    // Get all rooms for the property
     const where: Prisma.RoomWhereInput = { propertyId };
     if (roomTypeId) where.roomTypeId = roomTypeId;
 
@@ -257,12 +251,10 @@ export class RoomsService {
       },
     });
 
-    // Filter available rooms (no conflicting reservations)
     const availableRooms = rooms.filter(
       (room) => room.reservations.length === 0,
     );
 
-    // Group by room type
     const availabilityByType = availableRooms.reduce(
       (acc, room) => {
         const typeId = room.roomTypeId;

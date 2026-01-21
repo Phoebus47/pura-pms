@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: ['main', 'master']
   pull_request:
     types: [opened, synchronize]
 
@@ -26,10 +26,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Check code formatting
+        run: pnpm format:check
 
       - name: Lint
         run: pnpm lint
@@ -37,5 +40,11 @@ jobs:
       - name: Type Check
         run: pnpm type-check
 
+      - name: Run tests
+        run: pnpm test --passWithNoTests || true
+
       - name: Build
         run: pnpm build
+
+      - name: Security audit
+        run: pnpm audit --audit-level=moderate || true

@@ -1,54 +1,51 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { authAPI } from "@/lib/api";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { authAPI } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     try {
       const response = await authAPI.login({ email, password });
 
-      // Store token in localStorage
-      localStorage.setItem("token", response.access_token);
-
-      // Redirect to dashboard
-      router.push("/");
+      localStorage.setItem('token', response.access_token);
+      router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#1e4b8e] to-[#2d5aa0] p-4">
-      <div className="w-full max-w-md">
+    <div className="bg-linear-to-br flex from-[#1e4b8e] items-center justify-center min-h-screen p-4 to-[#2d5aa0]">
+      <div className="max-w-md w-full">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">PURA PMS</h1>
+        <div className="mb-8 text-center">
+          <h1 className="font-bold mb-2 text-4xl text-white">PURA PMS</h1>
           <p className="text-white/80">Property Management System</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8">
-          <h2 className="text-2xl font-bold text-[#1e4b8e] mb-6">Sign In</h2>
+        <div className="backdrop-blur-xl bg-white/95 p-8 rounded-3xl shadow-2xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-2xl">Sign In</h2>
 
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Email
               </label>
               <input
@@ -57,13 +54,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@pura.com"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Password
               </label>
               <input
@@ -72,14 +69,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
               />
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-red-50 border border-red-200 p-3 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
 
@@ -87,21 +84,21 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#1e4b8e] hover:bg-[#153a6e] text-white py-3 rounded-xl font-semibold transition-all"
+              className="bg-[#1e4b8e] font-semibold hover:bg-[#153a6e] py-3 rounded-xl text-white transition-all w-full"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-slate-50 rounded-xl">
-            <p className="text-xs font-semibold text-slate-600 mb-2">
+          <div className="bg-slate-50 mt-6 p-4 rounded-xl">
+            <p className="font-semibold mb-2 text-slate-600 text-xs">
               Demo Credentials:
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-slate-500 text-xs">
               Email: <span className="font-mono">admin@pura.com</span>
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-slate-500 text-xs">
               Password: <span className="font-mono">admin123</span>
             </p>
           </div>

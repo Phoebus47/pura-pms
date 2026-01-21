@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Bell, Search } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Bell, Search } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,58 +10,63 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 export function Header() {
   return (
-    <header className="flex h-16 items-center justify-between border-b border-white/40 bg-white/30 px-6 backdrop-blur-2xl sticky top-0 z-20 shadow-lg shadow-black/5">
+    <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-16 items-center justify-between px-6 shadow-black/5 shadow-lg sticky top-0 z-20">
       {/* Search */}
-      <div className="flex items-center gap-4 flex-1">
-        <div className="relative w-full max-w-md group">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-[#1e4b8e] transition-colors" />
+      <div className="flex flex-1 gap-4 items-center">
+        <div className="group max-w-md relative w-full">
+          <Search className="-translate-y-1/2 absolute group-focus-within:text-[#1e4b8e] h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
           <input
             type="search"
             placeholder="Search guests, reservations, rooms..."
-            className="w-full rounded-2xl border border-white/60 bg-white/60 backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm transition-all focus:border-[#1e4b8e]/40 focus:bg-white/80 focus:outline-none focus:ring-4 focus:ring-[#1e4b8e]/10 placeholder:text-slate-500 shadow-lg shadow-black/5 hover:shadow-xl hover:bg-white/70"
+            aria-label="Search guests, reservations, rooms"
+            className="backdrop-blur-xl bg-white/60 border border-white/60 focus:bg-white/80 focus:border-[#1e4b8e]/40 focus:outline-none focus:ring-[#1e4b8e]/10 focus:ring-4 hover:bg-white/70 hover:shadow-xl pl-10 placeholder:text-slate-500 pr-4 py-2.5 rounded-2xl shadow-black/5 shadow-lg text-sm transition-all w-full"
           />
         </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-3">
+      <div className="flex gap-3 items-center">
         {/* Notifications */}
         <Button
           variant="ghost"
           size="icon"
-          className="relative hover:bg-muted/80 rounded-full transition-all active:scale-95 group"
+          aria-label="Notifications"
+          className="active:scale-95 group hover:bg-muted/80 relative rounded-full transition-all"
         >
-          <Bell className="h-5 w-5 text-muted-foreground group-hover:text-[#1e4b8e] transition-colors" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#f5a623] ring-2 ring-white animate-pulse" />
+          <Bell className="group-hover:text-[#1e4b8e] h-5 text-muted-foreground transition-colors w-5" />
+          <span
+            className="absolute animate-pulse bg-[#f5a623] h-2 right-2 ring-2 ring-white rounded-full top-2 w-2"
+            aria-hidden="true"
+          />
         </Button>
 
-        <div className="h-8 w-px bg-border/60 mx-1" />
+        <div className="bg-border/60 h-8 mx-1 w-px" />
 
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="gap-3 hover:bg-muted/80 px-2 py-1.5 h-auto rounded-full transition-all active:scale-95 group"
+              className="active:scale-95 gap-3 group h-auto hover:bg-muted/80 px-2 py-1.5 rounded-full transition-all"
             >
               <div className="relative">
-                <Avatar className="h-9 w-9 border-2 border-transparent group-hover:border-[#1e4b8e]/20 transition-all">
+                <Avatar className="border-2 border-transparent group-hover:border-[#1e4b8e]/20 h-9 transition-all w-9">
                   <AvatarImage src="/placeholder-avatar.jpg" />
-                  <AvatarFallback className="bg-linear-to-br from-[#1e4b8e] to-[#153a6e] text-white font-semibold text-xs shadow-inner">
+                  <AvatarFallback className="bg-linear-to-br font-semibold from-[#1e4b8e] shadow-inner text-white text-xs to-[#153a6e]">
                     SA
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+                <div className="absolute bg-emerald-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
               </div>
-              <div className="text-left hidden md:block">
-                <p className="text-sm font-semibold text-foreground leading-tight">
+              <div className="hidden md:block text-left">
+                <p className="font-semibold leading-tight text-foreground text-sm">
                   Super Admin
                 </p>
-                <p className="text-[11px] text-muted-foreground font-medium">
+                <p className="font-medium text-[11px] text-muted-foreground">
                   Hotel Manager
                 </p>
               </div>
@@ -69,27 +74,27 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-60 p-2 rounded-2xl shadow-2xl border-border/50"
+            className="border-border/50 p-2 rounded-2xl shadow-2xl w-60"
           >
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-semibold leading-none">
+                <p className="font-semibold leading-none text-sm">
                   Super Admin
                 </p>
-                <p className="text-xs leading-none text-muted-foreground">
+                <p className="leading-none text-muted-foreground text-xs">
                   admin@pura.com
                 </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="mx-2" />
-            <DropdownMenuItem className="rounded-xl cursor-pointer p-2.5 my-0.5 transition-colors focus:bg-[#1e4b8e]/5 focus:text-[#1e4b8e] font-medium">
+            <DropdownMenuItem className="cursor-pointer focus:bg-[#1e4b8e]/5 focus:text-[#1e4b8e] font-medium my-0.5 p-2.5 rounded-xl transition-colors">
               Profile Settings
             </DropdownMenuItem>
-            <DropdownMenuItem className="rounded-xl cursor-pointer p-2.5 my-0.5 transition-colors focus:bg-[#1e4b8e]/5 focus:text-[#1e4b8e] font-medium">
+            <DropdownMenuItem className="cursor-pointer focus:bg-[#1e4b8e]/5 focus:text-[#1e4b8e] font-medium my-0.5 p-2.5 rounded-xl transition-colors">
               Switch Property
             </DropdownMenuItem>
             <DropdownMenuSeparator className="mx-2" />
-            <DropdownMenuItem className="rounded-xl cursor-pointer p-2.5 my-0.5 text-red-600 focus:bg-red-50 focus:text-red-600 font-semibold">
+            <DropdownMenuItem className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-xl text-red-600">
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

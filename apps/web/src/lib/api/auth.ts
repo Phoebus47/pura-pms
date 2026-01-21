@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient } from './client';
 
 export interface LoginDto {
   email: string;
@@ -18,10 +18,10 @@ export interface AuthResponse {
 
 export const authAPI = {
   async login(credentials: LoginDto): Promise<AuthResponse> {
-    return apiClient.post<AuthResponse>("/auth/login", credentials);
+    return apiClient.post<AuthResponse>('/auth/login', credentials);
   },
 
-  async getCurrentUser(token: string): Promise<AuthResponse["user"]> {
-    return apiClient.get<AuthResponse["user"]>("/auth/me", token);
+  async getCurrentUser(token: string): Promise<AuthResponse['user']> {
+    return apiClient.get<AuthResponse['user']>('/auth/me', token);
   },
 };

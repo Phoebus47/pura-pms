@@ -15,6 +15,19 @@ dist
 # Environment
 .env*
 !.env.example
+!.env.local.example
+
+# SonarQube
+.scannerwork
+
+# Coverage
+coverage
+*.lcov
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
 
 # Logs
 npm-debug.log*

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
-import { reservationsAPI, type Reservation } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { ReservationStatusBadge } from "@/components/reservation-status-badge";
-import { PropertySelector } from "@/components/property-selector";
+import { useEffect, useState, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { reservationsAPI, type Reservation } from '@/lib/api';
+import { toast } from '@/lib/toast';
+import { Button } from '@/components/ui/button';
+import { ReservationStatusBadge } from '@/components/reservation-status-badge';
+import { PropertySelector } from '@/components/property-selector';
 
 export default function ReservationCalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [propertyFilter, setPropertyFilter] = useState("");
+  const [propertyFilter, setPropertyFilter] = useState('');
 
   const loadReservations = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Get first and last day of current month
       const firstDay = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
@@ -30,8 +30,8 @@ export default function ReservationCalendarPage() {
       );
 
       const filters: Record<string, string> = {
-        checkIn: firstDay.toISOString().split("T")[0],
-        checkOut: lastDay.toISOString().split("T")[0],
+        checkIn: firstDay.toISOString().split('T')[0],
+        checkOut: lastDay.toISOString().split('T')[0],
       };
 
       if (propertyFilter) {
@@ -40,8 +40,8 @@ export default function ReservationCalendarPage() {
 
       const data = await reservationsAPI.getAll(filters);
       setReservations(data);
-    } catch (error) {
-      console.error("Failed to load reservations:", error);
+    } catch {
+      toast.error('Failed to load reservations');
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,6 @@ export default function ReservationCalendarPage() {
     setCurrentDate(new Date());
   }
 
-  // Generate calendar days
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1);
@@ -83,60 +82,59 @@ export default function ReservationCalendarPage() {
     days.push(i);
   }
 
-  // Get reservations for a specific day
   function getReservationsForDay(day: number): Reservation[] {
-    const dateStr = new Date(year, month, day).toISOString().split("T")[0];
+    const dateStr = new Date(year, month, day).toISOString().split('T')[0];
     return reservations.filter((r) => {
-      const checkIn = r.checkIn.split("T")[0];
-      const checkOut = r.checkOut.split("T")[0];
+      const checkIn = r.checkIn.split('T')[0];
+      const checkOut = r.checkOut.split('T')[0];
       return dateStr >= checkIn && dateStr < checkOut;
     });
   }
 
   const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#1e4b8e]">
+          <h1 className="font-bold text-[#1e4b8e] text-3xl">
             Reservation Calendar
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="mt-1 text-slate-600">
             {monthNames[month]} {year}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex gap-3 items-center">
           <Button onClick={goToToday} variant="outline" className="rounded-xl">
             Today
           </Button>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <Button
               onClick={previousMonth}
               variant="outline"
-              className="rounded-xl p-2"
+              className="p-2 rounded-xl"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <Button
               onClick={nextMonth}
               variant="outline"
-              className="rounded-xl p-2"
+              className="p-2 rounded-xl"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
@@ -145,11 +143,11 @@ export default function ReservationCalendarPage() {
       </div>
 
       {/* Filters */}
-      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-        <div className="flex items-center gap-4">
-          <Filter className="h-5 w-5 text-slate-600" />
+      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <div className="flex gap-4 items-center">
+          <Filter className="h-5 text-slate-600 w-5" />
           <div className="flex-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
+            <label className="block font-semibold mb-2 text-slate-700 text-sm">
               Filter by Property
             </label>
             <PropertySelector
@@ -162,20 +160,20 @@ export default function ReservationCalendarPage() {
 
       {/* Calendar Grid */}
       {loading ? (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+            <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
             <p className="mt-4 text-slate-600">Loading calendar...</p>
           </div>
         </div>
       ) : (
-        <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl overflow-hidden">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 overflow-hidden p-6 rounded-3xl shadow-xl">
           {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-2 mb-4">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div className="gap-2 grid grid-cols-7 mb-4">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
-                className="text-center font-bold text-slate-700 py-2"
+                className="font-bold py-2 text-center text-slate-700"
               >
                 {day}
               </div>
@@ -183,7 +181,7 @@ export default function ReservationCalendarPage() {
           </div>
 
           {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className="gap-2 grid grid-cols-7">
             {days.map((day, index) => {
               if (day === null) {
                 return <div key={`empty-${index}`} className="aspect-square" />;
@@ -200,14 +198,14 @@ export default function ReservationCalendarPage() {
                   key={day}
                   className={`aspect-square rounded-2xl border-2 p-2 transition-all ${
                     isToday
-                      ? "border-[#1e4b8e] bg-[#1e4b8e]/5"
-                      : "border-slate-200 hover:border-slate-300"
+                      ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
+                      : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex flex-col h-full">
                     <div
                       className={`text-sm font-bold mb-1 ${
-                        isToday ? "text-[#1e4b8e]" : "text-slate-700"
+                        isToday ? 'text-[#1e4b8e]' : 'text-slate-700'
                       }`}
                     >
                       {day}
@@ -216,21 +214,21 @@ export default function ReservationCalendarPage() {
                       {dayReservations.slice(0, 3).map((reservation) => (
                         <div
                           key={reservation.id}
-                          className="text-xs p-1 rounded bg-white/80 border border-slate-200 truncate cursor-pointer hover:bg-white transition-colors"
+                          className="bg-white/80 border border-slate-200 cursor-pointer hover:bg-white p-1 rounded text-xs transition-colors truncate"
                           title={`${reservation.guest?.firstName} ${reservation.guest?.lastName} - Room ${reservation.room?.number}`}
                         >
                           <ReservationStatusBadge
                             status={reservation.status}
                             size="xs"
                           />
-                          <div className="truncate mt-0.5">
-                            {reservation.guest?.firstName}{" "}
+                          <div className="mt-0.5 truncate">
+                            {reservation.guest?.firstName}{' '}
                             {reservation.guest?.lastName}
                           </div>
                         </div>
                       ))}
                       {dayReservations.length > 3 && (
-                        <div className="text-xs text-slate-500 font-semibold">
+                        <div className="font-semibold text-slate-500 text-xs">
                           +{dayReservations.length - 3} more
                         </div>
                       )}
@@ -244,24 +242,24 @@ export default function ReservationCalendarPage() {
       )}
 
       {/* Legend */}
-      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-[#1e4b8e] mb-4">Legend</h3>
+      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <h3 className="font-bold mb-4 text-[#1e4b8e] text-lg">Legend</h3>
         <div className="flex flex-wrap gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <ReservationStatusBadge status="CONFIRMED" />
-            <span className="text-sm text-slate-600">Confirmed</span>
+            <span className="text-slate-600 text-sm">Confirmed</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <ReservationStatusBadge status="CHECKED_IN" />
-            <span className="text-sm text-slate-600">Checked In</span>
+            <span className="text-slate-600 text-sm">Checked In</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <ReservationStatusBadge status="CHECKED_OUT" />
-            <span className="text-sm text-slate-600">Checked Out</span>
+            <span className="text-slate-600 text-sm">Checked Out</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <ReservationStatusBadge status="CANCELLED" />
-            <span className="text-sm text-slate-600">Cancelled</span>
+            <span className="text-slate-600 text-sm">Cancelled</span>
           </div>
         </div>
       </div>

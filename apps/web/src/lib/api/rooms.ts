@@ -1,12 +1,12 @@
-import { apiClient, getAuthToken } from "./client";
+import { apiClient, getAuthToken } from './client';
 
 export type RoomStatus =
-  | "VACANT_CLEAN"
-  | "VACANT_DIRTY"
-  | "OCCUPIED_CLEAN"
-  | "OCCUPIED_DIRTY"
-  | "OUT_OF_ORDER"
-  | "OUT_OF_SERVICE";
+  | 'VACANT_CLEAN'
+  | 'VACANT_DIRTY'
+  | 'OCCUPIED_CLEAN'
+  | 'OCCUPIED_DIRTY'
+  | 'OUT_OF_ORDER'
+  | 'OUT_OF_SERVICE';
 
 export interface Room {
   id: string;
@@ -63,12 +63,12 @@ export const roomsAPI = {
   async getAll(filters?: RoomFilterParams): Promise<Room[]> {
     const token = getAuthToken();
     const params = new URLSearchParams();
-    if (filters?.propertyId) params.append("propertyId", filters.propertyId);
-    if (filters?.roomTypeId) params.append("roomTypeId", filters.roomTypeId);
-    if (filters?.status) params.append("status", filters.status);
+    if (filters?.propertyId) params.append('propertyId', filters.propertyId);
+    if (filters?.roomTypeId) params.append('roomTypeId', filters.roomTypeId);
+    if (filters?.status) params.append('status', filters.status);
 
     const query = params.toString();
-    const endpoint = query ? `/rooms?${query}` : "/rooms";
+    const endpoint = query ? `/rooms?${query}` : '/rooms';
     return apiClient.get<Room[]>(endpoint, token || undefined);
   },
 
@@ -79,7 +79,7 @@ export const roomsAPI = {
 
   async create(data: CreateRoomDto): Promise<Room> {
     const token = getAuthToken();
-    return apiClient.post<Room>("/rooms", data, token || undefined);
+    return apiClient.post<Room>('/rooms', data, token || undefined);
   },
 
   async update(id: string, data: UpdateRoomDto): Promise<Room> {
@@ -108,7 +108,7 @@ export const roomsAPI = {
       checkIn: params.checkIn,
       checkOut: params.checkOut,
     });
-    if (params.roomTypeId) queryParams.append("roomTypeId", params.roomTypeId);
+    if (params.roomTypeId) queryParams.append('roomTypeId', params.roomTypeId);
 
     return apiClient.get<unknown>(
       `/rooms/availability?${queryParams.toString()}`,

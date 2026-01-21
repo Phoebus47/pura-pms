@@ -8,13 +8,25 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md,yml,yaml}\"",
+    "lint:fix": "turbo lint",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
     "db:push": "pnpm --filter database db:push",
     "db:generate": "pnpm --filter database db:generate",
-    "sonar": "npx dotenv-cli -- npx sonarqube-scanner"
+    "sonar": "npx dotenv-cli -- npx sonarqube-scanner",
+    "prepare": "husky",
+    "test": "turbo test",
+    "test:coverage": "turbo test:cov",
+    "test:e2e": "pnpm --filter web test:e2e"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.4.2",
     "turbo": "^2.3.0"
   },
   "packageManager": "pnpm@9.15.0"

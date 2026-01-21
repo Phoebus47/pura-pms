@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { Plus, Bed, Filter } from "lucide-react";
-import { roomsAPI, type Room, type RoomStatus } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { RoomStatusBadge } from "@/components/room-status-badge";
+import { useEffect, useState, useCallback } from 'react';
+import { Plus, Bed, Filter } from 'lucide-react';
+import { roomsAPI, type Room, type RoomStatus } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { RoomStatusBadge } from '@/components/room-status-badge';
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -21,7 +21,7 @@ export default function RoomsPage() {
       );
       setRooms(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load rooms");
+      setError(err instanceof Error ? err.message : 'Failed to load rooms');
     } finally {
       setLoading(false);
     }
@@ -33,9 +33,9 @@ export default function RoomsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading rooms...</p>
         </div>
       </div>
@@ -44,9 +44,9 @@ export default function RoomsPage() {
 
   if (error) {
     return (
-      <div className="rounded-2xl bg-red-50 p-6 border border-red-200">
-        <h3 className="text-red-800 font-semibold">Error loading rooms</h3>
-        <p className="text-red-600 mt-2">{error}</p>
+      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+        <h3 className="font-semibold text-red-800">Error loading rooms</h3>
+        <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadRooms} className="mt-4">
           Try Again
         </Button>
@@ -59,31 +59,31 @@ export default function RoomsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#1e4b8e]">Rooms</h1>
-          <p className="text-slate-600 mt-1">Manage rooms and their status</p>
+          <h1 className="font-bold text-[#1e4b8e] text-3xl">Rooms</h1>
+          <p className="mt-1 text-slate-600">Manage rooms and their status</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
+            <Filter className="h-4 mr-2 w-4" />
             Filter
           </Button>
           <Button className="bg-[#1e4b8e] hover:bg-[#153a6e]">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 mr-2 w-4" />
             Add Room
           </Button>
         </div>
       </div>
 
       {/* Room Status Summary */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="gap-4 grid lg:grid-cols-6 md:grid-cols-3">
         {(
           [
-            "VACANT_CLEAN",
-            "VACANT_DIRTY",
-            "OCCUPIED_CLEAN",
-            "OCCUPIED_DIRTY",
-            "OUT_OF_ORDER",
-            "OUT_OF_SERVICE",
+            'VACANT_CLEAN',
+            'VACANT_DIRTY',
+            'OCCUPIED_CLEAN',
+            'OCCUPIED_DIRTY',
+            'OUT_OF_ORDER',
+            'OUT_OF_SERVICE',
           ] as RoomStatus[]
         ).map((status) => {
           const count = rooms.filter((r) => r.status === status).length;
@@ -95,11 +95,11 @@ export default function RoomsPage() {
               }
               className={`rounded-2xl border p-4 text-left transition-all ${
                 statusFilter === status
-                  ? "border-[#1e4b8e] bg-[#1e4b8e]/5"
-                  : "border-white/50 bg-white/40 hover:bg-white/50"
+                  ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
+                  : 'border-white/50 bg-white/40 hover:bg-white/50'
               }`}
             >
-              <div className="text-2xl font-bold text-slate-800">{count}</div>
+              <div className="font-bold text-2xl text-slate-800">{count}</div>
               <RoomStatusBadge status={status} className="mt-2" />
             </button>
           );
@@ -108,38 +108,38 @@ export default function RoomsPage() {
 
       {/* Rooms Grid */}
       {rooms.length === 0 ? (
-        <div className="text-center py-12 bg-white/40 backdrop-blur-2xl rounded-3xl border border-white/50">
-          <Bed className="h-16 w-16 text-slate-300 mx-auto" />
-          <h3 className="mt-4 text-lg font-semibold text-slate-700">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 py-12 rounded-3xl text-center">
+          <Bed className="h-16 mx-auto text-slate-300 w-16" />
+          <h3 className="font-semibold mt-4 text-lg text-slate-700">
             No rooms found
           </h3>
-          <p className="text-slate-500 mt-2">
+          <p className="mt-2 text-slate-500">
             {statusFilter
-              ? "Try changing the filter"
-              : "Get started by adding your first room"}
+              ? 'Try changing the filter'
+              : 'Get started by adding your first room'}
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="gap-4 grid lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
           {rooms.map((room) => (
             <div
               key={room.id}
-              className="group relative overflow-hidden rounded-2xl border border-white/50 bg-white/40 backdrop-blur-2xl p-5 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/70 hover:bg-white/50 cursor-pointer"
+              className="backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl overflow-hidden p-5 relative rounded-2xl shadow-lg transition-all"
               onClick={() => {
                 window.location.href = `/rooms/${room.id}`;
               }}
             >
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-[#1e4b8e]/10 p-2.5">
-                    <Bed className="h-5 w-5 text-[#1e4b8e]" />
+                <div className="flex gap-3 items-center">
+                  <div className="bg-[#1e4b8e]/10 p-2.5 rounded-xl">
+                    <Bed className="h-5 text-[#1e4b8e] w-5" />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-slate-800">
                       Room {room.number}
                     </h3>
                     {room.floor !== null && room.floor !== undefined && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-slate-500 text-xs">
                         Floor {room.floor}
                       </p>
                     )}
@@ -152,12 +152,12 @@ export default function RoomsPage() {
               </div>
 
               {room.roomType && (
-                <div className="mt-4 pt-4 border-t border-slate-200">
-                  <div className="text-xs text-slate-500">Room Type</div>
-                  <div className="font-semibold text-slate-700 mt-1">
+                <div className="border-slate-200 border-t mt-4 pt-4">
+                  <div className="text-slate-500 text-xs">Room Type</div>
+                  <div className="font-semibold mt-1 text-slate-700">
                     {room.roomType.name}
                   </div>
-                  <div className="text-sm text-[#1e4b8e] font-semibold mt-1">
+                  <div className="font-semibold mt-1 text-[#1e4b8e] text-sm">
                     ฿{Number(room.roomType.baseRate).toLocaleString()}
                   </div>
                 </div>

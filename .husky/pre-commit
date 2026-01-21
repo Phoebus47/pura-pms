@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+set -e
+
+npx lint-staged
+
+if ! git diff --quiet; then
+  echo "Formatting or linting updated files. Please stage the changes and retry the commit."
+  exit 1
+fi

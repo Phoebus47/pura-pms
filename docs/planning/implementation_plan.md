@@ -105,8 +105,8 @@ npx -y shadcn@latest init -y
 
 ```yaml
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 ```
 
 ---

@@ -1,34 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { Plus, Users, Search, Star, Ban, Pencil, Trash2 } from "lucide-react";
-import { guestsAPI, type Guest } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { GuestFormDialog } from "@/components/guest-form-dialog";
+import { useEffect, useState } from 'react';
+import { Plus, Users, Search, Star, Ban, Pencil, Trash2 } from 'lucide-react';
+import { type Guest } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { GuestFormDialog } from '@/components/guest-form-dialog';
+import { useGuests } from '@/hooks/use-guests';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function GuestsPage() {
-  const [guests, setGuests] = useState<Guest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
-
-  const loadGuests = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await guestsAPI.getAll({
-        search: searchQuery || undefined,
-        limit: 50,
-      });
-      setGuests(response.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load guests");
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery]);
+  const { guests, loading, error, loadGuests, deleteGuest } = useGuests({
+    search: searchQuery,
+    limit: 50,
+  });
+  const { confirm, Dialog } = useConfirmDialog();
 
   useEffect(() => {
     loadGuests();
@@ -49,16 +37,15 @@ export default function GuestsPage() {
     setIsFormOpen(true);
   }
 
-  async function handleDelete(e: React.MouseEvent, id: string, name: string) {
+  function handleDelete(e: React.MouseEvent, id: string, name: string) {
     e.stopPropagation();
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
-
-    try {
-      await guestsAPI.delete(id);
-      loadGuests();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete guest");
-    }
+    confirm(
+      'Delete Guest',
+      `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      async () => {
+        await deleteGuest(id);
+      },
+    );
   }
 
   function handleFormSuccess() {
@@ -67,9 +54,9 @@ export default function GuestsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading guests...</p>
         </div>
       </div>
@@ -78,9 +65,9 @@ export default function GuestsPage() {
 
   if (error) {
     return (
-      <div className="rounded-2xl bg-red-50 p-6 border border-red-200">
-        <h3 className="text-red-800 font-semibold">Error loading guests</h3>
-        <p className="text-red-600 mt-2">{error}</p>
+      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+        <h3 className="font-semibold text-red-800">Error loading guests</h3>
+        <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadGuests} className="mt-4">
           Try Again
         </Button>
@@ -90,35 +77,36 @@ export default function GuestsPage() {
 
   return (
     <>
+      {Dialog}
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#1e4b8e]">Guests</h1>
-            <p className="text-slate-600 mt-1">
+            <h1 className="font-bold text-[#1e4b8e] text-3xl">Guests</h1>
+            <p className="mt-1 text-slate-600">
               Manage guest profiles and history
             </p>
           </div>
           <Button
             onClick={handleCreate}
-            className="rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e]"
+            className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 mr-2 w-4" />
             Add Guest
           </Button>
         </div>
 
         {/* Search */}
         <div className="flex gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <div className="flex-1 max-w-md relative">
+            <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-slate-400 top-1/2 w-4" />
             <input
               type="search"
               placeholder="Search by name, email, phone, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full rounded-2xl border border-white/60 bg-white/60 backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm transition-all focus:border-[#1e4b8e]/40 focus:bg-white/80 focus:outline-none focus:ring-4 focus:ring-[#1e4b8e]/10 placeholder:text-slate-500 shadow-lg"
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="backdrop-blur-xl bg-white/60 border border-white/60 focus:bg-white/80 focus:border-[#1e4b8e]/40 focus:outline-none focus:ring-[#1e4b8e]/10 focus:ring-4 pl-10 placeholder:text-slate-500 pr-4 py-2.5 rounded-2xl shadow-lg text-sm transition-all w-full"
             />
           </div>
           <Button onClick={handleSearch} className="rounded-xl">
@@ -128,59 +116,59 @@ export default function GuestsPage() {
 
         {/* Guests List */}
         {guests.length === 0 ? (
-          <div className="text-center py-12 bg-white/40 backdrop-blur-2xl rounded-3xl border border-white/50">
-            <Users className="h-16 w-16 text-slate-300 mx-auto" />
-            <h3 className="mt-4 text-lg font-semibold text-slate-700">
+          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 py-12 rounded-3xl text-center">
+            <Users className="h-16 mx-auto text-slate-300 w-16" />
+            <h3 className="font-semibold mt-4 text-lg text-slate-700">
               No guests found
             </h3>
-            <p className="text-slate-500 mt-2">
+            <p className="mt-2 text-slate-500">
               {searchQuery
-                ? "Try a different search term"
-                : "Get started by adding your first guest"}
+                ? 'Try a different search term'
+                : 'Get started by adding your first guest'}
             </p>
           </div>
         ) : (
-          <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl shadow-xl overflow-hidden">
+          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 overflow-hidden rounded-3xl shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50/50 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       Guest
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       Contact
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       VIP Level
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       Stays
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       Revenue
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-slate-200 divide-y">
                   {guests.map((guest) => (
                     <tr
                       key={guest.id}
-                      className="hover:bg-white/50 transition-colors cursor-pointer"
+                      className="cursor-pointer hover:bg-white/50 transition-colors"
                       onClick={() => {
                         window.location.href = `/guests/${guest.id}`;
                       }}
                     >
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-[#1e4b8e]/10 flex items-center justify-center">
-                            <span className="text-sm font-semibold text-[#1e4b8e]">
+                        <div className="flex gap-3 items-center">
+                          <div className="bg-[#1e4b8e]/10 flex h-10 items-center justify-center rounded-full w-10">
+                            <span className="font-semibold text-[#1e4b8e] text-sm">
                               {guest.firstName[0]}
                               {guest.lastName[0]}
                             </span>
@@ -190,7 +178,7 @@ export default function GuestsPage() {
                               {guest.firstName} {guest.lastName}
                             </div>
                             {guest.nationality && (
-                              <div className="text-xs text-slate-500">
+                              <div className="text-slate-500 text-xs">
                                 {guest.nationality}
                               </div>
                             )}
@@ -198,48 +186,48 @@ export default function GuestsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-slate-700">
-                          {guest.email || "-"}
+                        <div className="text-slate-700 text-sm">
+                          {guest.email || '-'}
                         </div>
-                        <div className="text-xs text-slate-500">
-                          {guest.phone || "-"}
+                        <div className="text-slate-500 text-xs">
+                          {guest.phone || '-'}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1">
+                        <div className="flex gap-1 items-center">
                           {Array.from({ length: guest.vipLevel }).map(
                             (_, i) => (
                               <Star
                                 key={i}
-                                className="h-4 w-4 fill-[#f5a623] text-[#f5a623]"
+                                className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                               />
                             ),
                           )}
                           {guest.vipLevel === 0 && (
-                            <span className="text-xs text-slate-400">
+                            <span className="text-slate-400 text-xs">
                               Standard
                             </span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-semibold text-slate-800">
+                        <div className="font-semibold text-slate-800 text-sm">
                           {guest.totalStays}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-semibold text-[#1e4b8e]">
+                        <div className="font-semibold text-[#1e4b8e] text-sm">
                           ฿{Number(guest.totalRevenue).toLocaleString()}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         {guest.isBlacklist ? (
-                          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-red-100 text-red-700 ring-1 ring-inset ring-red-600/20">
+                          <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-2.5 py-1 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-xs">
                             <Ban className="h-3 w-3" />
                             Blacklisted
                           </span>
                         ) : (
-                          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                          <span className="bg-emerald-100 font-semibold inline-flex items-center px-2.5 py-1 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-xs">
                             Active
                           </span>
                         )}
@@ -249,7 +237,7 @@ export default function GuestsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="rounded-xl hover:bg-blue-50 hover:text-blue-600"
+                            className="hover:bg-blue-50 hover:text-blue-600 rounded-xl"
                             onClick={(e) => handleEdit(e, guest)}
                           >
                             <Pencil className="h-4 w-4" />
@@ -257,7 +245,7 @@ export default function GuestsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="rounded-xl hover:bg-red-50 hover:text-red-600"
+                            className="hover:bg-red-50 hover:text-red-600 rounded-xl"
                             onClick={(e) =>
                               handleDelete(
                                 e,

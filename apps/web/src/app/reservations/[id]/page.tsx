@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Edit,
@@ -9,10 +9,10 @@ import {
   CheckCircle,
   XCircle,
   Calendar,
-} from "lucide-react";
-import { reservationsAPI, type Reservation } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { ReservationStatusBadge } from "@/components/reservation-status-badge";
+} from 'lucide-react';
+import { reservationsAPI, type Reservation } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 
 export default function ReservationDetailPage() {
   const params = useParams();
@@ -31,7 +31,7 @@ export default function ReservationDetailPage() {
       setReservation(data);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to load reservation",
+        err instanceof Error ? err.message : 'Failed to load reservation',
       );
     } finally {
       setLoading(false);
@@ -43,68 +43,68 @@ export default function ReservationDetailPage() {
   }, [loadReservation]);
 
   async function handleCheckIn() {
-    if (!confirm("Confirm check-in for this reservation?")) return;
+    if (!confirm('Confirm check-in for this reservation?')) return;
 
     try {
       await reservationsAPI.checkIn(reservationId);
-      loadReservation(); // Reload to get updated data
+      loadReservation();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to check in");
+      alert(err instanceof Error ? err.message : 'Failed to check in');
     }
   }
 
   async function handleCheckOut() {
-    if (!confirm("Confirm check-out for this reservation?")) return;
+    if (!confirm('Confirm check-out for this reservation?')) return;
 
     try {
       await reservationsAPI.checkOut(reservationId);
-      loadReservation(); // Reload to get updated data
+      loadReservation();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to check out");
+      alert(err instanceof Error ? err.message : 'Failed to check out');
     }
   }
 
   async function handleCancel() {
-    const reason = prompt("Enter cancellation reason:");
+    const reason = prompt('Enter cancellation reason:');
     if (!reason) return;
 
     try {
       await reservationsAPI.cancel(reservationId, reason);
-      loadReservation(); // Reload to get updated data
+      loadReservation();
     } catch (err) {
       alert(
-        err instanceof Error ? err.message : "Failed to cancel reservation",
+        err instanceof Error ? err.message : 'Failed to cancel reservation',
       );
     }
   }
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this reservation?")) return;
+    if (!confirm('Are you sure you want to delete this reservation?')) return;
 
     try {
       await reservationsAPI.delete(reservationId);
-      router.push("/reservations");
+      router.push('/reservations');
     } catch (err) {
       alert(
-        err instanceof Error ? err.message : "Failed to delete reservation",
+        err instanceof Error ? err.message : 'Failed to delete reservation',
       );
     }
   }
 
   function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading reservation...</p>
         </div>
       </div>
@@ -113,11 +113,11 @@ export default function ReservationDetailPage() {
 
   if (error || !reservation) {
     return (
-      <div className="rounded-2xl bg-red-50 p-6 border border-red-200">
-        <h3 className="text-red-800 font-semibold">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+        <h3 className="font-semibold text-red-800">
           Error loading reservation
         </h3>
-        <p className="text-red-600 mt-2">{error || "Reservation not found"}</p>
+        <p className="mt-2 text-red-600">{error || 'Reservation not found'}</p>
         <Button onClick={() => router.back()} className="mt-4">
           Go Back
         </Button>
@@ -125,28 +125,28 @@ export default function ReservationDetailPage() {
     );
   }
 
-  const canCheckIn = reservation.status === "CONFIRMED";
-  const canCheckOut = reservation.status === "CHECKED_IN";
-  const canCancel = ["CONFIRMED", "CHECKED_IN"].includes(reservation.status);
+  const canCheckIn = reservation.status === 'CONFIRMED';
+  const canCheckOut = reservation.status === 'CHECKED_IN';
+  const canCancel = ['CONFIRMED', 'CHECKED_IN'].includes(reservation.status);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           <Button
             variant="outline"
             onClick={() => router.back()}
             className="rounded-xl"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 mr-2 w-4" />
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-[#1e4b8e]">
+            <h1 className="font-bold text-[#1e4b8e] text-3xl">
               {reservation.confirmNumber}
             </h1>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex gap-2 items-center mt-1">
               <ReservationStatusBadge status={reservation.status} />
             </div>
           </div>
@@ -155,18 +155,18 @@ export default function ReservationDetailPage() {
           {canCheckIn && (
             <Button
               onClick={handleCheckIn}
-              className="rounded-xl bg-emerald-600 hover:bg-emerald-700"
+              className="bg-emerald-600 hover:bg-emerald-700 rounded-xl"
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircle className="h-4 mr-2 w-4" />
               Check In
             </Button>
           )}
           {canCheckOut && (
             <Button
               onClick={handleCheckOut}
-              className="rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e]"
+              className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircle className="h-4 mr-2 w-4" />
               Check Out
             </Button>
           )}
@@ -174,9 +174,9 @@ export default function ReservationDetailPage() {
             <Button
               variant="outline"
               onClick={handleCancel}
-              className="rounded-xl text-orange-600 hover:bg-orange-50"
+              className="hover:bg-orange-50 rounded-xl text-orange-600"
             >
-              <XCircle className="h-4 w-4 mr-2" />
+              <XCircle className="h-4 mr-2 w-4" />
               Cancel
             </Button>
           )}
@@ -185,40 +185,40 @@ export default function ReservationDetailPage() {
             onClick={() => router.push(`/reservations/${reservationId}/edit`)}
             className="rounded-xl"
           >
-            <Edit className="h-4 w-4 mr-2" />
+            <Edit className="h-4 mr-2 w-4" />
             Edit
           </Button>
           <Button
             variant="outline"
             onClick={handleDelete}
-            className="rounded-xl text-red-600 hover:bg-red-50"
+            className="hover:bg-red-50 rounded-xl text-red-600"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 mr-2 w-4" />
             Delete
           </Button>
         </div>
       </div>
 
       {/* Reservation Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
         {/* Main Info Card */}
-        <div className="lg:col-span-2 rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-[#1e4b8e] mb-6">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Reservation Details
           </h2>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="gap-6 grid grid-cols-2">
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Confirmation Number
               </label>
-              <p className="text-lg font-mono font-semibold text-[#1e4b8e] mt-1">
+              <p className="font-mono font-semibold mt-1 text-[#1e4b8e] text-lg">
                 {reservation.confirmNumber}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Status
               </label>
               <div className="mt-1">
@@ -227,87 +227,87 @@ export default function ReservationDetailPage() {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Guest
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
+              <p className="font-semibold mt-1 text-lg text-slate-800">
                 {reservation.guest?.firstName} {reservation.guest?.lastName}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-slate-500 text-sm">
                 {reservation.guest?.email}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Room
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
+              <p className="font-semibold mt-1 text-lg text-slate-800">
                 Room {reservation.room?.number}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-slate-500 text-sm">
                 {reservation.room?.roomType.name}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Check-in Date
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                <Calendar className="inline h-4 w-4 mr-1" />
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                <Calendar className="h-4 inline mr-1 w-4" />
                 {formatDate(reservation.checkIn)}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Check-out Date
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                <Calendar className="inline h-4 w-4 mr-1" />
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                <Calendar className="h-4 inline mr-1 w-4" />
                 {formatDate(reservation.checkOut)}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Number of Nights
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                {reservation.nights}{" "}
-                {reservation.nights === 1 ? "night" : "nights"}
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                {reservation.nights}{' '}
+                {reservation.nights === 1 ? 'night' : 'nights'}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Number of Guests
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                {reservation.numberOfGuests}{" "}
-                {reservation.numberOfGuests === 1 ? "guest" : "guests"}
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                {reservation.numberOfGuests}{' '}
+                {reservation.numberOfGuests === 1 ? 'guest' : 'guests'}
               </p>
             </div>
           </div>
 
           {reservation.specialRequests && (
-            <div className="mt-6 pt-6 border-t border-slate-200">
-              <label className="text-sm font-semibold text-slate-600">
+            <div className="border-slate-200 border-t mt-6 pt-6">
+              <label className="font-semibold text-slate-600 text-sm">
                 Special Requests
               </label>
-              <p className="text-slate-700 mt-2 whitespace-pre-wrap">
+              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {reservation.specialRequests}
               </p>
             </div>
           )}
 
           {reservation.cancellationReason && (
-            <div className="mt-6 pt-6 border-t border-red-200 bg-red-50/50 -m-6 p-6 rounded-b-3xl">
-              <label className="text-sm font-semibold text-red-600">
+            <div className="-m-6 bg-red-50/50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-3xl">
+              <label className="font-semibold text-red-600 text-sm">
                 Cancellation Reason
               </label>
-              <p className="text-red-700 mt-2 whitespace-pre-wrap">
+              <p className="mt-2 text-red-700 whitespace-pre-wrap">
                 {reservation.cancellationReason}
               </p>
             </div>
@@ -315,11 +315,11 @@ export default function ReservationDetailPage() {
         </div>
 
         {/* Pricing Card */}
-        <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-[#1e4b8e] mb-6">Pricing</h2>
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">Pricing</h2>
 
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-slate-600">Room Rate</span>
               <span className="font-semibold text-slate-800">
                 ฿
@@ -329,41 +329,41 @@ export default function ReservationDetailPage() {
               </span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-slate-600">Nights</span>
               <span className="font-semibold text-slate-800">
                 × {reservation.nights}
               </span>
             </div>
 
-            <div className="pt-4 border-t border-slate-200">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-slate-700">
+            <div className="border-slate-200 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-lg text-slate-700">
                   Total Amount
                 </span>
-                <span className="text-2xl font-bold text-[#1e4b8e]">
+                <span className="font-bold text-[#1e4b8e] text-2xl">
                   ฿{Number(reservation.totalAmount).toLocaleString()}
                 </span>
               </div>
             </div>
 
             {reservation.actualCheckIn && (
-              <div className="pt-4 border-t border-slate-200">
-                <label className="text-sm font-semibold text-slate-600">
+              <div className="border-slate-200 border-t pt-4">
+                <label className="font-semibold text-slate-600 text-sm">
                   Actual Check-in
                 </label>
-                <p className="text-slate-700 mt-1">
+                <p className="mt-1 text-slate-700">
                   {new Date(reservation.actualCheckIn).toLocaleString()}
                 </p>
               </div>
             )}
 
             {reservation.actualCheckOut && (
-              <div className="pt-4 border-t border-slate-200">
-                <label className="text-sm font-semibold text-slate-600">
+              <div className="border-slate-200 border-t pt-4">
+                <label className="font-semibold text-slate-600 text-sm">
                   Actual Check-out
                 </label>
-                <p className="text-slate-700 mt-1">
+                <p className="mt-1 text-slate-700">
                   {new Date(reservation.actualCheckOut).toLocaleString()}
                 </p>
               </div>
@@ -373,18 +373,18 @@ export default function ReservationDetailPage() {
       </div>
 
       {/* Metadata */}
-      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-        <h2 className="text-xl font-bold text-[#1e4b8e] mb-4">Metadata</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <h2 className="font-bold mb-4 text-[#1e4b8e] text-xl">Metadata</h2>
+        <div className="gap-4 grid grid-cols-2 text-sm">
           <div>
-            <span className="text-slate-600">Created:</span>{" "}
-            <span className="text-slate-800 font-medium">
+            <span className="text-slate-600">Created:</span>{' '}
+            <span className="font-medium text-slate-800">
               {new Date(reservation.createdAt).toLocaleString()}
             </span>
           </div>
           <div>
-            <span className="text-slate-600">Last Updated:</span>{" "}
-            <span className="text-slate-800 font-medium">
+            <span className="text-slate-600">Last Updated:</span>{' '}
+            <span className="font-medium text-slate-800">
               {new Date(reservation.updatedAt).toLocaleString()}
             </span>
           </div>

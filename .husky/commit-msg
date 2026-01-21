@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -e
+
+npx --no-install commitlint --edit "$1"

@@ -82,7 +82,7 @@ export class PropertiesService {
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
-    await this.findOne(id); // Check if exists
+    await this.findOne(id);
 
     return this.prisma.property.update({
       where: { id },
@@ -99,7 +99,7 @@ export class PropertiesService {
   }
 
   async remove(id: string) {
-    const property = await this.findOne(id); // ensures property exists and includes _count
+    const property = await this.findOne(id);
 
     if (property._count.rooms > 0 || property._count.roomTypes > 0) {
       throw new BadRequestException(

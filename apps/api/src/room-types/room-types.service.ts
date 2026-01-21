@@ -12,7 +12,6 @@ export class RoomTypesService {
   constructor(private prisma: PrismaService) {}
 
   async create(createRoomTypeDto: CreateRoomTypeDto) {
-    // Check if property exists
     const property = await this.prisma.property.findUnique({
       where: { id: createRoomTypeDto.propertyId },
     });
@@ -23,7 +22,6 @@ export class RoomTypesService {
       );
     }
 
-    // Check if code already exists for this property
     const existing = await this.prisma.roomType.findFirst({
       where: {
         propertyId: createRoomTypeDto.propertyId,
@@ -117,7 +115,6 @@ export class RoomTypesService {
       throw new NotFoundException(`Room type with ID ${id} not found`);
     }
 
-    // If code is being updated, check for duplicates
     if (updateRoomTypeDto.code) {
       const existing = await this.prisma.roomType.findFirst({
         where: {
@@ -151,7 +148,6 @@ export class RoomTypesService {
   async remove(id: string) {
     const roomType = await this.findOne(id);
 
-    // Check if room type has rooms
     if (roomType._count.rooms > 0) {
       throw new BadRequestException(
         'Cannot delete room type with existing rooms. Please remove or reassign rooms first.',

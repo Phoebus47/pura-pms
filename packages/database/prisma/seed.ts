@@ -1,39 +1,39 @@
 /// <reference types="node" />
-import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   // Create Roles
   const superAdminRole = await prisma.role.upsert({
-    where: { name: "Super Admin" },
+    where: { name: 'Super Admin' },
     update: {},
     create: {
-      name: "Super Admin",
-      permissions: ["ALL"],
+      name: 'Super Admin',
+      permissions: ['ALL'],
     },
   });
 
   const staffRole = await prisma.role.upsert({
-    where: { name: "Staff" },
+    where: { name: 'Staff' },
     update: {},
     create: {
-      name: "Staff",
-      permissions: ["FRONT_DESK", "RESERVATIONS"],
+      name: 'Staff',
+      permissions: ['FRONT_DESK', 'RESERVATIONS'],
     },
   });
 
   // Create Super Admin User
-  const password = await bcrypt.hash("admin123", 10);
+  const password = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@pura.com" },
+    where: { email: 'admin@pura.com' },
     update: {},
     create: {
-      email: "admin@pura.com",
+      email: 'admin@pura.com',
       password,
-      firstName: "Super",
-      lastName: "Admin",
+      firstName: 'Super',
+      lastName: 'Admin',
       roleId: superAdminRole.id,
       isActive: true,
     },
