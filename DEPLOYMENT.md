@@ -35,6 +35,8 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 PORT=10000
 
 # CORS Origin - ใส่ URL ของ Vercel frontend (คั่นด้วย comma ถ้ามีหลาย URL)
+# ตัวอย่าง: https://pura-pms-web.vercel.app,https://pura-pms-web-git-main-your-team.vercel.app
+# ต้องไม่มี trailing slash (/)
 CORS_ORIGIN=https://your-app.vercel.app,https://your-preview.vercel.app
 
 # Node Environment
