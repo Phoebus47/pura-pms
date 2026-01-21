@@ -25,7 +25,9 @@ async function bootstrap() {
     `🚀 API Server running on http://localhost:${process.env.PORT ?? 3001}`,
   );
 }
-bootstrap().catch((err) => {
+
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+bootstrap().catch((err: unknown) => {
   console.error(err);
   process.exit(1);
 });

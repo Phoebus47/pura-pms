@@ -16,6 +16,9 @@ dist
 .env*
 !.env.example
 
+# SonarQube
+.scannerwork
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
