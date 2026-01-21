@@ -25,4 +25,7 @@ async function bootstrap() {
     `🚀 API Server running on http://localhost:${process.env.PORT ?? 3001}`,
   );
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

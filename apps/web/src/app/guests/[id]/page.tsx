@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Edit, Trash2, Star, Ban, CheckCircle } from "lucide-react";
 import { guestsAPI, type Guest } from "@/lib/api";
@@ -15,11 +15,7 @@ export default function GuestDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadGuest();
-  }, [guestId]);
-
-  async function loadGuest() {
+  const loadGuest = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -30,7 +26,11 @@ export default function GuestDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [guestId]);
+
+  useEffect(() => {
+    loadGuest();
+  }, [loadGuest]);
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this guest?")) return;

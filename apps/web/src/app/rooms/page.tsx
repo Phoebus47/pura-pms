@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Plus, Bed, Filter } from "lucide-react";
 import { roomsAPI, type Room, type RoomStatus } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,7 @@ export default function RoomsPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoomStatus | undefined>();
 
-  useEffect(() => {
-    loadRooms();
-  }, [statusFilter]);
-
-  async function loadRooms() {
+  const loadRooms = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -29,7 +25,11 @@ export default function RoomsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadRooms();
+  }, [loadRooms]);
 
   if (loading) {
     return (

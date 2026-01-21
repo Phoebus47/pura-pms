@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { Plus, Calendar } from "lucide-react";
 import { reservationsAPI, type Reservation } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { ReservationStatusBadge } from "@/components/reservation-status-badge";
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     loadReservations();
@@ -77,13 +79,16 @@ export default function ReservationsPage() {
           <Button
             variant="outline"
             onClick={() => {
-              window.location.href = "/reservations/calendar";
+              router.push("/reservations/calendar");
             }}
           >
             <Calendar className="h-4 w-4 mr-2" />
             Calendar View
           </Button>
-          <Button className="bg-[#1e4b8e] hover:bg-[#153a6e]">
+          <Button
+            className="bg-[#1e4b8e] hover:bg-[#153a6e]"
+            onClick={() => router.push("/reservations/new")}
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Reservation
           </Button>
@@ -100,7 +105,10 @@ export default function ReservationsPage() {
           <p className="text-slate-500 mt-2">
             Get started by creating your first reservation
           </p>
-          <Button className="mt-6 bg-[#1e4b8e] hover:bg-[#153a6e]">
+          <Button
+            className="bg-[#1e4b8e] hover:bg-[#153a6e]"
+            onClick={() => router.push("/reservations/new")}
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Reservation
           </Button>

@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsNumber,
   IsArray,
-  IsDecimal,
   Min,
 } from 'class-validator';
 

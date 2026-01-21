@@ -1,43 +1,144 @@
-import { Calendar, Users, Bed, CreditCard } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+"use client";
 
-const stats = [
-  {
-    name: "Total Reservations",
-    value: "124",
-    icon: Calendar,
-    change: "+12%",
-    changeType: "positive" as const,
-    color: "#1e4b8e",
-  },
-  {
-    name: "Checked In",
-    value: "87",
-    icon: Users,
-    change: "+8%",
-    changeType: "positive" as const,
-    color: "#f5a623",
-  },
-  {
-    name: "Available Rooms",
-    value: "23",
-    icon: Bed,
-    change: "-5%",
-    changeType: "negative" as const,
-    color: "#3b82f6",
-  },
-  {
-    name: "Revenue Today",
-    value: "฿45,231",
-    icon: CreditCard,
-    change: "+23%",
-    changeType: "positive" as const,
-    color: "#153a6e",
-  },
-];
+import { useEffect, useState } from "react";
+import {
+  Calendar,
+  Users,
+  Bed,
+  CreditCard,
+  TrendingUp,
+  Clock,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { reservationsAPI, roomsAPI, type Reservation } from "@/lib/api";
+
+interface DashboardStats {
+  totalReservations: number;
+  checkedIn: number;
+  availableRooms: number;
+  totalRooms: number;
+  revenueToday: number;
+  occupancyRate: number;
+}
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalReservations: 0,
+    checkedIn: 0,
+    availableRooms: 0,
+    totalRooms: 0,
+    revenueToday: 0,
+    occupancyRate: 0,
+  });
+  const [recentReservations, setRecentReservations] = useState<Reservation[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  async function loadDashboardData() {
+    try {
+      setLoading(true);
+
+      // Fetch all data in parallel
+      const [reservations, rooms] = await Promise.all([
+        reservationsAPI.getAll(),
+        roomsAPI.getAll(),
+      ]);
+
+      // Calculate stats
+      const checkedInCount = reservations.filter(
+        (r) => r.status === "CHECKED_IN",
+      ).length;
+      const availableRoomsCount = rooms.filter(
+        (r) => r.status === "VACANT_CLEAN" || r.status === "VACANT_DIRTY",
+      ).length;
+
+      // Calculate today's revenue (from checked-in reservations)
+      const today = new Date().toISOString().split("T")[0];
+      const todayRevenue = reservations
+        .filter((r) => r.status === "CHECKED_IN" && r.checkIn.startsWith(today))
+        .reduce((sum, r) => sum + Number(r.totalAmount), 0);
+
+      // Calculate occupancy rate
+      const occupancyRate =
+        rooms.length > 0
+          ? Math.round((checkedInCount / rooms.length) * 100)
+          : 0;
+
+      setStats({
+        totalReservations: reservations.length,
+        checkedIn: checkedInCount,
+        availableRooms: availableRoomsCount,
+        totalRooms: rooms.length,
+        revenueToday: todayRevenue,
+        occupancyRate,
+      });
+
+      // Get recent reservations (last 5)
+      setRecentReservations(reservations.slice(0, 5));
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const statCards = [
+    {
+      name: "Total Reservations",
+      value: stats.totalReservations.toString(),
+      icon: Calendar,
+      change: `${stats.occupancyRate}% occupancy`,
+      changeType:
+        stats.occupancyRate >= 70 ? "positive" : ("negative" as const),
+      color: "#1e4b8e",
+    },
+    {
+      name: "Checked In",
+      value: stats.checkedIn.toString(),
+      icon: Users,
+      change: `${stats.totalRooms - stats.checkedIn} available`,
+      changeType: "neutral" as const,
+      color: "#f5a623",
+    },
+    {
+      name: "Available Rooms",
+      value: stats.availableRooms.toString(),
+      icon: Bed,
+      change: `of ${stats.totalRooms} total`,
+      changeType: "neutral" as const,
+      color: "#3b82f6",
+    },
+    {
+      name: "Revenue Today",
+      value: `฿${stats.revenueToday.toLocaleString()}`,
+      icon: CreditCard,
+      change: "Today's check-ins",
+      changeType: stats.revenueToday > 0 ? "positive" : ("neutral" as const),
+      color: "#153a6e",
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+          <p className="mt-4 text-slate-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500">
       {/* Welcome Header */}
@@ -48,38 +149,36 @@ export default function Dashboard() {
           </h1>
           <p className="text-slate-600 mt-2 text-base">
             Welcome back,{" "}
-            <span className="text-[#1e4b8e] font-bold">Admin</span>! Here's your
-            property overview.
+            <span className="text-[#1e4b8e] font-bold">Admin</span>! Here&apos;s
+            your property overview.
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-white/50 backdrop-blur-xl rounded-2xl px-4 py-2 border border-white/60 shadow-xl shadow-black/5">
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-9 w-9 rounded-full border-2 border-white bg-muted flex items-center justify-center text-[10px] font-bold overflow-hidden shadow-md"
-              >
-                <Avatar className="h-full w-full">
-                  <AvatarImage src={`https://i.pravatar.cc/150?u=${i}`} />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-              </div>
-            ))}
+        <div className="flex items-center gap-3">
+          <Button
+            className="rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e] shadow-lg shadow-blue-900/10"
+            onClick={() => router.push("/reservations/new")}
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            New Reservation
+          </Button>
+          <div className="flex items-center gap-2 bg-white/50 backdrop-blur-xl rounded-xl px-4 py-2.5 border border-white/60 shadow-lg shadow-black/5">
+            <TrendingUp className="h-5 w-5 text-emerald-600" />
+            <span className="text-sm text-slate-600 font-semibold">
+              {stats.occupancyRate}% Occupancy
+            </span>
           </div>
-          <span className="text-sm text-slate-600 font-semibold">
-            5 staff on shift
-          </span>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <div
             key={stat.name}
             className="group relative overflow-hidden rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/10 hover:-translate-y-2 hover:border-white/70 hover:bg-white/50"
           >
-            <div className="absolute -right-4 -top-4 h-32 w-32 rounded-full opacity-20 blur-2xl transition-all duration-500 group-hover:scale-150 group-hover:opacity-30"
+            <div
+              className="absolute -right-4 -top-4 h-32 w-32 rounded-full opacity-20 blur-2xl transition-all duration-500 group-hover:scale-150 group-hover:opacity-30"
               style={{ backgroundColor: stat.color }}
             />
             <div className="relative flex items-center justify-between">
@@ -88,7 +187,7 @@ export default function Dashboard() {
                   className="rounded-2xl p-3.5 shadow-2xl backdrop-blur-sm border border-white/30 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-xl"
                   style={{
                     backgroundColor: `${stat.color}ee`,
-                    color: 'white',
+                    color: "white",
                   }}
                 >
                   <stat.icon className="h-6 w-6" />
@@ -99,143 +198,80 @@ export default function Dashboard() {
                   "flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ring-1 ring-inset",
                   stat.changeType === "positive"
                     ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-                    : "bg-rose-50 text-rose-700 ring-rose-600/20",
+                    : stat.changeType === "negative"
+                      ? "bg-red-50 text-red-700 ring-red-600/20"
+                      : "bg-slate-50 text-slate-700 ring-slate-600/20",
                 )}
               >
                 {stat.change}
               </div>
             </div>
-            <div className="relative mt-6">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div className="relative mt-4">
+              <p className="text-sm font-semibold text-slate-600">
                 {stat.name}
               </p>
-              <div className="flex items-baseline gap-1 mt-2">
-                <p className="text-4xl font-bold text-slate-800 tracking-tight">
-                  {stat.value}
-                </p>
-              </div>
+              <p className="mt-2 text-4xl font-black tracking-tight text-[#1e4b8e]">
+                {stat.value}
+              </p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Quick Actions */}
-        <div className="lg:col-span-1 space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="h-1 w-10 rounded-full bg-linear-to-r from-[#f5a623] to-[#fbbf24]" />
-            <h2 className="text-2xl font-bold text-slate-800">
-              Quick Actions
-            </h2>
-          </div>
-          <div className="grid gap-4">
-            <button className="flex items-center gap-4 rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-5 text-left transition-all duration-300 hover:shadow-2xl hover:shadow-[#1e4b8e]/10 hover:border-[#1e4b8e]/30 hover:-translate-y-1 hover:bg-white/50 group active:scale-[0.97]">
-              <div className="rounded-2xl bg-[#1e4b8e]/90 backdrop-blur-sm border border-white/20 p-3 shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-xl group-hover:bg-[#1e4b8e]">
-                <Calendar className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-base text-slate-800">New Reservation</p>
-                <p className="text-sm text-slate-500 font-medium mt-0.5">
-                  Create a new booking
-                </p>
-              </div>
-            </button>
-            <button className="flex items-center gap-4 rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-5 text-left transition-all duration-300 hover:shadow-2xl hover:shadow-[#f5a623]/10 hover:border-[#f5a623]/30 hover:-translate-y-1 hover:bg-white/50 group active:scale-[0.97]">
-              <div className="rounded-2xl bg-[#f5a623]/90 backdrop-blur-sm border border-white/20 p-3 shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-xl group-hover:bg-[#f5a623]">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-base text-slate-800">Check In</p>
-                <p className="text-sm text-slate-500 font-medium mt-0.5">
-                  Handle arrival process
-                </p>
-              </div>
-            </button>
-            <button className="flex items-center gap-4 rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-5 text-left transition-all duration-300 hover:shadow-2xl hover:shadow-[#153a6e]/10 hover:border-[#153a6e]/30 hover:-translate-y-1 hover:bg-white/50 group active:scale-[0.97]">
-              <div className="rounded-2xl bg-[#153a6e]/90 backdrop-blur-sm border border-white/20 p-3 shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-xl group-hover:bg-[#153a6e]">
-                <CreditCard className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-base text-slate-800">Process Payment</p>
-                <p className="text-sm text-slate-500 font-medium mt-0.5">
-                  Review and close folio
-                </p>
-              </div>
-            </button>
-          </div>
+      {/* Recent Activity */}
+      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-[#1e4b8e]">
+            Recent Reservations
+          </h2>
+          <Clock className="h-5 w-5 text-slate-400" />
         </div>
 
-        {/* Recent Activity Mockup */}
-        <div className="lg:col-span-2 space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="h-1 w-10 rounded-full bg-linear-to-r from-[#1e4b8e] to-[#3b82f6]" />
-            <h2 className="text-2xl font-bold text-slate-800">
-              Recent Activity
-            </h2>
-          </div>
-          <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl shadow-2xl shadow-black/5 overflow-hidden hover:shadow-xl hover:border-white/70 transition-all duration-300">
-            <div className="divide-y divide-slate-200/50">
-              {[
-                {
-                  type: "check-in",
-                  user: "John Doe",
-                  room: "302",
-                  time: "10 mins ago",
-                  color: "#1e4b8e",
-                },
-                {
-                  type: "payment",
-                  user: "Sarah Smith",
-                  amount: "฿5,200",
-                  time: "25 mins ago",
-                  color: "#f5a623",
-                },
-                {
-                  type: "booking",
-                  user: "Mike Ross",
-                  status: "Confirmed",
-                  time: "1 hour ago",
-                  color: "#3b82f6",
-                },
-                {
-                  type: "housekeeping",
-                  room: "105",
-                  status: "Cleaned",
-                  time: "2 hours ago",
-                  color: "#153a6e",
-                },
-              ].map((activity, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-5 hover:bg-white/50 backdrop-blur-sm transition-all duration-200 cursor-default group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div 
-                      className="h-12 w-12 rounded-2xl flex items-center justify-center font-bold text-sm text-white shadow-xl backdrop-blur-sm border border-white/30 transition-all duration-200 group-hover:scale-110 group-hover:rotate-3"
-                      style={{ backgroundColor: `${activity.color}ee` }}
-                    >
-                      {activity.type[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-base font-bold capitalize text-slate-800">
-                        {activity.type.replace("-", " ")}
-                      </p>
-                      <p className="text-sm text-slate-500 font-medium mt-0.5">
-                        {activity.user || `Room ${activity.room}`} •{" "}
-                        {activity.amount ||
-                          activity.status ||
-                          "Check-in successful"}
-                      </p>
-                    </div>
+        {recentReservations.length === 0 ? (
+          <p className="text-center text-slate-500 py-8">
+            No recent reservations
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {recentReservations.map((reservation) => (
+              <div
+                key={reservation.id}
+                className="flex items-center justify-between p-4 rounded-2xl bg-white/50 hover:bg-white/70 transition-colors border border-white/60"
+              >
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={`https://ui-avatars.com/api/?name=${reservation.guest?.firstName}+${reservation.guest?.lastName}`}
+                    />
+                    <AvatarFallback>
+                      {reservation.guest?.firstName?.[0]}
+                      {reservation.guest?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-slate-800">
+                      {reservation.guest?.firstName}{" "}
+                      {reservation.guest?.lastName}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      Room {reservation.room?.number} •{" "}
+                      {reservation.confirmNumber}
+                    </p>
                   </div>
-                  <span className="text-xs font-semibold text-slate-400">
-                    {activity.time}
-                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="text-right">
+                  <p className="font-semibold text-[#1e4b8e]">
+                    ฿{Number(reservation.totalAmount).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    {new Date(reservation.checkIn).toLocaleDateString()} -{" "}
+                    {new Date(reservation.checkOut).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

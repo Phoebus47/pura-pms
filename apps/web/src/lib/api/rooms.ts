@@ -44,7 +44,7 @@ export interface CreateRoomDto {
   propertyId: string;
 }
 
-export interface UpdateRoomDto extends Partial<CreateRoomDto> {}
+export type UpdateRoomDto = Partial<CreateRoomDto>;
 
 export interface RoomFilterParams {
   propertyId?: string;
@@ -101,7 +101,7 @@ export const roomsAPI = {
     return apiClient.delete<void>(`/rooms/${id}`, token || undefined);
   },
 
-  async checkAvailability(params: AvailabilityParams): Promise<any> {
+  async checkAvailability(params: AvailabilityParams): Promise<unknown> {
     const token = getAuthToken();
     const queryParams = new URLSearchParams({
       propertyId: params.propertyId,
@@ -110,7 +110,7 @@ export const roomsAPI = {
     });
     if (params.roomTypeId) queryParams.append("roomTypeId", params.roomTypeId);
 
-    return apiClient.get<any>(
+    return apiClient.get<unknown>(
       `/rooms/availability?${queryParams.toString()}`,
       token || undefined,
     );

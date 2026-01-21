@@ -7,10 +7,12 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
+    "type-check": "turbo type-check",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
     "db:push": "pnpm --filter database db:push",
-    "db:generate": "pnpm --filter database db:generate"
+    "db:generate": "pnpm --filter database db:generate",
+    "sonar": "npx dotenv-cli -- npx sonarqube-scanner"
   },
   "devDependencies": {
     "turbo": "^2.3.0"

@@ -91,8 +91,10 @@ export class ReservationsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') _id: string) {
     // Reservations should not be deleted, only cancelled
-    throw new Error('Reservations cannot be deleted. Use cancel instead.');
+    throw new Error(
+      `Reservations cannot be deleted (ID: ${_id}). Use cancel instead.`,
+    );
   }
 }

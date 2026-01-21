@@ -9,7 +9,7 @@ class APIError extends Error {
   constructor(
     public status: number,
     public statusText: string,
-    public data?: any,
+    public data?: unknown,
   ) {
     super(`API Error: ${status} ${statusText}`);
     this.name = "APIError";
@@ -82,7 +82,7 @@ export class APIClient {
     });
   }
 
-  async post<T>(endpoint: string, data?: any, token?: string): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, token?: string): Promise<T> {
     const authToken = token || getAuthToken();
     return this.request<T>(endpoint, {
       method: "POST",
@@ -91,7 +91,7 @@ export class APIClient {
     });
   }
 
-  async patch<T>(endpoint: string, data?: any, token?: string): Promise<T> {
+  async patch<T>(endpoint: string, data?: unknown, token?: string): Promise<T> {
     const authToken = token || getAuthToken();
     return this.request<T>(endpoint, {
       method: "PATCH",

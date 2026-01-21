@@ -3,6 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
 
+import { Prisma } from '@pura/database';
+
 @Injectable()
 export class GuestsService {
   constructor(private prisma: PrismaService) {}
@@ -28,7 +30,7 @@ export class GuestsService {
     limit?: number,
     offset?: number,
   ) {
-    const where: any = {};
+    const where: Prisma.GuestWhereInput = {};
 
     if (search) {
       where.OR = [
@@ -136,7 +138,7 @@ export class GuestsService {
   async update(id: string, updateGuestDto: UpdateGuestDto) {
     await this.findOne(id); // Check if exists
 
-    const updateData: any = { ...updateGuestDto };
+    const updateData: Prisma.GuestUpdateInput = { ...updateGuestDto };
     if (updateGuestDto.dateOfBirth) {
       updateData.dateOfBirth = new Date(updateGuestDto.dateOfBirth);
     }
@@ -192,10 +194,7 @@ export class GuestsService {
     });
 
     // Calculate statistics
-    const totalNights = reservations.reduce(
-      (sum, res) => sum + res.nights,
-      0,
-    );
+    const totalNights = reservations.reduce((sum, res) => sum + res.nights, 0);
     const totalRevenue = reservations.reduce(
       (sum, res) => sum + Number(res.totalAmount),
       0,

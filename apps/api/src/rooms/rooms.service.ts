@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { RoomStatus } from '@pura/database';
+import { Prisma, RoomStatus, RoomType } from '@pura/database';
 
 @Injectable()
 export class RoomsService {
@@ -69,7 +69,7 @@ export class RoomsService {
   }
 
   async findAll(propertyId?: string, roomTypeId?: string, status?: RoomStatus) {
-    const where: any = {};
+    const where: Prisma.RoomWhereInput = {};
     if (propertyId) where.propertyId = propertyId;
     if (roomTypeId) where.roomTypeId = roomTypeId;
     if (status) where.status = status;
@@ -97,10 +97,7 @@ export class RoomsService {
           },
         },
       },
-      orderBy: [
-        { floor: 'asc' },
-        { number: 'asc' },
-      ],
+      orderBy: [{ floor: 'asc' }, { number: 'asc' }],
     });
   }
 
@@ -199,7 +196,7 @@ export class RoomsService {
   }
 
   async remove(id: string) {
-    const room = await this.findOne(id);
+    await this.findOne(id);
 
     // Check if room has active reservations
     const activeReservations = await this.prisma.reservation.count({
@@ -229,7 +226,7 @@ export class RoomsService {
     roomTypeId?: string,
   ) {
     // Get all rooms for the property
-    const where: any = { propertyId };
+    const where: Prisma.RoomWhereInput = { propertyId };
     if (roomTypeId) where.roomTypeId = roomTypeId;
 
     const rooms = await this.prisma.room.findMany({
@@ -261,27 +258,32 @@ export class RoomsService {
     });
 
     // Filter available rooms (no conflicting reservations)
-    const availableRooms = rooms.filter((room) => room.reservations.length === 0);
+    const availableRooms = rooms.filter(
+      (room) => room.reservations.length === 0,
+    );
 
     // Group by room type
-    const availabilityByType = availableRooms.reduce((acc, room) => {
-      const typeId = room.roomTypeId;
-      if (!acc[typeId]) {
-        acc[typeId] = {
-          roomType: room.roomType,
-          availableCount: 0,
-          rooms: [],
-        };
-      }
-      acc[typeId].availableCount++;
-      acc[typeId].rooms.push({
-        id: room.id,
-        number: room.number,
-        floor: room.floor,
-        status: room.status,
-      });
-      return acc;
-    }, {} as Record<string, any>);
+    const availabilityByType = availableRooms.reduce(
+      (acc, room) => {
+        const typeId = room.roomTypeId;
+        if (!acc[typeId]) {
+          acc[typeId] = {
+            roomType: room.roomType,
+            availableCount: 0,
+            rooms: [],
+          };
+        }
+        acc[typeId].availableCount++;
+        acc[typeId].rooms.push({
+          id: room.id,
+          number: room.number,
+          floor: room.floor,
+          status: room.status,
+        });
+        return acc;
+      },
+      {} as Record<string, RoomAvailability>,
+    );
 
     return {
       checkIn,
@@ -290,4 +292,15 @@ export class RoomsService {
       totalAvailable: availableRooms.length,
     };
   }
+}
+
+export interface RoomAvailability {
+  roomType: RoomType;
+  availableCount: number;
+  rooms: Array<{
+    id: string;
+    number: string;
+    floor: number | null;
+    status: RoomStatus;
+  }>;
 }
