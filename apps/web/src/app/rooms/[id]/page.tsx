@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Edit, Trash2 } from "lucide-react";
-import { roomsAPI, type Room } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { RoomStatusBadge } from "@/components/room-status-badge";
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { roomsAPI, type Room } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { RoomStatusBadge } from '@/components/room-status-badge';
 
 export default function RoomDetailPage() {
   const params = useParams();
@@ -23,7 +23,7 @@ export default function RoomDetailPage() {
       const data = await roomsAPI.getById(roomId);
       setRoom(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load room");
+      setError(err instanceof Error ? err.message : 'Failed to load room');
     } finally {
       setLoading(false);
     }
@@ -34,21 +34,21 @@ export default function RoomDetailPage() {
   }, [loadRoom]);
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this room?")) return;
+    if (!confirm('Are you sure you want to delete this room?')) return;
 
     try {
       await roomsAPI.delete(roomId);
-      router.push("/rooms");
+      router.push('/rooms');
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete room");
+      alert(err instanceof Error ? err.message : 'Failed to delete room');
     }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading room details...</p>
         </div>
       </div>
@@ -57,9 +57,9 @@ export default function RoomDetailPage() {
 
   if (error || !room) {
     return (
-      <div className="rounded-2xl bg-red-50 p-6 border border-red-200">
-        <h3 className="text-red-800 font-semibold">Error loading room</h3>
-        <p className="text-red-600 mt-2">{error || "Room not found"}</p>
+      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+        <h3 className="font-semibold text-red-800">Error loading room</h3>
+        <p className="mt-2 text-red-600">{error || 'Room not found'}</p>
         <Button onClick={() => router.back()} className="mt-4">
           Go Back
         </Button>
@@ -71,20 +71,20 @@ export default function RoomDetailPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           <Button
             variant="outline"
             onClick={() => router.back()}
             className="rounded-xl"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 mr-2 w-4" />
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-[#1e4b8e]">
+            <h1 className="font-bold text-[#1e4b8e] text-3xl">
               Room {room.number}
             </h1>
-            <p className="text-slate-600 mt-1">Floor {room.floor}</p>
+            <p className="mt-1 text-slate-600">Floor {room.floor}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -93,49 +93,49 @@ export default function RoomDetailPage() {
             onClick={() => router.push(`/rooms/${roomId}/edit`)}
             className="rounded-xl"
           >
-            <Edit className="h-4 w-4 mr-2" />
+            <Edit className="h-4 mr-2 w-4" />
             Edit
           </Button>
           <Button
             variant="outline"
             onClick={handleDelete}
-            className="rounded-xl text-red-600 hover:bg-red-50"
+            className="hover:bg-red-50 rounded-xl text-red-600"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 mr-2 w-4" />
             Delete
           </Button>
         </div>
       </div>
 
       {/* Room Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
         {/* Main Info Card */}
-        <div className="lg:col-span-2 rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-[#1e4b8e] mb-6">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Room Information
           </h2>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="gap-6 grid grid-cols-2">
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Room Number
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
+              <p className="font-semibold mt-1 text-lg text-slate-800">
                 {room.number}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Floor
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
+              <p className="font-semibold mt-1 text-lg text-slate-800">
                 {room.floor}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Status
               </label>
               <div className="mt-1">
@@ -144,39 +144,39 @@ export default function RoomDetailPage() {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Room Type
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                {room.roomType?.name || "-"}
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                {room.roomType?.name || '-'}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Base Rate
               </label>
-              <p className="text-lg font-semibold text-[#1e4b8e] mt-1">
+              <p className="font-semibold mt-1 text-[#1e4b8e] text-lg">
                 ฿{Number(room.roomType?.baseRate || 0).toLocaleString()}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Max Occupancy
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                {room.roomType?.maxOccupancy || "-"} guests
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                {room.roomType?.maxOccupancy || '-'} guests
               </p>
             </div>
           </div>
 
           {room.notes && (
-            <div className="mt-6 pt-6 border-t border-slate-200">
-              <label className="text-sm font-semibold text-slate-600">
+            <div className="border-slate-200 border-t mt-6 pt-6">
+              <label className="font-semibold text-slate-600 text-sm">
                 Notes
               </label>
-              <p className="text-slate-700 mt-2 whitespace-pre-wrap">
+              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {room.notes}
               </p>
             </div>
@@ -184,27 +184,27 @@ export default function RoomDetailPage() {
         </div>
 
         {/* Room Type Details Card */}
-        <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-[#1e4b8e] mb-6">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Room Type Details
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Type Name
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                {room.roomType?.name || "-"}
+              <p className="font-semibold mt-1 text-lg text-slate-800">
+                {room.roomType?.name || '-'}
               </p>
             </div>
 
             {room.roomType?.description && (
               <div>
-                <label className="text-sm font-semibold text-slate-600">
+                <label className="font-semibold text-slate-600 text-sm">
                   Description
                 </label>
-                <p className="text-slate-700 mt-1">
+                <p className="mt-1 text-slate-700">
                   {room.roomType.description}
                 </p>
               </div>
@@ -212,14 +212,14 @@ export default function RoomDetailPage() {
 
             {room.roomType?.amenities && room.roomType.amenities.length > 0 && (
               <div>
-                <label className="text-sm font-semibold text-slate-600 mb-2 block">
+                <label className="block font-semibold mb-2 text-slate-600 text-sm">
                   Amenities
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {room.roomType.amenities.map((amenity, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-[#1e4b8e]/10 text-[#1e4b8e] ring-1 ring-inset ring-[#1e4b8e]/20"
+                      className="bg-[#1e4b8e]/10 font-semibold inline-flex items-center px-3 py-1 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-xs"
                     >
                       {amenity}
                     </span>
@@ -232,18 +232,18 @@ export default function RoomDetailPage() {
       </div>
 
       {/* Metadata */}
-      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-        <h2 className="text-xl font-bold text-[#1e4b8e] mb-4">Metadata</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <h2 className="font-bold mb-4 text-[#1e4b8e] text-xl">Metadata</h2>
+        <div className="gap-4 grid grid-cols-2 text-sm">
           <div>
-            <span className="text-slate-600">Created:</span>{" "}
-            <span className="text-slate-800 font-medium">
+            <span className="text-slate-600">Created:</span>{' '}
+            <span className="font-medium text-slate-800">
               {new Date(room.createdAt).toLocaleString()}
             </span>
           </div>
           <div>
-            <span className="text-slate-600">Last Updated:</span>{" "}
-            <span className="text-slate-800 font-medium">
+            <span className="text-slate-600">Last Updated:</span>{' '}
+            <span className="font-medium text-slate-800">
               {new Date(room.updatedAt).toLocaleString()}
             </span>
           </div>

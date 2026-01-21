@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Star, Ban, CheckCircle } from "lucide-react";
-import { guestsAPI, type Guest } from "@/lib/api";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, Edit, Trash2, Star, Ban, CheckCircle } from 'lucide-react';
+import { guestsAPI, type Guest } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 
 export default function GuestDetailPage() {
   const params = useParams();
@@ -22,7 +22,7 @@ export default function GuestDetailPage() {
       const data = await guestsAPI.getById(guestId);
       setGuest(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load guest");
+      setError(err instanceof Error ? err.message : 'Failed to load guest');
     } finally {
       setLoading(false);
     }
@@ -33,13 +33,13 @@ export default function GuestDetailPage() {
   }, [loadGuest]);
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this guest?")) return;
+    if (!confirm('Are you sure you want to delete this guest?')) return;
 
     try {
       await guestsAPI.delete(guestId);
-      router.push("/guests");
+      router.push('/guests');
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete guest");
+      alert(err instanceof Error ? err.message : 'Failed to delete guest');
     }
   }
 
@@ -48,21 +48,21 @@ export default function GuestDetailPage() {
 
     try {
       await guestsAPI.toggleBlacklist(guestId);
-      loadGuest(); // Reload to get updated data
+      loadGuest();
     } catch (err) {
       alert(
         err instanceof Error
           ? err.message
-          : "Failed to update blacklist status",
+          : 'Failed to update blacklist status',
       );
     }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e4b8e] mx-auto"></div>
+          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading guest profile...</p>
         </div>
       </div>
@@ -71,9 +71,9 @@ export default function GuestDetailPage() {
 
   if (error || !guest) {
     return (
-      <div className="rounded-2xl bg-red-50 p-6 border border-red-200">
-        <h3 className="text-red-800 font-semibold">Error loading guest</h3>
-        <p className="text-red-600 mt-2">{error || "Guest not found"}</p>
+      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+        <h3 className="font-semibold text-red-800">Error loading guest</h3>
+        <p className="mt-2 text-red-600">{error || 'Guest not found'}</p>
         <Button onClick={() => router.back()} className="mt-4">
           Go Back
         </Button>
@@ -85,37 +85,37 @@ export default function GuestDetailPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           <Button
             variant="outline"
             onClick={() => router.back()}
             className="rounded-xl"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 mr-2 w-4" />
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-[#1e4b8e]">
+            <h1 className="font-bold text-[#1e4b8e] text-3xl">
               {guest.firstName} {guest.lastName}
             </h1>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex gap-2 items-center mt-1">
               {guest.isBlacklist ? (
-                <span className="inline-flex items-center gap-1 text-sm font-semibold text-red-600">
+                <span className="font-semibold gap-1 inline-flex items-center text-red-600 text-sm">
                   <Ban className="h-4 w-4" />
                   Blacklisted
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
+                <span className="font-semibold gap-1 inline-flex items-center text-emerald-600 text-sm">
                   <CheckCircle className="h-4 w-4" />
                   Active Guest
                 </span>
               )}
               {guest.vipLevel > 0 && (
-                <div className="flex items-center gap-1">
+                <div className="flex gap-1 items-center">
                   {Array.from({ length: guest.vipLevel }).map((_, i) => (
                     <Star
                       key={i}
-                      className="h-4 w-4 fill-[#f5a623] text-[#f5a623]"
+                      className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                     />
                   ))}
                 </div>
@@ -127,16 +127,16 @@ export default function GuestDetailPage() {
           <Button
             variant="outline"
             onClick={toggleBlacklist}
-            className={`rounded-xl ${guest.isBlacklist ? "text-emerald-600 hover:bg-emerald-50" : "text-red-600 hover:bg-red-50"}`}
+            className={`rounded-xl ${guest.isBlacklist ? 'text-emerald-600 hover:bg-emerald-50' : 'text-red-600 hover:bg-red-50'}`}
           >
             {guest.isBlacklist ? (
               <>
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <CheckCircle className="h-4 mr-2 w-4" />
                 Remove from Blacklist
               </>
             ) : (
               <>
-                <Ban className="h-4 w-4 mr-2" />
+                <Ban className="h-4 mr-2 w-4" />
                 Add to Blacklist
               </>
             )}
@@ -146,93 +146,93 @@ export default function GuestDetailPage() {
             onClick={() => router.push(`/guests/${guestId}/edit`)}
             className="rounded-xl"
           >
-            <Edit className="h-4 w-4 mr-2" />
+            <Edit className="h-4 mr-2 w-4" />
             Edit
           </Button>
           <Button
             variant="outline"
             onClick={handleDelete}
-            className="rounded-xl text-red-600 hover:bg-red-50"
+            className="hover:bg-red-50 rounded-xl text-red-600"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 mr-2 w-4" />
             Delete
           </Button>
         </div>
       </div>
 
       {/* Guest Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
         {/* Personal Info Card */}
-        <div className="lg:col-span-2 rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-[#1e4b8e] mb-6">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Personal Information
           </h2>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="gap-6 grid grid-cols-2">
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 First Name
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
+              <p className="font-semibold mt-1 text-lg text-slate-800">
                 {guest.firstName}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Last Name
               </label>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
+              <p className="font-semibold mt-1 text-lg text-slate-800">
                 {guest.lastName}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Email
               </label>
-              <p className="text-slate-700 mt-1">{guest.email || "-"}</p>
+              <p className="mt-1 text-slate-700">{guest.email || '-'}</p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Phone
               </label>
-              <p className="text-slate-700 mt-1">{guest.phone || "-"}</p>
+              <p className="mt-1 text-slate-700">{guest.phone || '-'}</p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Nationality
               </label>
-              <p className="text-slate-700 mt-1">{guest.nationality || "-"}</p>
+              <p className="mt-1 text-slate-700">{guest.nationality || '-'}</p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 ID Number
               </label>
-              <p className="text-slate-700 mt-1">{guest.idNumber || "-"}</p>
+              <p className="mt-1 text-slate-700">{guest.idNumber || '-'}</p>
             </div>
           </div>
 
           {guest.address && (
-            <div className="mt-6 pt-6 border-t border-slate-200">
-              <label className="text-sm font-semibold text-slate-600">
+            <div className="border-slate-200 border-t mt-6 pt-6">
+              <label className="font-semibold text-slate-600 text-sm">
                 Address
               </label>
-              <p className="text-slate-700 mt-2 whitespace-pre-wrap">
+              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {guest.address}
               </p>
             </div>
           )}
 
           {guest.notes && (
-            <div className="mt-6 pt-6 border-t border-slate-200">
-              <label className="text-sm font-semibold text-slate-600">
+            <div className="border-slate-200 border-t mt-6 pt-6">
+              <label className="font-semibold text-slate-600 text-sm">
                 Notes
               </label>
-              <p className="text-slate-700 mt-2 whitespace-pre-wrap">
+              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {guest.notes}
               </p>
             </div>
@@ -240,24 +240,24 @@ export default function GuestDetailPage() {
         </div>
 
         {/* Statistics Card */}
-        <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-[#1e4b8e] mb-6">
+        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Guest Statistics
           </h2>
 
           <div className="space-y-6">
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 VIP Level
               </label>
-              <div className="flex items-center gap-1 mt-2">
+              <div className="flex gap-1 items-center mt-2">
                 {guest.vipLevel === 0 ? (
                   <span className="text-slate-500">Standard Guest</span>
                 ) : (
                   Array.from({ length: guest.vipLevel }).map((_, i) => (
                     <Star
                       key={i}
-                      className="h-6 w-6 fill-[#f5a623] text-[#f5a623]"
+                      className="fill-[#f5a623] h-6 text-[#f5a623] w-6"
                     />
                   ))
                 )}
@@ -265,35 +265,35 @@ export default function GuestDetailPage() {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Total Stays
               </label>
-              <p className="text-3xl font-bold text-[#1e4b8e] mt-1">
+              <p className="font-bold mt-1 text-[#1e4b8e] text-3xl">
                 {guest.totalStays}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Total Revenue
               </label>
-              <p className="text-3xl font-bold text-[#1e4b8e] mt-1">
+              <p className="font-bold mt-1 text-[#1e4b8e] text-3xl">
                 ฿{Number(guest.totalRevenue).toLocaleString()}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600">
+              <label className="font-semibold text-slate-600 text-sm">
                 Status
               </label>
               <div className="mt-2">
                 {guest.isBlacklist ? (
-                  <span className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold bg-red-100 text-red-700 ring-1 ring-inset ring-red-600/20">
+                  <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-3 py-1.5 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-sm">
                     <Ban className="h-4 w-4" />
                     Blacklisted
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                  <span className="bg-emerald-100 font-semibold gap-1 inline-flex items-center px-3 py-1.5 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-sm">
                     <CheckCircle className="h-4 w-4" />
                     Active
                   </span>
@@ -305,18 +305,18 @@ export default function GuestDetailPage() {
       </div>
 
       {/* Metadata */}
-      <div className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-2xl p-6 shadow-xl">
-        <h2 className="text-xl font-bold text-[#1e4b8e] mb-4">Metadata</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <h2 className="font-bold mb-4 text-[#1e4b8e] text-xl">Metadata</h2>
+        <div className="gap-4 grid grid-cols-2 text-sm">
           <div>
-            <span className="text-slate-600">Created:</span>{" "}
-            <span className="text-slate-800 font-medium">
+            <span className="text-slate-600">Created:</span>{' '}
+            <span className="font-medium text-slate-800">
               {new Date(guest.createdAt).toLocaleString()}
             </span>
           </div>
           <div>
-            <span className="text-slate-600">Last Updated:</span>{" "}
-            <span className="text-slate-800 font-medium">
+            <span className="text-slate-600">Last Updated:</span>{' '}
+            <span className="font-medium text-slate-800">
               {new Date(guest.updatedAt).toLocaleString()}
             </span>
           </div>

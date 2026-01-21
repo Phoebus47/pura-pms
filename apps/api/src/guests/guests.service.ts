@@ -136,7 +136,7 @@ export class GuestsService {
   }
 
   async update(id: string, updateGuestDto: UpdateGuestDto) {
-    await this.findOne(id); // Check if exists
+    await this.findOne(id);
 
     const updateData: Prisma.GuestUpdateInput = { ...updateGuestDto };
     if (updateGuestDto.dateOfBirth) {
@@ -159,7 +159,6 @@ export class GuestsService {
   async remove(id: string) {
     const guest = await this.findOne(id);
 
-    // Check if guest has reservations
     if (guest._count.reservations > 0) {
       throw new Error(
         'Cannot delete guest with existing reservations. Guest data must be retained for audit purposes.',
@@ -193,7 +192,6 @@ export class GuestsService {
       },
     });
 
-    // Calculate statistics
     const totalNights = reservations.reduce((sum, res) => sum + res.nights, 0);
     const totalRevenue = reservations.reduce(
       (sum, res) => sum + Number(res.totalAmount),

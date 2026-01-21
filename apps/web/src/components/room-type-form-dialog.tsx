@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
-import { roomTypesAPI, type RoomType, type CreateRoomTypeDto } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { PropertySelector } from "./property-selector";
+import { useState, useEffect } from 'react';
+import { X, Plus, Trash2 } from 'lucide-react';
+import { roomTypesAPI, type RoomType, type CreateRoomTypeDto } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { PropertySelector } from './property-selector';
 
 interface RoomTypeFormDialogProps {
   isOpen: boolean;
@@ -20,16 +20,16 @@ export function RoomTypeFormDialog({
   roomType,
 }: RoomTypeFormDialogProps) {
   const [formData, setFormData] = useState<CreateRoomTypeDto>({
-    name: "",
-    code: "",
-    description: "",
+    name: '',
+    code: '',
+    description: '',
     baseRate: 0,
     maxAdults: 2,
     maxChildren: 1,
     amenities: [],
-    propertyId: "",
+    propertyId: '',
   });
-  const [newAmenity, setNewAmenity] = useState("");
+  const [newAmenity, setNewAmenity] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export function RoomTypeFormDialog({
       setFormData({
         name: roomType.name,
         code: roomType.code,
-        description: roomType.description || "",
+        description: roomType.description || '',
         baseRate: Number(roomType.baseRate),
         maxAdults: roomType.maxAdults,
         maxChildren: roomType.maxChildren,
@@ -47,17 +47,17 @@ export function RoomTypeFormDialog({
       });
     } else {
       setFormData({
-        name: "",
-        code: "",
-        description: "",
+        name: '',
+        code: '',
+        description: '',
         baseRate: 0,
         maxAdults: 2,
         maxChildren: 1,
         amenities: [],
-        propertyId: "",
+        propertyId: '',
       });
     }
-    setNewAmenity("");
+    setNewAmenity('');
     setError(null);
   }, [roomType, isOpen]);
 
@@ -67,7 +67,7 @@ export function RoomTypeFormDialog({
         ...formData,
         amenities: [...(formData.amenities || []), newAmenity.trim()],
       });
-      setNewAmenity("");
+      setNewAmenity('');
     }
   }
 
@@ -92,7 +92,7 @@ export function RoomTypeFormDialog({
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save room type");
+      setError(err instanceof Error ? err.message : 'Failed to save room type');
     } finally {
       setLoading(false);
     }
@@ -101,30 +101,30 @@ export function RoomTypeFormDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden">
+    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
+      <div className="bg-white max-h-[90vh] max-w-3xl overflow-hidden rounded-3xl shadow-2xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-2xl font-bold text-[#1e4b8e]">
-            {roomType ? "Edit Room Type" : "New Room Type"}
+        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+          <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            {roomType ? 'Edit Room Type' : 'New Room Type'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
           >
-            <X className="h-5 w-5 text-slate-600" />
+            <X className="h-5 text-slate-600 w-5" />
           </button>
         </div>
 
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]"
+          className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
         >
           <div className="space-y-4">
             {/* Property */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Property *
               </label>
               <PropertySelector
@@ -137,9 +137,9 @@ export function RoomTypeFormDialog({
             </div>
 
             {/* Name & Code */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Room Type Name *
                 </label>
                 <input
@@ -150,12 +150,12 @@ export function RoomTypeFormDialog({
                   }
                   required
                   placeholder="Deluxe Suite"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Code *
                 </label>
                 <input
@@ -169,14 +169,14 @@ export function RoomTypeFormDialog({
                   }
                   required
                   placeholder="DLX"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all uppercase"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all uppercase w-full"
                 />
               </div>
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Description
               </label>
               <textarea
@@ -186,14 +186,14 @@ export function RoomTypeFormDialog({
                 }
                 placeholder="Room type description..."
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all resize-none"
+                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
               />
             </div>
 
             {/* Base Rate & Occupancy */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Base Rate (฿) *
                 </label>
                 <input
@@ -209,12 +209,12 @@ export function RoomTypeFormDialog({
                   min="0"
                   step="0.01"
                   placeholder="1500"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Max Adults *
                 </label>
                 <input
@@ -229,12 +229,12 @@ export function RoomTypeFormDialog({
                   required
                   min="1"
                   placeholder="2"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Max Children *
                 </label>
                 <input
@@ -249,14 +249,14 @@ export function RoomTypeFormDialog({
                   required
                   min="0"
                   placeholder="1"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
             </div>
 
             {/* Amenities */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Amenities
               </label>
 
@@ -267,15 +267,15 @@ export function RoomTypeFormDialog({
                   value={newAmenity}
                   onChange={(e) => setNewAmenity(e.target.value)}
                   onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addAmenity())
+                    e.key === 'Enter' && (e.preventDefault(), addAmenity())
                   }
                   placeholder="e.g., WiFi, TV, Mini Bar"
-                  className="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 flex-1 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all"
                 />
                 <Button
                   type="button"
                   onClick={addAmenity}
-                  className="rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e] px-4"
+                  className="bg-[#1e4b8e] hover:bg-[#153a6e] px-4 rounded-xl"
                 >
                   <Plus className="h-5 w-5" />
                 </Button>
@@ -287,7 +287,7 @@ export function RoomTypeFormDialog({
                   {formData.amenities.map((amenity, index) => (
                     <div
                       key={index}
-                      className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold bg-[#1e4b8e]/10 text-[#1e4b8e] ring-1 ring-inset ring-[#1e4b8e]/20"
+                      className="bg-[#1e4b8e]/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-sm"
                     >
                       {amenity}
                       <button
@@ -305,14 +305,14 @@ export function RoomTypeFormDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200">
+          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
             <Button
               type="button"
               onClick={onClose}
@@ -324,14 +324,14 @@ export function RoomTypeFormDialog({
             </Button>
             <Button
               type="submit"
-              className="flex-1 rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e]"
+              className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
               disabled={loading}
             >
               {loading
-                ? "Saving..."
+                ? 'Saving...'
                 : roomType
-                  ? "Update Room Type"
-                  : "Create Room Type"}
+                  ? 'Update Room Type'
+                  : 'Create Room Type'}
             </Button>
           </div>
         </form>

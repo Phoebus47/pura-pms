@@ -1,4 +1,4 @@
-import { apiClient, getAuthToken } from "./client";
+import { apiClient, getAuthToken } from './client';
 
 export interface RoomType {
   id: string;
@@ -39,7 +39,7 @@ export const roomTypesAPI = {
     const token = getAuthToken();
     const endpoint = propertyId
       ? `/room-types?propertyId=${propertyId}`
-      : "/room-types";
+      : '/room-types';
     return apiClient.get<RoomType[]>(endpoint, token || undefined);
   },
 
@@ -50,7 +50,7 @@ export const roomTypesAPI = {
 
   async create(data: CreateRoomTypeDto): Promise<RoomType> {
     const token = getAuthToken();
-    return apiClient.post<RoomType>("/room-types", data, token || undefined);
+    return apiClient.post<RoomType>('/room-types', data, token || undefined);
   },
 
   async update(id: string, data: UpdateRoomTypeDto): Promise<RoomType> {

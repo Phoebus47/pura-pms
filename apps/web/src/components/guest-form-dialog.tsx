@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { X, Star } from "lucide-react";
-import { guestsAPI, type Guest, type CreateGuestDto } from "@/lib/api";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { X, Star } from 'lucide-react';
+import { guestsAPI, type Guest, type CreateGuestDto } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 
 interface GuestFormDialogProps {
   isOpen: boolean;
@@ -19,13 +19,13 @@ export function GuestFormDialog({
   guest,
 }: GuestFormDialogProps) {
   const [formData, setFormData] = useState<CreateGuestDto>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    nationality: "",
-    idNumber: "",
-    address: "",
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    nationality: '',
+    idNumber: '',
+    address: '',
     vipLevel: 0,
   });
   const [loading, setLoading] = useState(false);
@@ -36,22 +36,22 @@ export function GuestFormDialog({
       setFormData({
         firstName: guest.firstName,
         lastName: guest.lastName,
-        email: guest.email || "",
-        phone: guest.phone || "",
-        nationality: guest.nationality || "",
-        idNumber: guest.idNumber || "",
-        address: guest.address || "",
+        email: guest.email || '',
+        phone: guest.phone || '',
+        nationality: guest.nationality || '',
+        idNumber: guest.idNumber || '',
+        address: guest.address || '',
         vipLevel: guest.vipLevel,
       });
     } else {
       setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        nationality: "",
-        idNumber: "",
-        address: "",
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        nationality: '',
+        idNumber: '',
+        address: '',
         vipLevel: 0,
       });
     }
@@ -73,7 +73,7 @@ export function GuestFormDialog({
       onSuccess(savedGuest);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save guest");
+      setError(err instanceof Error ? err.message : 'Failed to save guest');
     } finally {
       setLoading(false);
     }
@@ -82,31 +82,31 @@ export function GuestFormDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden">
+    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
+      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-3xl shadow-2xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-2xl font-bold text-[#1e4b8e]">
-            {guest ? "Edit Guest" : "New Guest"}
+        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+          <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            {guest ? 'Edit Guest' : 'New Guest'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
           >
-            <X className="h-5 w-5 text-slate-600" />
+            <X className="h-5 text-slate-600 w-5" />
           </button>
         </div>
 
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]"
+          className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
         >
           <div className="space-y-4">
             {/* Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   First Name *
                 </label>
                 <input
@@ -117,12 +117,12 @@ export function GuestFormDialog({
                   }
                   required
                   placeholder="John"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Last Name *
                 </label>
                 <input
@@ -133,15 +133,15 @@ export function GuestFormDialog({
                   }
                   required
                   placeholder="Doe"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
             </div>
 
             {/* Contact */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Email
                 </label>
                 <input
@@ -151,12 +151,12 @@ export function GuestFormDialog({
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="john.doe@email.com"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Phone
                 </label>
                 <input
@@ -166,15 +166,15 @@ export function GuestFormDialog({
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="+66 81 234 5678"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
             </div>
 
             {/* ID Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Nationality
                 </label>
                 <input
@@ -184,12 +184,12 @@ export function GuestFormDialog({
                     setFormData({ ...formData, nationality: e.target.value })
                   }
                   placeholder="Thai"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   ID Number
                 </label>
                 <input
@@ -199,14 +199,14 @@ export function GuestFormDialog({
                     setFormData({ ...formData, idNumber: e.target.value })
                   }
                   placeholder="Passport or ID number"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
             </div>
 
             {/* Address */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Address
               </label>
               <textarea
@@ -216,13 +216,13 @@ export function GuestFormDialog({
                 }
                 placeholder="Full address"
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all resize-none"
+                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
               />
             </div>
 
             {/* VIP Level */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 VIP Level
               </label>
               <div className="flex gap-2">
@@ -235,18 +235,18 @@ export function GuestFormDialog({
                     }
                     className={`flex items-center gap-1 px-4 py-2 rounded-xl border-2 transition-all ${
                       formData.vipLevel === level
-                        ? "border-[#f5a623] bg-[#f5a623]/10"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? 'border-[#f5a623] bg-[#f5a623]/10'
+                        : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     {level === 0 ? (
-                      <span className="text-sm font-semibold">Standard</span>
+                      <span className="font-semibold text-sm">Standard</span>
                     ) : (
                       <>
                         {Array.from({ length: level }).map((_, i) => (
                           <Star
                             key={i}
-                            className="h-4 w-4 fill-[#f5a623] text-[#f5a623]"
+                            className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                           />
                         ))}
                       </>
@@ -258,14 +258,14 @@ export function GuestFormDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200">
+          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
             <Button
               type="button"
               onClick={onClose}
@@ -277,10 +277,10 @@ export function GuestFormDialog({
             </Button>
             <Button
               type="submit"
-              className="flex-1 rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e]"
+              className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
               disabled={loading}
             >
-              {loading ? "Saving..." : guest ? "Update Guest" : "Create Guest"}
+              {loading ? 'Saving...' : guest ? 'Update Guest' : 'Create Guest'}
             </Button>
           </div>
         </form>

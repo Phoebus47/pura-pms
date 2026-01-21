@@ -1,4 +1,4 @@
-import { apiClient, getAuthToken } from "./client";
+import { apiClient, getAuthToken } from './client';
 
 export interface Guest {
   id: string;
@@ -61,16 +61,16 @@ export const guestsAPI = {
   async getAll(params?: GuestSearchParams): Promise<GuestListResponse> {
     const token = getAuthToken();
     const queryParams = new URLSearchParams();
-    if (params?.search) queryParams.append("search", params.search);
+    if (params?.search) queryParams.append('search', params.search);
     if (params?.isBlacklist !== undefined)
-      queryParams.append("isBlacklist", String(params.isBlacklist));
+      queryParams.append('isBlacklist', String(params.isBlacklist));
     if (params?.vipLevel !== undefined)
-      queryParams.append("vipLevel", String(params.vipLevel));
-    if (params?.limit) queryParams.append("limit", String(params.limit));
-    if (params?.offset) queryParams.append("offset", String(params.offset));
+      queryParams.append('vipLevel', String(params.vipLevel));
+    if (params?.limit) queryParams.append('limit', String(params.limit));
+    if (params?.offset) queryParams.append('offset', String(params.offset));
 
     const query = queryParams.toString();
-    const endpoint = query ? `/guests?${query}` : "/guests";
+    const endpoint = query ? `/guests?${query}` : '/guests';
     return apiClient.get<GuestListResponse>(endpoint, token || undefined);
   },
 
@@ -86,7 +86,7 @@ export const guestsAPI = {
 
   async create(data: CreateGuestDto): Promise<Guest> {
     const token = getAuthToken();
-    return apiClient.post<Guest>("/guests", data, token || undefined);
+    return apiClient.post<Guest>('/guests', data, token || undefined);
   },
 
   async update(id: string, data: UpdateGuestDto): Promise<Guest> {

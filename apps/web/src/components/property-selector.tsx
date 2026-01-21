@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Building2 } from "lucide-react";
-import { propertiesAPI, type Property } from "@/lib/api";
+import { useEffect, useState } from 'react';
+import { Building2 } from 'lucide-react';
+import { propertiesAPI, type Property } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 interface PropertySelectorProps {
   value: string;
@@ -26,8 +27,8 @@ export function PropertySelector({
     try {
       const data = await propertiesAPI.getAll();
       setProperties(data);
-    } catch (error) {
-      console.error("Failed to load properties:", error);
+    } catch {
+      toast.error('Failed to load properties');
     } finally {
       setLoading(false);
     }
@@ -36,8 +37,8 @@ export function PropertySelector({
   if (loading) {
     return (
       <div className="relative">
-        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-        <div className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-slate-50 text-slate-400">
+        <Building2 className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
+        <div className="bg-slate-50 border border-slate-300 pl-10 pr-4 py-3 rounded-xl text-slate-400 w-full">
           Loading properties...
         </div>
       </div>
@@ -46,12 +47,12 @@ export function PropertySelector({
 
   return (
     <div className="relative">
-      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none z-10" />
+      <Building2 className="-translate-y-1/2 absolute h-5 left-3 pointer-events-none text-slate-400 top-1/2 w-5 z-10" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all appearance-none bg-white"
+        className="appearance-none bg-white border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
       >
         <option value="">Select a property</option>
         {properties.map((property) => (
@@ -60,9 +61,9 @@ export function PropertySelector({
           </option>
         ))}
       </select>
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+      <div className="-translate-y-1/2 absolute pointer-events-none right-3 top-1/2">
         <svg
-          className="h-5 w-5 text-slate-400"
+          className="h-5 text-slate-400 w-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

@@ -17,7 +17,6 @@ export class ReservationsService {
     const checkIn = new Date(createReservationDto.checkIn);
     const checkOut = new Date(createReservationDto.checkOut);
 
-    // Validate dates
     if (checkIn >= checkOut) {
       throw new BadRequestException(
         'Check-out date must be after check-in date',
@@ -28,12 +27,10 @@ export class ReservationsService {
       throw new BadRequestException('Check-in date cannot be in the past');
     }
 
-    // Calculate nights
     const nights = Math.ceil(
       (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
     );
 
-    // Check if room exists
     const room = await this.prisma.room.findUnique({
       where: { id: createReservationDto.roomId },
       include: { roomType: true },
@@ -45,7 +42,6 @@ export class ReservationsService {
       );
     }
 
-    // Check if guest exists
     const guest = await this.prisma.guest.findUnique({
       where: { id: createReservationDto.guestId },
     });
@@ -56,7 +52,6 @@ export class ReservationsService {
       );
     }
 
-    // Check room availability
     const conflictingReservations = await this.prisma.reservation.findMany({
       where: {
         roomId: createReservationDto.roomId,
@@ -86,15 +81,12 @@ export class ReservationsService {
       );
     }
 
-    // Calculate total amount
     const totalAmount =
       createReservationDto.totalAmount ||
       nights * Number(createReservationDto.roomRate);
 
-    // Generate confirmation number
     const confirmNumber = this.generateConfirmNumber();
 
-    // Create reservation
     const reservation = await this.prisma.reservation.create({
       data: {
         confirmNumber,
@@ -123,7 +115,6 @@ export class ReservationsService {
       },
     });
 
-    // Update guest statistics
     await this.prisma.guest.update({
       where: { id: createReservationDto.guestId },
       data: {
@@ -280,7 +271,6 @@ export class ReservationsService {
       ...updateReservationDto,
     };
 
-    // If dates are being updated, check availability
     if (updateReservationDto.checkIn || updateReservationDto.checkOut) {
       const checkIn = updateReservationDto.checkIn
         ? new Date(updateReservationDto.checkIn)
@@ -295,7 +285,6 @@ export class ReservationsService {
         );
       }
 
-      // Check for conflicts (excluding current reservation)
       const conflictingReservations = await this.prisma.reservation.findMany({
         where: {
           roomId: reservation.roomId,
@@ -326,7 +315,6 @@ export class ReservationsService {
         );
       }
 
-      // Recalculate nights and total amount
       const nights = Math.ceil(
         (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
       );
@@ -399,7 +387,6 @@ export class ReservationsService {
       );
     }
 
-    // Update reservation
     const updated = await this.prisma.reservation.update({
       where: { id },
       data: {
@@ -416,7 +403,6 @@ export class ReservationsService {
       },
     });
 
-    // Update room status
     await this.prisma.room.update({
       where: { id: reservation.roomId },
       data: { status: 'OCCUPIED_CLEAN' },
@@ -434,7 +420,6 @@ export class ReservationsService {
       );
     }
 
-    // Update reservation
     const updated = await this.prisma.reservation.update({
       where: { id },
       data: {
@@ -451,7 +436,6 @@ export class ReservationsService {
       },
     });
 
-    // Update room status
     await this.prisma.room.update({
       where: { id: reservation.roomId },
       data: { status: 'VACANT_DIRTY' },
@@ -513,7 +497,6 @@ export class ReservationsService {
       },
     });
 
-    // Get all rooms for the property
     const availabilityRoomWhere: Prisma.RoomWhereInput = { propertyId };
     if (roomTypeId) availabilityRoomWhere.roomTypeId = roomTypeId;
 
@@ -525,7 +508,6 @@ export class ReservationsService {
       orderBy: [{ floor: 'asc' }, { number: 'asc' }],
     });
 
-    // Build calendar structure
     const calendar = rooms.map((room) => {
       const roomReservations = reservations.filter(
         (res) => res.roomId === room.id,

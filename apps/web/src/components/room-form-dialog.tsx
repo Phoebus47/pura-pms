@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import {
   roomsAPI,
   roomTypesAPI,
@@ -9,9 +9,10 @@ import {
   type CreateRoomDto,
   type RoomType,
   type RoomStatus,
-} from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { PropertySelector } from "./property-selector";
+} from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/lib/toast';
+import { PropertySelector } from './property-selector';
 
 interface RoomFormDialogProps {
   isOpen: boolean;
@@ -21,12 +22,12 @@ interface RoomFormDialogProps {
 }
 
 const ROOM_STATUSES: { value: RoomStatus; label: string }[] = [
-  { value: "VACANT_CLEAN", label: "Vacant Clean" },
-  { value: "VACANT_DIRTY", label: "Vacant Dirty" },
-  { value: "OCCUPIED_CLEAN", label: "Occupied Clean" },
-  { value: "OCCUPIED_DIRTY", label: "Occupied Dirty" },
-  { value: "OUT_OF_ORDER", label: "Out of Order" },
-  { value: "OUT_OF_SERVICE", label: "Out of Service" },
+  { value: 'VACANT_CLEAN', label: 'Vacant Clean' },
+  { value: 'VACANT_DIRTY', label: 'Vacant Dirty' },
+  { value: 'OCCUPIED_CLEAN', label: 'Occupied Clean' },
+  { value: 'OCCUPIED_DIRTY', label: 'Occupied Dirty' },
+  { value: 'OUT_OF_ORDER', label: 'Out of Order' },
+  { value: 'OUT_OF_SERVICE', label: 'Out of Service' },
 ];
 
 export function RoomFormDialog({
@@ -36,11 +37,11 @@ export function RoomFormDialog({
   room,
 }: RoomFormDialogProps) {
   const [formData, setFormData] = useState<CreateRoomDto>({
-    number: "",
+    number: '',
     floor: 1,
-    status: "VACANT_CLEAN",
-    roomTypeId: "",
-    propertyId: "",
+    status: 'VACANT_CLEAN',
+    roomTypeId: '',
+    propertyId: '',
   });
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,11 +59,11 @@ export function RoomFormDialog({
       });
     } else {
       setFormData({
-        number: "",
+        number: '',
         floor: 1,
-        status: "VACANT_CLEAN",
-        roomTypeId: "",
-        propertyId: "",
+        status: 'VACANT_CLEAN',
+        roomTypeId: '',
+        propertyId: '',
       });
     }
     setError(null);
@@ -81,8 +82,8 @@ export function RoomFormDialog({
       setLoadingRoomTypes(true);
       const data = await roomTypesAPI.getAll(propertyId);
       setRoomTypes(data);
-    } catch (error) {
-      console.error("Failed to load room types:", error);
+    } catch {
+      toast.error('Failed to load room types');
     } finally {
       setLoadingRoomTypes(false);
     }
@@ -102,7 +103,7 @@ export function RoomFormDialog({
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save room");
+      setError(err instanceof Error ? err.message : 'Failed to save room');
     } finally {
       setLoading(false);
     }
@@ -111,45 +112,45 @@ export function RoomFormDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden">
+    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
+      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-3xl shadow-2xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-2xl font-bold text-[#1e4b8e]">
-            {room ? "Edit Room" : "New Room"}
+        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+          <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            {room ? 'Edit Room' : 'New Room'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
           >
-            <X className="h-5 w-5 text-slate-600" />
+            <X className="h-5 text-slate-600 w-5" />
           </button>
         </div>
 
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]"
+          className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
         >
           <div className="space-y-4">
             {/* Property */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Property *
               </label>
               <PropertySelector
                 value={formData.propertyId}
                 onChange={(propertyId) =>
-                  setFormData({ ...formData, propertyId, roomTypeId: "" })
+                  setFormData({ ...formData, propertyId, roomTypeId: '' })
                 }
                 required
               />
             </div>
 
             {/* Room Number & Floor */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Room Number *
                 </label>
                 <input
@@ -160,12 +161,12 @@ export function RoomFormDialog({
                   }
                   required
                   placeholder="101"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block font-semibold mb-2 text-slate-700 text-sm">
                   Floor
                 </label>
                 <input
@@ -179,14 +180,14 @@ export function RoomFormDialog({
                   }
                   min="1"
                   placeholder="1"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all"
+                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
             </div>
 
             {/* Room Type */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Room Type *
               </label>
               <select
@@ -196,14 +197,14 @@ export function RoomFormDialog({
                 }
                 required
                 disabled={!formData.propertyId || loadingRoomTypes}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all appearance-none bg-white disabled:bg-slate-50 disabled:text-slate-400"
+                className="appearance-none bg-white border border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
               >
                 <option value="">
                   {loadingRoomTypes
-                    ? "Loading..."
+                    ? 'Loading...'
                     : formData.propertyId
-                      ? "Select a room type"
-                      : "Select property first"}
+                      ? 'Select a room type'
+                      : 'Select property first'}
                 </option>
                 {roomTypes.map((type) => (
                   <option key={type.id} value={type.id}>
@@ -215,7 +216,7 @@ export function RoomFormDialog({
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 Status *
               </label>
               <select
@@ -227,7 +228,7 @@ export function RoomFormDialog({
                   })
                 }
                 required
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#1e4b8e] focus:ring-4 focus:ring-[#1e4b8e]/10 outline-none transition-all appearance-none bg-white"
+                className="appearance-none bg-white border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
               >
                 {ROOM_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -239,14 +240,14 @@ export function RoomFormDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200">
+          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
             <Button
               type="button"
               onClick={onClose}
@@ -258,10 +259,10 @@ export function RoomFormDialog({
             </Button>
             <Button
               type="submit"
-              className="flex-1 rounded-xl bg-[#1e4b8e] hover:bg-[#153a6e]"
+              className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
               disabled={loading}
             >
-              {loading ? "Saving..." : room ? "Update Room" : "Create Room"}
+              {loading ? 'Saving...' : room ? 'Update Room' : 'Create Room'}
             </Button>
           </div>
         </form>

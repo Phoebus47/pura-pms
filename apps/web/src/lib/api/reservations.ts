@@ -1,12 +1,12 @@
-import { apiClient, getAuthToken } from "./client";
+import { apiClient, getAuthToken } from './client';
 
 export type ReservationStatus =
-  | "TENTATIVE"
-  | "CONFIRMED"
-  | "CHECKED_IN"
-  | "CHECKED_OUT"
-  | "CANCELLED"
-  | "NO_SHOW";
+  | 'TENTATIVE'
+  | 'CONFIRMED'
+  | 'CHECKED_IN'
+  | 'CHECKED_OUT'
+  | 'CANCELLED'
+  | 'NO_SHOW';
 
 export interface Reservation {
   id: string;
@@ -95,14 +95,14 @@ export const reservationsAPI = {
   async getAll(filters?: ReservationFilterParams): Promise<Reservation[]> {
     const token = getAuthToken();
     const params = new URLSearchParams();
-    if (filters?.propertyId) params.append("propertyId", filters.propertyId);
-    if (filters?.status) params.append("status", filters.status);
-    if (filters?.checkIn) params.append("checkIn", filters.checkIn);
-    if (filters?.checkOut) params.append("checkOut", filters.checkOut);
-    if (filters?.guestId) params.append("guestId", filters.guestId);
+    if (filters?.propertyId) params.append('propertyId', filters.propertyId);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.checkIn) params.append('checkIn', filters.checkIn);
+    if (filters?.checkOut) params.append('checkOut', filters.checkOut);
+    if (filters?.guestId) params.append('guestId', filters.guestId);
 
     const query = params.toString();
-    const endpoint = query ? `/reservations?${query}` : "/reservations";
+    const endpoint = query ? `/reservations?${query}` : '/reservations';
     return apiClient.get<Reservation[]>(endpoint, token || undefined);
   },
 
@@ -129,7 +129,7 @@ export const reservationsAPI = {
       startDate: params.startDate,
       endDate: params.endDate,
     });
-    if (params.roomTypeId) queryParams.append("roomTypeId", params.roomTypeId);
+    if (params.roomTypeId) queryParams.append('roomTypeId', params.roomTypeId);
 
     return apiClient.get<unknown>(
       `/reservations/calendar?${queryParams.toString()}`,
@@ -140,7 +140,7 @@ export const reservationsAPI = {
   async create(data: CreateReservationDto): Promise<Reservation> {
     const token = getAuthToken();
     return apiClient.post<Reservation>(
-      "/reservations",
+      '/reservations',
       data,
       token || undefined,
     );
