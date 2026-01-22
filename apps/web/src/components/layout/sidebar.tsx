@@ -3,26 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Calendar,
-  Users,
-  Bed,
-  CreditCard,
-  FileText,
-  Settings,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Reservations', href: '/reservations', icon: Calendar },
-  { name: 'Guests', href: '/guests', icon: Users },
-  { name: 'Rooms', href: '/rooms', icon: Bed },
-  { name: 'Billing', href: '/billing', icon: CreditCard },
-  { name: 'Reports', href: '/reports', icon: FileText },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
+import { navigationItems } from '@/config/navigation';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -48,7 +30,7 @@ export function Sidebar() {
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {navigation.map((item) => {
+          {navigationItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
