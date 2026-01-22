@@ -199,10 +199,14 @@ export default function NewReservationPage() {
             </h2>
 
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="property-select"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Property *
               </label>
               <PropertySelector
+                id="property-select"
                 value={propertyId}
                 onChange={setPropertyId}
                 required

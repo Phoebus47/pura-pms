@@ -147,10 +147,14 @@ export default function ReservationCalendarPage() {
         <div className="flex gap-4 items-center">
           <Filter className="h-5 text-slate-600 w-5" />
           <div className="flex-1">
-            <label className="block font-semibold mb-2 text-slate-700 text-sm">
+            <label
+              htmlFor="property-filter"
+              className="block font-semibold mb-2 text-slate-700 text-sm"
+            >
               Filter by Property
             </label>
             <PropertySelector
+              id="property-filter"
               value={propertyFilter}
               onChange={setPropertyFilter}
             />
