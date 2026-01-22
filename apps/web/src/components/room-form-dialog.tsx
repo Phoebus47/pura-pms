@@ -135,10 +135,14 @@ export function RoomFormDialog({
           <div className="space-y-4">
             {/* Property */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="room-property-select"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Property *
               </label>
               <PropertySelector
+                id="room-property-select"
                 value={formData.propertyId}
                 onChange={(propertyId) =>
                   setFormData({ ...formData, propertyId, roomTypeId: '' })
@@ -231,10 +235,15 @@ export function RoomFormDialog({
 
             {/* Status */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="room-status"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Status *
               </label>
               <select
+                id="room-status"
+                name="status"
                 value={formData.status}
                 onChange={(e) =>
                   setFormData({

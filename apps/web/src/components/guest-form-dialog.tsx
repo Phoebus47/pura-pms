@@ -258,11 +258,7 @@ export function GuestFormDialog({
               <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 VIP Level
               </label>
-              <div
-                className="flex gap-2"
-                role="group"
-                aria-label="VIP Level selection"
-              >
+              <fieldset className="flex gap-2">
                 {[0, 1, 2, 3, 4, 5].map((level) => (
                   <button
                     key={level}
@@ -292,7 +288,7 @@ export function GuestFormDialog({
                     )}
                   </button>
                 ))}
-              </div>
+              </fieldset>
             </div>
 
             {/* Error Message */}

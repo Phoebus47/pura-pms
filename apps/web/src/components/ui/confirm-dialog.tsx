@@ -66,12 +66,11 @@ export function useConfirmDialog() {
   }, [onCancelCallback]);
 
   const Dialog = dialog ? (
-    <div
-      className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center z-50"
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      className="backdrop-blur-sm bg-black/50 bg-transparent border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
+      open
     >
       <div className="bg-white border border-slate-200 max-w-md mx-4 p-6 rounded-2xl shadow-2xl w-full">
         <h3
@@ -90,7 +89,7 @@ export function useConfirmDialog() {
           <Button onClick={handleConfirm}>{dialog.confirmText}</Button>
         </div>
       </div>
-    </div>
+    </dialog>
   ) : null;
 
   return { confirm, Dialog };

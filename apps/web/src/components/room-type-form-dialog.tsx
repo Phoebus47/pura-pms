@@ -124,10 +124,14 @@ export function RoomTypeFormDialog({
           <div className="space-y-4">
             {/* Property */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="room-type-property-select"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Property *
               </label>
               <PropertySelector
+                id="room-type-property-select"
                 value={formData.propertyId}
                 onChange={(propertyId) =>
                   setFormData({ ...formData, propertyId })
@@ -285,7 +289,10 @@ export function RoomTypeFormDialog({
 
             {/* Amenities */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="room-type-amenity"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Amenities
               </label>
 
@@ -297,9 +304,12 @@ export function RoomTypeFormDialog({
                   type="text"
                   value={newAmenity}
                   onChange={(e) => setNewAmenity(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && (e.preventDefault(), addAmenity())
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addAmenity();
+                    }
+                  }}
                   placeholder="e.g., WiFi, TV, Mini Bar"
                   className="border border-slate-300 flex-1 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all"
                 />

@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<
               <Button
                 variant="outline"
                 onClick={() => {
-                  if (typeof globalThis.window !== 'undefined') {
+                  if (globalThis.window !== undefined) {
                     globalThis.location.href = '/';
                   }
                 }}
