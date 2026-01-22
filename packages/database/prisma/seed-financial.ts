@@ -742,16 +742,17 @@ export default async function seedFinancial() {
   await main();
 }
 
-// Allow running directly
-if (require.main === module) {
-  (async () => {
-    try {
-      await main();
-    } catch (e) {
-      console.error('❌ Error seeding financial data:', e);
-      process.exit(1);
-    } finally {
-      await prisma.$disconnect();
-    }
-  })();
+// Allow running directly (tsx supports top-level await)
+if (
+  require.main === module ||
+  import.meta.url.endsWith(process.argv[1]?.replaceAll('\\', '/'))
+) {
+  try {
+    await main();
+  } catch (e) {
+    console.error('❌ Error seeding financial data:', e);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
 }

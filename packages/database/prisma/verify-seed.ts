@@ -116,18 +116,26 @@ async function main() {
 
   if (errors.length > 0) {
     console.log('❌ Validation Errors:');
-    errors.forEach((error) => console.log(`  - ${error}`));
+    for (const error of errors) {
+      console.log(`  - ${error}`);
+    }
     process.exit(1);
   } else {
     console.log('✅ All validations passed!');
   }
 }
 
-main()
-  .catch((e) => {
+// Allow running directly (tsx supports top-level await)
+if (
+  require.main === module ||
+  import.meta.url.endsWith(process.argv[1]?.replaceAll('\\', '/'))
+) {
+  try {
+    await main();
+  } catch (e) {
     console.error('❌ Error verifying seed data:', e);
     process.exit(1);
-  })
-  .finally(async () => {
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}
