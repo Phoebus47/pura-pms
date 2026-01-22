@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { execSync } from 'child_process';
-import * as path from 'path';
+import * as path from 'node:path';
 
 // Load test environment variables
 const envPath = path.resolve(__dirname, '../.env.test');
@@ -46,7 +45,7 @@ export async function withTransaction<T>(
 ): Promise<T> {
   return await prisma
     .$transaction(async (tx) => {
-      const result = await callback(tx as PrismaClient);
+      await callback(tx as PrismaClient);
       // Force rollback by throwing an error
       throw new Error('ROLLBACK_FOR_TEST');
     })

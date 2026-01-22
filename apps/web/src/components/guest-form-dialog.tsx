@@ -255,10 +255,13 @@ export function GuestFormDialog({
 
             {/* VIP Level */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="vip-level-group"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 VIP Level
               </label>
-              <fieldset className="flex gap-2">
+              <fieldset id="vip-level-group" className="flex gap-2">
                 {[0, 1, 2, 3, 4, 5].map((level) => (
                   <button
                     key={level}
@@ -315,7 +318,10 @@ export function GuestFormDialog({
               className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
               disabled={loading}
             >
-              {loading ? 'Saving...' : guest ? 'Update Guest' : 'Create Guest'}
+              {(() => {
+                if (loading) return 'Saving...';
+                return guest ? 'Update Guest' : 'Create Guest';
+              })()}
             </Button>
           </div>
         </form>

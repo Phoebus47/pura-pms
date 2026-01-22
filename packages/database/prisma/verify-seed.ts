@@ -13,9 +13,9 @@ async function main() {
 
   console.log(`📝 Transaction Codes: ${transactionCodes.length} records`);
   console.log('Sample codes:');
-  transactionCodes.slice(0, 5).forEach((tc) => {
+  for (const tc of transactionCodes.slice(0, 5)) {
     console.log(`  - ${tc.code}: ${tc.description} (${tc.type}, ${tc.group})`);
-  });
+  }
   console.log('');
 
   // Group by type
@@ -36,9 +36,9 @@ async function main() {
 
   console.log(`📝 Reason Codes: ${reasonCodes.length} records`);
   console.log('Sample codes:');
-  reasonCodes.slice(0, 5).forEach((rc) => {
+  for (const rc of reasonCodes.slice(0, 5)) {
     console.log(`  - ${rc.code}: ${rc.description} (${rc.category})`);
-  });
+  }
   console.log('');
 
   // Group by category
@@ -59,9 +59,9 @@ async function main() {
 
   console.log(`📝 GL Accounts: ${glAccounts.length} records`);
   console.log('Sample accounts:');
-  glAccounts.slice(0, 5).forEach((gl) => {
+  for (const gl of glAccounts.slice(0, 5)) {
     console.log(`  - ${gl.code}: ${gl.name} (${gl.type})`);
-  });
+  }
   console.log('');
 
   // Group by type
@@ -88,7 +88,7 @@ async function main() {
   // Check required TransactionCodes
   const requiredCodes = ['1000', '2000', '4000', '5000', '9000'];
   const missingCodes = requiredCodes.filter(
-    (code) => !transactionCodes.find((tc) => tc.code === code),
+    (code) => !transactionCodes.some((tc) => tc.code === code),
   );
   if (missingCodes.length > 0) {
     errors.push(`Missing TransactionCodes: ${missingCodes.join(', ')}`);
@@ -97,7 +97,7 @@ async function main() {
   // Check required ReasonCodes
   const requiredCategories = ['VOID', 'DISCOUNT', 'ADJUSTMENT'];
   const missingCategories = requiredCategories.filter(
-    (cat) => !reasonCodes.find((rc) => rc.category === cat),
+    (cat) => !reasonCodes.some((rc) => rc.category === cat),
   );
   if (missingCategories.length > 0) {
     errors.push(
@@ -108,7 +108,7 @@ async function main() {
   // Check required GL Accounts
   const requiredGL = ['1000', '4000', '4100', '4200'];
   const missingGL = requiredGL.filter(
-    (code) => !glAccounts.find((gl) => gl.code === code),
+    (code) => !glAccounts.some((gl) => gl.code === code),
   );
   if (missingGL.length > 0) {
     errors.push(`Missing GL Accounts: ${missingGL.join(', ')}`);

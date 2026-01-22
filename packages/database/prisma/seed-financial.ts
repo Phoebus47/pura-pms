@@ -744,12 +744,14 @@ export default async function seedFinancial() {
 
 // Allow running directly
 if (require.main === module) {
-  main()
-    .catch((e) => {
+  (async () => {
+    try {
+      await main();
+    } catch (e) {
       console.error('❌ Error seeding financial data:', e);
       process.exit(1);
-    })
-    .finally(async () => {
+    } finally {
       await prisma.$disconnect();
-    });
+    }
+  })();
 }

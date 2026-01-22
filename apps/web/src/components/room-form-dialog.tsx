@@ -286,7 +286,10 @@ export function RoomFormDialog({
               className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
               disabled={loading}
             >
-              {loading ? 'Saving...' : room ? 'Update Room' : 'Create Room'}
+              {(() => {
+                if (loading) return 'Saving...';
+                return room ? 'Update Room' : 'Create Room';
+              })()}
             </Button>
           </div>
         </form>
