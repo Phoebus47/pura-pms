@@ -212,12 +212,13 @@ export default function ReservationsPage() {
 
           <div className="md:hidden space-y-3">
             {reservations.map((reservation) => (
-              <div
+              <button
                 key={reservation.id}
-                className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer p-4 rounded-2xl shadow-lg transition-all"
+                className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 p-4 rounded-2xl shadow-lg text-left transition-all w-full"
                 onClick={() => {
                   router.push(`/reservations/${reservation.id}`);
                 }}
+                type="button"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -268,7 +269,7 @@ export default function ReservationsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </>

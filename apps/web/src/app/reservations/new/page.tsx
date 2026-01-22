@@ -417,10 +417,15 @@ export default function NewReservationPage() {
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="number-of-guests"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Number of Guests
                 </label>
                 <input
+                  id="number-of-guests"
+                  name="numberOfGuests"
                   type="number"
                   value={numberOfGuests}
                   onChange={(e) =>
@@ -433,10 +438,15 @@ export default function NewReservationPage() {
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="special-requests"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Special Requests
                 </label>
                 <textarea
+                  id="special-requests"
+                  name="specialRequests"
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
                   rows={3}
