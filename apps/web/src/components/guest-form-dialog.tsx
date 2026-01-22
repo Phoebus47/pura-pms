@@ -93,7 +93,6 @@ export function GuestFormDialog({
         className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
       >
         <div className="space-y-4">
-          {/* Name */}
           <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
             <TextInput
               id="guest-first-name"
@@ -117,7 +116,6 @@ export function GuestFormDialog({
             />
           </div>
 
-          {/* Contact */}
           <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
             <TextInput
               id="guest-email"
@@ -139,7 +137,6 @@ export function GuestFormDialog({
             />
           </div>
 
-          {/* ID Info */}
           <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
             <TextInput
               id="guest-nationality"
@@ -163,7 +160,6 @@ export function GuestFormDialog({
             />
           </div>
 
-          {/* Address */}
           <Textarea
             id="guest-address"
             name="address"
@@ -174,7 +170,6 @@ export function GuestFormDialog({
             rows={3}
           />
 
-          {/* VIP Level */}
           <div>
             <label
               htmlFor="vip-level-group"
@@ -213,11 +208,9 @@ export function GuestFormDialog({
             </fieldset>
           </div>
 
-          {/* Error Message */}
           <ErrorDisplay error={error} />
         </div>
 
-        {/* Footer */}
         <FormDialogFooter
           onCancel={onClose}
           loading={loading}

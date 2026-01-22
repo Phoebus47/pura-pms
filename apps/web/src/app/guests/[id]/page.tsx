@@ -78,7 +78,6 @@ export default function GuestDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <DetailPageHeader
         title={`${guest.firstName} ${guest.lastName}`}
         subtitle={
@@ -145,9 +144,7 @@ export default function GuestDetailPage() {
         }
       />
 
-      {/* Guest Information */}
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        {/* Personal Info Card */}
         <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
           <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Personal Information
@@ -218,7 +215,6 @@ export default function GuestDetailPage() {
           )}
         </div>
 
-        {/* Statistics Card */}
         <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
           <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
             Guest Statistics
@@ -283,7 +279,6 @@ export default function GuestDetailPage() {
         </div>
       </div>
 
-      {/* Metadata */}
       <MetadataCard createdAt={guest.createdAt} updatedAt={guest.updatedAt} />
     </div>
   );

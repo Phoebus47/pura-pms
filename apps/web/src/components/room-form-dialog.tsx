@@ -126,7 +126,6 @@ export function RoomFormDialog({
         className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
       >
         <div className="space-y-4">
-          {/* Property */}
           <div>
             <label
               htmlFor="room-property-select"
@@ -144,7 +143,6 @@ export function RoomFormDialog({
             />
           </div>
 
-          {/* Room Number & Floor */}
           <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
             <TextInput
               id="room-number"
@@ -166,7 +164,6 @@ export function RoomFormDialog({
             />
           </div>
 
-          {/* Room Type */}
           <Select
             id="room-type"
             name="roomTypeId"
@@ -190,7 +187,6 @@ export function RoomFormDialog({
             }))}
           />
 
-          {/* Status */}
           <Select
             id="room-status"
             name="status"
@@ -209,11 +205,9 @@ export function RoomFormDialog({
             }))}
           />
 
-          {/* Error Message */}
           <ErrorDisplay error={error} />
         </div>
 
-        {/* Footer */}
         <FormDialogFooter
           onCancel={onClose}
           loading={loading}

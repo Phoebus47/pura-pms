@@ -32,7 +32,6 @@ export function BaseFormDialog({
       <div
         className={`bg-white max-h-[90vh] ${maxWidthClasses[maxWidth]} overflow-hidden rounded-3xl shadow-2xl w-full`}
       >
-        {/* Header */}
         <div className="border-b border-slate-200 flex items-center justify-between p-6">
           <h2 className="font-bold text-[#1e4b8e] text-2xl">{title}</h2>
           <button
@@ -45,7 +44,6 @@ export function BaseFormDialog({
           </button>
         </div>
 
-        {/* Content */}
         {children}
       </div>
     </div>
