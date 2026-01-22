@@ -1,8 +1,15 @@
 import { reservationsAPI } from './api/reservations';
-import { apiClient } from './api/client';
+import { apiClient, getAuthToken } from './api/client';
 
-jest.mock('./api/client');
-jest.mock('./api/auth', () => ({
+// Mock the entire client module
+jest.mock('./api/client', () => ({
+  apiClient: {
+    get: jest.fn(),
+    post: jest.fn(),
+    patch: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
   getAuthToken: jest.fn(() => 'mock-token'),
 }));
 
