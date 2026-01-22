@@ -77,6 +77,8 @@ export function GuestSearchDialog({
             <div className="flex-1 relative">
               <Search className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
               <input
+                id="guest-search"
+                name="search"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

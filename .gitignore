@@ -1,48 +1,238 @@
-# Dependencies
-node_modules
-.pnpm-store
+# ==================== DEPENDENCIES ====================
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+yarn.lock
+package-lock.json
 
-# Turbo
-.turbo
+# ==================== MONOREPO ====================
+.turbo/
+pnpm-lock.yaml
 
-# Next.js
-.next
-out
-
-# NestJS
-dist
-
-# Environment
-.env*
+# ==================== ENVIRONMENT VARIABLES ====================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 !.env.example
 !.env.local.example
+!.env.template
 
-# SonarQube
-.scannerwork
+# ==================== NEXT.JS (Frontend) ====================
+.next/
+out/
+build/
+.vercel
+.vercel.json
+next-env.d.ts
+*.tsbuildinfo
 
+# ==================== NESTJS (Backend) ====================
+dist/
+build/
+*.tsbuildinfo
+
+# ==================== DATABASE ====================
+# Prisma
+packages/database/prisma/migrations/
+packages/database/.env
+
+# ==================== TESTING ====================
 # Coverage
-coverage
+coverage/
 *.lcov
+.nyc_output/
 
 # Playwright
 test-results/
 playwright-report/
 playwright/.cache/
+playwright/.auth/
 
-# Logs
+# Jest
+.jest-cache/
+
+# ==================== LOGS ====================
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Editor
-.vscode
-.idea
+# ==================== EDITOR & IDE ====================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA / WebStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
 *.swp
 *.swo
+*~
+.vim/
 
-# OS
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ==================== OS ====================
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
 
+# ==================== BUILD & CACHE ====================
+# TypeScript
+*.tsbuildinfo
+
+# ESLint
+.eslintcache
+
+# Prettier
+.prettiercache
+
+# Turborepo
+.turbo/
+
+# ==================== SONARQUBE ====================
+.scannerwork/
+.sonar/
+
+# ==================== SENTRY ====================
+.sentryclirc
+.sentry/
+
+# ==================== TEMPORARY FILES ====================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.patch
+*.diff
+
+# ==================== SECURITY ====================
+# Secrets
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# ==================== DEPLOYMENT ====================
+# Vercel
+.vercel
+
+# Render
+.render/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# ==================== MISC ====================
+# Debug
+.vscode-test/
+*.vsix
+
+# Local development
+.local/
+local/
+
+# Backup files
+*.backup
+*.bak
+
+# Database dumps
+*.sql
+*.dump
+!packages/database/prisma/seed.sql
+
+# ==================== PURA PMS SPECIFIC ====================
+# Report exports (temporary)
+reports/exports/
+*.pdf.tmp
+*.xlsx.tmp
+
+# Uploads (if any)
+uploads/
+public/uploads/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# ==================== DOCUMENTATION ====================
+# Note: docs/ directory should be committed (contains PRD, Guidelines, Planning)
+# Only ignore generated/temporary documentation files
+
+# Generated API documentation (if any)
+docs/api/generated/
+docs/api/build/
+
+# Temporary documentation files
+docs/**/*.tmp
+docs/**/*.temp
+docs/**/*.bak
+docs/**/*.backup
+
+# Documentation build outputs (if using static site generators)
+docs/.vitepress/dist/
+docs/.vuepress/dist/
+docs/_build/
+docs/.next/
+docs/dist/
+docs/build/

@@ -8,7 +8,9 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-bold text-[#1e4b8e] text-3xl">Settings</h1>
-          <p className="mt-1 text-slate-600">Manage your account and preferences</p>
+          <p className="mt-1 text-slate-600">
+            Manage your account and preferences
+          </p>
         </div>
       </div>
 
@@ -17,7 +19,7 @@ export default function SettingsPage() {
         <h2 className="font-semibold mb-2 text-slate-700 text-xl">
           Settings Coming Soon
         </h2>
-        <p className="text-center text-slate-500 text-sm max-w-md">
+        <p className="max-w-md text-center text-slate-500 text-sm">
           This feature is under development. You&apos;ll be able to manage your
           settings and preferences here.
         </p>

@@ -61,14 +61,39 @@ pnpm dev
 ```
 pura/
 ├── apps/
-│   ├── web/          # Next.js frontend
-│   └── api/          # NestJS backend
+│   ├── web/                    # Next.js 16 frontend
+│   │   ├── src/app/           # App Router pages
+│   │   ├── src/components/    # React components
+│   │   ├── src/lib/            # Utilities & API clients
+│   │   └── src/hooks/          # Custom React hooks
+│   └── api/                    # NestJS 11 backend
+│       ├── src/modules/        # Feature modules
+│       └── src/common/         # Shared utilities
 ├── packages/
-│   └── database/      # Prisma schema & migrations
-├── docs/             # Documentation
-├── eslint-rules/     # Custom ESLint rules
-└── .husky/           # Git hooks
+│   └── database/               # Prisma schema & migrations
+│       └── prisma/
+│           ├── schema.prisma          # Main schema
+│           └── schema.enhancements.prisma  # Financial module (to merge)
+├── docs/
+│   ├── planning/               # PRD, Blueprint, Work Plans
+│   └── guidelines/             # Coding standards
+├── eslint-rules/               # Custom ESLint rules
+└── .husky/                     # Git hooks
 ```
+
+## 📊 Current Status
+
+**Completed Phases:**
+
+- ✅ Phase 1: Foundation (Infrastructure, Auth, Database, UI)
+- ✅ Phase 2: Front Office Core (Property, Rooms, Guests, Reservations)
+
+**Current Phase:**
+
+- 🎯 Phase 3: Financial & Audit Module (Priority)
+
+**Next Steps:**
+See [Detailed Work Plan](./docs/planning/DETAILED-WORK-PLAN.md) for complete task breakdown.
 
 ## 🔒 Code Quality
 
@@ -83,9 +108,26 @@ See [docs/guidelines/coding_standards.md](./docs/guidelines/coding_standards.md)
 
 ## 📚 Documentation
 
-- [Coding Standards](./docs/guidelines/coding_standards.md)
-- [Implementation Plan](./docs/planning/implementation_plan.md)
-- [PRD](./docs/planning/prd.md)
+### Planning & Requirements
+
+- [PRD](./docs/planning/prd.md) - Product Requirements Document
+- [PRD Enhancements](./docs/planning/prd-enhancements.md) - Enterprise enhancements
+- [Final Blueprint](./docs/planning/FINAL-BLUEPRINT.md) - Complete feature list
+- [Summary](./docs/planning/SUMMARY.md) - Research summary
+- [Detailed Work Plan](./docs/planning/DETAILED-WORK-PLAN.md) - Task breakdown
+
+### Technical Documentation
+
+- [Coding Standards](./docs/guidelines/coding_standards.md) - Code quality guidelines
+- [Implementation Plan](./docs/planning/implementation_plan.md) - Tech stack & setup
+- [Task Breakdown](./docs/planning/task.md) - Phase completion status
+- [Compliance Check](./docs/planning/compliance-check.md) - Standards compliance
+
+### Reports & Security
+
+- [Reports Master List](./docs/planning/reports-master-list.md) - 30+ Reports specifications
+- [Security & Legal Compliance](./docs/planning/security-legal-compliance.md) - Security requirements
+- [Improvement Checklist](./docs/planning/improvement-checklist.md) - Development checklist
 
 ## 🧪 Testing
 

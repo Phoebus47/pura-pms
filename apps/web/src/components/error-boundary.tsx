@@ -55,7 +55,11 @@ export class ErrorBoundary extends Component<
               <Button onClick={this.handleReset}>Try again</Button>
               <Button
                 variant="outline"
-                onClick={() => (window.location.href = '/')}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/';
+                  }
+                }}
               >
                 Go to home
               </Button>

@@ -106,10 +106,14 @@ export function GuestFormDialog({
             {/* Name */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="guest-first-name"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   First Name *
                 </label>
                 <input
+                  id="guest-first-name"
                   type="text"
                   value={formData.firstName}
                   onChange={(e) =>
@@ -122,10 +126,14 @@ export function GuestFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="guest-last-name"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Last Name *
                 </label>
                 <input
+                  id="guest-last-name"
                   type="text"
                   value={formData.lastName}
                   onChange={(e) =>
@@ -141,10 +149,15 @@ export function GuestFormDialog({
             {/* Contact */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="guest-email"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Email
                 </label>
                 <input
+                  id="guest-email"
+                  name="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) =>
@@ -156,10 +169,15 @@ export function GuestFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="guest-phone"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Phone
                 </label>
                 <input
+                  id="guest-phone"
+                  name="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) =>
@@ -174,10 +192,15 @@ export function GuestFormDialog({
             {/* ID Info */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="guest-nationality"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Nationality
                 </label>
                 <input
+                  id="guest-nationality"
+                  name="nationality"
                   type="text"
                   value={formData.nationality}
                   onChange={(e) =>
@@ -189,10 +212,15 @@ export function GuestFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="guest-id-number"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   ID Number
                 </label>
                 <input
+                  id="guest-id-number"
+                  name="idNumber"
                   type="text"
                   value={formData.idNumber}
                   onChange={(e) =>
@@ -206,10 +234,15 @@ export function GuestFormDialog({
 
             {/* Address */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="guest-address"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Address
               </label>
               <textarea
+                id="guest-address"
+                name="address"
                 value={formData.address}
                 onChange={(e) =>
                   setFormData({ ...formData, address: e.target.value })
@@ -225,7 +258,11 @@ export function GuestFormDialog({
               <label className="block font-semibold mb-2 text-slate-700 text-sm">
                 VIP Level
               </label>
-              <div className="flex gap-2">
+              <div
+                className="flex gap-2"
+                role="group"
+                aria-label="VIP Level selection"
+              >
                 {[0, 1, 2, 3, 4, 5].map((level) => (
                   <button
                     key={level}
@@ -233,6 +270,8 @@ export function GuestFormDialog({
                     onClick={() =>
                       setFormData({ ...formData, vipLevel: level })
                     }
+                    aria-label={`VIP Level ${level === 0 ? 'Standard' : level}`}
+                    aria-pressed={formData.vipLevel === level}
                     className={`flex items-center gap-1 px-4 py-2 rounded-xl border-2 transition-all ${
                       formData.vipLevel === level
                         ? 'border-[#f5a623] bg-[#f5a623]/10'

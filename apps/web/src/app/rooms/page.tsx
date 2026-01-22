@@ -2,11 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Bed, Filter } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { roomsAPI, type Room, type RoomStatus } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { RoomStatusBadge } from '@/components/room-status-badge';
 
 export default function RoomsPage() {
+  const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +128,7 @@ export default function RoomsPage() {
               key={room.id}
               className="backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl overflow-hidden p-5 relative rounded-2xl shadow-lg transition-all"
               onClick={() => {
-                window.location.href = `/rooms/${room.id}`;
+                router.push(`/rooms/${room.id}`);
               }}
             >
               <div className="flex items-start justify-between">

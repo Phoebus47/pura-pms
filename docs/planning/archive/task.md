@@ -123,48 +123,80 @@
 
 ---
 
-## Phase 3: Operations (Week 5-6)
+## 🎯 Phase 3: Financial & Audit Module (Week 5-16) - CURRENT PRIORITY
 
-- [ ] Check-in/Check-out workflow
-- [ ] Folio Management
-- [ ] Payment Processing
-- [ ] Housekeeping Module
-- [ ] Room Status Board
+### Sprint 1: Database Schema Enhancement (Week 5-6)
 
-## Phase 4: Financial & Audit (Week 7-8)
+- [ ] Merge Financial Module schema (TransactionCode, FolioWindow, FolioTransaction)
+- [ ] Create migration scripts
+- [ ] Seed default data (TransactionCodes, ReasonCodes, GL Accounts)
 
-- [ ] Shift Management
-- [ ] Cashier Functions
-- [ ] Night Audit System
-- [ ] Accounts Receivable (AR)
-- [ ] Accounts Payable (AP)
-- [ ] General Ledger (GL)
+### Sprint 2-3: Transaction Code & Folio Window (Week 6-8)
 
-## Phase 5: Reports & Archive (Week 9-10)
+- [ ] Transaction Code Module (Backend API + Frontend UI)
+- [ ] Folio Window System (Backend API + Frontend UI)
 
-- [ ] Daily Operations Reports
-- [ ] Revenue Reports
-- [ ] Financial Reports
+### Sprint 4-5: Folio Transaction & Reason Code (Week 8-10)
+
+- [ ] Folio Transaction System (Immutable, Tax/Service calculation)
+- [ ] Reason Code System (Backend API + Frontend UI)
+
+### Sprint 6-7: Night Audit & Shift Management (Week 10-12)
+
+- [ ] Night Audit System Enhancement (Queue System with Redis/BullMQ)
+- [ ] Shift Management Enhancement (Cash reconciliation, Manager approval)
+
+### Sprint 8: Core Reports (Week 12-13)
+
+- [ ] Daily Revenue Report (DRR)
+- [ ] Trial Balance (Interactive Drill-down)
+- [ ] Daily Flash Report
+
+### Sprint 9: Tax Invoice System (Week 13-14)
+
+- [ ] Tax Invoice Backend (Running number, QR Code, e-Tax Invoice)
+- [ ] Tax Invoice Frontend (Thai font support, PDF generation)
+
+### Sprint 10: Security & Compliance (Week 14-15)
+
+- [ ] PDPA Compliance (Consent, Anonymization, Breach Notification)
+- [ ] TM.30 Auto-generation
+- [ ] Session Management (Auto-logout, Concurrent control)
+
+### Sprint 11: Testing & QA (Week 15-16)
+
+- [ ] Integration Testing
+- [ ] Code Quality Review (SonarQube, Test Coverage >80%)
+- [ ] Documentation Update
+
+## Phase 4: Advanced Features (Week 17-24)
+
+- [ ] Rate Derivation (Parent/Child Rates)
+- [ ] Allotment & Blocks
+- [ ] Housekeeping Inspection Workflow
+- [ ] Hardware Bridge (Local Agent - POC)
+- [ ] PWA Setup
+- [ ] LINE Official Account Integration
+- [ ] Inventory & Cost Control (Lite)
+- [ ] Staff Commission System
+- [ ] Banquet & Event Management
+- [ ] Member & Loyalty Program
+- [ ] Owner's Mobile Dashboard
+
+## Phase 5: Reports & Archive (Week 25-26)
+
+- [ ] Complete Reports System (30+ Reports)
 - [ ] Report Archive System
 - [ ] Report History (7 years)
-- [ ] Scheduled Reports
+- [ ] Scheduled Reports (Auto-email)
 
-## Phase 6: Advanced Features (Week 11-14)
-
-- [ ] Rate Management
-- [ ] Group Bookings & MICE
-- [ ] Concierge Services
-- [ ] Spa & Amenities
-- [ ] Channel Manager Integration
-- [ ] Booking Engine
-
-## Phase 7: Polish & Deploy (Week 15-16)
+## Phase 6: Polish & Deploy (Week 27-28)
 
 - [ ] UI/UX Polish
 - [ ] Performance Optimization
 - [ ] Security Audit
-- [ ] Documentation
-- [ ] Deployment
+- [ ] Final Documentation
+- [ ] Production Deployment
 
 ---
 

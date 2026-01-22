@@ -28,14 +28,11 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="backdrop-blur-2xl border-r border-white/20 flex flex-col h-full overflow-hidden relative shadow-2xl text-white w-64 z-20">
-      {/* Glass Background with Gradient */}
+    <div className="backdrop-blur-2xl border-r border-white/20 flex-col h-full hidden md:flex overflow-hidden relative shadow-2xl text-white w-64 z-20">
       <div className="absolute bg-linear-to-b from-[#1e4b8e]/90 inset-0 to-[#153a6e]/90 via-[#1a4280]/85" />
       <div className="absolute backdrop-blur-xl inset-0" />
 
-      {/* Content */}
       <div className="flex flex-col h-full relative z-10">
-        {/* Logo */}
         <div className="backdrop-blur-sm border-b border-white/20 flex h-20 items-center justify-center px-6">
           <div className="flex gap-3 items-center">
             <Image
@@ -44,11 +41,12 @@ export function Sidebar() {
               width={48}
               height={48}
               className="drop-shadow-2xl h-12 w-12"
+              loading="eager"
+              priority
             />
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
@@ -81,7 +79,6 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer */}
         <div className="border-t border-white/20 p-4">
           <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-4 rounded-2xl shadow-lg text-center">
             <p className="font-semibold text-white/90 text-xs">PURA PMS</p>

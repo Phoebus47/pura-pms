@@ -150,10 +150,15 @@ export function RoomFormDialog({
             {/* Room Number & Floor */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-number"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Room Number *
                 </label>
                 <input
+                  id="room-number"
+                  name="number"
                   type="text"
                   value={formData.number}
                   onChange={(e) =>
@@ -166,10 +171,15 @@ export function RoomFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-floor"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Floor
                 </label>
                 <input
+                  id="room-floor"
+                  name="floor"
                   type="number"
                   value={formData.floor}
                   onChange={(e) =>
@@ -187,10 +197,15 @@ export function RoomFormDialog({
 
             {/* Room Type */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="room-type"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Room Type *
               </label>
               <select
+                id="room-type"
+                name="roomTypeId"
                 value={formData.roomTypeId}
                 onChange={(e) =>
                   setFormData({ ...formData, roomTypeId: e.target.value })

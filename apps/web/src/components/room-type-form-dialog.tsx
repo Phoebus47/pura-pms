@@ -139,10 +139,15 @@ export function RoomTypeFormDialog({
             {/* Name & Code */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-type-name"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Room Type Name *
                 </label>
                 <input
+                  id="room-type-name"
+                  name="name"
                   type="text"
                   value={formData.name}
                   onChange={(e) =>
@@ -155,10 +160,15 @@ export function RoomTypeFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-type-code"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Code *
                 </label>
                 <input
+                  id="room-type-code"
+                  name="code"
                   type="text"
                   value={formData.code}
                   onChange={(e) =>
@@ -176,10 +186,15 @@ export function RoomTypeFormDialog({
 
             {/* Description */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="room-type-description"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Description
               </label>
               <textarea
+                id="room-type-description"
+                name="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -190,13 +205,17 @@ export function RoomTypeFormDialog({
               />
             </div>
 
-            {/* Base Rate & Occupancy */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-type-base-rate"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Base Rate (฿) *
                 </label>
                 <input
+                  id="room-type-base-rate"
+                  name="baseRate"
                   type="number"
                   value={formData.baseRate}
                   onChange={(e) =>
@@ -214,10 +233,15 @@ export function RoomTypeFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-type-max-adults"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Max Adults *
                 </label>
                 <input
+                  id="room-type-max-adults"
+                  name="maxAdults"
                   type="number"
                   value={formData.maxAdults}
                   onChange={(e) =>
@@ -234,10 +258,15 @@ export function RoomTypeFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="room-type-max-children"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Max Children *
                 </label>
                 <input
+                  id="room-type-max-children"
+                  name="maxChildren"
                   type="number"
                   value={formData.maxChildren}
                   onChange={(e) =>
@@ -263,6 +292,8 @@ export function RoomTypeFormDialog({
               {/* Add Amenity */}
               <div className="flex gap-2 mb-3">
                 <input
+                  id="room-type-amenity"
+                  name="amenity"
                   type="text"
                   value={newAmenity}
                   onChange={(e) => setNewAmenity(e.target.value)}

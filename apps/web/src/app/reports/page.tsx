@@ -17,7 +17,7 @@ export default function ReportsPage() {
         <h2 className="font-semibold mb-2 text-slate-700 text-xl">
           Reports Coming Soon
         </h2>
-        <p className="text-center text-slate-500 text-sm max-w-md">
+        <p className="max-w-md text-center text-slate-500 text-sm">
           This feature is under development. You&apos;ll be able to generate and
           view various reports here.
         </p>

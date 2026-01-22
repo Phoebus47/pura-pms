@@ -40,6 +40,11 @@ async function main() {
   });
 
   console.log({ admin });
+
+  // Run financial seed after main seed
+  console.log('\n🌱 Seeding Financial Module...');
+  const { default: seedFinancial } = await import('./seed-financial');
+  await seedFinancial();
 }
 
 main()

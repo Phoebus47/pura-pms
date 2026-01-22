@@ -242,6 +242,7 @@ export default function Dashboard() {
                   <Avatar className="h-10 w-10">
                     <AvatarImage
                       src={`https://ui-avatars.com/api/?name=${reservation.guest?.firstName}+${reservation.guest?.lastName}`}
+                      alt={`${reservation.guest?.firstName} ${reservation.guest?.lastName} avatar`}
                     />
                     <AvatarFallback>
                       {reservation.guest?.firstName?.[0]}

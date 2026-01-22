@@ -124,6 +124,9 @@ model Reservation {
   guestId        String
   guest          Guest             @relation(fields: [guestId], references: [id])
   folios         Folio[]
+  fixedCharges   FixedCharge[]
+  deposits       Deposit[]
+  taxInvoices    TaxInvoice[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -141,11 +144,207 @@ model Folio {
   reservation   Reservation   @relation(fields: [reservationId], references: [id])
   type          FolioType     @default(GUEST)
   balance       Decimal       @default(0) @db.Decimal(12, 2)
-  isClosed      Boolean       @default(false)
-  transactions  Transaction[]
+  isClosed      Boolean       @default(false) // Deprecated: Use status instead
+  status        FolioStatus?  @default(OPEN)
+  businessDate  DateTime?     @db.Date
+  closedAt      DateTime?
+  closedBy      String?
+  transactions  Transaction[]  // Legacy: Will be replaced by FolioTransaction
+  windows       FolioWindow[]
   createdAt     DateTime      @default(now())
 }
 
+// ==================== FINANCIAL MODULE ====================
+
+// Transaction Code - ผังบัญชีฝั่ง PMS
+model TransactionCode {
+  id            String   @id @default(cuid())
+  code          String   @unique // e.g., "1000" (Room Charge), "9000" (Cash)
+  description   String
+  descriptionTh String? // ภาษาไทย
+  type          TransactionType // CHARGE, PAYMENT, ADJUSTMENT, etc.
+  group         TrxGroup // ROOM, FOOD, BEVERAGE, SPA, MISC, TAX, SERVICE
+  
+  // Tax & Service Charge Logic
+  hasTax        Boolean  @default(true)
+  hasService    Boolean  @default(true)
+  taxId         String?  // Link to Tax configuration
+  serviceRate   Decimal? @default(10.00) @db.Decimal(5, 2) // Service Charge %
+  
+  // Mapping to GL (สำคัญสำหรับ Export บัญชี)
+  glAccountCode String   // e.g., "4000-01" (Revenue-Room)
+  departmentCode String? // สำหรับ USALI
+  
+  transactions  FolioTransaction[]
+  fixedCharges  FixedCharge[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Folio Window - การแยกบิล
+model FolioWindow {
+  id           String             @id @default(cuid())
+  folioId      String
+  folio        Folio              @relation(fields: [folioId], references: [id], onDelete: Cascade)
+  windowNumber Int                // 1, 2, 3, 4
+  description  String?            // e.g. "Personal Expenses", "Company Charges"
+  balance      Decimal            @default(0.00) @db.Decimal(12, 2)
+  transactions FolioTransaction[]
+  createdAt    DateTime           @default(now())
+  @@unique([folioId, windowNumber])
+}
+
+// Folio Transaction - Enhanced (replaces Transaction model)
+model FolioTransaction {
+  id            String   @id @default(cuid())
+  windowId      String
+  window        FolioWindow @relation(fields: [windowId], references: [id])
+  trxCodeId     String
+  trxCode       TransactionCode @relation(fields: [trxCodeId], references: [id])
+  
+  // Dates are Critical
+  businessDate  DateTime @db.Date // วันที่ทางบัญชีโรงแรม
+  createdAt     DateTime @default(now()) // วันที่บันทึกจริง (System timestamp)
+  
+  // Money (ต้องเก็บละเอียด แยก Vat/Service)
+  amountNet     Decimal  @db.Decimal(12, 2) // ราคาก่อนภาษี/Service
+  amountService Decimal  @default(0) @db.Decimal(12, 2) // Service Charge 10%
+  amountTax     Decimal  @default(0) @db.Decimal(12, 2) // VAT 7%
+  amountTotal   Decimal  @db.Decimal(12, 2) // Net + Svc + Tax
+  
+  // Sign (Charge = +, Payment = -)
+  sign          Int      // 1 or -1
+  
+  // Reference & Audit
+  reference     String?  // e.g., "Room 101", "Check #1234", "POS-001"
+  remark        String?
+  userId        String   // ใครเป็นคนทำรายการ
+  shiftId       String?  // ทำในกะไหน
+  shift         Shift?   @relation(fields: [shiftId], references: [id])
+  nightAuditId  String?  // ถูกปิดรอบไปหรือยัง (ถ้ามีค่า = ห้ามแตะต้องแล้ว)
+  
+  // Reason Code (บังคับสำหรับ Void/Adjustment)
+  reasonCodeId  String?
+  reasonCode    ReasonCode? @relation(fields: [reasonCodeId], references: [id])
+  
+  // Correction linkage
+  relatedTrxId  String?  // ถ้าเป็นการ Void, Link กลับไปที่รายการเดิม
+  isVoid        Boolean  @default(false)
+  voidedAt      DateTime?
+  voidedBy      String?
+  
+  // Indexes for performance
+  @@index([businessDate])
+  @@index([windowId, businessDate])
+  @@index([nightAuditId])
+  @@index([trxCodeId])
+  @@index([userId])
+  @@index([isVoid])
+  @@index([relatedTrxId])
+}
+
+// Reason Code
+model ReasonCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  description String
+  descriptionTh String?
+  category    ReasonCategory
+  isActive    Boolean  @default(true)
+  transactions FolioTransaction[]
+  createdAt   DateTime @default(now())
+}
+
+// Routing Instructions - การโยนบิลอัตโนมัติ
+model RoutingInstruction {
+  id            String   @id @default(cuid())
+  sourceFolioId String
+  targetFolioId String
+  targetWindow  Int
+  
+  trxCodes      String[] // Array of TrxCodes to route (e.g. ["1000", "2000"])
+  dateFrom      DateTime @db.Date
+  dateTo        DateTime @db.Date
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+// Deposit Ledger
+model Deposit {
+  id            String   @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  amount        Decimal  @db.Decimal(12, 2)
+  currency      String   @default("THB")
+  exchangeRate Decimal? @db.Decimal(10, 4) // ถ้าจ่ายด้วยสกุลอื่น
+  method        PaymentMethod
+  receivedAt    DateTime @default(now())
+  receivedBy    String
+  reference     String?
+  notes         String?
+  // เมื่อ Check-in จะโอนไปเป็น Payment ใน Folio
+  transferredToFolio Boolean @default(false)
+  transferredAt      DateTime?
+}
+
+// Currency Exchange
+model ExchangeRate {
+  id            String   @id @default(cuid())
+  baseCurrency  String   @default("THB")
+  targetCurrency String
+  rate          Decimal  @db.Decimal(10, 4)
+  effectiveDate DateTime @db.Date
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  @@unique([baseCurrency, targetCurrency, effectiveDate])
+}
+
+// Tax Invoice
+model TaxInvoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique // Running Number ต้องเป๊ะ ห้ามข้าม
+  folioId       String?
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  businessDate  DateTime @db.Date
+  
+  // Taxpayer Info
+  taxId         String   // เลขประจำตัวผู้เสียภาษี
+  branchNumber  String? // สาขา
+  
+  // Amounts
+  amountNet     Decimal  @db.Decimal(12, 2)
+  amountTax     Decimal  @db.Decimal(12, 2)
+  amountTotal   Decimal  @db.Decimal(12, 2)
+  
+  // e-Tax Invoice
+  eTaxInvoiceId String? // ID จากกรมสรรพากร (ถ้ามี)
+  qrCode        String? // QR Code สำหรับ e-Tax Invoice
+  
+  // Status
+  status        InvoiceStatus @default(OPEN)
+  issuedAt      DateTime?
+  issuedBy      String?
+  createdAt     DateTime @default(now())
+}
+
+// Fixed Charges (Recurring)
+model FixedCharge {
+  id            String   @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  trxCodeId     String
+  trxCode       TransactionCode @relation(fields: [trxCodeId], references: [id])
+  amount        Decimal  @db.Decimal(12, 2)
+  description   String
+  startDate     DateTime @db.Date
+  endDate       DateTime @db.Date
+  isActive      Boolean  @default(true)
+  posted        Boolean  @default(false) // ถูก Post แล้วหรือยัง
+  createdAt     DateTime @default(now())
+}
+
+// Legacy Transaction model (deprecated - will be removed after migration)
 model Transaction {
   id          String          @id @default(cuid())
   folioId     String
@@ -189,7 +388,8 @@ model Shift {
   closingCash  Decimal?      @db.Decimal(12, 2)
   cashVariance Decimal?      @db.Decimal(12, 2)
   status       ShiftStatus   @default(OPEN)
-  transactions Transaction[]
+  transactions Transaction[] // Legacy: Will be removed after migration
+  folioTransactions FolioTransaction[] // New: Use this instead
   notes        String?
 }
 
@@ -391,6 +591,42 @@ enum TransactionType {
   PAYMENT
   ADJUSTMENT
   TRANSFER
+  DEPOSIT
+  REFUND
+}
+
+enum TrxGroup {
+  ROOM
+  FOOD
+  BEVERAGE
+  SPA
+  FITNESS
+  LAUNDRY
+  TELEPHONE
+  INTERNET
+  MINIBAR
+  PARKING
+  MISC
+  TAX
+  SERVICE
+  DISCOUNT
+}
+
+enum FolioStatus {
+  OPEN
+  CLOSED
+  POSTED_TO_CITY_LEDGER
+  TRANSFERRED
+}
+
+enum ReasonCategory {
+  VOID
+  DISCOUNT
+  ADJUSTMENT
+  TRANSFER
+  COMPLIMENTARY
+  STAFF
+  OTHER
 }
 
 enum PaymentMethod {

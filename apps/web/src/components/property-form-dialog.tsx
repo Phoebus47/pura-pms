@@ -96,10 +96,15 @@ export function PropertyFormDialog({
           <div className="space-y-4">
             {/* Name */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="property-name"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Property Name *
               </label>
               <input
+                id="property-name"
+                name="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) =>
@@ -111,12 +116,16 @@ export function PropertyFormDialog({
               />
             </div>
 
-            {/* Address */}
             <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
+              <label
+                htmlFor="property-address"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
                 Address
               </label>
               <textarea
+                id="property-address"
+                name="address"
                 value={formData.address}
                 onChange={(e) =>
                   setFormData({ ...formData, address: e.target.value })
@@ -127,13 +136,17 @@ export function PropertyFormDialog({
               />
             </div>
 
-            {/* Phone & Email */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="property-phone"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Phone
                 </label>
                 <input
+                  id="property-phone"
+                  name="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) =>
@@ -145,10 +158,15 @@ export function PropertyFormDialog({
               </div>
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
+                <label
+                  htmlFor="property-email"
+                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                >
                   Email
                 </label>
                 <input
+                  id="property-email"
+                  name="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) =>

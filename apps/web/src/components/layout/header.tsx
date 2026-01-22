@@ -15,11 +15,12 @@ import {
 export function Header() {
   return (
     <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-16 items-center justify-between px-6 shadow-black/5 shadow-lg sticky top-0 z-20">
-      {/* Search */}
       <div className="flex flex-1 gap-4 items-center">
         <div className="group max-w-md relative w-full">
           <Search className="-translate-y-1/2 absolute group-focus-within:text-[#1e4b8e] h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
           <input
+            id="global-search"
+            name="search"
             type="search"
             placeholder="Search guests, reservations, rooms..."
             aria-label="Search guests, reservations, rooms"
@@ -28,9 +29,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Right Section */}
       <div className="flex gap-3 items-center">
-        {/* Notifications */}
         <Button
           variant="ghost"
           size="icon"
@@ -46,7 +45,6 @@ export function Header() {
 
         <div className="bg-border/60 h-8 mx-1 w-px" />
 
-        {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -55,7 +53,10 @@ export function Header() {
             >
               <div className="relative">
                 <Avatar className="border-2 border-transparent group-hover:border-[#1e4b8e]/20 h-9 transition-all w-9">
-                  <AvatarImage src="/placeholder-avatar.jpg" />
+                  <AvatarImage
+                    src="/placeholder-avatar.jpg"
+                    alt="Super Admin profile picture"
+                  />
                   <AvatarFallback className="bg-linear-to-br font-semibold from-[#1e4b8e] shadow-inner text-white text-xs to-[#153a6e]">
                     SA
                   </AvatarFallback>
