@@ -82,9 +82,11 @@ describe('Main Bootstrap', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(validationPipe.isTransformEnabled).toBe(true);
 
-    expect(mockApp.listen).toHaveBeenCalledWith(
-      expect.stringMatching(/^3001$/),
-    );
+    // Verify listen called with 3001 (string or number)
+    // Verify listen called with 3001 (string or number)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const listenPort = (mockApp.listen as jest.Mock).mock.calls[0][0];
+    expect(String(listenPort)).toBe('3001');
   });
 
   it('should use PORT from env if defined', async () => {

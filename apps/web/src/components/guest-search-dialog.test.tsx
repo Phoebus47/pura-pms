@@ -226,31 +226,4 @@ describe('GuestSearchDialog', () => {
       ).not.toBeDisabled();
     });
   });
-
-  it('calls onClose when close button clicked', async () => {
-    render(
-      <GuestSearchDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        onSelectGuest={mockOnSelectGuest}
-        onCreateNew={mockOnCreateNew}
-      />,
-    );
-
-    // X icon usually is just a button, might not have explicit accessible name unless we check implementation
-    // The implementation has a button wrapping the X icon.
-    // We can rely on just finding the button (it's the only one besides search/create usually)
-    // or by role if we can identify it.
-    // Let's assume there is a close button in the header.
-    // The code shows: <button onClick={onClose} ...><X .../></button>
-    // It doesn't have an aria-label.
-    // We can find by class or just all buttons.
-    // Actually, it's easier to verify it renders.
-    // Let's retry searching for it or adding aria-label if we were editing code.
-    // But since we are writing tests, let's use the X icon presence.
-
-    // Better approach: Since we know the structure, we can find the button containing the X icon
-    // But 'lucide-react' renders an SVG.
-    // We can try to inspect the code.
-  });
 });

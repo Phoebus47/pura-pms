@@ -146,27 +146,7 @@ describe('PropertiesPage', () => {
     render(<PropertiesPage />);
 
     // Find edit button (Pencil) via card
-    // Cards usually have Actions section at bottom.
-    // Let's assume order: View Details, Edit (ghost), Delete (ghost).
-    // Or check inside the card container.
     screen.getByText('Hotel California').closest('div');
-    // This DOM traversal is risky. The component structure:
-    // div > div.flex.items-start > ...
-    //     > div.flex.gap-2.mt-6 (Actions)
-    // Actually the card is the `properties.map` element.
-    // Let's use `within`.
-
-    // We can target specific text to find the card.
-    // But `getByText('Hotel California')` gives the h3.
-    // The card is a few parents up.
-    // Alternative: getAllByRole('button') and filter?
-    // Or just look for the pencil icon button?
-    // Implementation uses Lucide icons.
-
-    // Robust way: Actions div follows the content div.
-    // Let's grab all buttons in the document.
-    // Edit is the 2nd button in the actions group (View Details, Edit, Delete).
-    // View Details has text. Edit/Delete are icon-only.
 
     const viewDetailsBtns = screen.getAllByText('View Details');
     const firstDetailsBtn = viewDetailsBtns[0];
