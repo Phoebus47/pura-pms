@@ -128,6 +128,7 @@ export default function ReservationCalendarPage() {
               onClick={previousMonth}
               variant="outline"
               className="p-2 rounded-xl"
+              aria-label="Previous Month"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
@@ -135,6 +136,7 @@ export default function ReservationCalendarPage() {
               onClick={nextMonth}
               variant="outline"
               className="p-2 rounded-xl"
+              aria-label="Next Month"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
@@ -147,10 +149,14 @@ export default function ReservationCalendarPage() {
         <div className="flex gap-4 items-center">
           <Filter className="h-5 text-slate-600 w-5" />
           <div className="flex-1">
-            <label className="block font-semibold mb-2 text-slate-700 text-sm">
+            <label
+              htmlFor="property-filter"
+              className="block font-semibold mb-2 text-slate-700 text-sm"
+            >
               Filter by Property
             </label>
             <PropertySelector
+              id="property-filter"
               value={propertyFilter}
               onChange={setPropertyFilter}
             />
@@ -184,7 +190,12 @@ export default function ReservationCalendarPage() {
           <div className="gap-2 grid grid-cols-7">
             {days.map((day, index) => {
               if (day === null) {
-                return <div key={`empty-${index}`} className="aspect-square" />;
+                return (
+                  <div
+                    key={`empty-${year}-${month}-${index}`}
+                    className="aspect-square"
+                  />
+                );
               }
 
               const dayReservations = getReservationsForDay(day);
@@ -195,7 +206,7 @@ export default function ReservationCalendarPage() {
 
               return (
                 <div
-                  key={day}
+                  key={`day-${day}`}
                   className={`aspect-square rounded-2xl border-2 p-2 transition-all ${
                     isToday
                       ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'

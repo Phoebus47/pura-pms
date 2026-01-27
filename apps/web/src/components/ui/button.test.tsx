@@ -30,4 +30,15 @@ describe('Button', () => {
     const button = container.querySelector('button');
     expect(button).toHaveClass('bg-destructive');
   });
+
+  it('should render as child when asChild is true', () => {
+    render(
+      <Button asChild>
+        <a href="/link">Link Button</a>
+      </Button>,
+    );
+    const link = screen.getByRole('link', { name: /link button/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveClass('inline-flex');
+  });
 });

@@ -99,7 +99,9 @@ export default function Dashboard() {
       icon: Calendar,
       change: `${stats.occupancyRate}% occupancy`,
       changeType:
-        stats.occupancyRate >= 70 ? 'positive' : ('negative' as const),
+        stats.occupancyRate >= 70
+          ? ('positive' as const)
+          : ('negative' as const),
       color: '#1e4b8e',
     },
     {
@@ -123,7 +125,8 @@ export default function Dashboard() {
       value: `฿${stats.revenueToday.toLocaleString()}`,
       icon: CreditCard,
       change: "Today's check-ins",
-      changeType: stats.revenueToday > 0 ? 'positive' : ('neutral' as const),
+      changeType:
+        stats.revenueToday > 0 ? ('positive' as const) : ('neutral' as const),
       color: '#153a6e',
     },
   ];
@@ -193,16 +196,7 @@ export default function Dashboard() {
                   <stat.icon className="h-6 w-6" />
                 </div>
               </div>
-              <div
-                className={cn(
-                  'flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ring-1 ring-inset',
-                  stat.changeType === 'positive'
-                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-                    : stat.changeType === 'negative'
-                      ? 'bg-red-50 text-red-700 ring-red-600/20'
-                      : 'bg-slate-50 text-slate-700 ring-slate-600/20',
-                )}
-              >
+              <div className={cn(getChangeTypeColor(stat.changeType))}>
                 {stat.change}
               </div>
             </div>
@@ -242,6 +236,7 @@ export default function Dashboard() {
                   <Avatar className="h-10 w-10">
                     <AvatarImage
                       src={`https://ui-avatars.com/api/?name=${reservation.guest?.firstName}+${reservation.guest?.lastName}`}
+                      alt={`${reservation.guest?.firstName} ${reservation.guest?.lastName} avatar`}
                     />
                     <AvatarFallback>
                       {reservation.guest?.firstName?.[0]}
@@ -275,4 +270,15 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+function getChangeTypeColor(type: 'positive' | 'negative' | 'neutral') {
+  switch (type) {
+    case 'positive':
+      return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+    case 'negative':
+      return 'bg-red-50 text-red-700 ring-red-600/20';
+    default:
+      return 'bg-slate-50 text-slate-700 ring-slate-600/20';
+  }
 }

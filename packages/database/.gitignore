@@ -1,9 +1,50 @@
-node_modules
-.turbo
-dist
+# ==================== PRISMA ====================
+# Generated Prisma Client (will be in node_modules)
+# Note: Do not ignore @prisma/client in node_modules
+
+# Prisma migrations (keep in git, but ignore generated files)
+# migrations/ directory should be committed, but ignore:
+*.migration.js
+*.migration.d.ts
+
+# ==================== ENVIRONMENT ====================
+.env
+.env*.local
+!.env.example
+
+# ==================== BUILD OUTPUT ====================
+dist/
+build/
 *.tsbuildinfo
 
-# Keep environment variables out of version control
-.env*
+# ==================== DEPENDENCIES ====================
+node_modules/
+.pnpm-store/
 
-/generated/prisma
+# ==================== TESTING ====================
+coverage/
+*.lcov
+
+# ==================== LOGS ====================
+*.log
+
+# ==================== EDITOR ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+
+# ==================== DATABASE ====================
+# Local database files (if using SQLite for testing)
+*.db
+*.sqlite
+*.sqlite3
+
+# Database dumps (keep seed.sql but ignore dumps)
+*.dump
+*.sql
+!prisma/seed.sql

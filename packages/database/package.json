@@ -1,32 +1,38 @@
 {
   "name": "@pura/database",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
+    "postinstall": "prisma generate",
+    "build": "prisma generate && tsc -p tsconfig.build.json",
+    "dev": "tsc --watch",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "tsx prisma/seed.mts",
+    "db:seed-financial": "tsx prisma/seed-financial.ts",
+    "db:verify-seed": "tsx prisma/verify-seed.mts",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate",
-    "build": "prisma generate && tsc"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:perf": "jest performance.test.ts --verbose",
+    "test:unit": "jest --testPathIgnorePatterns=performance.test.ts",
+    "test:isolated": "NODE_ENV=test jest --runInBand"
   },
   "dependencies": {
-    "@prisma/client": "^6.3.0",
-    "bcryptjs": "^3.0.3",
-    "prisma": "^6.3.0",
-    "typescript": "^5.7.0"
+    "@prisma/client": "^6.19.2"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^25.0.9",
-    "ts-node": "^10.9.2"
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "dotenv": "^16.4.7",
+    "jest": "^29.7.0",
+    "prisma": "^6.19.2",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
   }
 }

@@ -9,7 +9,7 @@ import { UpdateRoomTypeDto } from './dto/update-room-type.dto';
 
 @Injectable()
 export class RoomTypesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createRoomTypeDto: CreateRoomTypeDto) {
     const property = await this.prisma.property.findUnique({

@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
   }
@@ -55,7 +55,11 @@ export class ErrorBoundary extends Component<
               <Button onClick={this.handleReset}>Try again</Button>
               <Button
                 variant="outline"
-                onClick={() => (window.location.href = '/')}
+                onClick={() => {
+                  if (globalThis.window !== undefined) {
+                    globalThis.location.assign('/');
+                  }
+                }}
               >
                 Go to home
               </Button>

@@ -6,12 +6,14 @@ import { propertiesAPI, type Property } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
 interface PropertySelectorProps {
-  value: string;
-  onChange: (propertyId: string) => void;
-  required?: boolean;
+  readonly id?: string;
+  readonly value: string;
+  readonly onChange: (propertyId: string) => void;
+  readonly required?: boolean;
 }
 
 export function PropertySelector({
+  id,
   value,
   onChange,
   required = false,
@@ -49,6 +51,7 @@ export function PropertySelector({
     <div className="relative">
       <Building2 className="-translate-y-1/2 absolute h-5 left-3 pointer-events-none text-slate-400 top-1/2 w-5 z-10" />
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}

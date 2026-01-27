@@ -3,11 +3,11 @@
 import { Calendar } from 'lucide-react';
 
 interface DateRangePickerProps {
-  checkIn: string;
-  checkOut: string;
-  onCheckInChange: (date: string) => void;
-  onCheckOutChange: (date: string) => void;
-  minDate?: string;
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly onCheckInChange: (date: string) => void;
+  readonly onCheckOutChange: (date: string) => void;
+  readonly minDate?: string;
 }
 
 export function DateRangePicker({
@@ -41,12 +41,17 @@ export function DateRangePicker({
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         {/* Check-in Date */}
         <div>
-          <label className="block font-semibold mb-2 text-slate-700 text-sm">
+          <label
+            htmlFor="check-in-date"
+            className="block font-semibold mb-2 text-slate-700 text-sm"
+          >
             Check-in Date
           </label>
           <div className="relative">
             <Calendar className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
             <input
+              id="check-in-date"
+              name="checkIn"
               type="date"
               value={checkIn}
               onChange={(e) => handleCheckInChange(e.target.value)}
@@ -59,12 +64,17 @@ export function DateRangePicker({
 
         {/* Check-out Date */}
         <div>
-          <label className="block font-semibold mb-2 text-slate-700 text-sm">
+          <label
+            htmlFor="check-out-date"
+            className="block font-semibold mb-2 text-slate-700 text-sm"
+          >
             Check-out Date
           </label>
           <div className="relative">
             <Calendar className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
             <input
+              id="check-out-date"
+              name="checkOut"
               type="date"
               value={checkOut}
               onChange={(e) => onCheckOutChange(e.target.value)}

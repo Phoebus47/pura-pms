@@ -4,7 +4,7 @@ interface RequestOptions extends RequestInit {
   token?: string;
 }
 
-class APIError extends Error {
+export class APIError extends Error {
   constructor(
     public status: number,
     public statusText: string,
@@ -16,8 +16,8 @@ class APIError extends Error {
 }
 
 export class APIClient {
-  private baseURL: string;
-  private defaultHeaders: Record<string, string>;
+  private readonly baseURL: string;
+  private readonly defaultHeaders: Record<string, string>;
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;
@@ -107,16 +107,16 @@ export class APIClient {
 export const apiClient = new APIClient();
 
 export function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
+  if (globalThis.window === undefined) return null;
+  return globalThis.localStorage.getItem('token');
 }
 
 export function setAuthToken(token: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('token', token);
+  if (globalThis.window === undefined) return;
+  globalThis.localStorage.setItem('token', token);
 }
 
 export function clearAuthToken(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('token');
+  if (globalThis.window === undefined) return;
+  globalThis.localStorage.removeItem('token');
 }

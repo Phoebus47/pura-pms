@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto';
 import {
   Injectable,
   NotFoundException,
@@ -11,7 +12,7 @@ import { Prisma, ReservationStatus } from '@pura/database';
 
 @Injectable()
 export class ReservationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createReservationDto: CreateReservationDto) {
     const checkIn = new Date(createReservationDto.checkIn);
@@ -155,9 +156,8 @@ export class ReservationsService {
           checkOut: { lte: checkOut },
         });
       }
-      if (orFilter.length > 0) {
-        where.OR = orFilter;
-      }
+
+      where.OR = orFilter;
     }
 
     if (guestId) {
@@ -547,7 +547,11 @@ export class ReservationsService {
   private generateConfirmNumber(): string {
     const prefix = 'PURA';
     const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const random = crypto
+      .randomBytes(3)
+      .toString('hex')
+      .toUpperCase()
+      .substring(0, 4);
     return `${prefix}-${timestamp}-${random}`;
   }
 }

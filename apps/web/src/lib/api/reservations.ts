@@ -1,4 +1,4 @@
-import { apiClient, getAuthToken } from './client';
+import { apiClient } from './client';
 
 export type ReservationStatus =
   | 'TENTATIVE'
@@ -93,7 +93,6 @@ export interface CalendarParams {
 
 export const reservationsAPI = {
   async getAll(filters?: ReservationFilterParams): Promise<Reservation[]> {
-    const token = getAuthToken();
     const params = new URLSearchParams();
     if (filters?.propertyId) params.append('propertyId', filters.propertyId);
     if (filters?.status) params.append('status', filters.status);
@@ -103,27 +102,18 @@ export const reservationsAPI = {
 
     const query = params.toString();
     const endpoint = query ? `/reservations?${query}` : '/reservations';
-    return apiClient.get<Reservation[]>(endpoint, token || undefined);
+    return apiClient.get<Reservation[]>(endpoint);
   },
 
   async getById(id: string): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.get<Reservation>(
-      `/reservations/${id}`,
-      token || undefined,
-    );
+    return apiClient.get<Reservation>(`/reservations/${id}`);
   },
 
   async getByConfirmNumber(confirmNumber: string): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.get<Reservation>(
-      `/reservations/confirm/${confirmNumber}`,
-      token || undefined,
-    );
+    return apiClient.get<Reservation>(`/reservations/confirm/${confirmNumber}`);
   },
 
   async getCalendar(params: CalendarParams): Promise<unknown> {
-    const token = getAuthToken();
     const queryParams = new URLSearchParams({
       propertyId: params.propertyId,
       startDate: params.startDate,
@@ -133,57 +123,32 @@ export const reservationsAPI = {
 
     return apiClient.get<unknown>(
       `/reservations/calendar?${queryParams.toString()}`,
-      token || undefined,
     );
   },
 
   async create(data: CreateReservationDto): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.post<Reservation>(
-      '/reservations',
-      data,
-      token || undefined,
-    );
+    return apiClient.post<Reservation>('/reservations', data);
   },
 
   async update(id: string, data: UpdateReservationDto): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.patch<Reservation>(
-      `/reservations/${id}`,
-      data,
-      token || undefined,
-    );
+    return apiClient.patch<Reservation>(`/reservations/${id}`, data);
   },
 
   async cancel(id: string, reason?: string): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.patch<Reservation>(
-      `/reservations/${id}/cancel`,
-      { reason },
-      token || undefined,
-    );
+    return apiClient.patch<Reservation>(`/reservations/${id}/cancel`, {
+      reason,
+    });
   },
 
   async checkIn(id: string): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.post<Reservation>(
-      `/reservations/${id}/check-in`,
-      {},
-      token || undefined,
-    );
+    return apiClient.post<Reservation>(`/reservations/${id}/check-in`, {});
   },
 
   async checkOut(id: string): Promise<Reservation> {
-    const token = getAuthToken();
-    return apiClient.post<Reservation>(
-      `/reservations/${id}/check-out`,
-      {},
-      token || undefined,
-    );
+    return apiClient.post<Reservation>(`/reservations/${id}/check-out`, {});
   },
 
   async delete(id: string): Promise<void> {
-    const token = getAuthToken();
-    return apiClient.delete<void>(`/reservations/${id}`, token || undefined);
+    return apiClient.delete<void>(`/reservations/${id}`);
   },
 };

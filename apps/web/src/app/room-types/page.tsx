@@ -200,9 +200,9 @@ export default function RoomTypesPage() {
                       Amenities
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {roomType.amenities.slice(0, 3).map((amenity, index) => (
+                      {roomType.amenities.slice(0, 3).map((amenity) => (
                         <span
-                          key={index}
+                          key={amenity}
                           className="bg-[#1e4b8e]/10 font-semibold inline-flex items-center px-2 py-1 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-xs"
                         >
                           {amenity}

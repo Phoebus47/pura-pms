@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Building2, Pencil, Trash2 } from 'lucide-react';
 import { type Property } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { useProperties } from '@/hooks/use-properties';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function PropertiesPage() {
+  const router = useRouter();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
@@ -164,7 +166,7 @@ export default function PropertiesPage() {
                     size="sm"
                     className="flex-1 rounded-xl"
                     onClick={() => {
-                      window.location.href = `/properties/${property.id}`;
+                      router.push(`/properties/${property.id}`);
                     }}
                   >
                     View Details

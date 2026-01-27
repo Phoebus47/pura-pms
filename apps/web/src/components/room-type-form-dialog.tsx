@@ -1,16 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { roomTypesAPI, type RoomType, type CreateRoomTypeDto } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { PropertySelector } from './property-selector';
+import { BaseFormDialog } from '@/components/shared/base-form-dialog';
+import {
+  TextInput,
+  NumberInput,
+  Textarea,
+} from '@/components/shared/form-fields';
+import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
+import { ErrorDisplay } from '@/components/shared/error-display';
 
 interface RoomTypeFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  roomType?: RoomType | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: () => void;
+  readonly roomType?: RoomType | null;
 }
 
 export function RoomTypeFormDialog({
@@ -98,244 +106,187 @@ export function RoomTypeFormDialog({
     }
   }
 
-  if (!isOpen) return null;
-
   return (
-    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[90vh] max-w-3xl overflow-hidden rounded-3xl shadow-2xl w-full">
-        {/* Header */}
-        <div className="border-b border-slate-200 flex items-center justify-between p-6">
-          <h2 className="font-bold text-[#1e4b8e] text-2xl">
-            {roomType ? 'Edit Room Type' : 'New Room Type'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
-          >
-            <X className="h-5 text-slate-600 w-5" />
-          </button>
-        </div>
+    <BaseFormDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={roomType ? 'Edit Room Type' : 'New Room Type'}
+      maxWidth="xl"
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
+      >
+        <div className="space-y-4">
+          {/* Property */}
+          <div>
+            <label
+              htmlFor="room-type-property-select"
+              className="block font-semibold mb-2 text-slate-700 text-sm"
+            >
+              Property *
+            </label>
+            <PropertySelector
+              id="room-type-property-select"
+              value={formData.propertyId}
+              onChange={(propertyId) =>
+                setFormData({ ...formData, propertyId })
+              }
+              required
+            />
+          </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
-        >
-          <div className="space-y-4">
-            {/* Property */}
-            <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                Property *
-              </label>
-              <PropertySelector
-                value={formData.propertyId}
-                onChange={(propertyId) =>
-                  setFormData({ ...formData, propertyId })
-                }
-                required
+          {/* Name & Code */}
+          <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
+            <TextInput
+              id="room-type-name"
+              name="name"
+              label="Room Type Name"
+              value={formData.name}
+              onChange={(value) => setFormData({ ...formData, name: value })}
+              required
+              placeholder="Deluxe Suite"
+            />
+            <TextInput
+              id="room-type-code"
+              name="code"
+              label="Code"
+              value={formData.code}
+              onChange={(value) =>
+                setFormData({
+                  ...formData,
+                  code: value.toUpperCase(),
+                })
+              }
+              required
+              placeholder="DLX"
+              className="uppercase"
+            />
+          </div>
+
+          {/* Description */}
+          <Textarea
+            id="room-type-description"
+            name="description"
+            label="Description"
+            value={formData.description}
+            onChange={(value) =>
+              setFormData({ ...formData, description: value })
+            }
+            placeholder="Room type description..."
+            rows={3}
+          />
+
+          <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
+            <NumberInput
+              id="room-type-base-rate"
+              name="baseRate"
+              label="Base Rate (฿)"
+              value={formData.baseRate}
+              onChange={(value) =>
+                setFormData({ ...formData, baseRate: value })
+              }
+              required
+              min={0}
+              step={0.01}
+              placeholder="1500"
+            />
+            <NumberInput
+              id="room-type-max-adults"
+              name="maxAdults"
+              label="Max Adults"
+              value={formData.maxAdults}
+              onChange={(value) =>
+                setFormData({ ...formData, maxAdults: value })
+              }
+              required
+              min={1}
+              placeholder="2"
+            />
+            <NumberInput
+              id="room-type-max-children"
+              name="maxChildren"
+              label="Max Children"
+              value={formData.maxChildren}
+              onChange={(value) =>
+                setFormData({ ...formData, maxChildren: value })
+              }
+              required
+              min={0}
+              placeholder="1"
+            />
+          </div>
+
+          {/* Amenities */}
+          <div>
+            <label
+              htmlFor="room-type-amenity"
+              className="block font-semibold mb-2 text-slate-700 text-sm"
+            >
+              Amenities
+            </label>
+
+            {/* Add Amenity */}
+            <div className="flex gap-2 mb-3">
+              <input
+                id="room-type-amenity"
+                name="amenity"
+                type="text"
+                value={newAmenity}
+                onChange={(e) => setNewAmenity(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addAmenity();
+                  }
+                }}
+                placeholder="e.g., WiFi, TV, Mini Bar"
+                className="border border-slate-300 flex-1 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all"
               />
+              <Button
+                type="button"
+                onClick={addAmenity}
+                className="bg-[#1e4b8e] hover:bg-[#153a6e] px-4 rounded-xl"
+                aria-label="Add amenity"
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
             </div>
 
-            {/* Name & Code */}
-            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Room Type Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                  placeholder="Deluxe Suite"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Code *
-                </label>
-                <input
-                  type="text"
-                  value={formData.code}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      code: e.target.value.toUpperCase(),
-                    })
-                  }
-                  required
-                  placeholder="DLX"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all uppercase w-full"
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Room type description..."
-                rows={3}
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
-              />
-            </div>
-
-            {/* Base Rate & Occupancy */}
-            <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Base Rate (฿) *
-                </label>
-                <input
-                  type="number"
-                  value={formData.baseRate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      baseRate: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  required
-                  min="0"
-                  step="0.01"
-                  placeholder="1500"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Max Adults *
-                </label>
-                <input
-                  type="number"
-                  value={formData.maxAdults}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      maxAdults: parseInt(e.target.value) || 1,
-                    })
-                  }
-                  required
-                  min="1"
-                  placeholder="2"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Max Children *
-                </label>
-                <input
-                  type="number"
-                  value={formData.maxChildren}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      maxChildren: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  required
-                  min="0"
-                  placeholder="1"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-                />
-              </div>
-            </div>
-
-            {/* Amenities */}
-            <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                Amenities
-              </label>
-
-              {/* Add Amenity */}
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={newAmenity}
-                  onChange={(e) => setNewAmenity(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && (e.preventDefault(), addAmenity())
-                  }
-                  placeholder="e.g., WiFi, TV, Mini Bar"
-                  className="border border-slate-300 flex-1 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all"
-                />
-                <Button
-                  type="button"
-                  onClick={addAmenity}
-                  className="bg-[#1e4b8e] hover:bg-[#153a6e] px-4 rounded-xl"
-                >
-                  <Plus className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Amenities List */}
-              {formData.amenities && formData.amenities.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.amenities.map((amenity, index) => (
-                    <div
-                      key={index}
-                      className="bg-[#1e4b8e]/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-sm"
+            {/* Amenities List */}
+            {formData.amenities && formData.amenities.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.amenities.map((amenity, index) => (
+                  <div
+                    key={`${amenity}-${index}`}
+                    className="bg-[#1e4b8e]/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-sm"
+                  >
+                    {amenity}
+                    <button
+                      type="button"
+                      onClick={() => removeAmenity(index)}
+                      className="hover:text-red-600 transition-colors"
+                      aria-label={`Remove ${amenity}`}
                     >
-                      {amenity}
-                      <button
-                        type="button"
-                        onClick={() => removeAmenity(index)}
-                        className="hover:text-red-600 transition-colors"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Footer */}
-          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              className="flex-1 rounded-xl"
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
-              disabled={loading}
-            >
-              {loading
-                ? 'Saving...'
-                : roomType
-                  ? 'Update Room Type'
-                  : 'Create Room Type'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+          {/* Error Message */}
+          <ErrorDisplay error={error} />
+        </div>
+
+        {/* Footer */}
+        <FormDialogFooter
+          onCancel={onClose}
+          loading={loading}
+          submitLabel={roomType ? 'Update Room Type' : 'Create Room Type'}
+        />
+      </form>
+    </BaseFormDialog>
   );
 }

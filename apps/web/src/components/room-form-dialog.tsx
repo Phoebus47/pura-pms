@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import {
   roomsAPI,
   roomTypesAPI,
@@ -10,15 +9,22 @@ import {
   type RoomType,
   type RoomStatus,
 } from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/lib/toast';
 import { PropertySelector } from './property-selector';
+import { BaseFormDialog } from '@/components/shared/base-form-dialog';
+import {
+  TextInput,
+  NumberInput,
+  Select,
+} from '@/components/shared/form-fields';
+import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
+import { ErrorDisplay } from '@/components/shared/error-display';
 
 interface RoomFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  room?: Room | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: () => void;
+  readonly room?: Room | null;
 }
 
 const ROOM_STATUSES: { value: RoomStatus; label: string }[] = [
@@ -109,164 +115,111 @@ export function RoomFormDialog({
     }
   }
 
-  if (!isOpen) return null;
-
   return (
-    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-3xl shadow-2xl w-full">
-        {/* Header */}
-        <div className="border-b border-slate-200 flex items-center justify-between p-6">
-          <h2 className="font-bold text-[#1e4b8e] text-2xl">
-            {room ? 'Edit Room' : 'New Room'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
-          >
-            <X className="h-5 text-slate-600 w-5" />
-          </button>
+    <BaseFormDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={room ? 'Edit Room' : 'New Room'}
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
+      >
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="room-property-select"
+              className="block font-semibold mb-2 text-slate-700 text-sm"
+            >
+              Property *
+            </label>
+            <PropertySelector
+              id="room-property-select"
+              value={formData.propertyId}
+              onChange={(propertyId) =>
+                setFormData({ ...formData, propertyId, roomTypeId: '' })
+              }
+              required
+            />
+          </div>
+
+          <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
+            <TextInput
+              id="room-number"
+              name="number"
+              label="Room Number"
+              value={formData.number}
+              onChange={(value) => setFormData({ ...formData, number: value })}
+              required
+              placeholder="101"
+            />
+            <NumberInput
+              id="room-floor"
+              name="floor"
+              label="Floor"
+              value={formData.floor}
+              onChange={(value) => setFormData({ ...formData, floor: value })}
+              min={1}
+              placeholder="1"
+            />
+          </div>
+
+          <Select
+            id="room-type"
+            name="roomTypeId"
+            label="Room Type"
+            value={formData.roomTypeId}
+            onChange={(value) =>
+              setFormData({ ...formData, roomTypeId: value })
+            }
+            required
+            disabled={!formData.propertyId || loadingRoomTypes}
+            placeholder={getRoomTypePlaceholder(
+              loadingRoomTypes,
+              !!formData.propertyId,
+            )}
+            options={roomTypes.map((type) => ({
+              value: type.id,
+              label: `${type.name} - ฿${Number(type.baseRate).toLocaleString()}`,
+            }))}
+          />
+
+          <Select
+            id="room-status"
+            name="status"
+            label="Status"
+            value={formData.status}
+            onChange={(value) =>
+              setFormData({
+                ...formData,
+                status: value as RoomStatus,
+              })
+            }
+            required
+            options={ROOM_STATUSES.map((status) => ({
+              value: status.value,
+              label: status.label,
+            }))}
+          />
+
+          <ErrorDisplay error={error} />
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="max-h-[calc(90vh-140px)] overflow-y-auto p-6"
-        >
-          <div className="space-y-4">
-            {/* Property */}
-            <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                Property *
-              </label>
-              <PropertySelector
-                value={formData.propertyId}
-                onChange={(propertyId) =>
-                  setFormData({ ...formData, propertyId, roomTypeId: '' })
-                }
-                required
-              />
-            </div>
-
-            {/* Room Number & Floor */}
-            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Room Number *
-                </label>
-                <input
-                  type="text"
-                  value={formData.number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, number: e.target.value })
-                  }
-                  required
-                  placeholder="101"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                  Floor
-                </label>
-                <input
-                  type="number"
-                  value={formData.floor}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      floor: parseInt(e.target.value) || 1,
-                    })
-                  }
-                  min="1"
-                  placeholder="1"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-                />
-              </div>
-            </div>
-
-            {/* Room Type */}
-            <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                Room Type *
-              </label>
-              <select
-                value={formData.roomTypeId}
-                onChange={(e) =>
-                  setFormData({ ...formData, roomTypeId: e.target.value })
-                }
-                required
-                disabled={!formData.propertyId || loadingRoomTypes}
-                className="appearance-none bg-white border border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-              >
-                <option value="">
-                  {loadingRoomTypes
-                    ? 'Loading...'
-                    : formData.propertyId
-                      ? 'Select a room type'
-                      : 'Select property first'}
-                </option>
-                {roomTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name} - ฿{Number(type.baseRate).toLocaleString()}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="block font-semibold mb-2 text-slate-700 text-sm">
-                Status *
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    status: e.target.value as RoomStatus,
-                  })
-                }
-                required
-                className="appearance-none bg-white border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
-              >
-                {ROOM_STATUSES.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              className="flex-1 rounded-xl"
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
-              disabled={loading}
-            >
-              {loading ? 'Saving...' : room ? 'Update Room' : 'Create Room'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <FormDialogFooter
+          onCancel={onClose}
+          loading={loading}
+          submitLabel={room ? 'Update Room' : 'Create Room'}
+        />
+      </form>
+    </BaseFormDialog>
   );
+}
+
+function getRoomTypePlaceholder(
+  isLoading: boolean,
+  hasProperty: boolean,
+): string {
+  if (isLoading) return 'Loading...';
+  if (hasProperty) return 'Select a room type';
+  return 'Select property first';
 }

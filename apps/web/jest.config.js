@@ -25,6 +25,7 @@ const customJestConfig = {
     '/node_modules/',
     '/.next/',
     '/out/',
+    '/e2e/',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],

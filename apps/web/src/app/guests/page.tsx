@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Users, Search, Star, Ban, Pencil, Trash2 } from 'lucide-react';
 import { type Guest } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { useGuests } from '@/hooks/use-guests';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function GuestsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
@@ -162,7 +164,7 @@ export default function GuestsPage() {
                       key={guest.id}
                       className="cursor-pointer hover:bg-white/50 transition-colors"
                       onClick={() => {
-                        window.location.href = `/guests/${guest.id}`;
+                        router.push(`/guests/${guest.id}`);
                       }}
                     >
                       <td className="px-6 py-4">
@@ -198,7 +200,7 @@ export default function GuestsPage() {
                           {Array.from({ length: guest.vipLevel }).map(
                             (_, i) => (
                               <Star
-                                key={i}
+                                key={`${guest.id}-star-${i}`}
                                 className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                               />
                             ),

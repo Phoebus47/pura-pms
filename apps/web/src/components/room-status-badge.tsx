@@ -2,8 +2,8 @@ import { cn } from '@/lib/utils';
 import type { RoomStatus } from '@/lib/api/rooms';
 
 interface RoomStatusBadgeProps {
-  status: RoomStatus;
-  className?: string;
+  readonly status: RoomStatus;
+  readonly className?: string;
 }
 
 const statusConfig: Record<RoomStatus, { label: string; className: string }> = {

@@ -19,4 +19,9 @@ describe('AppController', () => {
       expect(appController.getHello()).toBe('Hello World!');
     });
   });
+
+  it('should be instantiated explicitly', () => {
+    const explicitController = new AppController(new AppService());
+    expect(explicitController).toBeDefined();
+  });
 });

@@ -53,7 +53,7 @@ SENTRY_DSN=your-sentry-dsn-here
 1. **สร้าง Web Service บน Render**
    - **Name**: `pura-api` (หรือชื่อที่ต้องการ)
    - **Environment**: `Node`
-   - **Build Command**: `pnpm install && pnpm --filter @pura/database build && pnpm --filter api build`
+   - **Build Command**: `rm -rf node_modules && pnpm install --frozen-lockfile && pnpm --filter @pura/database build && pnpm --filter api build`
    - **Start Command**: `cd apps/api && pnpm start:prod`
    - **Root Directory**: (เว้นว่าง - Render จะ detect จาก repo)
 
@@ -116,7 +116,7 @@ SENTRY_DSN=your-sentry-dsn-here
 
 - ตรวจสอบว่า monorepo structure ถูกต้อง
 - ตรวจสอบว่า `package.json` มี scripts ที่ถูกต้อง
-- ตรวจสอบว่า build command ใน Render ถูกต้อง: `pnpm install && pnpm --filter @pura/database build && pnpm --filter api build`
+- ตรวจสอบว่า build command ใน Render ถูกต้อง: `rm -rf node_modules && pnpm install --frozen-lockfile && pnpm --filter @pura/database build && pnpm --filter api build`
 - ตรวจสอบว่า Prisma schema อยู่ใน `packages/database/prisma/schema.prisma`
 
 ### Prisma Generate Error
@@ -124,3 +124,7 @@ SENTRY_DSN=your-sentry-dsn-here
 - ตรวจสอบว่า `DATABASE_URL` ถูกตั้งค่าใน Render environment variables
 - ตรวจสอบว่า Prisma config (`packages/database/prisma.config.ts`) ถูกต้อง
 - Build command ต้อง build `@pura/database` ก่อน `api` เพื่อ generate Prisma Client
+- **ถ้าเจอ `prisma: not found` หรือ `tsc: not found`**:
+  - Render ใช้ cached node_modules ที่ไม่มี dependencies ใหม่
+  - **วิธีแก้**: ล้าง Build Cache ใน Render Dashboard → Service → Settings → "Clear build cache"
+  - หรือใช้ Build Command ที่ลบ node_modules ก่อน: `rm -rf node_modules && pnpm install --frozen-lockfile && pnpm --filter @pura/database build && pnpm --filter api build`

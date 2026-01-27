@@ -109,7 +109,168 @@ apps/web/src/
 
 - **Code Splitting:** Rely on Next.js automatic splitting. Use `React.lazy` or `dynamic()` for heavy components that are not critical for LCP (Largest Contentful Paint).
 - **Image Optimization:** Always use `next/image` for images to leverage optimization and lazy loading.
+  - **LCP Images:** Add `loading="eager"` and `priority` props for above-the-fold images (e.g., logo, hero images).
+  - **Alt Attributes:** All images must have descriptive `alt` attributes for accessibility and SEO.
 - **Memoization:** Wrap expensive components in `React.memo` only if profiling shows render performance issues.
+
+---
+
+## 5.2. Lighthouse Performance Requirements
+
+### Target Scores
+
+All pages must achieve **100/100** in all Lighthouse categories:
+
+- **Performance:** 100/100
+- **Accessibility:** 100/100
+- **Best Practices:** 100/100
+- **SEO:** 100/100
+
+### Performance Metrics
+
+- **LCP (Largest Contentful Paint):** < 2.5 seconds
+- **FID (First Input Delay):** < 100 milliseconds
+- **CLS (Cumulative Layout Shift):** < 0.1
+- **FCP (First Contentful Paint):** < 1.8 seconds
+- **TTI (Time to Interactive):** < 3.8 seconds
+- **Speed Index:** < 3.4 seconds
+
+### Accessibility Requirements
+
+- **Alt Text:** All images must have descriptive `alt` attributes. Use empty `alt=""` only for decorative images.
+- **Form Labels:** All form inputs must have associated `label` elements with `htmlFor` attributes.
+- **ARIA Labels:** Use `aria-label` for interactive elements without visible text.
+- **Semantic HTML:** Use proper HTML5 semantic elements (`<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<footer>`).
+- **Color Contrast:** Ensure text meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text).
+- **Keyboard Navigation:** All interactive elements must be keyboard accessible.
+
+### Best Practices Requirements
+
+- **HTTPS:** All pages must be served over HTTPS in production.
+- **No Console Errors:** No JavaScript console errors or warnings.
+- **Modern JavaScript:** Use modern JavaScript features (ES6+) with proper transpilation.
+- **No Deprecated APIs:** Avoid using deprecated browser APIs.
+- **Image Aspect Ratio:** Set explicit `width` and `height` on images to prevent layout shift.
+
+### SEO Requirements
+
+- **Meta Tags:** Include proper `title`, `description`, and `keywords` in metadata.
+- **Open Graph:** Add Open Graph meta tags for social media sharing.
+- **Twitter Cards:** Include Twitter Card meta tags.
+- **Structured Data:** Use JSON-LD structured data where appropriate.
+- **Canonical URLs:** Set canonical URLs to prevent duplicate content.
+- **Robots Meta:** Configure robots meta tags appropriately.
+- **Sitemap:** Generate and submit XML sitemap.
+- **Language:** Set proper `lang` attribute on `<html>` element.
+
+### Implementation Checklist
+
+Before deploying any page, ensure:
+
+- [ ] All images have `alt` attributes
+- [ ] LCP image has `loading="eager"` and `priority` props
+- [ ] All form inputs have associated labels
+- [ ] Meta tags are properly configured
+- [ ] No console errors or warnings
+- [ ] Lighthouse scores are 100/100 in all categories
+- [ ] Performance metrics meet targets
+- [ ] Page passes accessibility audit
+- [ ] SEO meta tags are complete
+
+### Testing
+
+Run Lighthouse audit before every deployment:
+
+```bash
+# Using Chrome DevTools
+# 1. Open DevTools (F12)
+# 2. Go to Lighthouse tab
+# 3. Select all categories
+# 4. Click "Analyze page load"
+
+# Or using CLI
+npx lighthouse http://localhost:3000 --view
+```
+
+---
+
+## 5.1. Responsive Design
+
+### Mobile-First Approach
+
+- **Design Philosophy:** Use a mobile-first approach. Start with mobile layouts and progressively enhance for larger screens.
+- **Breakpoints:** Use consistent breakpoints across the application. Recommended breakpoints:
+  - Mobile: `< 768px` (default)
+  - Tablet: `≥ 768px`
+  - Desktop: `≥ 1024px`
+  - Large Desktop: `≥ 1280px`
+
+### Navigation Patterns
+
+- **Desktop:** Use sidebar navigation for main navigation menu.
+- **Mobile:** Convert sidebar to **bottom navigation bar (bottombar)** for better thumb accessibility and screen space utilization.
+  - Sidebar should be hidden on mobile (`hidden md:block` or similar)
+  - Bottom navigation bar should be visible only on mobile (`block md:hidden` or similar)
+  - Bottom bar should be fixed at the bottom of the viewport
+  - Use icons with labels for better clarity
+
+### Implementation Guidelines
+
+```typescript
+// Example: Responsive Navigation Component
+const Navigation = () => {
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:block fixed left-0 top-0 h-full w-64">
+        {/* Sidebar content */}
+      </aside>
+
+      {/* Mobile Bottom Bar */}
+      <nav className="block md:hidden fixed bottom-0 left-0 right-0 h-16 border-t">
+        {/* Bottom navigation items */}
+      </nav>
+    </>
+  );
+};
+```
+
+### Responsive Utilities
+
+- **Tailwind CSS:** Use Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`) for responsive styling.
+- **CSS Media Queries:** When using custom CSS, use mobile-first media queries:
+
+  ```css
+  /* Mobile-first: base styles for mobile */
+  .container {
+    padding: 1rem;
+  }
+
+  /* Tablet and up */
+  @media (min-width: 768px) {
+    .container {
+      padding: 2rem;
+    }
+  }
+  ```
+
+### Touch Targets
+
+- **Minimum Size:** Interactive elements (buttons, links) should have a minimum touch target of **44×44px** on mobile devices.
+- **Spacing:** Maintain adequate spacing between touch targets to prevent accidental taps.
+
+### Viewport Configuration
+
+- **Meta Tag:** Ensure proper viewport meta tag in `layout.tsx`:
+  ```tsx
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  ```
+
+### Testing Responsive Design
+
+- **Device Testing:** Test on actual devices when possible, or use browser DevTools device emulation.
+- **Breakpoint Testing:** Test all breakpoints to ensure smooth transitions between layouts.
+- **Orientation:** Test both portrait and landscape orientations on mobile devices.
 
 ---
 
