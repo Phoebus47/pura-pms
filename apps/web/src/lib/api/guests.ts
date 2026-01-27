@@ -67,7 +67,8 @@ export const guestsAPI = {
     if (params?.vipLevel !== undefined)
       queryParams.append('vipLevel', String(params.vipLevel));
     if (params?.limit) queryParams.append('limit', String(params.limit));
-    if (params?.offset) queryParams.append('offset', String(params.offset));
+    if (params?.offset !== undefined)
+      queryParams.append('offset', String(params.offset));
 
     const query = queryParams.toString();
     const endpoint = query ? `/guests?${query}` : '/guests';

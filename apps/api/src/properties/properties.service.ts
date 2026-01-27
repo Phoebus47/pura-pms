@@ -9,7 +9,7 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 
 @Injectable()
 export class PropertiesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createPropertyDto: CreatePropertyDto) {
     return this.prisma.property.create({

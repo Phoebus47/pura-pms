@@ -175,8 +175,16 @@ All pages must achieve **100/100** in all Lighthouse categories:
 - **Critical Areas:** Authentication, reservations, payments, data validation
 
 ### Test File Conventions
-- **Naming:** Place test files next to source files with `.test.ts`, `.test.tsx`, `.spec.ts`, or `.spec.tsx` extension
-- **Location:** Same directory as source file (e.g., `button.tsx` → `button.test.tsx`)
+- **Frontend (Next.js):** Use `.test.tsx` (components) or `.test.ts` (utilities), co-located with source files
+  - Example: `src/components/button.tsx` → `src/components/button.test.tsx`
+- **Backend (NestJS):** Use `.spec.ts`, co-located with source files
+  - Example: `src/app.controller.ts` → `src/app.controller.spec.ts`
+- **E2E (Playwright):** Use `.spec.ts` in `apps/web/e2e/` directory
+  - Example: `apps/web/e2e/auth/login.spec.ts`
+- **Database:** Use `.test.ts` in `__tests__/` or co-located
+  - Example: `packages/database/__tests__/transaction-code.test.ts`
+- **Location:** Co-located with source files (except E2E and database integration tests)
+- **See:** `docs/guidelines/test-structure-standard.md` for complete standard
 
 ### Best Practices
 - **Test Behavior, Not Implementation:** Focus on what the code does, not how it does it
@@ -336,3 +344,34 @@ When working on this project, you can act as different team members:
 ### Usage
 Prefix your request with the role (e.g., "@PM break down Night Audit feature")
 See `docs/guidelines/virtual-ai-team-guide.md` for detailed prompts and workflows.
+
+## AI Agent Instructions (2026 Best Practices)
+
+### Code Generation Guidelines
+- **Always follow the standards defined in this file** - Do not deviate from established patterns
+- **Reference external docs when needed** - Use `docs/guidelines/` for detailed specifications
+- **Ask for clarification** - If requirements are unclear, ask before implementing
+- **Prioritize maintainability** - Write code that future developers (and AI) can understand
+
+### Context Awareness
+- **Read existing code patterns** - Match the style and structure of similar files
+- **Check for shared components** - Use existing components from `components/shared/` before creating new ones
+- **Follow naming conventions** - Use the exact naming patterns established in the codebase
+
+### Quality Assurance
+- **Write tests alongside code** - Don't create features without corresponding tests
+- **Verify accessibility** - Ensure all UI changes meet a11y requirements
+- **Check Lighthouse scores** - Maintain 100/100 scores for all pages
+- **Run linters** - Ensure code passes ESLint and TypeScript checks before completion
+
+## Priority Guidelines
+
+When rules or instructions conflict, follow this hierarchy:
+1. **User Instructions:** Direct prompts from the user take precedence over general rules.
+2. **System Stability:** Never break the build or introduce critical bugs.
+3. **Project Standards:** Follow the specific constraints defined in this file (Types, Tests, Linting).
+4. **Core Principles:** Prioritize KISS, DRY, and Security over clever optimization.
+5. **General Best Practices:** Follow community standards for React/Node.js.
+
+## End of Rules
+

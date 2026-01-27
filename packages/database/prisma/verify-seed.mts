@@ -126,10 +126,9 @@ async function main() {
 }
 
 // Allow running directly (tsx supports top-level await)
-if (
-  require.main === module ||
-  import.meta.url.endsWith(process.argv[1]?.replaceAll('\\', '/'))
-) {
+import { pathToFileURL } from 'node:url';
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     await main();
   } catch (e) {

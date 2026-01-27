@@ -4,7 +4,7 @@ interface RequestOptions extends RequestInit {
   token?: string;
 }
 
-class APIError extends Error {
+export class APIError extends Error {
   constructor(
     public status: number,
     public statusText: string,
@@ -16,8 +16,8 @@ class APIError extends Error {
 }
 
 export class APIClient {
-  private baseURL: string;
-  private defaultHeaders: Record<string, string>;
+  private readonly baseURL: string;
+  private readonly defaultHeaders: Record<string, string>;
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;

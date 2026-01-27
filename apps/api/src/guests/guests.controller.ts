@@ -35,9 +35,9 @@ export class GuestsController {
     return this.guestsService.findAll(
       search,
       isBlacklist === 'true',
-      vipLevel ? parseInt(vipLevel) : undefined,
-      limit ? parseInt(limit) : undefined,
-      offset ? parseInt(offset) : undefined,
+      vipLevel ? Number.parseInt(vipLevel) : undefined,
+      limit ? Number.parseInt(limit) : undefined,
+      offset ? Number.parseInt(offset) : undefined,
     );
   }
 

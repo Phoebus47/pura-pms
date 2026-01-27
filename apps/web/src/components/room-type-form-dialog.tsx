@@ -15,10 +15,10 @@ import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
 import { ErrorDisplay } from '@/components/shared/error-display';
 
 interface RoomTypeFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  roomType?: RoomType | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: () => void;
+  readonly roomType?: RoomType | null;
 }
 
 export function RoomTypeFormDialog({
@@ -247,6 +247,7 @@ export function RoomTypeFormDialog({
                 type="button"
                 onClick={addAmenity}
                 className="bg-[#1e4b8e] hover:bg-[#153a6e] px-4 rounded-xl"
+                aria-label="Add amenity"
               >
                 <Plus className="h-5 w-5" />
               </Button>
@@ -257,7 +258,7 @@ export function RoomTypeFormDialog({
               <div className="flex flex-wrap gap-2">
                 {formData.amenities.map((amenity, index) => (
                   <div
-                    key={index}
+                    key={`${amenity}-${index}`}
                     className="bg-[#1e4b8e]/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-sm"
                   >
                     {amenity}
@@ -265,6 +266,7 @@ export function RoomTypeFormDialog({
                       type="button"
                       onClick={() => removeAmenity(index)}
                       className="hover:text-red-600 transition-colors"
+                      aria-label={`Remove ${amenity}`}
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>

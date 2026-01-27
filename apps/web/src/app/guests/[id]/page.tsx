@@ -97,7 +97,7 @@ export default function GuestDetailPage() {
               <div className="flex gap-1 items-center">
                 {Array.from({ length: guest.vipLevel }).map((_, i) => (
                   <Star
-                    key={i}
+                    key={`${guest.id}-vip-star-${i}`}
                     className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                   />
                 ))}
@@ -194,9 +194,7 @@ export default function GuestDetailPage() {
 
           {guest.address && (
             <div className="border-slate-200 border-t mt-6 pt-6">
-              <label className="font-semibold text-slate-600 text-sm">
-                Address
-              </label>
+              <p className="font-semibold text-slate-600 text-sm">Address</p>
               <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {guest.address}
               </p>
@@ -205,9 +203,7 @@ export default function GuestDetailPage() {
 
           {guest.notes && (
             <div className="border-slate-200 border-t mt-6 pt-6">
-              <label className="font-semibold text-slate-600 text-sm">
-                Notes
-              </label>
+              <p className="font-semibold text-slate-600 text-sm">Notes</p>
               <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {guest.notes}
               </p>
@@ -230,7 +226,7 @@ export default function GuestDetailPage() {
                   ) : (
                     Array.from({ length: guest.vipLevel }).map((_, i) => (
                       <Star
-                        key={i}
+                        key={`${guest.id}-stats-star-${i}`}
                         className="fill-[#f5a623] h-6 text-[#f5a623] w-6"
                       />
                     ))

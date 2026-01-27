@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/lib/toast';
 
 interface GuestSearchDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSelectGuest: (guest: Guest) => void;
-  onCreateNew: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSelectGuest: (guest: Guest) => void;
+  readonly onCreateNew: () => void;
 }
 
 export function GuestSearchDialog({
@@ -62,7 +62,9 @@ export function GuestSearchDialog({
       <div className="bg-white max-h-[80vh] max-w-2xl overflow-hidden rounded-3xl shadow-2xl w-full">
         {/* Header */}
         <div className="border-b border-slate-200 flex items-center justify-between p-6">
-          <h2 className="font-bold text-[#1e4b8e] text-2xl">Search Guest</h2>
+          <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            {getDialogTitle(searched, guests.length > 0)}
+          </h2>
           <button
             onClick={onClose}
             className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
@@ -98,56 +100,7 @@ export function GuestSearchDialog({
         </div>
 
         {/* Results */}
-        <div className="max-h-96 overflow-y-auto p-6">
-          {!searched ? (
-            <div className="py-12 text-center">
-              <Search className="h-12 mb-4 mx-auto text-slate-300 w-12" />
-              <p className="text-slate-500">
-                Enter a name, email, or phone to search
-              </p>
-            </div>
-          ) : guests.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="mb-4 text-slate-600">No guests found</p>
-              <Button
-                onClick={handleCreateNew}
-                className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
-              >
-                <UserPlus className="h-4 mr-2 w-4" />
-                Create New Guest
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {guests.map((guest) => (
-                <button
-                  key={guest.id}
-                  onClick={() => handleSelect(guest)}
-                  className="border border-slate-200 hover:bg-[#1e4b8e]/5 hover:border-[#1e4b8e] p-4 rounded-2xl text-left transition-all w-full"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-slate-800">
-                        {guest.firstName} {guest.lastName}
-                      </p>
-                      <p className="mt-1 text-slate-500 text-sm">
-                        {guest.email || guest.phone || 'No contact info'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-slate-600 text-sm">
-                        {guest.totalStays} stays
-                      </p>
-                      <p className="text-slate-500 text-xs">
-                        ฿{Number(guest.totalRevenue).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="max-h-96 overflow-y-auto p-6">{renderResults()}</div>
 
         {/* Footer */}
         {searched && guests.length > 0 && (
@@ -165,4 +118,72 @@ export function GuestSearchDialog({
       </div>
     </div>
   );
+
+  function renderResults() {
+    if (!searched) {
+      return (
+        <div className="py-12 text-center">
+          <Search className="h-12 mb-4 mx-auto text-slate-300 w-12" />
+          <p className="text-slate-500">
+            Enter a name, email, or phone to search
+          </p>
+        </div>
+      );
+    }
+
+    if (guests.length === 0) {
+      return (
+        <div className="py-12 text-center">
+          <p className="mb-4 text-slate-600">No guests found</p>
+          <Button
+            onClick={handleCreateNew}
+            className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
+          >
+            <UserPlus className="h-4 mr-2 w-4" />
+            Create New Guest
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {guests.map((guest) => (
+          <button
+            key={guest.id}
+            onClick={() => handleSelect(guest)}
+            className="border border-slate-200 hover:bg-[#1e4b8e]/5 hover:border-[#1e4b8e] p-4 rounded-2xl text-left transition-all w-full"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-slate-800">
+                  {guest.firstName} {guest.lastName}
+                </p>
+                <p className="mt-1 text-slate-500 text-sm">
+                  {guest.email || guest.phone || 'No contact info'}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-slate-600 text-sm">
+                  {guest.totalStays} stays
+                </p>
+                <p className="text-slate-500 text-xs">
+                  ฿{Number(guest.totalRevenue).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    );
+  }
+}
+
+function getDialogTitle(
+  isSearchPerformed: boolean,
+  hasResults: boolean,
+): string {
+  if (!isSearchPerformed) return 'Search Guest';
+  if (hasResults) return 'Select Guest';
+  return 'No Guests Found';
 }

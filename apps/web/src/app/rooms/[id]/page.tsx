@@ -149,9 +149,7 @@ export default function RoomDetailPage() {
 
           {room.notes && (
             <div className="border-slate-200 border-t mt-6 pt-6">
-              <label className="font-semibold text-slate-600 text-sm">
-                Notes
-              </label>
+              <p className="font-semibold text-slate-600 text-sm">Notes</p>
               <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {room.notes}
               </p>
@@ -185,13 +183,13 @@ export default function RoomDetailPage() {
 
             {room.roomType?.amenities && room.roomType.amenities.length > 0 && (
               <div>
-                <label className="block font-semibold mb-2 text-slate-600 text-sm">
+                <p className="block font-semibold mb-2 text-slate-600 text-sm">
                   Amenities
-                </label>
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {room.roomType.amenities.map((amenity, index) => (
                     <span
-                      key={index}
+                      key={`${amenity}-${index}`}
                       className="bg-[#1e4b8e]/10 font-semibold inline-flex items-center px-3 py-1 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-xs"
                     >
                       {amenity}

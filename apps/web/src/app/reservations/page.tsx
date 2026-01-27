@@ -32,14 +32,6 @@ export default function ReservationsPage() {
     }
   }
 
-  function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -276,4 +268,12 @@ export default function ReservationsPage() {
       )}
     </div>
   );
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }

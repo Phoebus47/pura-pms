@@ -10,10 +10,10 @@ import {
 import { Button } from '@/components/ui/button';
 
 interface PropertyFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  property?: Property | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: () => void;
+  readonly property?: Property | null;
 }
 
 export function PropertyFormDialog({
@@ -202,15 +202,16 @@ export function PropertyFormDialog({
               className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
               disabled={loading}
             >
-              {loading
-                ? 'Saving...'
-                : property
-                  ? 'Update Property'
-                  : 'Create Property'}
+              {loading ? 'Saving...' : getSubmitButtonLabel(!!property)}
             </Button>
           </div>
         </form>
       </div>
     </div>
   );
+}
+
+function getSubmitButtonLabel(isEdit: boolean): string {
+  if (isEdit) return 'Update Property';
+  return 'Create Property';
 }

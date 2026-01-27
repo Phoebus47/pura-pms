@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
@@ -7,7 +11,7 @@ import { Prisma } from '@pura/database';
 
 @Injectable()
 export class GuestsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createGuestDto: CreateGuestDto) {
     return this.prisma.guest.create({
@@ -160,7 +164,7 @@ export class GuestsService {
     const guest = await this.findOne(id);
 
     if (guest._count.reservations > 0) {
-      throw new Error(
+      throw new BadRequestException(
         'Cannot delete guest with existing reservations. Guest data must be retained for audit purposes.',
       );
     }

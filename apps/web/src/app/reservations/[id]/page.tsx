@@ -209,27 +209,23 @@ export default function ReservationDetailPage() {
 
           <div className="gap-6 grid grid-cols-2">
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
+              <p className="font-semibold text-slate-600 text-sm">
                 Confirmation Number
-              </label>
+              </p>
               <p className="font-mono font-semibold mt-1 text-[#1e4b8e] text-lg">
                 {reservation.confirmNumber}
               </p>
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
-                Status
-              </label>
+              <p className="font-semibold text-slate-600 text-sm">Status</p>
               <div className="mt-1">
                 <ReservationStatusBadge status={reservation.status} />
               </div>
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
-                Guest
-              </label>
+              <p className="font-semibold text-slate-600 text-sm">Guest</p>
               <p className="font-semibold mt-1 text-lg text-slate-800">
                 {reservation.guest?.firstName} {reservation.guest?.lastName}
               </p>
@@ -239,9 +235,7 @@ export default function ReservationDetailPage() {
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
-                Room
-              </label>
+              <p className="font-semibold text-slate-600 text-sm">Room</p>
               <p className="font-semibold mt-1 text-lg text-slate-800">
                 Room {reservation.room?.number}
               </p>
@@ -251,9 +245,9 @@ export default function ReservationDetailPage() {
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
+              <p className="font-semibold text-slate-600 text-sm">
                 Check-in Date
-              </label>
+              </p>
               <p className="font-semibold mt-1 text-lg text-slate-800">
                 <Calendar className="h-4 inline mr-1 w-4" />
                 {formatDate(reservation.checkIn)}
@@ -261,9 +255,9 @@ export default function ReservationDetailPage() {
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
+              <p className="font-semibold text-slate-600 text-sm">
                 Check-out Date
-              </label>
+              </p>
               <p className="font-semibold mt-1 text-lg text-slate-800">
                 <Calendar className="h-4 inline mr-1 w-4" />
                 {formatDate(reservation.checkOut)}
@@ -271,9 +265,9 @@ export default function ReservationDetailPage() {
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
+              <p className="font-semibold text-slate-600 text-sm">
                 Number of Nights
-              </label>
+              </p>
               <p className="font-semibold mt-1 text-lg text-slate-800">
                 {reservation.nights}{' '}
                 {reservation.nights === 1 ? 'night' : 'nights'}
@@ -281,9 +275,9 @@ export default function ReservationDetailPage() {
             </div>
 
             <div>
-              <label className="font-semibold text-slate-600 text-sm">
+              <p className="font-semibold text-slate-600 text-sm">
                 Number of Guests
-              </label>
+              </p>
               <p className="font-semibold mt-1 text-lg text-slate-800">
                 {reservation.numberOfGuests}{' '}
                 {reservation.numberOfGuests === 1 ? 'guest' : 'guests'}
@@ -293,9 +287,9 @@ export default function ReservationDetailPage() {
 
           {reservation.specialRequests && (
             <div className="border-slate-200 border-t mt-6 pt-6">
-              <label className="font-semibold text-slate-600 text-sm">
+              <p className="font-semibold text-slate-600 text-sm">
                 Special Requests
-              </label>
+              </p>
               <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {reservation.specialRequests}
               </p>
@@ -304,9 +298,9 @@ export default function ReservationDetailPage() {
 
           {reservation.cancellationReason && (
             <div className="-m-6 bg-red-50/50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-3xl">
-              <label className="font-semibold text-red-600 text-sm">
+              <p className="font-semibold text-red-600 text-sm">
                 Cancellation Reason
-              </label>
+              </p>
               <p className="mt-2 text-red-700 whitespace-pre-wrap">
                 {reservation.cancellationReason}
               </p>
@@ -349,9 +343,9 @@ export default function ReservationDetailPage() {
 
             {reservation.actualCheckIn && (
               <div className="border-slate-200 border-t pt-4">
-                <label className="font-semibold text-slate-600 text-sm">
+                <p className="font-semibold text-slate-600 text-sm">
                   Actual Check-in
-                </label>
+                </p>
                 <p className="mt-1 text-slate-700">
                   {new Date(reservation.actualCheckIn).toLocaleString()}
                 </p>
@@ -360,9 +354,9 @@ export default function ReservationDetailPage() {
 
             {reservation.actualCheckOut && (
               <div className="border-slate-200 border-t pt-4">
-                <label className="font-semibold text-slate-600 text-sm">
+                <p className="font-semibold text-slate-600 text-sm">
                   Actual Check-out
-                </label>
+                </p>
                 <p className="mt-1 text-slate-700">
                   {new Date(reservation.actualCheckOut).toLocaleString()}
                 </p>

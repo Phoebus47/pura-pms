@@ -4,7 +4,11 @@ import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div className="absolute bg-linear-to-br from-blue-50 inset-0 opacity-60 to-orange-50 via-indigo-50" />

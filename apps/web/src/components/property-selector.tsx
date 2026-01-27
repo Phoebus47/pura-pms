@@ -6,10 +6,10 @@ import { propertiesAPI, type Property } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
 interface PropertySelectorProps {
-  id?: string;
-  value: string;
-  onChange: (propertyId: string) => void;
-  required?: boolean;
+  readonly id?: string;
+  readonly value: string;
+  readonly onChange: (propertyId: string) => void;
+  readonly required?: boolean;
 }
 
 export function PropertySelector({

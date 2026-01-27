@@ -3,11 +3,11 @@
 import { Calendar } from 'lucide-react';
 
 interface DateRangePickerProps {
-  checkIn: string;
-  checkOut: string;
-  onCheckInChange: (date: string) => void;
-  onCheckOutChange: (date: string) => void;
-  minDate?: string;
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly onCheckInChange: (date: string) => void;
+  readonly onCheckOutChange: (date: string) => void;
+  readonly minDate?: string;
 }
 
 export function DateRangePicker({

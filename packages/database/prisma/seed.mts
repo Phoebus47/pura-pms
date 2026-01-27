@@ -1,7 +1,10 @@
 /// <reference types="node" />
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import { createRequire } from 'node:module';
 
+// ESM compatibility: createRequire is the correct pattern for importing CommonJS modules in ESM
+const require = createRequire(import.meta.url);
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -15,7 +18,7 @@ async function main() {
     },
   });
 
-  const staffRole = await prisma.role.upsert({
+  await prisma.role.upsert({
     where: { name: 'Staff' },
     update: {},
     create: {
@@ -43,15 +46,15 @@ async function main() {
 
   // Run financial seed after main seed
   console.log('\n🌱 Seeding Financial Module...');
-  const { default: seedFinancial } = await import('./seed-financial');
-  await seedFinancial();
+  const seedFinancialModule = await import('./seed-financial.mjs');
+  await seedFinancialModule.default();
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+try {
+  await main();
+} catch (e) {
+  console.error(e);
+  process.exit(1);
+} finally {
+  await prisma.$disconnect();
+}

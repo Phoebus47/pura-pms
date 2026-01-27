@@ -2,9 +2,9 @@ import { cn } from '@/lib/utils';
 import type { ReservationStatus } from '@/lib/api/reservations';
 
 interface ReservationStatusBadgeProps {
-  status: ReservationStatus;
-  className?: string;
-  size?: 'default' | 'xs';
+  readonly status: ReservationStatus;
+  readonly className?: string;
+  readonly size?: 'default' | 'xs';
 }
 
 const statusConfig: Record<

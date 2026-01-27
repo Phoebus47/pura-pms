@@ -10,7 +10,7 @@ import { Prisma, RoomStatus, RoomType } from '@pura/database';
 
 @Injectable()
 export class RoomsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createRoomDto: CreateRoomDto) {
     const property = await this.prisma.property.findUnique({
@@ -255,27 +255,25 @@ export class RoomsService {
       (room) => room.reservations.length === 0,
     );
 
-    const availabilityByType = availableRooms.reduce(
-      (acc, room) => {
-        const typeId = room.roomTypeId;
-        if (!acc[typeId]) {
-          acc[typeId] = {
-            roomType: room.roomType,
-            availableCount: 0,
-            rooms: [],
-          };
-        }
-        acc[typeId].availableCount++;
-        acc[typeId].rooms.push({
-          id: room.id,
-          number: room.number,
-          floor: room.floor,
-          status: room.status,
-        });
-        return acc;
-      },
-      {} as Record<string, RoomAvailability>,
-    );
+    const availabilityByType: Record<string, RoomAvailability> = {};
+
+    for (const room of availableRooms) {
+      const typeId = room.roomTypeId;
+      if (!availabilityByType[typeId]) {
+        availabilityByType[typeId] = {
+          roomType: room.roomType,
+          availableCount: 0,
+          rooms: [],
+        };
+      }
+      availabilityByType[typeId].availableCount++;
+      availabilityByType[typeId].rooms.push({
+        id: room.id,
+        number: room.number,
+        floor: room.floor,
+        status: room.status,
+      });
+    }
 
     return {
       checkIn,

@@ -21,10 +21,10 @@ import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
 import { ErrorDisplay } from '@/components/shared/error-display';
 
 interface RoomFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  room?: Room | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: () => void;
+  readonly room?: Room | null;
 }
 
 const ROOM_STATUSES: { value: RoomStatus; label: string }[] = [
@@ -174,13 +174,10 @@ export function RoomFormDialog({
             }
             required
             disabled={!formData.propertyId || loadingRoomTypes}
-            placeholder={
-              loadingRoomTypes
-                ? 'Loading...'
-                : formData.propertyId
-                  ? 'Select a room type'
-                  : 'Select property first'
-            }
+            placeholder={getRoomTypePlaceholder(
+              loadingRoomTypes,
+              !!formData.propertyId,
+            )}
             options={roomTypes.map((type) => ({
               value: type.id,
               label: `${type.name} - ฿${Number(type.baseRate).toLocaleString()}`,
@@ -216,4 +213,13 @@ export function RoomFormDialog({
       </form>
     </BaseFormDialog>
   );
+}
+
+function getRoomTypePlaceholder(
+  isLoading: boolean,
+  hasProperty: boolean,
+): string {
+  if (isLoading) return 'Loading...';
+  if (hasProperty) return 'Select a room type';
+  return 'Select property first';
 }

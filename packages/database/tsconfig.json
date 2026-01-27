@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "lib": ["es2019", "dom"],
+    "target": "es2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["es2022", "dom"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
-  "exclude": ["node_modules", "dist", "prisma", "prisma.config.ts"]
+  "include": ["src", "prisma"],
+  "exclude": ["node_modules", "dist", "prisma/migrations"]
 }

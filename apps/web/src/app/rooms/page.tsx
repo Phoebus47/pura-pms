@@ -124,9 +124,9 @@ export default function RoomsPage() {
       ) : (
         <div className="gap-4 grid lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
           {rooms.map((room) => (
-            <div
+            <button
               key={room.id}
-              className="backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl overflow-hidden p-5 relative rounded-2xl shadow-lg transition-all"
+              className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 focus:outline-none focus:ring-[#1e4b8e] focus:ring-2 focus:ring-offset-2 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl overflow-hidden p-5 relative rounded-2xl shadow-lg text-left transition-all w-full"
               onClick={() => {
                 router.push(`/rooms/${room.id}`);
               }}
@@ -164,7 +164,7 @@ export default function RoomsPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </button>
           ))}
         </div>
       )}

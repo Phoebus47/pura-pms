@@ -200,7 +200,7 @@ export default function GuestsPage() {
                           {Array.from({ length: guest.vipLevel }).map(
                             (_, i) => (
                               <Star
-                                key={i}
+                                key={`${guest.id}-star-${i}`}
                                 className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                               />
                             ),

@@ -67,7 +67,7 @@ export function useConfirmDialog() {
 
   const Dialog = dialog ? (
     <dialog
-      className="backdrop-blur-sm bg-black/50 bg-transparent border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
+      className="backdrop-blur-sm bg-black/50 border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
       open

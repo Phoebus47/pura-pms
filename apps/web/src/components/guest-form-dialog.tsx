@@ -9,10 +9,10 @@ import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
 import { ErrorDisplay } from '@/components/shared/error-display';
 
 interface GuestFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: (guest: Guest) => void;
-  guest?: Guest | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: (guest: Guest) => void;
+  readonly guest?: Guest | null;
 }
 
 export function GuestFormDialog({
@@ -197,7 +197,7 @@ export function GuestFormDialog({
                     <>
                       {Array.from({ length: level }).map((_, i) => (
                         <Star
-                          key={i}
+                          key={`level-${level}-star-${i}`}
                           className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
                         />
                       ))}
