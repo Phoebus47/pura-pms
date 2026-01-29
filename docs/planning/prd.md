@@ -453,17 +453,17 @@ model AuditLog {
 
 - [x] Project setup & architecture
 - [x] Authentication & authorization
-- [ ] Property & room setup
-- [ ] Basic reservations
-- [ ] Guest profiles
+- [x] Property & room setup
+- [x] Basic reservations
+- [x] Guest profiles
 
 ### Phase 2: Front Office (4 weeks)
 
 - [ ] Check-in/out workflow
 - [ ] Folio management
 - [ ] Payment processing
-- [ ] Housekeeping module
-- [ ] Dashboard
+- [x] Housekeeping module
+- [x] Dashboard
 
 ### Phase 3: Financial & Audit (4 weeks)
 

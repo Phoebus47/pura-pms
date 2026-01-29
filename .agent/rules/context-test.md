@@ -1,0 +1,24 @@
+# Test context
+
+You are editing **tests**. Combine your knowledge with project rules.
+
+## Use your knowledge (no need to paste long docs)
+
+- Jest / Vitest (describe, it, expect, vi.mock, vi.fn)
+- React Testing Library (render, screen, queries, userEvent, accessibility)
+- Testing best practices: behavior over implementation, one logical assertion per test, clear arrange–act–assert
+- Mocking (modules, timers, fetch)
+
+## Project-specific – read only these sections when needed
+
+- **docs/guidelines/coding_standards.md §13** – Testing (behavior over implementation, naming, location, mock external deps, coverage)
+- **§17** – Code quality tests (behavior, mock next-intl/router/image/framer-motion; API tests: status codes, validation)
+- **§15** – i18n: in tests, mock `useTranslations` / `getTranslations`; assert on keys or mocked strings as appropriate
+
+## Quick checks
+
+- Mock `next-intl`, `@/i18n/navigation`, `next/image` (strip `unoptimized`/`fill` from mock to avoid DOM warnings)
+- Prefer `getByRole`, `getByLabelText` over `getByTestId`
+- Test behavior and outcomes, not implementation details
+- Keep tests focused; one concern per test when possible
+- **API Tests:** Mock Request/Response objects for Controllers.
