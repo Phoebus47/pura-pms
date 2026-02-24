@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
+import { setAuthToken } from '@/lib/api/client';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
   const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +23,13 @@ export default function LoginPage() {
     try {
       const response = await authAPI.login({ email, password });
 
-      localStorage.setItem('token', response.access_token);
+      setAuthToken(response.access_token);
+      setAuth(response.access_token, {
+        id: response.user.id,
+        email: response.user.email,
+        name: `${response.user.firstName} ${response.user.lastName}`,
+        role: response.user.role,
+      });
       router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');

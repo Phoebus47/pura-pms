@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { vi, type Mock } from 'vitest';
 import { UsersService } from './users.service';
@@ -58,16 +57,15 @@ describe('UsersService', () => {
       expect(result).toBeDefined();
       expect(prisma.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             email: 'test@example.com',
           }),
         }),
       );
       // Verify that the password sent to prisma is NOT the plain text password
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       const createCallArgs = (prisma.user.create as Mock).mock.calls[0][0];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(createCallArgs.data.password).not.toBe('password');
     });
   });

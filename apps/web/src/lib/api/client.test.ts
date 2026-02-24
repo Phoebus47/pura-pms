@@ -161,6 +161,30 @@ describe('APIClient', () => {
     });
   });
 
+  describe('mock api interception', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('should route request to mock router when NEXT_PUBLIC_USE_MOCK_API is true', async () => {
+      process.env.NEXT_PUBLIC_USE_MOCK_API = 'true';
+      const client = new APIClient();
+
+      // using a guaranteed mock endpoint
+      const response = await client.get('/metrics/occupancy');
+
+      expect(global.fetch).not.toHaveBeenCalled();
+      expect(response).toBeDefined();
+      expect((response as any).totalRooms).toBeDefined();
+    });
+  });
+
   describe('post', () => {
     it('should make POST request with data', async () => {
       const mockData = { id: '1', name: 'Test' };

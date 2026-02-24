@@ -69,10 +69,9 @@ describe('FoliosService', () => {
       const result = await service.create({ reservationId: 'res-1' });
 
       expect(result).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(prisma.folio.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             folioNumber: 'F000006',
             reservationId: 'res-1',
@@ -99,10 +98,9 @@ describe('FoliosService', () => {
       });
 
       expect(result).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(prisma.folio.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             type: 'COMPANY',
           }),
@@ -134,15 +132,14 @@ describe('FoliosService', () => {
       const result = await service.findOne('folio-1');
 
       expect(result).toEqual(mockFolio);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(prisma.folio.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'folio-1' },
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           include: expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             reservation: expect.any(Object),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
             windows: expect.any(Object),
           }),
         }),
@@ -171,7 +168,7 @@ describe('FoliosService', () => {
       const result = await service.findByReservationId('res-1');
 
       expect(result).toHaveLength(2);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(prisma.folio.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { reservationId: 'res-1' },
@@ -221,13 +218,12 @@ describe('FoliosService', () => {
 
       expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             windowId: 'win-1',
             trxCodeId: 'trx-1',
             amountNet: 1000,
             amountService: 100, // 10% of 1000
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
             amountTax: expect.closeTo(77, 0), // 7% of (1000 + 100)
             sign: 1,
           }),
@@ -267,7 +263,6 @@ describe('FoliosService', () => {
 
       expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             amountService: 0,
             amountTax: 0,
@@ -304,7 +299,6 @@ describe('FoliosService', () => {
 
       expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             businessDate: new Date('2025-01-15'),
           }),
@@ -359,7 +353,6 @@ describe('FoliosService', () => {
 
       expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             amountService: 100,
             amountTax: 0,

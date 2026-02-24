@@ -8,9 +8,10 @@ import { dirname } from 'node:path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+import dotenv from 'dotenv';
 // Load test environment variables
 const envPath = path.resolve(__dirname, '../.env.test');
-require('dotenv').config({ path: envPath });
+dotenv.config({ path: envPath });
 
 // Create Prisma client for testing with explicit test database
 export const prisma = new PrismaClient({

@@ -1,5 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
 import { AppLayout } from './app-layout';
+import { usePathname } from 'next/navigation';
+
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(),
+}));
 
 vi.mock('./sidebar', () => ({
   Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
@@ -16,6 +22,11 @@ vi.mock('./bottom-navigation', () => ({
 }));
 
 describe('AppLayout', () => {
+  beforeEach(() => {
+    (usePathname as any).mockReturnValue('/');
+    vi.clearAllMocks();
+  });
+
   it('should render sidebar', () => {
     render(
       <AppLayout>
@@ -65,5 +76,19 @@ describe('AppLayout', () => {
 
     const main = screen.getByText('Test Content').closest('main');
     expect(main).toBeInTheDocument();
+  });
+
+  it('should only render children when pathname is /login', () => {
+    (usePathname as any).mockReturnValue('/login');
+    render(
+      <AppLayout>
+        <div>Test Login Content</div>
+      </AppLayout>,
+    );
+
+    expect(screen.getByText('Test Login Content')).toBeInTheDocument();
+    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('header')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
   });
 });

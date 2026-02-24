@@ -61,6 +61,13 @@ describe('LoginPage', () => {
   it('should handle successful login', async () => {
     vi.spyOn(authAPI, 'login').mockResolvedValue({
       access_token: 'test-token',
+      user: {
+        id: '1',
+        email: 'admin@pura.com',
+        firstName: 'Test',
+        lastName: 'Admin',
+        role: 'ADMIN',
+      },
     } as any);
 
     render(<LoginPage />);

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReservationsService } from './reservations.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -159,7 +158,6 @@ describe('ReservationsService', () => {
       await service.findAll('prop-1');
       expect(prisma.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({ room: { propertyId: 'prop-1' } }),
         }),
       );
@@ -177,7 +175,6 @@ describe('ReservationsService', () => {
       );
       expect(prisma.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({
             status: ReservationStatus.CONFIRMED,
             guestId: 'guest-1',
@@ -190,7 +187,6 @@ describe('ReservationsService', () => {
       await service.findAll(undefined, undefined, checkIn);
       expect(prisma.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({
             OR: [{ checkIn: { gte: checkIn } }],
           }),
@@ -203,7 +199,6 @@ describe('ReservationsService', () => {
       await service.findAll(undefined, undefined, undefined, checkOut);
       expect(prisma.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({
             OR: [{ checkOut: { lte: checkOut } }],
           }),
@@ -310,7 +305,6 @@ describe('ReservationsService', () => {
 
       expect(prisma.reservation.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             nights: 2,
             totalAmount: 200,
@@ -395,7 +389,6 @@ describe('ReservationsService', () => {
       await service.cancel('res-1');
       expect(prisma.reservation.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             notes: 'Original Note',
           }),
@@ -512,7 +505,6 @@ describe('ReservationsService', () => {
 
       expect(prisma.room.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({ roomTypeId: 'type-1' }),
         }),
       );

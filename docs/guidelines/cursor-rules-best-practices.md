@@ -1,6 +1,6 @@
 # .cursorrules Best Practices - PURA PMS
 
-**Last Updated:** 2026-01-XX  
+**Last Updated:** February 2026  
 **Purpose:** คู่มือการใช้งานและปรับปรุง `.cursorrules` สำหรับ Cursor IDE
 
 ---

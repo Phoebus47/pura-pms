@@ -72,11 +72,10 @@ pura/
 ├── packages/
 │   └── database/               # Prisma schema & migrations
 │       └── prisma/
-│           ├── schema.prisma          # Main schema
-│           └── schema.enhancements.prisma  # Financial module (to merge)
+│           └── schema.prisma          # Main schema
 ├── docs/
-│   ├── planning/               # PRD, Blueprint, Work Plans
-│   └── guidelines/             # Coding standards
+│   ├── planning/               # PRD, Roadmap, Reports
+│   └── guidelines/             # Coding standards, AI guides
 ├── eslint-rules/               # Custom ESLint rules
 └── .husky/                     # Git hooks
 ```
@@ -92,8 +91,14 @@ pura/
 
 - 🎯 Phase 3: Financial & Audit Module (Priority)
 
-**Next Steps:**
-See [Detailed Work Plan](./docs/planning/DETAILED-WORK-PLAN.md) for complete task breakdown.
+**Remaining Phases:**
+
+- Phase 4: Operations Edge Cases (Day-use, Room Move, No-show, etc.)
+- Phase 5: Advanced Features (Rate Derivation, AI Yield Management, PWA)
+- Phase 6: Compliance & Communication (TM30, Guest Communication)
+- Phase 7: i18n & Multi-Property
+
+See [Development Roadmap](./docs/planning/roadmap.md) for complete task breakdown.
 
 ## 🔒 Code Quality
 
@@ -110,24 +115,18 @@ See [docs/guidelines/coding_standards.md](./docs/guidelines/coding_standards.md)
 
 ### Planning & Requirements
 
-- [PRD](./docs/planning/prd.md) - Product Requirements Document
-- [PRD Enhancements](./docs/planning/prd-enhancements.md) - Enterprise enhancements
-- [Final Blueprint](./docs/planning/FINAL-BLUEPRINT.md) - Complete feature list
-- [Summary](./docs/planning/SUMMARY.md) - Research summary
-- [Detailed Work Plan](./docs/planning/DETAILED-WORK-PLAN.md) - Task breakdown
+- [PRD v3.2](./docs/planning/prd.md) — Product Requirements Document (24 Modules, Enterprise)
+- [Development Roadmap](./docs/planning/roadmap.md) — Feature checklist & phase priorities
 
 ### Technical Documentation
 
-- [Coding Standards](./docs/guidelines/coding_standards.md) - Code quality guidelines
-- [Implementation Plan](./docs/planning/implementation_plan.md) - Tech stack & setup
-- [Task Breakdown](./docs/planning/task.md) - Phase completion status
-- [Compliance Check](./docs/planning/compliance-check.md) - Standards compliance
+- [Coding Standards](./docs/guidelines/coding_standards.md) — Code quality guidelines
+- [Deployment Guide](./DEPLOYMENT.md) — Vercel + Render + Supabase setup
 
 ### Reports & Security
 
-- [Reports Master List](./docs/planning/reports-master-list.md) - 30+ Reports specifications
-- [Security & Legal Compliance](./docs/planning/security-legal-compliance.md) - Security requirements
-- [Improvement Checklist](./docs/planning/improvement-checklist.md) - Development checklist
+- [Reports Master List](./docs/planning/reports-master-list.md) — 30+ Report specifications
+- [Security & Legal Compliance](./docs/planning/security-legal-compliance.md) — PDPA, PCI-DSS, TM30
 
 ## 🧪 Testing
 

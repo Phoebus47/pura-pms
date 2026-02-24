@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReportsService } from './reports.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -111,14 +110,12 @@ describe('ReportsService', () => {
 
       expect(prisma.folioTransaction.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({
             businessDate: expectedDate,
             isVoid: false,
             window: {
               folio: {
                 reservation: {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                   room: { propertyId: 'prop-1' } as any,
                 },
               },

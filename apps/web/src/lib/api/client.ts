@@ -41,6 +41,16 @@ export class APIClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    // DEMO MOCK API INTERCEPT
+    if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+      const { routeMockRequest } = await import('./mock/router');
+      return routeMockRequest<T>(endpoint, {
+        ...fetchOptions,
+        token,
+        method: options.method,
+      });
+    }
+
     const url = `${this.baseURL}${endpoint}`;
 
     try {

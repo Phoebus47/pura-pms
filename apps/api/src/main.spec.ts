@@ -73,7 +73,6 @@ describe('Main Bootstrap', () => {
     // Get the mocked NestFactory to check calls
     const { NestFactory } = await import('@nestjs/core');
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     const createFn = NestFactory.create;
     expect(
       vi.isMockFunction(createFn) ? createFn : undefined,
@@ -83,7 +82,6 @@ describe('Main Bootstrap', () => {
       vi.isMockFunction(mockApp.enableCors) ? mockApp.enableCors : undefined,
     ).toHaveBeenCalledWith(
       expect.objectContaining({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         origin: expect.any(Array),
         credentials: true,
       }),
