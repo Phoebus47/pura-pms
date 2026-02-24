@@ -1,19 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropertiesPage from './page';
 import { useProperties } from '@/hooks/use-properties';
 import { useRouter } from 'next/navigation';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/hooks/use-properties', () => ({
-  useProperties: jest.fn(),
+vi.mock('@/hooks/use-properties', () => ({
+  useProperties: vi.fn(),
 }));
 
-const mockConfirm = jest.fn((title, msg, action) => action());
-jest.mock('@/components/ui/confirm-dialog', () => ({
+const mockConfirm = vi.fn((title, msg, action) => action());
+vi.mock('@/components/ui/confirm-dialog', () => ({
   useConfirmDialog: () => ({
     confirm: mockConfirm,
     Dialog: <div data-testid="confirm-dialog" />,
@@ -21,8 +23,8 @@ jest.mock('@/components/ui/confirm-dialog', () => ({
 }));
 
 // Mock child components
-jest.mock('@/components/property-form-dialog', () => ({
-  PropertyFormDialog: jest.fn(({ isOpen, property, onSuccess, onClose }) =>
+vi.mock('@/components/property-form-dialog', () => ({
+  PropertyFormDialog: vi.fn(({ isOpen, property, onSuccess, onClose }) =>
     isOpen ? (
       <div data-testid="property-form-dialog">
         {property ? `Edit ${property.name}` : 'Create Property'}
@@ -52,14 +54,14 @@ const mockProperties = [
 ];
 
 describe('PropertiesPage', () => {
-  const mockLoadProperties = jest.fn();
-  const mockDeleteProperty = jest.fn();
-  const mockPush = jest.fn();
+  const mockLoadProperties = vi.fn();
+  const mockDeleteProperty = vi.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (useProperties as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useProperties as any).mockReturnValue({
       properties: mockProperties,
       loading: false,
       error: null,
@@ -69,7 +71,7 @@ describe('PropertiesPage', () => {
   });
 
   it('renders loading state', () => {
-    (useProperties as jest.Mock).mockReturnValue({
+    (useProperties as any).mockReturnValue({
       loading: true,
       properties: [],
       loadProperties: mockLoadProperties,
@@ -79,7 +81,7 @@ describe('PropertiesPage', () => {
   });
 
   it('renders error state', () => {
-    (useProperties as jest.Mock).mockReturnValue({
+    (useProperties as any).mockReturnValue({
       loading: false,
       error: 'Failed to fetch',
       properties: [],
@@ -93,7 +95,7 @@ describe('PropertiesPage', () => {
   });
 
   it('renders empty state', () => {
-    (useProperties as jest.Mock).mockReturnValue({
+    (useProperties as any).mockReturnValue({
       properties: [],
       loading: false,
       loadProperties: mockLoadProperties,

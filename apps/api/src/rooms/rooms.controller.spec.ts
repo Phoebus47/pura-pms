@@ -6,20 +6,20 @@ import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomStatus } from '@pura/database';
 
 const mockRoomsService = {
-  create: jest.fn(),
-  findAll: jest.fn(),
-  getAvailability: jest.fn(),
-  findOne: jest.fn(),
-  update: jest.fn(),
-  updateStatus: jest.fn(),
-  remove: jest.fn(),
+  create: vi.fn(),
+  findAll: vi.fn(),
+  getAvailability: vi.fn(),
+  findOne: vi.fn(),
+  update: vi.fn(),
+  updateStatus: vi.fn(),
+  remove: vi.fn(),
 };
 
 describe('RoomsController', () => {
   let controller: RoomsController;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RoomsController],

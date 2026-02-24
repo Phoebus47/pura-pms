@@ -1,8 +1,8 @@
-# PURA PMS - Improvement Checklist
+# PURA PMS - Development Roadmap
 
-## สรุปการปรับปรุงทั้งหมดจาก PRD เดิม
+## Checklist ฟีเจอร์ทั้งหมดสำหรับ PRD v3.2 (24 Modules, 7 Phases)
 
-เอกสารนี้เป็น Checklist สำหรับการปรับปรุงและเพิ่มเติมฟีเจอร์ต่างๆ ตาม PRD Enhancements
+เอกสารนี้เป็น Checklist สำหรับการพัฒนาฟีเจอร์ทั้งหมดตาม PRD v3.2 Enterprise Edition
 
 ---
 
@@ -132,6 +132,53 @@
   - [ ] Separate profile per guest
   - [ ] Separate billing option
 
+### Edge Cases (Enterprise)
+
+- [ ] **Day-use Reservations**
+  - [ ] Day-use flag on reservation
+  - [ ] Separate rate structure
+  - [ ] Skip Night Audit posting for day-use
+
+- [ ] **Split Stay**
+  - [ ] Multiple room types within single reservation
+  - [ ] Automatic room move at split point
+
+- [ ] **No-show & Late Cancellation**
+  - [ ] CancellationPolicy model
+  - [ ] Link rate codes to cancellation policies
+  - [ ] Auto-post no-show charge during Night Audit
+  - [ ] Late cancellation fee calculation
+
+- [ ] **Room Move Mid-stay**
+  - [ ] RoomMove model
+  - [ ] Auto-transfer folio to new room
+  - [ ] Re-issue key card trigger
+  - [ ] Update housekeeping status (old → Dirty, new → Occupied)
+
+- [ ] **VIP Room Pre-assignment**
+  - [ ] Lock room for VIP, prevent auto-reassignment
+
+- [ ] **Complimentary / House Use Rooms**
+  - [ ] Rate code type: COMP / HOUSE
+  - [ ] Count occupancy but not revenue
+  - [ ] Authority tracking
+
+- [ ] **Post-departure Charges**
+  - [ ] Reopen folio after checkout
+  - [ ] Post to city ledger if no card auth
+
+- [ ] **Extended Stay Billing**
+  - [ ] Weekly/monthly billing cycles
+  - [ ] Auto-generate interim folio
+
+- [ ] **Tax Exemption**
+  - [ ] Flag reservation for VAT exemption
+  - [ ] Store exemption documents
+
+- [ ] **Overbooking Recovery (Walk)**
+  - [ ] Partner hotel list
+  - [ ] Walk cost tracking & compensation
+
 ---
 
 ## 🧹 Housekeeping Enhancements
@@ -173,6 +220,27 @@
   - [ ] e-Tax Invoice integration
   - [ ] QR Code generation
   - [ ] PDF generation with Thai font support
+
+- [ ] **Credit Card Pre-authorization**
+  - [ ] CardAuthorization model
+  - [ ] Pre-auth at check-in (hold, not charge)
+  - [ ] Incremental authorization for extended stays
+  - [ ] Release hold at checkout
+
+- [ ] **Credit Limit Alerts**
+  - [ ] Auto-notify when folio exceeds threshold
+  - [ ] Force settlement workflow
+
+- [ ] **Rebate vs. Void**
+  - [ ] Separate rebate workflow (partial refund)
+  - [ ] Distinct from full void
+
+- [ ] **Package Revenue Breakdown**
+  - [ ] Split inclusive rate per USALI
+  - [ ] Room → 4000-01, F&B → 4000-02
+
+- [ ] **Refund Processing**
+  - [ ] Full/partial refund with approval workflow
 
 ---
 
@@ -459,6 +527,65 @@
 
 ---
 
+## 🔒 Compliance & New Modules
+
+### TM30 Immigration Reporting (Module 4.19)
+
+- [ ] TM30Report model
+- [ ] Auto-extract passport data from scan/OCR
+- [ ] Auto-generate TM30 form
+- [ ] Track submission status (Pending/Submitted/Confirmed)
+- [ ] Batch submission
+- [ ] Alert for overdue submissions
+
+### Lost & Found Management (Module 4.20)
+
+- [ ] LostFoundItem model
+- [ ] Item registration with photo evidence
+- [ ] Guest notification & claim workflow
+- [ ] Disposition tracking (returned, donated, disposed)
+
+### Guest Communication Hub (Module 4.21)
+
+- [ ] GuestMessage model
+- [ ] In-app messaging (guest ↔ staff)
+- [ ] Automated pre-arrival messages
+- [ ] Post-stay satisfaction survey
+- [ ] Push notifications
+
+### Central Reservation System (Module 4.22)
+
+- [ ] Cross-property availability search
+- [ ] Central rate management
+- [ ] Guest profile sharing across properties
+- [ ] Loyalty program
+
+### Yield Management (Module 4.23)
+
+- [ ] Demand forecasting (historical data)
+- [ ] Competitor rate monitoring
+- [ ] Automated rate recommendations
+- [ ] Pace analysis with alerts
+
+### Self-Service Portal (Module 4.24)
+
+- [ ] Kiosk check-in/out
+- [ ] Mobile check-in
+- [ ] Guest web portal (view folio, request services)
+- [ ] Digital key (BLE/NFC)
+
+### Digital Registration Card
+
+- [ ] Tablet signature capture
+- [ ] Digital storage with legal compliance
+
+### Wake-up Call System
+
+- [ ] Manual or PBX integration
+- [ ] Track delivery confirmation
+
+---
+
 ## 🔒 Security & Legal Compliance
 
 ### Thai Legal Compliance
@@ -632,77 +759,68 @@
 
 ---
 
-## 📅 Priority Order
+## 📅 Priority Order (Aligned with PRD v3.2)
 
-### Phase 1: Critical (Next Sprint)
+### Phase 3: Financial & Audit (Current — 🎯 Priority)
 
-1. **Financial Module Schema**
-   - TransactionCode
-   - FolioWindow
-   - FolioTransaction
-   - ReasonCode
-   - Budget Model
+1. Enhanced Folio System (Windows, Routing, Post-departure, Rebate)
+2. Transaction Codes (Mapping to GL)
+3. Reason Codes (Audit Trail)
+4. Night Audit System (Enhanced with Queue)
+5. Shift Management (Enhanced)
+6. GL/AR/AP modules (USALI Compliant)
+7. Tax Invoice (e-Tax Invoice Ready)
+8. Currency Exchange
+9. Credit Card Pre-authorization
+10. Package Revenue Breakdown (USALI split)
+11. Credit Limit Alerts & Auto-settlement
 
-2. **Core Reports (Minimum Viable)**
-   - Daily Revenue Report (DRR)
-   - Trial Balance (Basic)
-   - Daily Flash Report
-   - Tax Invoice Control
+### Phase 4: Operations Edge Cases
 
-3. **Security Foundation**
-   - PDPA Consent Management
-   - Session Management
-   - PCI-DSS Tokenization Setup
-   - Audit Logging
+1. Day-use Reservations
+2. Split Stay
+3. Room Move Mid-stay
+4. No-show / Late Cancellation Auto-charges
+5. Post-departure Charges
+6. Overbooking Recovery (Walk)
+7. Complimentary / House Use Rooms
+8. Extended Stay Billing (weekly/monthly)
+9. Tax Exemption Handling
+10. VIP Room Pre-assignment & Lock
 
-4. **i18n Foundation**
-   - next-intl setup
-   - Message files
-   - Remove hardcoded text
+### Phase 5: Advanced Features
 
-### Phase 2: High Priority
+1. Rate Derivation (Parent/Child Rates)
+2. Dynamic Pricing / Yield Management (AI)
+3. Allotment & Blocks
+4. Housekeeping Inspection (Workflow)
+5. Hardware Bridge (Local Agent)
+6. PWA (Offline Capability)
+7. Digital Registration Card (Tablet Signature)
+8. Wake-up Call System
+9. DND/MUR Status Indicators
 
-1. **Reports (Complete)**
-   - P&L Statement (USALI)
-   - Cashier Report
-   - Rate Variance Report
-   - High Balance Report
-   - ABF Reports
-   - Police Report (TM.30)
+### Phase 6: Compliance & Communication
 
-2. **Security & Compliance**
-   - TM.30 Auto-generation
-   - Immutable Ledger
-   - 2FA for High-Role Users
-   - Backup Strategy
+1. **TM30 Immigration Reporting** (บังคับตามกฎหมาย)
+2. Lost & Found Management
+3. Guest Communication Hub (In-app messaging)
+4. Post-stay Feedback & Review Management
+5. Guest Complaints / Service Recovery
+6. Self-service Kiosk Integration
 
-3. **Night Audit Queue System**
-4. **Hardware Bridge (POC)**
-5. **Deposit Management**
-6. **Currency Exchange**
+### Phase 7: i18n & Multi-Property
 
-### Phase 3: Medium Priority
-
-1. **Advanced Reports**
-   - Interactive Drill-down
-   - Market Segment Analysis
-   - Forecast Reports
-   - Revenue Pace Report
-
-2. **Rate Derivation**
-3. **Allotment & Blocks**
-4. **Housekeeping Inspection**
-5. **PWA Setup**
-
-### Phase 4: Advanced Features
-
-1. Revenue Management System (RMS Lite)
-2. Engineering & Maintenance Module (CMMS)
-3. Automated Payment Reconciliation
-4. Guest Journey & Self-Service
-5. Open API Marketplace
+1. i18n Foundation (next-intl setup)
+2. Thai Translation (Critical Pages)
+3. Thai Font Support (PDF Reports)
+4. Thai Search (Guest Name Search)
+5. Central Reservation System (Multi-property)
+6. Guest Portal (View folio, request services)
+7. Digital Key (BLE/NFC)
+8. Mobile Check-in
 
 ---
 
-**Last Updated:** 2025-01-XX
-**Status:** In Progress
+**Last Updated:** February 2026
+**Status:** In Progress — Phase 1-2 Complete, Phase 3 Next

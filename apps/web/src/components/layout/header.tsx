@@ -1,8 +1,11 @@
 'use client';
 
 import { Bell, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { clearAuthToken } from '@/lib/api/client';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +16,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function Header() {
+  const router = useRouter();
+  const { user, clearAuth } = useAuthStore();
+
+  function handleLogout() {
+    clearAuthToken();
+    clearAuth();
+    router.push('/login');
+  }
+
+  const userName = user?.name || 'Guest User';
+  const userInitials = userName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+  const userRole =
+    user?.role === 'ADMIN' ? 'Super Admin' : user?.role || 'Guest';
+  const userEmail = user?.email || 'guest@pura.com';
+
   return (
     <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-16 items-center justify-between px-6 shadow-black/5 shadow-lg sticky top-0 z-20">
       <div className="flex flex-1 gap-4 items-center">
@@ -58,17 +81,17 @@ export function Header() {
                     alt="Super Admin profile picture"
                   />
                   <AvatarFallback className="bg-linear-to-br font-semibold from-[#1e4b8e] shadow-inner text-white text-xs to-[#153a6e]">
-                    SA
+                    {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute bg-emerald-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
               </div>
               <div className="hidden md:block text-left">
                 <p className="font-semibold leading-tight text-foreground text-sm">
-                  Super Admin
+                  {userName}
                 </p>
                 <p className="font-medium text-[11px] text-muted-foreground">
-                  Hotel Manager
+                  {userRole}
                 </p>
               </div>
             </Button>
@@ -79,11 +102,9 @@ export function Header() {
           >
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
-                <p className="font-semibold leading-none text-sm">
-                  Super Admin
-                </p>
+                <p className="font-semibold leading-none text-sm">{userName}</p>
                 <p className="leading-none text-muted-foreground text-xs">
-                  admin@pura.com
+                  {userEmail}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -95,7 +116,10 @@ export function Header() {
               Switch Property
             </DropdownMenuItem>
             <DropdownMenuSeparator className="mx-2" />
-            <DropdownMenuItem className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-xl text-red-600">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-xl text-red-600"
+            >
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

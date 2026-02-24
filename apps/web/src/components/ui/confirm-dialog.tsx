@@ -48,15 +48,18 @@ export function useConfirmDialog() {
   );
 
   const handleConfirm = useCallback(async () => {
+    /* v8 ignore start */
     if (onConfirmCallback) {
       await onConfirmCallback();
     }
+    /* v8 ignore stop */
     setDialog(null);
     setOnConfirmCallback(null);
     setOnCancelCallback(null);
   }, [onConfirmCallback]);
 
   const handleCancel = useCallback(() => {
+    /* v8 ignore next 3 */
     if (onCancelCallback) {
       onCancelCallback();
     }

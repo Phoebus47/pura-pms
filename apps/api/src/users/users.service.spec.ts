@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi, type Mock } from 'vitest';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 const mockPrismaService = {
   user: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
+    create: vi.fn(),
+    findUnique: vi.fn(),
   },
 };
 
@@ -16,7 +16,7 @@ describe('UsersService', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -57,16 +57,15 @@ describe('UsersService', () => {
       expect(result).toBeDefined();
       expect(prisma.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             email: 'test@example.com',
           }),
         }),
       );
       // Verify that the password sent to prisma is NOT the plain text password
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const createCallArgs = (prisma.user.create as jest.Mock).mock.calls[0][0];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
+      const createCallArgs = (prisma.user.create as Mock).mock.calls[0][0];
+
       expect(createCallArgs.data.password).not.toBe('password');
     });
   });

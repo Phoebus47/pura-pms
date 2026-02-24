@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useParams, useRouter } from 'next/navigation';
@@ -5,20 +6,20 @@ import RoomDetailPage from './page';
 import { roomsAPI } from '@/lib/api';
 import type { Room } from '@/lib/api';
 
-jest.mock('next/navigation', () => ({
-  useParams: jest.fn(),
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useParams: vi.fn(),
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   roomsAPI: {
-    getById: jest.fn(),
-    delete: jest.fn(),
+    getById: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
-global.confirm = jest.fn();
-global.alert = jest.fn();
+global.confirm = vi.fn();
+global.alert = vi.fn();
 
 describe('RoomDetailPage', () => {
   const mockRoom: Room = {
@@ -41,19 +42,17 @@ describe('RoomDetailPage', () => {
     updatedAt: '2024-01-01T00:00:00Z',
   };
 
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useParams as jest.Mock).mockReturnValue({ id: '1' });
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (global.confirm as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useParams as any).mockReturnValue({ id: '1' });
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    (global.confirm as any).mockReturnValue(true);
   });
 
   it('should show loading state initially', () => {
-    (roomsAPI.getById as jest.Mock).mockImplementation(
-      () => new Promise(() => {}),
-    );
+    (roomsAPI.getById as any).mockImplementation(() => new Promise(() => {}));
 
     render(<RoomDetailPage />);
 
@@ -61,7 +60,7 @@ describe('RoomDetailPage', () => {
   });
 
   it('should display room details when loaded', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
 
     render(<RoomDetailPage />);
 
@@ -77,7 +76,7 @@ describe('RoomDetailPage', () => {
   });
 
   it('should display room type amenities', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
 
     render(<RoomDetailPage />);
 
@@ -89,7 +88,7 @@ describe('RoomDetailPage', () => {
   });
 
   it('should handle edit button click', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
 
     const user = userEvent.setup();
 
@@ -106,8 +105,8 @@ describe('RoomDetailPage', () => {
   });
 
   it('should handle delete button click', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
-    (roomsAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
+    (roomsAPI.delete as any).mockResolvedValue(undefined);
 
     const user = userEvent.setup();
 
@@ -128,8 +127,8 @@ describe('RoomDetailPage', () => {
   });
 
   it('should not delete if user cancels confirmation', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
-    (global.confirm as jest.Mock).mockReturnValue(false);
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
+    (global.confirm as any).mockReturnValue(false);
 
     const user = userEvent.setup();
 
@@ -146,9 +145,7 @@ describe('RoomDetailPage', () => {
   });
 
   it('should display error when room not found', async () => {
-    (roomsAPI.getById as jest.Mock).mockRejectedValue(
-      new Error('Room not found'),
-    );
+    (roomsAPI.getById as any).mockRejectedValue(new Error('Room not found'));
 
     render(<RoomDetailPage />);
 
@@ -160,10 +157,8 @@ describe('RoomDetailPage', () => {
   });
 
   it('should handle delete error', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
-    (roomsAPI.delete as jest.Mock).mockRejectedValue(
-      new Error('Delete failed'),
-    );
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
+    (roomsAPI.delete as any).mockRejectedValue(new Error('Delete failed'));
 
     const user = userEvent.setup();
 
@@ -200,7 +195,7 @@ describe('RoomDetailPage', () => {
       updatedAt: '2024-01-01T00:00:00Z',
     };
 
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(minimalRoom);
+    (roomsAPI.getById as any).mockResolvedValue(minimalRoom);
 
     render(<RoomDetailPage />);
 
@@ -214,13 +209,37 @@ describe('RoomDetailPage', () => {
     expect(screen.queryByText('Amenities')).not.toBeInTheDocument();
   });
 
+  it('should render room correctly when roomType is missing', async () => {
+    const roomWithoutType: Room = {
+      id: '2',
+      number: '102',
+      floor: 2,
+      status: 'OCCUPIED_DIRTY',
+      propertyId: 'prop1',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      roomTypeId: 'type2',
+      roomType: undefined,
+    };
+    (roomsAPI.getById as any).mockResolvedValue(roomWithoutType);
+
+    render(<RoomDetailPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Room 102')).toBeInTheDocument();
+    });
+
+    const dashes = screen.getAllByText('-');
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
   it('should display notes when present', async () => {
     const roomWithNotes: Room = {
       ...mockRoom,
       notes: 'Accessible room',
     };
 
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(roomWithNotes);
+    (roomsAPI.getById as any).mockResolvedValue(roomWithNotes);
 
     render(<RoomDetailPage />);
 
@@ -230,7 +249,7 @@ describe('RoomDetailPage', () => {
   });
 
   it('should handle non-Error exception in loadRoom', async () => {
-    (roomsAPI.getById as jest.Mock).mockRejectedValue('String error');
+    (roomsAPI.getById as any).mockRejectedValue('String error');
 
     render(<RoomDetailPage />);
 
@@ -242,8 +261,8 @@ describe('RoomDetailPage', () => {
   });
 
   it('should handle non-Error exception in handleDelete', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(mockRoom);
-    (roomsAPI.delete as jest.Mock).mockRejectedValue('String error');
+    (roomsAPI.getById as any).mockResolvedValue(mockRoom);
+    (roomsAPI.delete as any).mockRejectedValue('String error');
 
     const user = userEvent.setup();
 
@@ -262,7 +281,7 @@ describe('RoomDetailPage', () => {
   });
 
   it('should handle null room response', async () => {
-    (roomsAPI.getById as jest.Mock).mockResolvedValue(null);
+    (roomsAPI.getById as any).mockResolvedValue(null);
 
     render(<RoomDetailPage />);
 

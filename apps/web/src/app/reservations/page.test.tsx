@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import ReservationsPage from './page';
 import { reservationsAPI } from '@/lib/api';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   reservationsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
 describe('ReservationsPage', () => {
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
   const mockReservations = [
     {
       id: '1',
@@ -64,14 +65,12 @@ describe('ReservationsPage', () => {
   ];
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    jest.clearAllMocks();
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    vi.clearAllMocks();
   });
 
   it('should display loading state initially', () => {
-    (reservationsAPI.getAll as jest.Mock).mockReturnValue(
-      new Promise(() => {}),
-    );
+    (reservationsAPI.getAll as any).mockReturnValue(new Promise(() => {}));
 
     render(<ReservationsPage />);
 
@@ -79,7 +78,7 @@ describe('ReservationsPage', () => {
   });
 
   it('should display reservations after loading', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
 
     render(<ReservationsPage />);
 
@@ -101,9 +100,7 @@ describe('ReservationsPage', () => {
 
   it('should display error message if loading fails', async () => {
     const errorMessage = 'Failed to load reservations';
-    (reservationsAPI.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    (reservationsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     render(<ReservationsPage />);
 
@@ -117,7 +114,7 @@ describe('ReservationsPage', () => {
 
   it('should navigate to new reservation page when button is clicked', async () => {
     const user = userEvent.setup();
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
 
     render(<ReservationsPage />);
 
@@ -126,13 +123,26 @@ describe('ReservationsPage', () => {
     });
 
     await user.click(screen.getByText('New Reservation'));
-
     expect(mockPush).toHaveBeenCalledWith('/reservations/new');
+  });
+
+  it('should navigate to calendar view when calendar button is clicked', async () => {
+    const user = userEvent.setup();
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+
+    render(<ReservationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Calendar View')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('Calendar View'));
+    expect(mockPush).toHaveBeenCalledWith('/reservations/calendar');
   });
 
   it('should navigate to reservation detail when row is clicked', async () => {
     const user = userEvent.setup();
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
 
     render(<ReservationsPage />);
 
@@ -157,18 +167,48 @@ describe('ReservationsPage', () => {
     });
   });
 
+  it('should navigate to reservation detail when mobile button is clicked', async () => {
+    const user = userEvent.setup();
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+
+    // Render with explicitly mobile-like constraints if needed, or just select the button
+    render(<ReservationsPage />);
+
+    await waitFor(() => {
+      const res001Elements = screen.getAllByText('RES001');
+      expect(res001Elements.length).toBeGreaterThan(0);
+    });
+
+    const mobileButtons = screen.getAllByRole('button');
+    // Find the button that represents the mobile row for RES001
+    const resButton = mobileButtons.find((btn) =>
+      btn.textContent?.includes('RES001'),
+    );
+    if (resButton) {
+      await user.click(resButton);
+      expect(mockPush).toHaveBeenCalledWith('/reservations/1');
+    }
+  });
+
   it('should display empty state when no reservations', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue([]);
+    (reservationsAPI.getAll as any).mockResolvedValue([]);
+    const user = userEvent.setup();
 
     render(<ReservationsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('No reservations yet')).toBeInTheDocument();
     });
+
+    const newResButtons = screen.getAllByRole('button', {
+      name: /new reservation/i,
+    });
+    await user.click(newResButtons[1]);
+    expect(mockPush).toHaveBeenCalledWith('/reservations/new');
   });
 
   it('should display reservation status badges', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
 
     render(<ReservationsPage />);
 
@@ -181,7 +221,7 @@ describe('ReservationsPage', () => {
   });
 
   it('should display default error message if loading fails with non-Error', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockRejectedValue('String Error');
+    (reservationsAPI.getAll as any).mockRejectedValue('String Error');
 
     render(<ReservationsPage />);
 

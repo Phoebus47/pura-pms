@@ -193,7 +193,7 @@ import { ComponentName } from './component-name';
 
 describe('ComponentName', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', () => {
@@ -326,20 +326,20 @@ If a test file grows too large, consider:
 
 ## Test Discovery
 
-### Jest Configuration
+### Vitest Configuration
 
-Jest automatically discovers test files based on patterns:
+Vitest automatically discovers test files based on patterns:
 
-**Frontend (`apps/web/jest.config.js`):**
+**Frontend (`apps/web/vitest.config.ts`):**
 
 ```javascript
-testMatch: ['**/__tests__/**/*.{ts,tsx}', '**/*.{test,spec}.{ts,tsx}'];
+include: ['src/**/*.test.{ts,tsx}'];
 ```
 
-**Backend (`apps/api/jest.config.js`):**
+**Backend (`apps/api/vitest.config.ts`):**
 
 ```javascript
-testMatch: ['**/*.spec.ts'];
+include: ['**/*.spec.ts'];
 ```
 
 ### Running Tests
@@ -380,7 +380,7 @@ When creating a new test file, ensure:
 
 ## References
 
-- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [Vitest Documentation](https://vitest.dev/guide/)
 - [React Testing Library](https://testing-library.com/react)
 - [NestJS Testing](https://docs.nestjs.com/fundamentals/testing)
 - [Playwright Testing](https://playwright.dev/docs/intro)

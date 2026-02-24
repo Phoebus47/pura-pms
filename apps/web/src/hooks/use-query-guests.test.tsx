@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -5,9 +6,9 @@ import { useQueryGuests, useQueryGuest } from './use-query-guests';
 import { apiClient } from '@/lib/api/client';
 import type { Guest } from '@/lib/api';
 
-jest.mock('@/lib/api/client', () => ({
+vi.mock('@/lib/api/client', () => ({
   apiClient: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
 }));
 
@@ -49,11 +50,11 @@ describe('useQueryGuests', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch guests successfully', async () => {
-    (apiClient.get as jest.Mock).mockResolvedValue(mockGuests);
+    (apiClient.get as any).mockResolvedValue(mockGuests);
 
     const { result } = renderHook(() => useQueryGuests(), {
       wrapper: createWrapper(),
@@ -69,7 +70,7 @@ describe('useQueryGuests', () => {
 
   it('should handle fetch error', async () => {
     const errorMessage = 'Failed to fetch guests';
-    (apiClient.get as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (apiClient.get as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useQueryGuests(), {
       wrapper: createWrapper(),
@@ -102,11 +103,11 @@ describe('useQueryGuest', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch guest by id successfully', async () => {
-    (apiClient.get as jest.Mock).mockResolvedValue(mockGuest);
+    (apiClient.get as any).mockResolvedValue(mockGuest);
 
     const { result } = renderHook(() => useQueryGuest('1'), {
       wrapper: createWrapper(),
@@ -131,7 +132,7 @@ describe('useQueryGuest', () => {
 
   it('should handle fetch error', async () => {
     const errorMessage = 'Failed to fetch guest';
-    (apiClient.get as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (apiClient.get as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useQueryGuest('1'), {
       wrapper: createWrapper(),

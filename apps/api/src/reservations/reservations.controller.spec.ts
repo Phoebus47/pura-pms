@@ -6,22 +6,22 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationStatus } from '@pura/database';
 
 const mockReservationsService = {
-  create: jest.fn(),
-  findAll: jest.fn(),
-  getCalendar: jest.fn(),
-  findByConfirmNumber: jest.fn(),
-  findOne: jest.fn(),
-  update: jest.fn(),
-  checkIn: jest.fn(),
-  checkOut: jest.fn(),
-  cancel: jest.fn(),
+  create: vi.fn(),
+  findAll: vi.fn(),
+  getCalendar: vi.fn(),
+  findByConfirmNumber: vi.fn(),
+  findOne: vi.fn(),
+  update: vi.fn(),
+  checkIn: vi.fn(),
+  checkOut: vi.fn(),
+  cancel: vi.fn(),
 };
 
 describe('ReservationsController', () => {
   let controller: ReservationsController;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReservationsController],

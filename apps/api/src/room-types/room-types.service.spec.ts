@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoomTypesService } from './room-types.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,15 +6,15 @@ import { CreateRoomTypeDto } from './dto/create-room-type.dto';
 
 const mockPrismaService = {
   property: {
-    findUnique: jest.fn(),
+    findUnique: vi.fn(),
   },
   roomType: {
-    create: jest.fn(),
-    findFirst: jest.fn(),
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    create: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 };
 
@@ -25,7 +23,7 @@ describe('RoomTypesService', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

@@ -132,6 +132,15 @@ $RECYCLE.BIN/
 # ==================== BUILD & CACHE ====================
 # TypeScript
 *.tsbuildinfo
+packages/**/*.js
+packages/**/*.js.map
+packages/**/*.d.ts
+packages/**/*.d.ts.map
+packages/**/*.mjs
+packages/**/*.mjs.map
+packages/**/*.d.mts
+packages/**/*.d.mts.map
+!packages/**/node_modules/**
 
 # ESLint
 .eslintcache

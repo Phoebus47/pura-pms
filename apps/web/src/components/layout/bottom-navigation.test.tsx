@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
 import { BottomNavigation } from './bottom-navigation';
 
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(),
 }));
 
 describe('BottomNavigation', () => {
   beforeEach(() => {
-    (usePathname as jest.Mock).mockReturnValue('/');
+    (usePathname as any).mockReturnValue('/');
   });
 
   it('should render navigation items', () => {
@@ -21,7 +22,7 @@ describe('BottomNavigation', () => {
   });
 
   it('should highlight active navigation item', () => {
-    (usePathname as jest.Mock).mockReturnValue('/reservations');
+    (usePathname as any).mockReturnValue('/reservations');
 
     render(<BottomNavigation />);
 

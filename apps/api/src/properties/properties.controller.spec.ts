@@ -5,18 +5,18 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 
 const mockPropertiesService = {
-  create: jest.fn(),
-  findAll: jest.fn(),
-  findOne: jest.fn(),
-  update: jest.fn(),
-  remove: jest.fn(),
+  create: vi.fn(),
+  findAll: vi.fn(),
+  findOne: vi.fn(),
+  update: vi.fn(),
+  remove: vi.fn(),
 };
 
 describe('PropertiesController', () => {
   let controller: PropertiesController;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PropertiesController],

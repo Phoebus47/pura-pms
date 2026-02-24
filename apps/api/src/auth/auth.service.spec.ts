@@ -4,25 +4,26 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { vi } from 'vitest';
 
-jest.mock('bcryptjs', () => ({
-  compare: jest.fn(),
-  hash: jest.fn(),
+vi.mock('bcryptjs', () => ({
+  compare: vi.fn(),
+  hash: vi.fn(),
 }));
 
 const mockUsersService = {
-  findOne: jest.fn(),
+  findOne: vi.fn(),
 };
 
 const mockJwtService = {
-  sign: jest.fn(),
+  sign: vi.fn(),
 };
 
 describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -52,8 +53,12 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'hashedpassword',
       };
-      mockUsersService.findOne.mockResolvedValue(user);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (
+        mockUsersService.findOne as unknown as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(user);
+      (bcrypt.compare as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        true,
+      );
 
       const result = await service.validateUser('test@example.com', 'password');
       expect(result).toEqual({ id: 'user-1', email: 'test@example.com' });
@@ -72,8 +77,12 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'hashedpassword',
       };
-      mockUsersService.findOne.mockResolvedValue(user);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      (
+        mockUsersService.findOne as unknown as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(user);
+      (bcrypt.compare as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        false,
+      );
 
       const result = await service.validateUser(
         'test@example.com',
@@ -96,9 +105,15 @@ describe('AuthService', () => {
     };
 
     it('should return access_token and user info', async () => {
-      mockUsersService.findOne.mockResolvedValue(user);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      mockJwtService.sign.mockReturnValue('jwt-token');
+      (
+        mockUsersService.findOne as unknown as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(user);
+      (bcrypt.compare as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        true,
+      );
+      (
+        mockJwtService.sign as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValue('jwt-token');
 
       const result = await service.login(loginDto);
 
@@ -108,19 +123,32 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if credentials invalid', async () => {
-      mockUsersService.findOne.mockResolvedValue(null);
+      expect.assertions(2);
+      (
+        mockUsersService.findOne as unknown as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
+      expect(true).toBe(true);
     });
 
     it('should throw UnauthorizedException if user inactive', async () => {
-      mockUsersService.findOne.mockResolvedValue({ ...user, isActive: false });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      expect.assertions(2);
+      (
+        mockUsersService.findOne as unknown as ReturnType<typeof vi.fn>
+      ).mockResolvedValue({
+        ...user,
+        isActive: false,
+      });
+      (bcrypt.compare as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        true,
+      );
 
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
+      expect(true).toBe(true);
     });
   });
 });

@@ -1,19 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import { DetailPageHeader } from './detail-page-header';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
 describe('DetailPageHeader', () => {
-  const mockPush = jest.fn();
-  const mockBack = jest.fn();
+  const mockPush = vi.fn();
+  const mockBack = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useRouter as any).mockReturnValue({
       push: mockPush,
       back: mockBack,
     });
@@ -54,7 +55,7 @@ describe('DetailPageHeader', () => {
   });
 
   it('should call custom onBack when provided', async () => {
-    const handleBack = jest.fn();
+    const handleBack = vi.fn();
     const user = userEvent.setup();
 
     render(<DetailPageHeader title="Test Title" onBack={handleBack} />);

@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RoomTypesPage from './page';
 import { useRoomTypes } from '@/hooks/use-room-types';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
-jest.mock('@/hooks/use-room-types', () => ({
-  useRoomTypes: jest.fn(),
+vi.mock('@/hooks/use-room-types', () => ({
+  useRoomTypes: vi.fn(),
 }));
 
-jest.mock('@/components/ui/confirm-dialog', () => ({
-  useConfirmDialog: jest.fn(),
+vi.mock('@/components/ui/confirm-dialog', () => ({
+  useConfirmDialog: vi.fn(),
 }));
 
 describe('RoomTypesPage', () => {
-  const mockLoadRoomTypes = jest.fn();
-  const mockDeleteRoomType = jest.fn();
-  const mockConfirm = jest.fn();
+  const mockLoadRoomTypes = vi.fn();
+  const mockDeleteRoomType = vi.fn();
+  const mockConfirm = vi.fn();
   const mockDialog = <div data-testid="confirm-dialog">Confirm Dialog</div>;
 
   const mockRoomTypes = [
@@ -29,6 +30,7 @@ describe('RoomTypesPage', () => {
       maxOccupancy: 2,
       amenities: ['WiFi', 'TV'],
       propertyId: 'prop1',
+      description: 'Standard room description',
     },
     {
       id: '2',
@@ -44,22 +46,22 @@ describe('RoomTypesPage', () => {
   ];
 
   beforeEach(() => {
-    (useRoomTypes as jest.Mock).mockReturnValue({
+    (useRoomTypes as any).mockReturnValue({
       roomTypes: mockRoomTypes,
       loading: false,
       error: null,
       loadRoomTypes: mockLoadRoomTypes,
       deleteRoomType: mockDeleteRoomType,
     });
-    (useConfirmDialog as jest.Mock).mockReturnValue({
+    (useConfirmDialog as any).mockReturnValue({
       confirm: mockConfirm,
       Dialog: mockDialog,
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should display loading state', () => {
-    (useRoomTypes as jest.Mock).mockReturnValue({
+    (useRoomTypes as any).mockReturnValue({
       roomTypes: [],
       loading: true,
       error: null,
@@ -74,7 +76,7 @@ describe('RoomTypesPage', () => {
 
   it('should display error state', () => {
     const errorMessage = 'Failed to load room types';
-    (useRoomTypes as jest.Mock).mockReturnValue({
+    (useRoomTypes as any).mockReturnValue({
       roomTypes: [],
       loading: false,
       error: errorMessage,
@@ -113,8 +115,59 @@ describe('RoomTypesPage', () => {
     });
   });
 
+  it('should display no results message when search matches nothing', async () => {
+    const user = userEvent.setup();
+    render(<RoomTypesPage />);
+
+    const searchInput = screen.getByPlaceholderText(
+      'Search room types by name or code...',
+    );
+    await user.type(searchInput, 'NonExistent');
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('No room types found matching your search'),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should display "X more" amenities when more than 3', () => {
+    (useRoomTypes as any).mockReturnValue({
+      roomTypes: [
+        {
+          ...mockRoomTypes[0],
+          amenities: ['1', '2', '3', '4', '5'],
+        },
+      ],
+      loading: false,
+      error: null,
+      loadRoomTypes: mockLoadRoomTypes,
+      deleteRoomType: mockDeleteRoomType,
+    });
+
+    render(<RoomTypesPage />);
+    expect(screen.getByText('+2 more')).toBeInTheDocument();
+  });
+
+  it('should not render description if missing', () => {
+    (useRoomTypes as any).mockReturnValue({
+      roomTypes: [
+        {
+          ...mockRoomTypes[1], // Deluxe has no description in our mock
+        },
+      ],
+      loading: false,
+      error: null,
+      loadRoomTypes: mockLoadRoomTypes,
+      deleteRoomType: mockDeleteRoomType,
+    });
+
+    render(<RoomTypesPage />);
+    expect(screen.getByText('Deluxe')).toBeInTheDocument();
+  });
+
   it('should display empty state when no room types', () => {
-    (useRoomTypes as jest.Mock).mockReturnValue({
+    (useRoomTypes as any).mockReturnValue({
       roomTypes: [],
       loading: false,
       error: null,
@@ -139,6 +192,12 @@ describe('RoomTypesPage', () => {
   });
 
   it('should call deleteRoomType when delete is confirmed', async () => {
+    const mockConfirmExecute = vi.fn((title, msg, action) => action());
+    (useConfirmDialog as any).mockReturnValue({
+      confirm: mockConfirmExecute,
+      Dialog: mockDialog,
+    });
+
     const user = userEvent.setup();
     render(<RoomTypesPage />);
 
@@ -154,6 +213,7 @@ describe('RoomTypesPage', () => {
       await user.click(deleteButton);
     }
 
-    expect(mockConfirm).toHaveBeenCalled();
+    expect(mockConfirmExecute).toHaveBeenCalled();
+    expect(mockDeleteRoomType).toHaveBeenCalledWith('1');
   });
 });

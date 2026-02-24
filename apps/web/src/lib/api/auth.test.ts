@@ -1,16 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { authAPI } from './auth';
 import { apiClient } from './client';
 
-jest.mock('./client', () => ({
+vi.mock('./client', () => ({
   apiClient: {
-    post: jest.fn(),
-    get: jest.fn(),
+    post: vi.fn(),
+    get: vi.fn(),
   },
 }));
 
 describe('authAPI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('login', () => {
@@ -30,7 +31,7 @@ describe('authAPI', () => {
         },
       };
 
-      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
+      (apiClient.post as any).mockResolvedValue(mockResponse);
 
       const result = await authAPI.login(credentials);
 
@@ -50,7 +51,7 @@ describe('authAPI', () => {
         role: 'admin',
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockUser);
+      (apiClient.get as any).mockResolvedValue(mockUser);
 
       const result = await authAPI.getCurrentUser(token);
 

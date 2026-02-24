@@ -1,550 +1,451 @@
 # PURA PMS - Coding Standards & Best Practices
 
-This document outlines the coding standards, best practices, and quality gates for the PURA PMS project. All code contributions must adhere to these guidelines to maintain high code quality, maintainability, and scalability.
+This document outlines the coding standards, best practices, and quality guidelines for the PURA PMS project. These standards are aligned with **industry best practices** for React, Next.js, TypeScript, NestJS, accessibility (a11y), i18n, and performance. All code contributions must adhere to these guidelines to maintain high code quality, maintainability, and consistency.
+
+### Section index (for targeted reads – save tokens)
+
+| §   | Topic                                                                                                                               |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Core Principles                                                                                                                     |
+| 2   | React & Next.js (client vs server, components, hooks, navigation, images, layout, i18n, styling, design tokens, interactive states) |
+| 3   | TypeScript                                                                                                                          |
+| 4   | Folder structure, component reuse, variants, barrel (index)                                                                         |
+| 5   | Performance (front & back)                                                                                                          |
+| 6   | Framer Motion                                                                                                                       |
+| 7   | Responsive Design                                                                                                                   |
+| 8   | SEO metadata, a11y (accessibility), Lighthouse                                                                                      |
+| 9   | Lighthouse audit                                                                                                                    |
+| 10  | Code Formatting & Tooling (ESLint, Prettier, size complexity)                                                                       |
+| 11  | Error handling                                                                                                                      |
+| 12  | Git Conventions                                                                                                                     |
+| 13  | Testing (quality, coverage)                                                                                                         |
+| 14  | NestJS / Back-end Guidelines                                                                                                        |
+| 15  | i18n (no hardcoding copy)                                                                                                           |
+| 16  | SonarQube / code quality (front, back, test)                                                                                        |
+| 17  | Code quality checklist                                                                                                              |
+| 18  | Quick Reference: When to Use What                                                                                                   |
+
+**Tip:** When implementing a specific task (UI, API, test), read only the sections above that apply instead of the full document.
 
 ---
 
 ## 1. Core Principles
 
-- **KISS (Keep It Simple, Stupid):** Avoid over-engineering. Write code that is easy to understand and maintain. If a simple solution exists, prefer it over a complex one.
-- **DRY (Don't Repeat Yourself):** Extract common logic into reusable functions, hooks, or components. If you copy-paste code more than twice, refactor it.
-- **YAGNI (You Aren't Gonna Need It):** Do not implement features or abstractions "just in case." Build for the current requirements.
-- **Separation of Concerns:** Keep logic separate from presentation. Use hooks for logic and components for UI.
+- **Cloud-First & Hybrid:** The system is a Cloud Web App (Next.js) with PWA capabilities and a **Local Bridge** for hardware integration (Printers, Key Cards).
+- **USALI Compliance:** All financial modules must adhere to the **Uniform System of Accounts for the Lodging Industry (USALI)** standards.
+- **Immutable Financials:** Financial transactions are **never deleted or updated**. Use void/correction transactions.
+- **Business Date != System Date:** All operations track both the `businessDate` (accounting day) and `systemDate` (server timestamp).
+- **KISS & DRY:** Keep It Simple, Don't Repeat Yourself.
 
 ---
 
 ## 2. React & Next.js Best Practices
 
+### Client vs server components
+
+- **Default to server:** In the App Router, components are **server components** by default. Use them for static or data-fetched content.
+- **PWA & Offline:** Components should be resilient to network loss. Use caching strategies (TenStack Query / Service Worker) where applicable.
+- **Local Bridge:** For Hardware (Printers, Scanners), do **not** use standard browser APIs. Use the **Local Bridge API** client to communicate with the local agent.
+- **Use client (`'use client'`) when you need:** `useState`, `useEffect`, event handlers.
+- **Composition:** Prefer keeping the page/layout as server and wrapping only the interactive part in a client component (e.g. server page that fetches data, client component for form or nav with state).
+- **Data:** Server components can async fetch and pass data as props to client components. Do not fetch in client components when the same data could be fetched on the server (avoids loading states and improves LCP/SEO).
+
+```typescript
+// Server component (default) – no 'use client'
+const Page = async () => {
+  const data = await fetchData()
+  return <ClientList initialData={data} />
+}
+
+// Client component – needs state or events
+'use client'
+const ClientList = ({ initialData }: Props) => {
+  const [filter, setFilter] = useState('')
+  return (/* ... */)
+}
+```
+
 ### Functional Components
 
 - Use **Functional Components** with Hooks for all UI elements.
-- **Naming:** PascalCase for components (e.g., `ReservationList.tsx`).
+- **Naming:** PascalCase for components (e.g., `Navbar.tsx`, `Hero.tsx`).
 
 ### Hooks Usage
 
 - **`useState`:** Use for local UI state that doesn't need to be shared globally.
-- **`useEffect`:** Use for side effects (data fetching, subscriptions). _Always_ include dependencies correctly.
+- **`useEffect`:** Use for side effects (data fetching, subscriptions). Always include dependencies correctly.
 - **`useCallback`:** Use to memoize functions passed as props to children to prevent unnecessary re-renders.
-  ```typescript
-  // Good
-  const handleClick = useCallback(() => {
-    // ...
-  }, [dependency]);
-  ```
-- **`useMemo`:** Use for expensive calculations or to ensure referential equality for objects/arrays in dependency lists. Do not overuse; premature optimization adds complexity.
+  - **When to use:**
+    - Functions passed to child components that are memoized with `React.memo`
+    - Functions used as dependencies in `useEffect` or `useMemo`
+    - Event handlers in frequently re-rendering components
+- **`useMemo`:** Use for expensive calculations. Do not overuse; premature optimization adds complexity.
+  - **When to use:**
+    - Expensive computations (filtering large arrays, complex calculations)
+    - Derived state that depends on multiple values
+    - Objects/arrays passed as props to memoized children
 - **Custom Hooks:** Extract complex logic into custom hooks (e.g., `useReservationForm`, `useAuth`).
 
 ### Navigation
 
-- **`useRouter`:** Use `router.push()` for programmatic navigation (e.g., after form submission).
-- **`<Link>`:** Use Next.js `<Link>` component for standard internal links (better performance due to prefetching).
+- **`useRouter`:** Use `router.push()` from `@/i18n/navigation` for programmatic navigation.
+- **`<Link>`:** Use `Link` from `@/i18n/navigation` for internal links (supports i18n routing).
 - **Avoid:** `window.location.href` (causes full page reload).
 
-### State Management
+### Images
 
-- **Local State:** `useState`
-- **Shared State (Simple):** React Context API (e.g., Theme, User Session).
-- **Server State:** Use **TanStack Query** (React Query) for caching and data synchronization. Configured with `QueryProvider` in root layout.
-- **Complex Global State:** **Zustand** for global UI state (e.g., auth, theme, modal state). Avoid Redux unless strictly necessary due to boilerplate.
-- **State Store Location:** Store files in `src/lib/stores/` directory (e.g., `use-auth-store.ts`, `use-ui-store.ts`).
+- **Use Next.js `<Image>`:** Use the `Image` component from `next/image` for all images. Do not use raw `<img>` elements.
+- **When to use `unoptimized`:** Set `unoptimized` on `<Image>` when you need full quality without Next’s optimization (e.g. logos, strict branding, or pre-sized assets). For photos or large assets, omit `unoptimized`.
+- **Rationale:** Consistent API, layout/fill/sizes, and optional optimization.
+
+### Layout: Hybrid (full-width background, content in container)
+
+For core pages, use a **Hybrid** approach: **background full width, content with max-width**.
+
+- **Section outer:** `w-full` (and section background classes) so the background spans the full viewport.
+- **Content inner:** `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8` so content is centred and capped.
+
+```tsx
+// Good: Hybrid
+<section className="w-full bg-light-bg py-16 lg:py-20">
+  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{/* content */}</div>
+</section>
+```
+
+### Internationalization (i18n) – next-intl
+
+- **Client components:** Use `useTranslations('namespace')` and `useLocale()`. Call hooks at top level.
+- **Server components / Server Actions:** Use `getTranslations('namespace')` (async). Do not use `useTranslations` in server components.
+- **Links:** Always use `Link` from `@/i18n/navigation` for internal links (locale-aware).
+- **Translation key naming:** Use **camelCase** for keys in `messages/*.json`. Keep keys identical in `en.json` and `th.json`.
+- **Message file structure:** Store in `messages/en.json` and `messages/th.json` with the same nested structure (e.g. `nav`, `hero`, `dashboard`).
+
+### Styling Best Practices
+
+- **No Inline Styles:** Do not use `style={{ ... }}` props. Use Tailwind CSS utility classes.
+- **No Hardcoded Colors:** Do not hardcode color values (e.g. `#E53935`). Use CSS variables and theme from `globals.css` or Tailwind semantic classes (e.g. `text-brand-accent`). Add new colors to `:root` / `@theme` in `globals.css` when needed.
+- **Design tokens:** Prefer design tokens from `app/globals.css`.
+- **Dynamic Styles:** Use `cn()` (clsx + tailwind-merge) for conditional classes.
+- **Arbitrary Values:** **Avoid arbitrary values** (e.g., `w-[123px]`) whenever possible. Prefer standard Tailwind utilities.
+
+### Interactive component states (UI states)
+
+For **buttons, links, and other interactive elements**, support the following states:
+
+| State             | When                 | Tailwind / HTML                    |
+| ----------------- | -------------------- | ---------------------------------- |
+| **Default**       | Normal, idle         | Base classes                       |
+| **Hover**         | Pointer over element | `hover:`                           |
+| **Active**        | Pressed / mousedown  | `active:`                          |
+| **Disabled**      | Control is disabled  | `disabled` attribute + `disabled:` |
+| **Focus-visible** | Keyboard focus       | `focus-visible:`                   |
+
+- **Prefer `focus-visible:` over `focus:`**.
+- **Loading:** If the action is async, show a loading state (disabled + spinner).
 
 ---
 
 ## 3. TypeScript Guidelines
 
-- **Strict Mode:** TypeScript `strict` mode must be enabled (already set in `tsconfig.json`).
-- **No `any`:** Avoid using `any`. Use `unknown` if the type is truly uncertain, or define a proper Interface/Type.
+- **Strict Mode:** TypeScript `strict` mode is enabled.
+- **No `any`:** Avoid using `any`. Use `unknown` or define a proper Interface/Type.
 - **Interfaces vs Types:** Prefer `interface` for object definitions (extensible) and `type` for unions/primitives.
 - **Props:** Define props interfaces for all components.
-  ```typescript
-  interface ButtonProps {
-    label: string;
-    onClick: () => void;
-    variant?: 'primary' | 'secondary';
-  }
-  ```
+- **Avoid Magic Numbers/Strings:** Do not inline “magic” values. Extract them into **named constants**.
+- **No Hardcoding (General):** Do not hardcode values (strings, numbers, colors, config) in code.
+
+```typescript
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+```
 
 ### Comments
 
-- **Use comments only when necessary** to explain non-obvious logic, business rules, or external constraints that cannot be expressed clearly in code.
-- **Avoid redundant comments** that repeat what the code already clearly expresses (e.g., `// increment i` above `i++`, `// Header` above `<header>`).
-- **Avoid JSDoc for obvious code** – If error messages, function names, and code structure are self-explanatory, JSDoc is unnecessary.
-- Prefer **good naming** (functions, variables, components) and **clear error messages** over comments for clarity.
-- **Keep comments up to date** – outdated or misleading comments must be removed or corrected.
-- Do not leave **debug/temporary comments** (e.g., commented-out code) in committed code.
+- **Use comments only when necessary** to explain non-obvious logic.
+- **No debug code:** Remove all `console.log` before committing.
+- **No commented code:** Do not commit commented-out code.
 
 ---
 
-## 4. Folder Structure & Naming
+## 4. Folder Structure, Component Reuse & Barrel (index)
 
-### Structure
+### Folder structure
 
-```
-apps/web/src/
-├── app/                  # App Router pages
-│   ├── (auth)/          # Auth related routes
-│   ├── (dashboard)/     # Dashboard routes
-│   └── layout.tsx       # Root layout
-├── components/           # Reusable components
-│   ├── ui/              # Primitive UI components (buttons, inputs)
-│   ├── forms/           # Complex form components
-│   └── shared/          # Shared business components
-├── lib/                 # Utilities and configurations
-│   ├── api/             # API clients
-│   └── utils/           # Helper functions
-├── hooks/               # Custom React hooks
-└── types/               # Global TypeScript definitions
-```
+- **Page-specific components:** Place under `app/[locale]/.../components/` when used only by that route group.
+- **Shared / reusable components:** Place under `components/` or `components/ui/` for primitives.
+- **Hooks, utils, config:** Under `lib/` (e.g. `lib/motion.ts`, `lib/utils.ts`).
+
+### Component reuse & variants
+
+- **Reuse:** Extract repeated UI into shared components.
+- **Variants:** Use a **single component with variants** (props) instead of two separate files for minor differences.
+
+### Barrel (index)
+
+- **When to use:** Use an `index.ts` only where it **reduces noisy imports** or groups a small set of related exports.
+- **Do not:** Barrel-export everything from a large flat list.
 
 ### Naming Conventions
 
-- **Files:** `kebab-case` (e.g., `user-profile.tsx`, `api-client.ts`).
-- **Components:** `PascalCase` (e.g., `UserProfile`).
-- **Functions/Variables:** `camelCase` (e.g., `fetchUserData`, `isLoading`).
-- **Constants:** `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_COUNT`).
+| Type                      | Case                     | Example            |
+| ------------------------- | ------------------------ | ------------------ |
+| **Component files**       | PascalCase               | `Navbar.tsx`       |
+| **Non-component TS/TSX**  | kebab-case               | `api-client.ts`    |
+| **UI primitives**         | kebab-case               | `sk-button.tsx`    |
+| **Test files**            | same as source + `.test` | `Navbar.test.tsx`  |
+| **Functions / variables** | camelCase                | `fetchData`        |
+| **Constants**             | UPPER_SNAKE_CASE         | `MAX_RETRY_COUNT`  |
+| **Translation keys**      | camelCase                | `projectReference` |
 
 ---
 
-## 5. Performance Optimization
+## 5. Performance (front & back)
 
-- **Code Splitting:** Rely on Next.js automatic splitting. Use `React.lazy` or `dynamic()` for heavy components that are not critical for LCP (Largest Contentful Paint).
-- **Image Optimization:** Always use `next/image` for images to leverage optimization and lazy loading.
-  - **LCP Images:** Add `loading="eager"` and `priority` props for above-the-fold images (e.g., logo, hero images).
-  - **Alt Attributes:** All images must have descriptive `alt` attributes for accessibility and SEO.
-- **Memoization:** Wrap expensive components in `React.memo` only if profiling shows render performance issues.
+### Front-end performance
 
----
+- **Server by default:** Prefer server components so less JS is sent.
+- **Code splitting:** Rely on Next.js automatic code splitting.
+- **Images:** Use `next/image`; add `priority` for above-the-fold images.
+- **LCP / CLS:** Avoid layout shift: set dimensions or aspect ratio for images.
 
-## 5.2. Lighthouse Performance Requirements
+### Back-end / API performance
 
-### Target Scores
-
-All pages must achieve **100/100** in all Lighthouse categories:
-
-- **Performance:** 100/100
-- **Accessibility:** 100/100
-- **Best Practices:** 100/100
-- **SEO:** 100/100
-
-### Performance Metrics
-
-- **LCP (Largest Contentful Paint):** < 2.5 seconds
-- **FID (First Input Delay):** < 100 milliseconds
-- **CLS (Cumulative Layout Shift):** < 0.1
-- **FCP (First Contentful Paint):** < 1.8 seconds
-- **TTI (Time to Interactive):** < 3.8 seconds
-- **Speed Index:** < 3.4 seconds
-
-### Accessibility Requirements
-
-- **Alt Text:** All images must have descriptive `alt` attributes. Use empty `alt=""` only for decorative images.
-- **Form Labels:** All form inputs must have associated `label` elements with `htmlFor` attributes.
-- **ARIA Labels:** Use `aria-label` for interactive elements without visible text.
-- **Semantic HTML:** Use proper HTML5 semantic elements (`<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<footer>`).
-- **Color Contrast:** Ensure text meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text).
-- **Keyboard Navigation:** All interactive elements must be keyboard accessible.
-
-### Best Practices Requirements
-
-- **HTTPS:** All pages must be served over HTTPS in production.
-- **No Console Errors:** No JavaScript console errors or warnings.
-- **Modern JavaScript:** Use modern JavaScript features (ES6+) with proper transpilation.
-- **No Deprecated APIs:** Avoid using deprecated browser APIs.
-- **Image Aspect Ratio:** Set explicit `width` and `height` on images to prevent layout shift.
-
-### SEO Requirements
-
-- **Meta Tags:** Include proper `title`, `description`, and `keywords` in metadata.
-- **Open Graph:** Add Open Graph meta tags for social media sharing.
-- **Twitter Cards:** Include Twitter Card meta tags.
-- **Structured Data:** Use JSON-LD structured data where appropriate.
-- **Canonical URLs:** Set canonical URLs to prevent duplicate content.
-- **Robots Meta:** Configure robots meta tags appropriately.
-- **Sitemap:** Generate and submit XML sitemap.
-- **Language:** Set proper `lang` attribute on `<html>` element.
-
-### Implementation Checklist
-
-Before deploying any page, ensure:
-
-- [ ] All images have `alt` attributes
-- [ ] LCP image has `loading="eager"` and `priority` props
-- [ ] All form inputs have associated labels
-- [ ] Meta tags are properly configured
-- [ ] No console errors or warnings
-- [ ] Lighthouse scores are 100/100 in all categories
-- [ ] Performance metrics meet targets
-- [ ] Page passes accessibility audit
-- [ ] SEO meta tags are complete
-
-### Testing
-
-Run Lighthouse audit before every deployment:
-
-```bash
-# Using Chrome DevTools
-# 1. Open DevTools (F12)
-# 2. Go to Lighthouse tab
-# 3. Select all categories
-# 4. Click "Analyze page load"
-
-# Or using CLI
-npx lighthouse http://localhost:3000 --view
-```
+- **Response time:** Keep API routes fast. Offload long-running work (e.g. Night Audit) to background jobs (BullMQ).
+- **N+1 / queries:** Avoid N+1 queries; use `include` or joins correctly in Prisma.
+- **Validation:** Validate and parse input early; return 400 for invalid payloads.
 
 ---
 
-## 5.1. Responsive Design
+## 6. Framer Motion
+
+Use **Framer Motion** for entrance and scroll-based animations (if installed/available).
+
+### Shared variants (design tokens for motion)
+
+- **Use `lib/motion.ts`:** Define shared variants and transitions in `lib/motion.ts` (e.g. `navbarEnter`, `heroContentEnter`).
+- **No magic numbers:** Do not inline duration or delay in components. Use named constants or variants.
+
+### When to use motion
+
+- **Entrance:** Navbar, Hero, section headers.
+- **Consistency:** Use the same spring/stagger settings across pages.
+- **Accessibility:** Respect `prefers-reduced-motion`.
+
+---
+
+## 7. Responsive Design
 
 ### Mobile-First Approach
 
-- **Design Philosophy:** Use a mobile-first approach. Start with mobile layouts and progressively enhance for larger screens.
-- **Breakpoints:** Use consistent breakpoints across the application. Recommended breakpoints:
-  - Mobile: `< 768px` (default)
-  - Tablet: `≥ 768px`
-  - Desktop: `≥ 1024px`
-  - Large Desktop: `≥ 1280px`
-
-### Navigation Patterns
-
-- **Desktop:** Use sidebar navigation for main navigation menu.
-- **Mobile:** Convert sidebar to **bottom navigation bar (bottombar)** for better thumb accessibility and screen space utilization.
-  - Sidebar should be hidden on mobile (`hidden md:block` or similar)
-  - Bottom navigation bar should be visible only on mobile (`block md:hidden` or similar)
-  - Bottom bar should be fixed at the bottom of the viewport
-  - Use icons with labels for better clarity
-
-### Implementation Guidelines
-
-```typescript
-// Example: Responsive Navigation Component
-const Navigation = () => {
-  return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:block fixed left-0 top-0 h-full w-64">
-        {/* Sidebar content */}
-      </aside>
-
-      {/* Mobile Bottom Bar */}
-      <nav className="block md:hidden fixed bottom-0 left-0 right-0 h-16 border-t">
-        {/* Bottom navigation items */}
-      </nav>
-    </>
-  );
-};
-```
-
-### Responsive Utilities
-
-- **Tailwind CSS:** Use Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`) for responsive styling.
-- **CSS Media Queries:** When using custom CSS, use mobile-first media queries:
-
-  ```css
-  /* Mobile-first: base styles for mobile */
-  .container {
-    padding: 1rem;
-  }
-
-  /* Tablet and up */
-  @media (min-width: 768px) {
-    .container {
-      padding: 2rem;
-    }
-  }
-  ```
+- **Design Philosophy:** Mobile-first. Start with mobile layouts and enhance for large screens.
+  - Mobile: `< 640px`
+  - Tablet: `≥ 640px` (sm:)
+  - Desktop: `≥ 1024px` (lg:)
+  - Large Desktop: `≥ 1280px` (xl:)
 
 ### Touch Targets
 
-- **Minimum Size:** Interactive elements (buttons, links) should have a minimum touch target of **44×44px** on mobile devices.
-- **Spacing:** Maintain adequate spacing between touch targets to prevent accidental taps.
-
-### Viewport Configuration
-
-- **Meta Tag:** Ensure proper viewport meta tag in `layout.tsx`:
-  ```tsx
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  ```
-
-### Testing Responsive Design
-
-- **Device Testing:** Test on actual devices when possible, or use browser DevTools device emulation.
-- **Breakpoint Testing:** Test all breakpoints to ensure smooth transitions between layouts.
-- **Orientation:** Test both portrait and landscape orientations on mobile devices.
+- Interactive elements (buttons, links) should have a minimum touch target of **44×44px** on mobile devices.
 
 ---
 
-## 6. Testing
+## 8. SEO Metadata, Accessibility (a11y) & Lighthouse
 
-### Testing Stack
+### SEO metadata (Next.js App Router)
 
-- **Backend (NestJS):** Jest + @nestjs/testing + Supertest
-- **Frontend (Next.js):** Jest + React Testing Library + @testing-library/jest-dom
-- **E2E Testing:** Playwright (configured and ready to use)
+- **Where to set:** `generateMetadata` or static `metadata` export in layout/page.
+- **Required:** At least `title` and `description` for every public page.
+- **Open Graph:** Add `openGraph` tags.
+- **Canonical:** Set canonical URLs.
 
-### Test Types
+### Accessibility (a11y)
 
-- **Unit Tests:** Test individual functions, utilities, and components in isolation.
-- **Integration Tests:** Test interactions between modules and API endpoints.
-- **Component Tests:** Test React components with user interactions using React Testing Library.
-- **E2E Tests:** Test complete user workflows using Playwright. Tests are located in `apps/web/e2e/` directory.
-
-### Coverage Requirements
-
-- **Target:** 80% coverage on critical business logic
-- **Critical Areas:** Authentication, reservations, payments, data validation
-- **Coverage Reports:** Generated in `coverage/` directory (lcov format for SonarQube)
-
-### Test Commands
-
-```bash
-# Run all tests (both web and api)
-pnpm test
-
-# Run with coverage
-pnpm test:coverage
-
-# Run specific app tests
-pnpm --filter web test
-pnpm --filter api test
-
-# Watch mode
-pnpm --filter web test:watch
-pnpm --filter api test:watch
-
-# E2E tests
-pnpm test:e2e
-pnpm --filter web test:e2e:ui
-pnpm --filter web test:e2e:debug
-```
-
-### Test File Conventions
-
-- **Naming:** Place test files next to source files with `.test.ts`, `.test.tsx`, `.spec.ts`, or `.spec.tsx` extension
-- **Location:** Same directory as source file (e.g., `button.tsx` → `button.test.tsx`)
-- **Structure:** Use `describe` blocks for grouping, `it` or `test` for individual tests
-
-### Best Practices
-
-- **Test Behavior, Not Implementation:** Focus on what the code does, not how it does it
-- **Use React Testing Library Queries:** Prefer `getByRole`, `getByLabelText` over `getByTestId`
-- **Mock External Dependencies:** Mock API calls, timers, and browser APIs
-- **Keep Tests Simple:** One assertion per test when possible
-- **Test User Interactions:** Use `@testing-library/user-event` for realistic user interactions
-- **Cleanup:** Use `afterEach` or `afterAll` to clean up side effects
+- **Semantic HTML:** Use correct tags (`<button>`, `<nav>`, `<h1>`).
+- **ARIA:** Add `aria-label` where text is missing.
+- **Color contrast:** Meet WCAG AA.
+- **Keyboard:** All interactive elements must be keyboard accessible (Tab/Enter/Space).
+- **Images:** Descriptive `alt`.
 
 ---
 
-## 7. SonarQube Quality Gates
+## 9. Lighthouse audit
 
-We adhere to the "Sonar Way" quality profile. To pass the quality gate:
+Run a Lighthouse audit before deployment. Target scores:
 
-- **Security Rating:** A (0 Vulnerabilities)
-- **Reliability Rating:** A (0 Bugs)
-- **Maintainability Rating:** A (Max Tech Debt Ratio < 5%)
-- **Duplicated Lines:** < 3%
-- **Coverage:** > 80% on new code
-- **Cognitive Complexity:** Functions should not be overly complex (Score < 15 per function).
-
-### Acceptance Criteria
-
-Code will strictly NOT be accepted/merged if:
-
-1. It introduces new Blocker/Critical issues.
-2. It fails the TypeScript build.
-3. Unit tests fail.
-4. Linting errors persist.
+- **Performance:** ≥ 90
+- **Accessibility:** 100
+- **Best Practices:** 100
+- **SEO:** 100
 
 ---
 
-## 8. Error Handling
+## 10. Code Formatting & Tooling
 
-- **API Calls:** Always wrap API calls in `try-catch` blocks within logic layers or custom hooks.
-- **UI Feedback:** Use Toast notifications for transient errors (e.g., "Failed to save") and inline validation messages for form errors.
-- **Error Boundaries:** Wrap major route segments or complex widgets in React Error Boundaries to prevent full app crashes.
-- **Logging:** Use proper error monitoring services (e.g., Sentry) for production. Avoid `console.error` in application code.
+### Post-Processing
 
-## 8.1. Console Usage & Logging
-
-### Prohibited in Production Code
-
-- **`console.log`:** Never use in production code. Remove all debug logging before committing.
-- **`console.error`:** Avoid in application code. Use Toast notifications for user-facing errors and error monitoring services for backend logging.
-
-### Allowed Exceptions
-
-- **Server Startup:** `console.log` in `main.ts` for server startup messages is acceptable.
-- **Error Boundaries:** `console.error` in Error Boundaries is acceptable **only** when wrapped in `process.env.NODE_ENV === "development"` checks.
-- **Bootstrap Errors:** `console.error` in bootstrap error handlers (e.g., `bootstrap().catch()`) is acceptable for critical startup failures.
-
-### Best Practices
-
-- **Frontend:** Use Toast notifications (`toast.error()`) for all user-facing error messages.
-- **Backend:** Use Pino structured logging (configured via `LoggerModule`) instead of `console.log`.
-  - Logger is automatically injected via NestJS dependency injection
-  - Use `this.logger.log()`, `this.logger.error()`, `this.logger.warn()`, etc. in services/controllers
-  - Development: Pretty-printed logs with colors
-  - Production: JSON structured logs
-- **Development:** Use debugger or temporary logging that is removed before commit.
-- **Production:** **Sentry** is configured and ready to use. Set `NEXT_PUBLIC_SENTRY_DSN` environment variable to enable error tracking and analytics.
-
-### Code Quality Standards
-
-- **No Debug Code:** Remove all `console.log`, `console.debug`, `console.info` statements before committing.
-- **No Commented Code:** Do not commit commented-out code. Use version control (Git) for code history.
-- **Clean Commits:** Every commit should be production-ready. No temporary code, debug statements, or TODO comments unless they are tracked in issue management.
-
-## 9. Code Formatting & Tooling
-
-### Prettier
-
-- **Configuration:** Prettier is configured at `apps/api/.prettierrc` with the following settings:
-  - `singleQuote: true` - Use single quotes for strings
-  - `trailingComma: "all"` - Add trailing commas where valid in ES5
-- **Format on Save:** Configure your IDE to format on save using Prettier.
-- **Pre-commit:** Run `pnpm format` before committing to ensure consistent formatting.
-- **Web App:** Prettier configuration should be added to `apps/web` for consistency.
-
-### ESLint
-
-- **Configuration:** ESLint is configured per workspace (`apps/web/eslint.config.mjs`, `apps/api/eslint.config.mjs`).
-- **Rules:** Follow Next.js and TypeScript recommended rules.
-- **Auto-fix:** Run `pnpm lint` to auto-fix fixable issues before committing.
-- **No Warnings:** All ESLint warnings must be resolved before merging.
-
-### Import Organization
-
-- **Order:** Group imports in the following order:
-  1. External packages (React, Next.js, third-party)
-  2. Internal modules (`@/components`, `@/lib`, `@/hooks`)
-  3. Relative imports (`./`, `../`)
-  4. Type-only imports (use `import type`)
-
-```typescript
-// Good
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/lib/toast';
-import type { Guest } from '@/lib/api';
-import { GuestForm } from './guest-form';
-```
-
-- **Separate Type Imports:** Use `import type` for type-only imports to improve build performance.
+- **Prettier:** Run `pnpm format` before committing.
+- **ESLint:** Run `pnpm lint` and resolve all warnings.
 
 ### File Size & Complexity
 
-- **File Size:** Keep files under **300 lines** when possible. Split large files into smaller, focused modules.
-- **Function Complexity:** Keep functions under **50 lines**. Extract complex logic into helper functions or custom hooks.
-- **Component Complexity:** Keep components under **200 lines**. Split large components into smaller sub-components.
-- **Cognitive Complexity:** Functions should have a cognitive complexity score < 15 (enforced by SonarQube).
-
-### Editor Configuration
-
-- **EditorConfig:** Consider adding `.editorconfig` for consistent editor settings across the team:
-
-  ```ini
-  root = true
-  [*]
-  indent_style = space
-  indent_size = 2
-  end_of_line = lf
-  charset = utf-8
-  trim_trailing_whitespace = true
-  insert_final_newline = true
-  ```
-
-- **VS Code Settings:** Recommended settings:
-  - Format on save: `true`
-  - Default formatter: Prettier
-  - ESLint auto-fix on save: `true`
-
-### Pre-commit Hooks (Recommended)
-
-- **Purpose:** Automatically format, lint, and type-check code before commits to ensure code quality.
-- **Setup:** Use Husky + lint-staged to run:
-  - `prettier --write` on staged files
-  - `eslint --fix` on staged files
-  - `type-check` before commit
-
-#### Installation Steps
-
-1. **Install dependencies:**
-
-   ```bash
-   pnpm add -D husky lint-staged
-   ```
-
-2. **Initialize Husky:**
-
-   ```bash
-   npx husky init
-   ```
-
-3. **Add pre-commit hook** (`.husky/pre-commit`):
-
-   ```bash
-   npx husky add .husky/pre-commit "npx lint-staged"
-   ```
-
-4. **Configure lint-staged** in `package.json`:
-
-   ```json
-   {
-     "lint-staged": {
-       "*.{ts,tsx}": ["prettier --write", "eslint --fix"],
-       "*.{json,md,yml,yaml}": ["prettier --write"]
-     }
-   }
-   ```
-
-5. **Add prepare script** to `package.json`:
-   ```json
-   {
-     "scripts": {
-       "prepare": "husky"
-     }
-   }
-   ```
-
-#### Benefits
-
-- **Automatic Quality Checks:** All committed code is automatically formatted and linted.
-- **Prevents Bad Commits:** Blocks commits that fail type-checking or linting.
-- **Consistent Code Style:** Ensures all team members follow the same formatting rules.
-- **Time Saving:** No need to manually run formatters before committing.
-
-#### Optional: Pre-push Hook
-
-For additional safety, add a pre-push hook to run type-check:
-
-```bash
-npx husky add .husky/pre-push "pnpm type-check"
-```
-
-## 10. Accessibility (a11y)
-
-- **Semantic HTML:** Use correct tags (`<button>` for actions, `<a>` for links, `<main>`, `<nav>`).
-- **ARIA Labels:** Add `aria-label` to interactive elements that lack visible text.
-- **Color Contrast:** Ensure text meets WCAG AA standards.
-- **Keyboard Navigation:** All interactive elements must be reachable and usable via keyboard (Tab/Enter/Space).
-
-## 11. Git Conventions
-
-- **Branch Naming:** `feat/feature-name`, `fix/bug-desc`, `chore/setup`, `refactor/module-name`.
-- **Commit Messages:** Use Conventional Commits:
-  - `feat: add reservation form`
-  - `fix: resolve login timeout`
-  - `refactor: optimize guest search`
-  - `docs: update readme`
-  - `chore: update dependencies`
-  - `style: format code with prettier`
-- **Commit Frequency:** Make small, focused commits. One logical change per commit.
-- **Before Committing:** Ensure code passes:
-  - TypeScript compilation (`pnpm type-check`)
-  - ESLint (`pnpm lint`)
-  - Prettier formatting (if format script exists)
+- **File Size:** Keep files under **300 lines**.
+- **Function Complexity:** Keep functions under **50 lines**.
 
 ---
 
-**Note:** This document serves as a reference for both human developers and AI assistants to ensure consistency and quality across the codebase.
+## 11. Error Handling
+
+- **API Calls:** Wrap API calls in `try-catch`.
+- **UI Feedback:** Use Toast notifications for transient errors.
+- **Logging:** Use Logger service (Pino/NestJS logger) instead of `console.log`.
+
+---
+
+## 12. Git Conventions
+
+### Branch Naming
+
+- `feat/feature-name`
+- `fix/bug-description`
+- `chore/task-description`
+
+### Commit Messages
+
+Use Conventional Commits:
+
+- `feat: add product search`
+- `fix: resolve mobile menu issue`
+- `docs: update README`
+- `style: format code`
+
+---
+
+## 13. Testing (quality & coverage)
+
+### Testing stack
+
+- **Unit tests:** Vitest + React Testing Library (Web) / Vitest + Supertest (API).
+- **E2E:** Playwright.
+
+### Test quality
+
+- **Behavior over implementation:** Test what the user sees/does.
+- **Queries:** Prefer `getByRole`, `getByLabelText`.
+- **Mocks:** Mock external deps (API, next-intl, router).
+- **Coverage:** Aim for > 80% on critical paths.
+
+---
+
+## 14. NestJS / Back-end Guidelines
+
+### Architecture
+
+- **Modular:** Organize by Feature Modules (e.g., `AuthModule`, `ReservationsModule`).
+- **Services:** Business logic lives in Services, not Controllers.
+- **DTOs:** Strict DTOs for every request with `class-validator`.
+
+### Financials & USALI
+
+- **USALI Compliance:** Chart of Accounts and Reports must follow **USALI** standards.
+- **Immutable Transactions:** Never `DELETE` or `UPDATE` financial records. Use `isVoid` flags and counter-transactions (Corrections).
+- **Date Handling:** Distinguish between `businessDate` (Accounting) and `systemDate` (Timestamp).
+
+### Database (Prisma)
+
+- **Transactions:** Use `prisma.$transaction()` for multi-step operations (especially financial postings).
+- **Migrations:** Do not edit migrations manually. Use `prisma migrate dev`.
+
+### Logging
+
+- **No Console:** Use `this.logger.log()`, `.error()`, `.warn()`.
+
+---
+
+## 15. Internationalization (i18n) Guidelines
+
+### No Hardcoding User-Facing Copy
+
+- **Do not hardcode** user-facing text.
+- **Always use** next-intl: put copy in `messages/en.json` and `messages/th.json`.
+- **Exceptions:** Technical identifiers (IDs, Codes).
+
+### Translation files & key naming
+
+- **Files:** `messages/en.json` and `messages/th.json`.
+- **Key naming:** **camelCase** (e.g. `projectReference`, `readMore`).
+
+### URL Structure
+
+- Use locale prefix/routing as configured in middleware.
+
+---
+
+## 16. SonarQube / Code Quality
+
+The project runs **SonarQube**. Code should pass `pnpm run sonar`.
+
+### Quality by layer
+
+- **Front-end:** Type safety, a11y, layout stability.
+- **Back-end:** Input validation, status codes, error handling.
+
+### How to align
+
+- **Fix Bugs & Security Hotspots.**
+- **No `any`.**
+- **No dead code.**
+- **Reduce duplication.**
+
+---
+
+## 17. Code Quality Checklist
+
+Before committing code, ensure:
+
+- [ ] TypeScript compilation passes
+- [ ] ESLint passes with no warnings
+- [ ] Prettier formatting applied
+- [ ] SonarQube analysis passes
+- [ ] All images have `alt` attributes
+- [ ] All links use `Link` from `@/i18n/navigation`
+- [ ] No hardcoded user-facing text; all copy from `messages` via next-intl
+- [ ] No hardcoded colors; use design tokens
+- [ ] USALI Compliance checked for financial modules
+- [ ] Motion: use shared variants; no magic numbers
+- [ ] Responsive design tested
+- [ ] No `console.log` or debug code
+- [ ] Interactive elements have required states (hover, focus-visible)
+- [ ] Components are properly typed
+- [ ] Client vs server logic is correct
+- [ ] a11y: semantic HTML, ARIA, keyboard support
+- [ ] Lighthouse audit passed
+
+---
+
+## 18. Quick Reference: When to Use What
+
+### State Management
+
+- **`useState`:** Local component state
+- **Zustand:** Global client state (filters, preferences, UI state)
+- **TanStack Query:** Server state (API data, caching)
+
+### Performance Optimization
+
+- **`useCallback`:** Functions passed to memoized children or used as dependencies
+- **`useMemo`:** Expensive calculations or objects passed to memoized children
+- **`React.memo`:** Expensive components that re-render frequently
+
+### Form Handling
+
+- **`react-hook-form` + `zod`:** All form validation
+- **Zod schemas:** Type-safe validation with runtime checking
+
+---
+
+**Document Version:** 2.1 (Alignment with Reference)
+**Last Updated:** January 2026

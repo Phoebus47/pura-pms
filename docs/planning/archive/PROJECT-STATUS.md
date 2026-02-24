@@ -53,13 +53,13 @@
 ### Priority Tasks (Next 2 Weeks)
 
 1. **Database Schema Enhancement** (Week 1-2)
-   - Merge Financial Module schema
-   - Create migration scripts
-   - Seed default data
+   - [x] Merge Financial Module schema
+   - [x] Create migration scripts
+   - [x] Seed default data
 
 2. **Transaction Code Module** (Week 2-3)
-   - Backend API
-   - Frontend UI
+   - [ ] Backend API
+   - [ ] Frontend UI
 
 3. **Folio Window System** (Week 3-4)
    - Backend API

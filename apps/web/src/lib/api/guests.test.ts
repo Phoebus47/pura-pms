@@ -1,20 +1,22 @@
 import { guestsAPI } from './guests';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient, getAuthToken } from './client';
 
-jest.mock('./client', () => ({
+vi.mock('./client', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   },
-  getAuthToken: jest.fn(),
+  getAuthToken: vi.fn(),
 }));
 
 describe('guestsAPI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getAuthToken as jest.Mock).mockReturnValue('token123');
+    vi.clearAllMocks();
+    (getAuthToken as any).mockReturnValue('token123');
   });
 
   describe('getAll', () => {
@@ -24,7 +26,7 @@ describe('guestsAPI', () => {
         total: 0,
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
+      (apiClient.get as any).mockResolvedValue(mockResponse);
 
       const result = await guestsAPI.getAll();
 
@@ -45,7 +47,7 @@ describe('guestsAPI', () => {
         offset: 0,
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
+      (apiClient.get as any).mockResolvedValue(mockResponse);
 
       const result = await guestsAPI.getAll(params);
 
@@ -53,7 +55,7 @@ describe('guestsAPI', () => {
         expect.stringContaining('/guests?'),
         'token123',
       );
-      const callArgs = (apiClient.get as jest.Mock).mock.calls[0];
+      const callArgs = (apiClient.get as any).mock.calls[0];
       const endpoint = callArgs[0] as string;
       expect(endpoint).toContain('search=John');
       expect(endpoint).toContain('isBlacklist=false');
@@ -64,8 +66,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({ data: [], total: 0 });
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({ data: [], total: 0 });
 
       await guestsAPI.getAll();
 
@@ -88,7 +90,7 @@ describe('guestsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockGuest);
+      (apiClient.get as any).mockResolvedValue(mockGuest);
 
       const result = await guestsAPI.getById('1');
 
@@ -97,8 +99,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({});
       await guestsAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/guests/1', undefined);
     });
@@ -108,7 +110,7 @@ describe('guestsAPI', () => {
     it('should call apiClient.get with correct endpoint', async () => {
       const mockHistory = { reservations: [] };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockHistory);
+      (apiClient.get as any).mockResolvedValue(mockHistory);
 
       const result = await guestsAPI.getHistory('1');
 
@@ -120,8 +122,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({});
       await guestsAPI.getHistory('1');
       expect(apiClient.get).toHaveBeenCalledWith(
         '/guests/1/history',
@@ -148,7 +150,7 @@ describe('guestsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.post as jest.Mock).mockResolvedValue(mockGuest);
+      (apiClient.post as any).mockResolvedValue(mockGuest);
 
       const result = await guestsAPI.create(createDto);
 
@@ -161,8 +163,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.post as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.post as any).mockResolvedValue({});
       await guestsAPI.create({ firstName: 'A', lastName: 'B' });
       expect(apiClient.post).toHaveBeenCalledWith(
         '/guests',
@@ -187,7 +189,7 @@ describe('guestsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockGuest);
+      (apiClient.patch as any).mockResolvedValue(mockGuest);
 
       const result = await guestsAPI.update('1', updateDto);
 
@@ -200,8 +202,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await guestsAPI.update('1', {});
       expect(apiClient.patch).toHaveBeenCalledWith('/guests/1', {}, undefined);
     });
@@ -221,7 +223,7 @@ describe('guestsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockGuest);
+      (apiClient.patch as any).mockResolvedValue(mockGuest);
 
       const result = await guestsAPI.updateVipLevel('1', 2);
 
@@ -234,8 +236,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await guestsAPI.updateVipLevel('1', 1);
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/guests/1/vip',
@@ -259,7 +261,7 @@ describe('guestsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockGuest);
+      (apiClient.patch as any).mockResolvedValue(mockGuest);
 
       const result = await guestsAPI.toggleBlacklist('1');
 
@@ -272,8 +274,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await guestsAPI.toggleBlacklist('1');
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/guests/1/blacklist',
@@ -285,7 +287,7 @@ describe('guestsAPI', () => {
 
   describe('delete', () => {
     it('should call apiClient.delete with correct id', async () => {
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (apiClient.delete as any).mockResolvedValue(undefined);
 
       await guestsAPI.delete('1');
 
@@ -293,8 +295,8 @@ describe('guestsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.delete as any).mockResolvedValue(undefined);
       await guestsAPI.delete('1');
       expect(apiClient.delete).toHaveBeenCalledWith('/guests/1', undefined);
     });

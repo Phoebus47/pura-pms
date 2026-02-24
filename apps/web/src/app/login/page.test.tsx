@@ -1,17 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import LoginPage from './page';
 import { authAPI } from '@/lib/api';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-}));
-
-jest.mock('@/lib/api', () => ({
-  authAPI: {
-    login: jest.fn(),
-  },
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
 const localStorageMock = (() => {
@@ -36,12 +30,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('LoginPage', () => {
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
+    (useRouter as any).mockReturnValue({ push: mockPush });
     localStorageMock.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render login form', () => {
@@ -65,10 +59,16 @@ describe('LoginPage', () => {
   });
 
   it('should handle successful login', async () => {
-    const user = userEvent.setup();
-    (authAPI.login as jest.Mock).mockResolvedValue({
+    vi.spyOn(authAPI, 'login').mockResolvedValue({
       access_token: 'test-token',
-    });
+      user: {
+        id: '1',
+        email: 'admin@pura.com',
+        firstName: 'Test',
+        lastName: 'Admin',
+        role: 'ADMIN',
+      },
+    } as any);
 
     render(<LoginPage />);
 
@@ -76,9 +76,9 @@ describe('LoginPage', () => {
     const passwordInput = screen.getByLabelText('Password');
     const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
 
-    await user.type(emailInput, 'admin@pura.com');
-    await user.type(passwordInput, 'admin123');
-    await user.click(submitButton);
+    fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'admin123' } });
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(authAPI.login).toHaveBeenCalledWith({
@@ -94,9 +94,8 @@ describe('LoginPage', () => {
   });
 
   it('should display error message on login failure', async () => {
-    const user = userEvent.setup();
     const errorMessage = 'Invalid credentials';
-    (authAPI.login as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    vi.spyOn(authAPI, 'login').mockRejectedValue(new Error(errorMessage));
 
     render(<LoginPage />);
 
@@ -104,18 +103,35 @@ describe('LoginPage', () => {
     const passwordInput = screen.getByLabelText('Password');
     const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
 
-    await user.type(emailInput, 'admin@pura.com');
-    await user.type(passwordInput, 'wrong-password');
-    await user.click(submitButton);
+    fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'wrong-password' } });
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
 
+  it('should display error message on login failure with non-Error', async () => {
+    vi.spyOn(authAPI, 'login').mockRejectedValue('String Error');
+
+    render(<LoginPage />);
+
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
+
+    fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'wrong-password' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Login failed')).toBeInTheDocument();
+    });
+  });
+
   it('should disable submit button while loading', async () => {
-    const user = userEvent.setup();
-    (authAPI.login as jest.Mock).mockImplementation(
+    vi.spyOn(authAPI, 'login').mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100)),
     );
 
@@ -125,9 +141,9 @@ describe('LoginPage', () => {
     const passwordInput = screen.getByLabelText('Password');
     const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
 
-    await user.type(emailInput, 'admin@pura.com');
-    await user.type(passwordInput, 'admin123');
-    await user.click(submitButton);
+    fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'admin123' } });
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText('Signing in...')).toBeInTheDocument();

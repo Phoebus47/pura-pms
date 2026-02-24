@@ -1,18 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PropertySelector } from './property-selector';
 import { propertiesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   propertiesAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -22,14 +23,14 @@ describe('PropertySelector', () => {
     { id: '2', name: 'Property 2', address: '', phone: '', email: '' },
   ];
 
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should show loading state initially', () => {
-    (propertiesAPI.getAll as jest.Mock).mockImplementation(
+    (propertiesAPI.getAll as any).mockImplementation(
       () => new Promise(() => {}),
     );
 
@@ -39,7 +40,7 @@ describe('PropertySelector', () => {
   });
 
   it('should load and display properties', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
 
     render(<PropertySelector value="" onChange={mockOnChange} />);
 
@@ -51,7 +52,7 @@ describe('PropertySelector', () => {
   });
 
   it('should call onChange when property is selected', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
 
     const user = userEvent.setup();
 
@@ -68,7 +69,7 @@ describe('PropertySelector', () => {
   });
 
   it('should display selected property value', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
 
     render(<PropertySelector value="1" onChange={mockOnChange} />);
 
@@ -79,7 +80,7 @@ describe('PropertySelector', () => {
   });
 
   it('should handle required prop', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
 
     render(<PropertySelector value="" onChange={mockOnChange} required />);
 
@@ -90,7 +91,7 @@ describe('PropertySelector', () => {
   });
 
   it('should handle id prop', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
 
     render(
       <PropertySelector
@@ -107,9 +108,7 @@ describe('PropertySelector', () => {
   });
 
   it('should handle API error', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockRejectedValue(
-      new Error('API Error'),
-    );
+    (propertiesAPI.getAll as any).mockRejectedValue(new Error('API Error'));
 
     render(<PropertySelector value="" onChange={mockOnChange} />);
 

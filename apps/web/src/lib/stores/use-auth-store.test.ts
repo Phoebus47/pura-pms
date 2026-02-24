@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAuthStore } from './use-auth-store';
 
-jest.mock('zustand/middleware', () => ({
+vi.mock('zustand/middleware', () => ({
   persist: <T>(fn: T) => fn,
 }));
 

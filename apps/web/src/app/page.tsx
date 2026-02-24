@@ -275,10 +275,10 @@ export default function Dashboard() {
 function getChangeTypeColor(type: 'positive' | 'negative' | 'neutral') {
   switch (type) {
     case 'positive':
-      return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+      return 'text-emerald-600 font-medium';
     case 'negative':
-      return 'bg-red-50 text-red-700 ring-red-600/20';
+      return 'text-red-600 font-medium';
     default:
-      return 'bg-slate-50 text-slate-700 ring-slate-600/20';
+      return 'text-slate-500 font-medium';
   }
 }

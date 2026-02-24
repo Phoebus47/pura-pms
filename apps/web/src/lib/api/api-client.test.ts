@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiClient } from './client';
 import { propertiesAPI } from './properties';
 import { roomsAPI } from './rooms';
@@ -5,21 +6,21 @@ import { guestsAPI } from './guests';
 import { reservationsAPI } from './reservations';
 import { roomTypesAPI } from './room-types';
 
-jest.mock('./client', () => ({
+vi.mock('./client', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   },
-  getAuthToken: jest.fn().mockReturnValue('mock-token'),
+  getAuthToken: vi.fn().mockReturnValue('mock-token'),
 }));
 
 describe('API Client Wrappers', () => {
   const mockToken = 'mock-token';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Properties API', () => {
@@ -62,7 +63,7 @@ describe('API Client Wrappers', () => {
 
     it('getAll passes single query param', async () => {
       await roomsAPI.getAll({ status: 'VACANT_CLEAN' });
-      const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+      const lastCall = (apiClient.get as any).mock.calls[0][0];
       expect(lastCall).toContain('status=VACANT_CLEAN');
       expect(lastCall).not.toContain('propertyId');
     });
@@ -73,7 +74,7 @@ describe('API Client Wrappers', () => {
         propertyId: 'p1',
         roomTypeId: 'rt1',
       });
-      const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+      const lastCall = (apiClient.get as any).mock.calls[0][0];
       // Check query string components (order agnostic)
       expect(lastCall).toContain('/rooms?');
       expect(lastCall).toContain('status=VACANT_CLEAN');
@@ -98,7 +99,7 @@ describe('API Client Wrappers', () => {
         roomTypeId: 'rt1',
       };
       await roomsAPI.checkAvailability(params);
-      const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+      const lastCall = (apiClient.get as any).mock.calls[0][0];
       expect(lastCall).toContain('checkIn=2024-01-01');
       expect(lastCall).toContain('roomTypeId=rt1');
     });
@@ -107,7 +108,6 @@ describe('API Client Wrappers', () => {
       await roomsAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/rooms/1', mockToken);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await roomsAPI.create({ number: '101' } as any);
       expect(apiClient.post).toHaveBeenCalledWith(
         '/rooms',
@@ -115,7 +115,6 @@ describe('API Client Wrappers', () => {
         mockToken,
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await roomsAPI.update('1', { number: '102' } as any);
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/rooms/1',
@@ -136,7 +135,7 @@ describe('API Client Wrappers', () => {
 
     it('getAll calls get with explicit params', async () => {
       await guestsAPI.getAll({ search: 'John', limit: 20 });
-      const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+      const lastCall = (apiClient.get as any).mock.calls[0][0];
       expect(lastCall).toContain('search=John');
       expect(lastCall).toContain('limit=20');
     });
@@ -162,7 +161,6 @@ describe('API Client Wrappers', () => {
       await guestsAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/guests/1', mockToken);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await guestsAPI.create({ firstName: 'John' } as any);
       expect(apiClient.post).toHaveBeenCalledWith(
         '/guests',
@@ -203,7 +201,7 @@ describe('API Client Wrappers', () => {
           checkOut: '2024-01-02',
           guestId: 'g1',
         });
-        const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+        const lastCall = (apiClient.get as any).mock.calls[0][0];
         expect(lastCall).toContain('propertyId=p1');
         expect(lastCall).toContain('checkIn=2024-01-01');
         expect(lastCall).toContain('checkOut=2024-01-02');
@@ -223,7 +221,7 @@ describe('API Client Wrappers', () => {
           startDate: '2024-01-01',
           endDate: '2024-01-31',
         });
-        const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+        const lastCall = (apiClient.get as any).mock.calls[0][0];
         expect(lastCall).toContain('/reservations/calendar?');
         expect(lastCall).toContain('propertyId=p1');
         expect(lastCall).toContain('startDate=2024-01-01');
@@ -238,7 +236,7 @@ describe('API Client Wrappers', () => {
           endDate: '2024-01-31',
           roomTypeId: 'rt1',
         });
-        const lastCall = (apiClient.get as jest.Mock).mock.calls[0][0];
+        const lastCall = (apiClient.get as any).mock.calls[0][0];
         expect(lastCall).toContain('roomTypeId=rt1');
       });
     });
@@ -270,14 +268,12 @@ describe('API Client Wrappers', () => {
       await reservationsAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/reservations/1');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await reservationsAPI.create({ guestId: 'g1' } as any);
       expect(apiClient.post).toHaveBeenCalledWith(
         '/reservations',
         expect.anything(),
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await reservationsAPI.update('1', { status: 'CONFIRMED' } as any);
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/reservations/1',
@@ -299,7 +295,6 @@ describe('API Client Wrappers', () => {
       await roomTypesAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/room-types/1', mockToken);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await roomTypesAPI.create({ name: 'D' } as any);
       expect(apiClient.post).toHaveBeenCalledWith(
         '/room-types',
@@ -307,7 +302,6 @@ describe('API Client Wrappers', () => {
         mockToken,
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await roomTypesAPI.update('1', { name: 'E' } as any);
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/room-types/1',

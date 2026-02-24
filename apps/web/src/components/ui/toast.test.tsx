@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
 import { Toaster } from './toast';
 
-jest.mock('sonner', () => ({
-  Toaster: jest.fn(() => <div data-testid="sonner-toaster" />),
+vi.mock('sonner', () => ({
+  Toaster: vi.fn(() => <div data-testid="sonner-toaster" />),
 }));
 
 describe('Toaster', () => {

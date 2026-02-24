@@ -1,28 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ReservationCalendarPage from './page';
 import { reservationsAPI } from '@/lib/api';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   reservationsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
 }));
 
 // Mock child components
-jest.mock('@/components/reservation-status-badge', () => ({
+vi.mock('@/components/reservation-status-badge', () => ({
   ReservationStatusBadge: ({ status }: { status: string }) => (
     <div data-testid="status-badge">{status}</div>
   ),
 }));
 
-jest.mock('@/components/property-selector', () => ({
+vi.mock('@/components/property-selector', () => ({
   PropertySelector: ({ onChange }: { onChange: (id: string) => void }) => (
     <div data-testid="property-selector">
       <button onClick={() => onChange('prop-1')}>Select Property</button>
@@ -43,22 +44,15 @@ describe('ReservationCalendarPage', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    const mockDate = new Date('2024-01-15T12:00:00Z');
-    const OriginalDate = global.Date;
-    jest.spyOn(global, 'Date').mockImplementation((...args) => {
-      if (args.length) {
-        return new OriginalDate(
-          ...(args as ConstructorParameters<typeof Date>),
-        );
-      }
-      return mockDate;
-    });
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
+    vi.clearAllMocks();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('renders calendar and loads reservations', async () => {
@@ -130,15 +124,30 @@ describe('ReservationCalendarPage', () => {
   });
 
   it('handles loading error', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockRejectedValue(
-      new Error('Failed'),
-    );
+    (reservationsAPI.getAll as any).mockRejectedValue(new Error('Failed'));
     render(<ReservationCalendarPage />);
 
     await waitFor(() => {
       expect(screen.queryByText('Loading calendar...')).not.toBeInTheDocument();
     });
-    // Should verify toast error?
-    // We mocked toast but didn't assert.
+  });
+
+  it('renders "+X more" when a day has more than 3 reservations', async () => {
+    const manyReservations = Array.from({ length: 5 }, (_, i) => ({
+      id: `res-${i}`,
+      checkIn: '2024-01-15T14:00:00.000Z',
+      checkOut: '2024-01-16T11:00:00.000Z',
+      status: 'CONFIRMED',
+      guest: { firstName: `Guest`, lastName: `${i}` },
+      room: { number: `10${i}` },
+    }));
+
+    (reservationsAPI.getAll as any).mockResolvedValue(manyReservations);
+
+    render(<ReservationCalendarPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('+2 more')).toBeInTheDocument();
+    });
   });
 });

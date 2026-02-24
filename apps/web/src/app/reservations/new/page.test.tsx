@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NewReservationPage from './page';
@@ -5,28 +6,28 @@ import { useRouter } from 'next/navigation';
 import { roomsAPI, reservationsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   roomsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
   reservationsAPI: {
-    create: jest.fn(),
+    create: vi.fn(),
   },
 }));
 
-jest.mock('@/components/date-range-picker', () => ({
+vi.mock('@/components/date-range-picker', () => ({
   DateRangePicker: ({
     onCheckInChange,
     onCheckOutChange,
@@ -43,11 +44,19 @@ jest.mock('@/components/date-range-picker', () => ({
       >
         Select Dates
       </button>
+      <button
+        onClick={() => {
+          onCheckInChange('2024-01-01');
+          onCheckOutChange('2024-01-01');
+        }}
+      >
+        Select 0 Dates
+      </button>
     </div>
   ),
 }));
 
-jest.mock('@/components/property-selector', () => ({
+vi.mock('@/components/property-selector', () => ({
   PropertySelector: ({ onChange }: { onChange: (id: string) => void }) => (
     <div data-testid="property-selector">
       <button onClick={() => onChange('prop-1')}>Select Property</button>
@@ -55,7 +64,7 @@ jest.mock('@/components/property-selector', () => ({
   ),
 }));
 
-jest.mock('@/components/guest-search-dialog', () => ({
+vi.mock('@/components/guest-search-dialog', () => ({
   GuestSearchDialog: ({
     isOpen,
     onClose,
@@ -87,7 +96,7 @@ jest.mock('@/components/guest-search-dialog', () => ({
     ) : null,
 }));
 
-jest.mock('@/components/guest-form-dialog', () => ({
+vi.mock('@/components/guest-form-dialog', () => ({
   GuestFormDialog: ({
     isOpen,
     onClose,
@@ -129,13 +138,13 @@ const mockRooms = [
 ];
 
 describe('NewReservationPage', () => {
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
-    (reservationsAPI.create as jest.Mock).mockResolvedValue({ id: 'res-1' });
+    vi.clearAllMocks();
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
+    (reservationsAPI.create as any).mockResolvedValue({ id: 'res-1' });
   });
 
   it('completes the reservation flow', async () => {
@@ -207,7 +216,7 @@ describe('NewReservationPage', () => {
   });
 
   it('handles room loading error', async () => {
-    (roomsAPI.getAll as jest.Mock).mockRejectedValue(new Error('Failed'));
+    (roomsAPI.getAll as any).mockRejectedValue(new Error('Failed'));
     render(<NewReservationPage />);
 
     await userEvent.click(screen.getByText('Select Property'));
@@ -217,15 +226,6 @@ describe('NewReservationPage', () => {
     await waitFor(() => {
       expect(screen.queryByText('Select a Room')).not.toBeInTheDocument();
     });
-  });
-
-  it('validates step 1 inputs', async () => {
-    render(<NewReservationPage />);
-    const nextBtn = screen.getByText('Next').closest('button');
-    expect(nextBtn).toBeDisabled();
-
-    // Attempt click (should trigger nothing or internal validation branch)
-    fireEvent.click(screen.getByText('Next'));
   });
 
   it('navigates back and forth', async () => {
@@ -299,9 +299,7 @@ describe('NewReservationPage', () => {
   });
 
   it('handles reservation submission error', async () => {
-    (reservationsAPI.create as jest.Mock).mockRejectedValue(
-      new Error('API Error'),
-    );
+    (reservationsAPI.create as any).mockRejectedValue(new Error('API Error'));
     render(<NewReservationPage />);
 
     // Fast forward to Step 4
@@ -355,7 +353,7 @@ describe('NewReservationPage', () => {
   });
 
   it('renders properties empty state correctly', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue([]);
+    (roomsAPI.getAll as any).mockResolvedValue([]);
     render(<NewReservationPage />);
 
     await userEvent.click(screen.getByText('Select Property'));
@@ -375,7 +373,7 @@ describe('NewReservationPage', () => {
       number: '999',
       // Missing roomType entirely or partial
     };
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue([roomWithMissingData]);
+    (roomsAPI.getAll as any).mockResolvedValue([roomWithMissingData]);
 
     render(<NewReservationPage />);
 
@@ -388,13 +386,62 @@ describe('NewReservationPage', () => {
       expect(screen.getByText('Room 999')).toBeInTheDocument();
     });
 
-    // Verify fallbacks rendered (NaN or 0 or defaults might appear depending on implementation)
-    // The implementation uses Number(... || 0), so it should render ฿0
-    expect(screen.getByText('฿0')).toBeInTheDocument();
+    // Proceed to Step 4 to cover fallback rendering inside Step 4 and handleSubmit
+    await userEvent.click(screen.getByText('Room 999'));
+    await userEvent.click(screen.getByText('Next'));
+    await userEvent.click(screen.getByText('Search Existing Guest'));
+    await userEvent.click(screen.getByText('Select John'));
+    await userEvent.click(screen.getByText('Next'));
+
+    expect(
+      screen.getByRole('heading', { name: 'Confirm Reservation' }),
+    ).toBeInTheDocument();
+
+    const confirmBtn = screen.getByRole('button', {
+      name: /confirm reservation/i,
+    });
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(reservationsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roomRate: 0,
+          totalAmount: 0,
+        }),
+      );
+    });
+  });
+
+  it('calculates total as 0 when nights is 0', async () => {
+    render(<NewReservationPage />);
+
+    // Fast forward to Step 4 with 0 nights
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select 0 Dates'));
+    await userEvent.click(screen.getByText('Next'));
+    await waitFor(() => screen.getByText('Select a Room'));
+    await userEvent.click(screen.getByText('Room 101'));
+    await userEvent.click(screen.getByText('Next'));
+    await userEvent.click(screen.getByText('Search Existing Guest'));
+    await userEvent.click(screen.getByText('Select John'));
+    await userEvent.click(screen.getByText('Next'));
+
+    const confirmBtn = screen.getByRole('button', {
+      name: /confirm reservation/i,
+    });
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(reservationsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          totalAmount: 0,
+        }),
+      );
+    });
   });
 
   it('handles non-Error exception during submission', async () => {
-    (reservationsAPI.create as jest.Mock).mockRejectedValue('String Error');
+    (reservationsAPI.create as any).mockRejectedValue('String Error');
     render(<NewReservationPage />);
 
     // Fast forward to Step 4 (Confirm)
@@ -416,5 +463,38 @@ describe('NewReservationPage', () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Failed to create reservation');
     });
+  });
+
+  it('triggers warning toasts when clicking next without selections', async () => {
+    render(<NewReservationPage />);
+
+    // Step 1 warning
+    // We need to bypass the disabled state of the button
+    const nextBtn = screen.getByText('Next');
+    fireEvent.click(nextBtn);
+    expect(toast.warning).toHaveBeenCalledWith(
+      'Please select property and dates',
+    );
+
+    // Proceed to Step 2
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select Dates'));
+    await userEvent.click(nextBtn);
+    await waitFor(() => screen.getByText('Select a Room'));
+
+    // Step 2 warning
+    const nextBtn2 = screen.getByText('Next');
+    fireEvent.click(nextBtn2);
+    expect(toast.warning).toHaveBeenCalledWith('Please select a room');
+
+    // Proceed to Step 3
+    await userEvent.click(screen.getByText('Room 101'));
+    await userEvent.click(nextBtn2);
+    await waitFor(() => screen.getByText('Select Guest'));
+
+    // Step 3 warning
+    const nextBtn3 = screen.getByText('Next');
+    fireEvent.click(nextBtn3);
+    expect(toast.warning).toHaveBeenCalledWith('Please select a guest');
   });
 });

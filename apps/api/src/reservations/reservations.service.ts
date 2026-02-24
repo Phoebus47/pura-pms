@@ -9,10 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { Prisma, ReservationStatus } from '@pura/database';
+import { FoliosService } from '../folios/folios.service';
 
 @Injectable()
 export class ReservationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly foliosService: FoliosService,
+  ) {}
 
   async create(createReservationDto: CreateReservationDto) {
     const checkIn = new Date(createReservationDto.checkIn);
@@ -407,6 +411,15 @@ export class ReservationsService {
       where: { id: reservation.roomId },
       data: { status: 'OCCUPIED_CLEAN' },
     });
+
+    // Initialize Folio if it doesn't exist
+    const existingFolios = await this.foliosService.findByReservationId(id);
+    if (existingFolios.length === 0) {
+      await this.foliosService.create({
+        reservationId: id,
+        type: 'GUEST',
+      });
+    }
 
     return updated;
   }

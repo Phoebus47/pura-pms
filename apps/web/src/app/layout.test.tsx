@@ -1,40 +1,41 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
 import RootLayout from './layout';
 
-jest.mock('next/font/google', () => ({
-  Geist: jest.fn(() => ({
+vi.mock('next/font/google', () => ({
+  Geist: vi.fn(() => ({
     variable: '--font-geist-sans',
   })),
-  Geist_Mono: jest.fn(() => ({
+  Geist_Mono: vi.fn(() => ({
     variable: '--font-geist-mono',
   })),
 }));
 
-jest.mock('../components/layout/app-layout', () => ({
+vi.mock('../components/layout/app-layout', () => ({
   AppLayout: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="app-layout">{children}</div>
   ),
 }));
 
-jest.mock('../lib/providers/query-provider', () => ({
+vi.mock('../lib/providers/query-provider', () => ({
   QueryProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="query-provider">{children}</div>
   ),
 }));
 
-jest.mock('../components/error-boundary', () => ({
+vi.mock('../components/error-boundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="error-boundary">{children}</div>
   ),
 }));
 
-jest.mock('../components/ui/toast', () => ({
+vi.mock('../components/ui/toast', () => ({
   Toaster: () => <div data-testid="toaster" />,
 }));
 
 const originalError = console.error;
 beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
     const message = args
       .map((arg) => (typeof arg === 'string' ? arg : String(arg)))
       .join(' ');
@@ -51,7 +52,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
+  (console.error as any).mockRestore();
 });
 
 describe('RootLayout', () => {

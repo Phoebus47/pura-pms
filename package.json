@@ -27,7 +27,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.4.2",
-    "turbo": "^2.7.6"
+    "turbo": "^2.8.10"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -41,7 +41,10 @@
   "packageManager": "pnpm@10.0.0",
   "pnpm": {
     "overrides": {
-      "lodash": "4.17.23"
+      "lodash": "4.17.23",
+      "next": ">=16.1.5",
+      "@isaacs/brace-expansion": ">=5.0.1",
+      "minimatch": ">=10.2.1"
     }
   }
 }

@@ -160,5 +160,5 @@
 
 ---
 
-**Last Updated:** 2025-01-XX  
+**Last Updated:** February 2026  
 **Version:** 1.0.0

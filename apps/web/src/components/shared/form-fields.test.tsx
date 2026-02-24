@@ -32,7 +32,7 @@ describe('FormFields', () => {
     });
 
     it('should call onChange when value changes', async () => {
-      const handleChange = jest.fn();
+      const handleChange = vi.fn();
       const user = userEvent.setup();
       let value = '';
 
@@ -125,7 +125,7 @@ describe('FormFields', () => {
     });
 
     it('should call onChange with number value', async () => {
-      const handleChange = jest.fn();
+      const handleChange = vi.fn();
       const user = userEvent.setup();
       let value: number | undefined = undefined;
 
@@ -156,6 +156,26 @@ describe('FormFields', () => {
       await user.type(input, '123');
 
       expect(handleChange).toHaveBeenCalled();
+    });
+
+    it('should fallback to 0 when input is invalid or cleared', async () => {
+      const handleChange = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <NumberInput
+          id="test-number-clear"
+          label="Number Label Clear"
+          value={5}
+          onChange={handleChange}
+        />,
+      );
+
+      const input = screen.getByLabelText(
+        'Number Label Clear',
+      ) as HTMLInputElement;
+      await user.clear(input);
+
+      expect(handleChange).toHaveBeenCalledWith(0);
     });
 
     it('should handle min and max constraints', () => {
@@ -191,7 +211,7 @@ describe('FormFields', () => {
     });
 
     it('should call onChange when value changes', async () => {
-      const handleChange = jest.fn();
+      const handleChange = vi.fn();
       const user = userEvent.setup();
       let value = '';
 
@@ -282,7 +302,7 @@ describe('FormFields', () => {
     });
 
     it('should call onChange when selection changes', async () => {
-      const handleChange = jest.fn();
+      const handleChange = vi.fn();
       const user = userEvent.setup();
 
       render(

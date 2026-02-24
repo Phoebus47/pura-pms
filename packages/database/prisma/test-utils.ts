@@ -23,8 +23,8 @@ export async function withTransaction<T>(
 }
 
 // Helper function for isolated test execution
-export async function runInTransaction<T>(
-  testFn: (prisma: PrismaClient) => Promise<T>,
+export async function runInTransaction(
+  testFn: (tx: PrismaClient) => Promise<void>,
 ): Promise<void> {
   try {
     await prisma.$transaction(async (tx) => {
@@ -33,9 +33,9 @@ export async function runInTransaction<T>(
       throw new Error('TEST_ROLLBACK');
     });
   } catch (error: any) {
-    // Ignore rollback errors
-    if (error.message !== 'TEST_ROLLBACK') {
-      throw error;
+    if (error.message === 'TEST_ROLLBACK') {
+      return;
     }
+    throw error;
   }
 }

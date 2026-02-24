@@ -11,7 +11,7 @@ describe('Button', () => {
   });
 
   it('should handle click events', async () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
     const user = userEvent.setup();
 
     render(<Button onClick={handleClick}>Click me</Button>);

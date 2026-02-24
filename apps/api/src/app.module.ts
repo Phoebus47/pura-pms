@@ -10,6 +10,10 @@ import { RoomTypesModule } from './room-types/room-types.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { GuestsModule } from './guests/guests.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { FoliosModule } from './folios/folios.module';
+import { FinancialModule } from './financial/financial.module';
+import { BullModule } from '@nestjs/bullmq';
+import { NightAuditModule } from './night-audit/night-audit.module';
 
 @Module({
   imports: [
@@ -22,6 +26,15 @@ import { ReservationsModule } from './reservations/reservations.module';
     RoomsModule,
     GuestsModule,
     ReservationsModule,
+    FoliosModule,
+    FinancialModule,
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
+      },
+    }),
+    NightAuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],

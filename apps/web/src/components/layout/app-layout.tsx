@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
@@ -9,6 +10,12 @@ export function AppLayout({
 }: {
   readonly children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div className="absolute bg-linear-to-br from-blue-50 inset-0 opacity-60 to-orange-50 via-indigo-50" />

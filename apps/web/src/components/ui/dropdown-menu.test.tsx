@@ -42,7 +42,7 @@ describe('DropdownMenu', () => {
   });
 
   it('navigates with keyboard', async () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <DropdownMenu>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -68,7 +68,7 @@ describe('DropdownMenu', () => {
   });
 
   it('respects disabled items', async () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <DropdownMenu>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>

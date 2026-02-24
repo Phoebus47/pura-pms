@@ -26,7 +26,7 @@ I want to implement: [ชื่อฟีเจอร์]
 
 Based on:
 - docs/planning/prd.md
-- docs/planning/DETAILED-WORK-PLAN.md
+- docs/planning/roadmap.md
 - docs/planning/reports-master-list.md (if applicable)
 
 Break this down into:
@@ -47,8 +47,8 @@ Act as a Technical PM for PURA PMS.
 Create a 2-week sprint plan for Phase 3: Financial & Audit Module.
 
 Based on:
-- docs/planning/DETAILED-WORK-PLAN.md
-- docs/planning/task.md
+- docs/planning/roadmap.md
+- docs/planning/prd.md
 
 Include:
 1. Sprint goals
@@ -137,7 +137,7 @@ Check:
 5. Data types (Decimal for money, proper date types)
 6. Migration strategy
 
-Reference: docs/planning/prd-enhancements.md
+Reference: docs/planning/prd.md
 ```
 
 ---
@@ -333,7 +333,7 @@ Files:
 [List files ที่เพิ่งสร้าง]
 
 Requirements:
-- Use Jest for testing
+- Use Vitest for testing
 - Minimum 80% coverage for critical business logic
 - Test both success and error paths
 - Include edge cases:
@@ -471,5 +471,5 @@ Create all necessary files following coding_standards.md
 
 ---
 
-**Last Updated:** 2025-01-XX  
-**Version:** 1.0.0
+**Last Updated:** February 2026  
+**Version:** 2.0.0

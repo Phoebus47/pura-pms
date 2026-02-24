@@ -236,7 +236,7 @@ describe('Structural Tests', () => {
       })
         .overrideProvider(ConfigService)
         .useValue({
-          get: jest.fn().mockReturnValue(undefined),
+          get: vi.fn().mockReturnValue(undefined),
         })
         // Override PrismaService just in case it's requested by class
         .useMocker((token) => {
@@ -256,7 +256,7 @@ describe('Structural Tests', () => {
       })
         .overrideProvider(ConfigService)
         .useValue({
-          get: jest.fn().mockReturnValue('customSecret'),
+          get: vi.fn().mockReturnValue('customSecret'),
         })
         .useMocker((token) => {
           if (token && token.toString().includes('PrismaService')) {

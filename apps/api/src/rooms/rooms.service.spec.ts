@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoomsService } from './rooms.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,20 +6,20 @@ import { RoomStatus } from '@pura/database';
 
 const mockPrismaService = {
   property: {
-    findUnique: jest.fn(),
+    findUnique: vi.fn(),
   },
   roomType: {
-    findUnique: jest.fn(),
+    findUnique: vi.fn(),
   },
   room: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
   reservation: {
-    count: jest.fn(),
+    count: vi.fn(),
   },
 };
 
@@ -29,7 +28,7 @@ describe('RoomsService', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPrismaService.room.findUnique.mockReset();
     mockPrismaService.room.create.mockReset();
     mockPrismaService.room.findMany.mockReset();
@@ -276,7 +275,6 @@ describe('RoomsService', () => {
 
       expect(prisma.room.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({
             roomTypeId: 'type-1',
           }),

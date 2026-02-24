@@ -1,0 +1,29 @@
+# API / Backend context
+
+You are editing **API** (NestJS, Prisma, DTOs). Combine your knowledge with project rules.
+
+## Use your knowledge (no need to paste long docs)
+
+- NestJS Architecture (Modules, Services, Controllers, Guards)
+- REST semantics (status codes, idempotency, GET vs POST)
+- Input validation (`class-validator` DTOs)
+- Error handling (Exceptions, Filters)
+- Security: CORS, Guards, no sensitive info in logs
+
+## Project-specific – read only these sections when needed
+
+- **docs/guidelines/coding_standards.md §14** – NestJS Guidelines (Feature Modules, Services for logic, Strict DTOs)
+- **§3** – TypeScript (no `any`, strict interfaces)
+- **§5** – Performance (N+1 queries, BullMQ for async)
+- **§11** – Error handling (try/catch, Logger service, no console.log)
+- **§17** – Quality (Input validation, status codes, immutable financials)
+
+## Quick checks (PURA Specific)
+
+- **Architecture:** Logic in Service, NOT Controller?
+- **Validation:** Is there a DTO with `class-validator` decorators?
+- **USALI:** Is the Chart of Accounts / Financial Logic **USALI compliant**?
+- **Financials:** NEVER `DELETE`? (Use void/counter-transaction with `isVoid` flag)
+- **Dates:** Are you distinguishing `businessDate` (Accounting) from `systemDate` (Timestamp)?
+- **Logging:** Using `this.logger` (not `console`)?
+- **Error:** Throwing standard `HttpException` (e.g. `NotFoundException`)?

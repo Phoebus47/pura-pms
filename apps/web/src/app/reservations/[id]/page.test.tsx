@@ -1,25 +1,26 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ReservationDetailPage from './page';
 import { reservationsAPI } from '@/lib/api';
 import { useRouter, useParams } from 'next/navigation';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   reservationsAPI: {
-    getById: jest.fn(),
-    checkIn: jest.fn(),
-    checkOut: jest.fn(),
-    cancel: jest.fn(),
-    delete: jest.fn(),
+    getById: vi.fn(),
+    checkIn: vi.fn(),
+    checkOut: vi.fn(),
+    cancel: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-  useParams: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+  useParams: vi.fn(),
 }));
 
-jest.mock('@/components/reservation-status-badge', () => ({
+vi.mock('@/components/reservation-status-badge', () => ({
   ReservationStatusBadge: ({ status }: { status: string }) => (
     <div>Status: {status}</div>
   ),
@@ -41,17 +42,17 @@ describe('ReservationDetailPage', () => {
     updatedAt: new Date().toISOString(),
   };
 
-  const mockPush = jest.fn();
-  const mockBack = jest.fn();
+  const mockPush = vi.fn();
+  const mockBack = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useRouter as any).mockReturnValue({
       push: mockPush,
       back: mockBack,
     });
-    (useParams as jest.Mock).mockReturnValue({ id: 'res-1' });
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue(mockReservation);
+    (useParams as any).mockReturnValue({ id: 'res-1' });
+    (reservationsAPI.getById as any).mockResolvedValue(mockReservation);
   });
 
   it('renders details', async () => {
@@ -64,10 +65,23 @@ describe('ReservationDetailPage', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
-  it('handle error', async () => {
-    (reservationsAPI.getById as jest.Mock).mockRejectedValue(
-      new Error('Failed'),
+  it('navigates between details and billing tabs', async () => {
+    render(<ReservationDetailPage />);
+    await waitFor(() =>
+      expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
     );
+
+    const billingTab = screen.getByText('Billing & Folio');
+    await userEvent.click(billingTab);
+
+    const detailsTab = screen.getByText('Details');
+    await userEvent.click(detailsTab);
+
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+  });
+
+  it('handle error', async () => {
+    (reservationsAPI.getById as any).mockRejectedValue(new Error('Failed'));
     render(<ReservationDetailPage />);
 
     await waitFor(() => {
@@ -76,7 +90,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles check in', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<ReservationDetailPage />);
     await waitFor(() =>
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
@@ -87,7 +101,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles cancellation', async () => {
-    jest.spyOn(window, 'prompt').mockReturnValue('Plans changed');
+    vi.spyOn(window, 'prompt').mockReturnValue('Plans changed');
     render(<ReservationDetailPage />);
     await waitFor(() =>
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
@@ -101,7 +115,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles deletion', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<ReservationDetailPage />);
     await waitFor(() =>
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
@@ -112,7 +126,7 @@ describe('ReservationDetailPage', () => {
     expect(mockPush).toHaveBeenCalledWith('/reservations');
   });
   it('cancels check in', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(false);
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
     render(<ReservationDetailPage />);
     await waitFor(() =>
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
@@ -123,9 +137,9 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles check in error', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.checkIn as jest.Mock).mockRejectedValue(
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.checkIn as any).mockRejectedValue(
       new Error('Check-in failed'),
     );
 
@@ -141,7 +155,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('cancels cancellation request', async () => {
-    jest.spyOn(window, 'prompt').mockReturnValue(null); // User cancelled
+    vi.spyOn(window, 'prompt').mockReturnValue(null); // User cancelled
     render(<ReservationDetailPage />);
     await waitFor(() =>
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
@@ -152,9 +166,9 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles cancellation error', async () => {
-    jest.spyOn(window, 'prompt').mockReturnValue('Reason');
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.cancel as jest.Mock).mockRejectedValue(
+    vi.spyOn(window, 'prompt').mockReturnValue('Reason');
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.cancel as any).mockRejectedValue(
       new Error('Cancel failed'),
     );
 
@@ -170,7 +184,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('cancels deletion', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(false);
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
     render(<ReservationDetailPage />);
     await waitFor(() =>
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
@@ -181,9 +195,9 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles deletion error', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.delete as jest.Mock).mockRejectedValue(
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.delete as any).mockRejectedValue(
       new Error('Delete failed'),
     );
 
@@ -199,11 +213,11 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles check out', async () => {
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue({
+    (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
       status: 'CHECKED_IN',
     });
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<ReservationDetailPage />);
 
     await waitFor(() =>
@@ -215,11 +229,11 @@ describe('ReservationDetailPage', () => {
   });
 
   it('cancels check out', async () => {
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue({
+    (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
       status: 'CHECKED_IN',
     });
-    jest.spyOn(window, 'confirm').mockReturnValue(false);
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
     render(<ReservationDetailPage />);
 
     await waitFor(() =>
@@ -231,13 +245,13 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles check out error', async () => {
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue({
+    (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
       status: 'CHECKED_IN',
     });
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.checkOut as jest.Mock).mockRejectedValue(
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.checkOut as any).mockRejectedValue(
       new Error('Check-out failed'),
     );
 
@@ -263,7 +277,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('navigates back from error state', async () => {
-    (reservationsAPI.getById as jest.Mock).mockRejectedValue(new Error('Fail'));
+    (reservationsAPI.getById as any).mockRejectedValue(new Error('Fail'));
     render(<ReservationDetailPage />);
 
     await waitFor(() =>
@@ -282,7 +296,7 @@ describe('ReservationDetailPage', () => {
       actualCheckIn: '2024-01-01T14:00:00Z',
       actualCheckOut: '2024-01-05T10:00:00Z',
     };
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue(fullReservation);
+    (reservationsAPI.getById as any).mockResolvedValue(fullReservation);
 
     render(<ReservationDetailPage />);
 
@@ -309,7 +323,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('renders singular nights and guests', async () => {
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue({
+    (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
       nights: 1,
       numberOfGuests: 1,
@@ -323,7 +337,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles non-Error objects in load', async () => {
-    (reservationsAPI.getById as jest.Mock).mockRejectedValue('String error');
+    (reservationsAPI.getById as any).mockRejectedValue('String error');
     render(<ReservationDetailPage />);
 
     await waitFor(() =>
@@ -334,7 +348,7 @@ describe('ReservationDetailPage', () => {
   });
 
   it('renders not found state when data is null', async () => {
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue(null);
+    (reservationsAPI.getById as any).mockResolvedValue(null);
     render(<ReservationDetailPage />);
 
     await waitFor(() =>
@@ -343,11 +357,11 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles non-Error objects in actions', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
 
     // Check In
-    (reservationsAPI.checkIn as jest.Mock).mockRejectedValue('Err');
+    (reservationsAPI.checkIn as any).mockRejectedValue('Err');
     render(<ReservationDetailPage />);
     await waitFor(() => screen.getByText('Check In'));
     await userEvent.click(screen.getByText('Check In'));
@@ -361,13 +375,13 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles non-Error objects in check out', async () => {
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue({
+    (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
       status: 'CHECKED_IN',
     });
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.checkOut as jest.Mock).mockRejectedValue('Err');
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.checkOut as any).mockRejectedValue('Err');
 
     render(<ReservationDetailPage />);
     await waitFor(() => screen.getByText('Check Out'));
@@ -378,9 +392,9 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles non-Error objects in cancel', async () => {
-    jest.spyOn(window, 'prompt').mockReturnValue('Reason');
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.cancel as jest.Mock).mockRejectedValue('Err');
+    vi.spyOn(window, 'prompt').mockReturnValue('Reason');
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.cancel as any).mockRejectedValue('Err');
 
     render(<ReservationDetailPage />);
     await waitFor(() => screen.getByText('Cancel'));
@@ -391,9 +405,9 @@ describe('ReservationDetailPage', () => {
   });
 
   it('handles non-Error objects in delete', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (reservationsAPI.delete as jest.Mock).mockRejectedValue('Err');
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (reservationsAPI.delete as any).mockRejectedValue('Err');
 
     render(<ReservationDetailPage />);
     await waitFor(() => screen.getByText('Delete'));
@@ -412,7 +426,7 @@ describe('ReservationDetailPage', () => {
       specialRequests: null,
       cancellationReason: null,
     };
-    (reservationsAPI.getById as jest.Mock).mockResolvedValue(noRoomReservation);
+    (reservationsAPI.getById as any).mockResolvedValue(noRoomReservation);
 
     render(<ReservationDetailPage />);
 

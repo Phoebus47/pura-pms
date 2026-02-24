@@ -1,19 +1,26 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  render,
+  screen,
+  fireEvent,
+  within,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GuestsPage from './page';
 import { useGuests } from '@/hooks/use-guests';
 import { useRouter } from 'next/navigation';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/hooks/use-guests', () => ({
-  useGuests: jest.fn(),
+vi.mock('@/hooks/use-guests', () => ({
+  useGuests: vi.fn(),
 }));
 
-const mockConfirm = jest.fn((title, msg, action) => action());
-jest.mock('@/components/ui/confirm-dialog', () => ({
+const mockConfirm = vi.fn((title, msg, action) => action());
+vi.mock('@/components/ui/confirm-dialog', () => ({
   useConfirmDialog: () => ({
     confirm: mockConfirm,
     Dialog: <div data-testid="confirm-dialog" />,
@@ -21,12 +28,13 @@ jest.mock('@/components/ui/confirm-dialog', () => ({
 }));
 
 // Mock child components to verify props
-jest.mock('@/components/guest-form-dialog', () => ({
-  GuestFormDialog: jest.fn(({ isOpen, guest, onSuccess }) =>
+vi.mock('@/components/guest-form-dialog', () => ({
+  GuestFormDialog: vi.fn(({ isOpen, guest, onSuccess, onClose }) =>
     isOpen ? (
       <div data-testid="guest-form-dialog">
         {guest ? `Edit ${guest.firstName}` : 'Create Guest'}
         <button onClick={onSuccess}>Success</button>
+        <button onClick={onClose}>Close</button>
       </div>
     ) : null,
   ),
@@ -58,14 +66,14 @@ const mockGuests = [
 ];
 
 describe('GuestsPage', () => {
-  const mockLoadGuests = jest.fn();
-  const mockDeleteGuest = jest.fn();
-  const mockPush = jest.fn();
+  const mockLoadGuests = vi.fn();
+  const mockDeleteGuest = vi.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (useGuests as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useGuests as any).mockReturnValue({
       guests: mockGuests,
       loading: false,
       error: null,
@@ -75,7 +83,7 @@ describe('GuestsPage', () => {
   });
 
   it('renders loading state', () => {
-    (useGuests as jest.Mock).mockReturnValue({
+    (useGuests as any).mockReturnValue({
       loading: true,
       guests: [],
       loadGuests: mockLoadGuests,
@@ -85,7 +93,7 @@ describe('GuestsPage', () => {
   });
 
   it('renders error state', () => {
-    (useGuests as jest.Mock).mockReturnValue({
+    (useGuests as any).mockReturnValue({
       loading: false,
       error: 'Failed to fetch',
       guests: [],
@@ -101,7 +109,7 @@ describe('GuestsPage', () => {
   });
 
   it('renders empty state', () => {
-    (useGuests as jest.Mock).mockReturnValue({
+    (useGuests as any).mockReturnValue({
       guests: [],
       loading: false,
       loadGuests: mockLoadGuests,
@@ -110,7 +118,51 @@ describe('GuestsPage', () => {
     expect(screen.getByText('No guests found')).toBeInTheDocument();
   });
 
+  it('renders empty state with search query', async () => {
+    (useGuests as any).mockReturnValue({
+      guests: [],
+      loading: false,
+      loadGuests: mockLoadGuests,
+    });
+    const user = userEvent.setup();
+    render(<GuestsPage />);
+    const input = screen.getByPlaceholderText(/search/i);
+    await user.type(input, 'TestSearchQuery');
+
+    // We expect the 'Try a different search term' message to appear
+    await waitFor(() => {
+      expect(
+        screen.getByText('Try a different search term'),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('renders guests list with fallback for missing email and handles row click', async () => {
+    const guestsWithMissingEmail = [{ ...mockGuests[0], email: null }];
+    (useGuests as any).mockReturnValue({
+      guests: guestsWithMissingEmail,
+      loading: false,
+      error: null,
+      loadGuests: mockLoadGuests,
+      deleteGuest: mockDeleteGuest,
+    });
+
+    render(<GuestsPage />);
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+
+    // Check fallback character for email
+    const fallbackTextElements = screen.getAllByText('-');
+    expect(fallbackTextElements.length).toBeGreaterThan(0);
+  });
+
   it('renders guests list and handles row click', async () => {
+    (useGuests as any).mockReturnValue({
+      guests: mockGuests,
+      loading: false,
+      error: null,
+      loadGuests: mockLoadGuests,
+      deleteGuest: mockDeleteGuest,
+    });
     render(<GuestsPage />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('US')).toBeInTheDocument();
@@ -148,6 +200,10 @@ describe('GuestsPage', () => {
     // Test Success callback
     await userEvent.click(screen.getByText('Success'));
     expect(mockLoadGuests).toHaveBeenCalled();
+
+    // Test Close callback
+    await userEvent.click(screen.getByText('Close'));
+    expect(screen.queryByText('Create Guest')).not.toBeInTheDocument();
   });
 
   it('handles edit guest', async () => {

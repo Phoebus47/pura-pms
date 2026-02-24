@@ -25,7 +25,7 @@ describe('BaseFormDialog', () => {
   });
 
   it('should call onClose when close button is clicked', async () => {
-    const handleClose = jest.fn();
+    const handleClose = vi.fn();
     const user = userEvent.setup();
 
     render(
@@ -68,5 +68,29 @@ describe('BaseFormDialog', () => {
 
     const xlDialog = container.querySelector('.max-w-xl');
     expect(xlDialog).toBeInTheDocument();
+
+    rerender(
+      <BaseFormDialog
+        isOpen={true}
+        onClose={() => {}}
+        title="Test Dialog"
+        maxWidth="lg"
+      >
+        <div>Content</div>
+      </BaseFormDialog>,
+    );
+    expect(container.querySelector('.max-w-lg')).toBeInTheDocument();
+
+    rerender(
+      <BaseFormDialog
+        isOpen={true}
+        onClose={() => {}}
+        title="Test Dialog"
+        maxWidth="2xl"
+      >
+        <div>Content</div>
+      </BaseFormDialog>,
+    );
+    expect(container.querySelector('.max-w-2xl')).toBeInTheDocument();
   });
 });

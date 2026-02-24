@@ -1,19 +1,20 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GuestSearchDialog } from './guest-search-dialog';
 import { guestsAPI } from '@/lib/api';
 
 // Mock the API
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   guestsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
 describe('GuestSearchDialog', () => {
-  const mockOnClose = jest.fn();
-  const mockOnSelectGuest = jest.fn();
-  const mockOnCreateNew = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSelectGuest = vi.fn();
+  const mockOnCreateNew = vi.fn();
   const mockGuests = [
     {
       id: '1',
@@ -36,7 +37,7 @@ describe('GuestSearchDialog', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders search input when open', () => {
@@ -69,7 +70,7 @@ describe('GuestSearchDialog', () => {
   });
 
   it('searches for guests on button click', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
 
     render(
       <GuestSearchDialog
@@ -95,7 +96,7 @@ describe('GuestSearchDialog', () => {
   });
 
   it('searches for guests on Enter key', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
 
     render(
       <GuestSearchDialog
@@ -117,7 +118,7 @@ describe('GuestSearchDialog', () => {
   });
 
   it('displays no guests found message', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: [] });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: [] });
 
     render(
       <GuestSearchDialog
@@ -141,7 +142,7 @@ describe('GuestSearchDialog', () => {
   });
 
   it('selects a guest on click', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({
+    (guestsAPI.getAll as any).mockResolvedValue({
       data: [mockGuests[0]],
     });
 
@@ -171,7 +172,7 @@ describe('GuestSearchDialog', () => {
   });
 
   it('calls create new handler', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: [] });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: [] });
 
     render(
       <GuestSearchDialog
@@ -200,7 +201,7 @@ describe('GuestSearchDialog', () => {
   });
 
   it('handles API error', async () => {
-    (guestsAPI.getAll as jest.Mock).mockRejectedValue(new Error('API Error'));
+    (guestsAPI.getAll as any).mockRejectedValue(new Error('API Error'));
     // Mock toast to check call or just ensure no crash
     // Since toast is imported from @/lib/toast, we should probably mock it if testing strictly,
     // but here we just ensure loading state clears.
@@ -224,6 +225,53 @@ describe('GuestSearchDialog', () => {
       expect(
         screen.getByRole('button', { name: /search/i }),
       ).not.toBeDisabled();
+    });
+  });
+
+  it('does not search if term is empty or whitespace', async () => {
+    render(
+      <GuestSearchDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSelectGuest={mockOnSelectGuest}
+        onCreateNew={mockOnCreateNew}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText(/search by name/i);
+    await userEvent.type(input, '   {enter}');
+
+    expect(guestsAPI.getAll).not.toHaveBeenCalled();
+  });
+
+  it('renders guest with no contact info', async () => {
+    (guestsAPI.getAll as any).mockResolvedValue({
+      data: [
+        {
+          ...mockGuests[0],
+          email: null,
+          phone: null,
+        },
+      ],
+    });
+
+    render(
+      <GuestSearchDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSelectGuest={mockOnSelectGuest}
+        onCreateNew={mockOnCreateNew}
+      />,
+    );
+
+    await userEvent.type(
+      screen.getByPlaceholderText(/search by name/i),
+      'John',
+    );
+    await userEvent.click(screen.getByRole('button', { name: /search/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('No contact info')).toBeInTheDocument();
     });
   });
 });

@@ -6,10 +6,13 @@ export * from './test-utils';
 // Global test setup
 beforeAll(async () => {
   try {
-    await prisma.$connect();
-    console.log('✅ Test database connected');
+    // Note: We don't forcefully connect here anymore to allow unit tests
+    // to run without a real database. Tests that need a real DB will connect
+    // automatically on first query or can connect explicitly.
+    // await prisma.$connect();
+    console.log('✅ Test setup complete');
   } catch (error) {
-    console.error('❌ Failed to connect to test database:', error);
+    console.error('❌ Failed to setup tests:', error);
     throw error;
   }
 });

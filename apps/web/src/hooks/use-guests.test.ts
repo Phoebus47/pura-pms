@@ -1,19 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useGuests } from './use-guests';
 import { guestsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   guestsAPI: {
-    getAll: jest.fn(),
-    delete: jest.fn(),
+    getAll: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    success: jest.fn(),
-    error: jest.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -38,7 +39,7 @@ describe('useGuests', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have initial loading state', () => {
@@ -50,7 +51,7 @@ describe('useGuests', () => {
   });
 
   it('should load guests when loadGuests is called', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
 
     const { result } = renderHook(() => useGuests());
 
@@ -68,7 +69,7 @@ describe('useGuests', () => {
 
   it('should handle loading error', async () => {
     const errorMessage = 'Failed to load guests';
-    (guestsAPI.getAll as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (guestsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useGuests());
 
@@ -84,8 +85,25 @@ describe('useGuests', () => {
     expect(toast.error).toHaveBeenCalledWith(errorMessage);
   });
 
+  it('should handle non-Error object during load', async () => {
+    (guestsAPI.getAll as any).mockRejectedValue('String error');
+
+    const { result } = renderHook(() => useGuests());
+
+    await act(async () => {
+      await result.current.loadGuests();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Failed to load guests');
+    expect(toast.error).toHaveBeenCalledWith('Failed to load guests');
+  });
+
   it('should apply search filter when provided', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
 
     const { result } = renderHook(() => useGuests({ search: 'John' }));
 
@@ -100,7 +118,7 @@ describe('useGuests', () => {
   });
 
   it('should apply limit when provided', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
 
     const { result } = renderHook(() => useGuests({ limit: 10 }));
 
@@ -115,8 +133,8 @@ describe('useGuests', () => {
   });
 
   it('should delete guest successfully', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
-    (guestsAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.delete as any).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useGuests());
 
@@ -133,7 +151,7 @@ describe('useGuests', () => {
 
   it('should handle delete error', async () => {
     const errorMessage = 'Failed to delete guest';
-    (guestsAPI.delete as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (guestsAPI.delete as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useGuests());
 
@@ -146,9 +164,23 @@ describe('useGuests', () => {
     expect(toast.error).toHaveBeenCalledWith(errorMessage);
   });
 
+  it('should handle non-Error object during delete', async () => {
+    (guestsAPI.delete as any).mockRejectedValue('String error');
+
+    const { result } = renderHook(() => useGuests());
+
+    let deleteResult: boolean;
+    await act(async () => {
+      deleteResult = await result.current.deleteGuest('1');
+    });
+
+    expect(deleteResult!).toBe(false);
+    expect(toast.error).toHaveBeenCalledWith('Failed to delete guest');
+  });
+
   it('should reload guests after successful delete', async () => {
-    (guestsAPI.getAll as jest.Mock).mockResolvedValue({ data: mockGuests });
-    (guestsAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (guestsAPI.getAll as any).mockResolvedValue({ data: mockGuests });
+    (guestsAPI.delete as any).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useGuests());
 
