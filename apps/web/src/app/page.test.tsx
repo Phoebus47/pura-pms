@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
@@ -5,26 +6,26 @@ import Dashboard from './page';
 import { reservationsAPI, roomsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   reservationsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
   roomsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
 }));
 
-jest.mock('next/image', () => ({
+vi.mock('next/image', () => ({
   __esModule: true,
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
     // eslint-disable-next-line @next/next/no-img-element
@@ -33,7 +34,7 @@ jest.mock('next/image', () => ({
 }));
 
 describe('Dashboard', () => {
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
   const mockReservations = [
     {
       id: '1',
@@ -68,15 +69,19 @@ describe('Dashboard', () => {
   ];
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    jest.clearAllMocks();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2024-01-15T12:00:00.000Z'));
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should display loading state initially', () => {
-    (reservationsAPI.getAll as jest.Mock).mockReturnValue(
-      new Promise(() => {}),
-    );
-    (roomsAPI.getAll as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (reservationsAPI.getAll as any).mockReturnValue(new Promise(() => {}));
+    (roomsAPI.getAll as any).mockReturnValue(new Promise(() => {}));
 
     render(<Dashboard />);
 
@@ -84,8 +89,8 @@ describe('Dashboard', () => {
   });
 
   it('should display dashboard stats after loading', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
@@ -99,8 +104,8 @@ describe('Dashboard', () => {
   });
 
   it('should display recent reservations', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
@@ -114,8 +119,8 @@ describe('Dashboard', () => {
 
   it('should navigate to new reservation page when button is clicked', async () => {
     const user = userEvent.setup();
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
@@ -130,10 +135,8 @@ describe('Dashboard', () => {
 
   it('should display error message if data loading fails', async () => {
     const errorMessage = 'Failed to load dashboard data';
-    (reservationsAPI.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (reservationsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
@@ -143,8 +146,8 @@ describe('Dashboard', () => {
   });
 
   it('should display "No recent reservations" when there are no reservations', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue([]);
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (reservationsAPI.getAll as any).mockResolvedValue([]);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
@@ -154,8 +157,8 @@ describe('Dashboard', () => {
   });
 
   it('should display error message if data loading fails with non-Error', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockRejectedValue('String Error');
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (reservationsAPI.getAll as any).mockRejectedValue('String Error');
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
     await waitFor(() => {
@@ -164,12 +167,27 @@ describe('Dashboard', () => {
   });
 
   it('should handle zero rooms for occupancy calculation', async () => {
-    (reservationsAPI.getAll as jest.Mock).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue([]);
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue([]);
 
     render(<Dashboard />);
     await waitFor(() => {
       expect(screen.getByText('0% occupancy')).toBeInTheDocument();
+    });
+  });
+
+  it('should cover all available room statuses', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue([]);
+    (roomsAPI.getAll as any).mockResolvedValue([
+      { id: '1', status: 'VACANT_CLEAN' },
+      { id: '2', status: 'VACANT_DIRTY' },
+      { id: '3', status: 'OCCUPIED_CLEAN' },
+    ]);
+
+    render(<Dashboard />);
+    await waitFor(() => {
+      // 2 rooms are available (VACANT_CLEAN and VACANT_DIRTY)
+      expect(screen.getByText('2')).toBeInTheDocument();
     });
   });
 });

@@ -1,19 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useRoomTypes } from './use-room-types';
 import { roomTypesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   roomTypesAPI: {
-    getAll: jest.fn(),
-    delete: jest.fn(),
+    getAll: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    success: jest.fn(),
-    error: jest.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -44,7 +45,7 @@ describe('useRoomTypes', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have initial loading state', () => {
@@ -56,7 +57,7 @@ describe('useRoomTypes', () => {
   });
 
   it('should load room types when loadRoomTypes is called', async () => {
-    (roomTypesAPI.getAll as jest.Mock).mockResolvedValue(mockRoomTypes);
+    (roomTypesAPI.getAll as any).mockResolvedValue(mockRoomTypes);
 
     const { result } = renderHook(() => useRoomTypes());
 
@@ -74,9 +75,7 @@ describe('useRoomTypes', () => {
 
   it('should handle loading error', async () => {
     const errorMessage = 'Failed to load room types';
-    (roomTypesAPI.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    (roomTypesAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useRoomTypes());
 
@@ -92,9 +91,26 @@ describe('useRoomTypes', () => {
     expect(toast.error).toHaveBeenCalledWith(errorMessage);
   });
 
+  it('should handle non-Error object during load', async () => {
+    (roomTypesAPI.getAll as any).mockRejectedValue('String error');
+
+    const { result } = renderHook(() => useRoomTypes());
+
+    await act(async () => {
+      await result.current.loadRoomTypes();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Failed to load room types');
+    expect(toast.error).toHaveBeenCalledWith('Failed to load room types');
+  });
+
   it('should delete room type successfully', async () => {
-    (roomTypesAPI.getAll as jest.Mock).mockResolvedValue(mockRoomTypes);
-    (roomTypesAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (roomTypesAPI.getAll as any).mockResolvedValue(mockRoomTypes);
+    (roomTypesAPI.delete as any).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useRoomTypes());
 
@@ -113,9 +129,7 @@ describe('useRoomTypes', () => {
 
   it('should handle delete error', async () => {
     const errorMessage = 'Failed to delete room type';
-    (roomTypesAPI.delete as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    (roomTypesAPI.delete as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useRoomTypes());
 
@@ -128,9 +142,23 @@ describe('useRoomTypes', () => {
     expect(toast.error).toHaveBeenCalledWith(errorMessage);
   });
 
+  it('should handle non-Error object during delete', async () => {
+    (roomTypesAPI.delete as any).mockRejectedValue('String error');
+
+    const { result } = renderHook(() => useRoomTypes());
+
+    let deleteResult: boolean;
+    await act(async () => {
+      deleteResult = await result.current.deleteRoomType('1');
+    });
+
+    expect(deleteResult!).toBe(false);
+    expect(toast.error).toHaveBeenCalledWith('Failed to delete room type');
+  });
+
   it('should reload room types after successful delete', async () => {
-    (roomTypesAPI.getAll as jest.Mock).mockResolvedValue(mockRoomTypes);
-    (roomTypesAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (roomTypesAPI.getAll as any).mockResolvedValue(mockRoomTypes);
+    (roomTypesAPI.delete as any).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useRoomTypes());
 

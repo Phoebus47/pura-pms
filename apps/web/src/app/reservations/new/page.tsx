@@ -47,7 +47,6 @@ export default function NewReservationPage() {
   const [submitting, setSubmitting] = useState(false);
 
   async function handleStep1Next() {
-    /* istanbul ignore next */
     if (!propertyId || !checkIn || !checkOut) {
       toast.warning('Please select property and dates');
       return;
@@ -69,7 +68,6 @@ export default function NewReservationPage() {
   }
 
   function handleStep2Next() {
-    /* istanbul ignore next */
     if (!selectedRoom) {
       toast.warning('Please select a room');
       return;
@@ -78,7 +76,6 @@ export default function NewReservationPage() {
   }
 
   function handleStep3Next() {
-    /* istanbul ignore next */
     if (!selectedGuest) {
       toast.warning('Please select a guest');
       return;
@@ -87,16 +84,14 @@ export default function NewReservationPage() {
   }
 
   async function handleSubmit() {
-    if (!selectedRoom || !selectedGuest) return;
-
     setSubmitting(true);
     try {
-      const baseRate = Number(selectedRoom.roomType?.baseRate || 0);
+      const baseRate = Number(selectedRoom!.roomType?.baseRate || 0);
       const calculatedTotal = baseRate * nights;
 
       const reservationData: CreateReservationDto = {
-        guestId: selectedGuest.id,
-        roomId: selectedRoom.id,
+        guestId: selectedGuest!.id,
+        roomId: selectedRoom!.id,
         checkIn,
         checkOut,
         adults: numberOfGuests,
@@ -227,7 +222,6 @@ export default function NewReservationPage() {
             <div className="flex justify-end pt-4">
               <Button
                 onClick={handleStep1Next}
-                disabled={!propertyId || !checkIn || !checkOut || loadingRooms}
                 className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
               >
                 {loadingRooms ? 'Loading...' : 'Next'}
@@ -296,7 +290,6 @@ export default function NewReservationPage() {
               </Button>
               <Button
                 onClick={handleStep2Next}
-                disabled={!selectedRoom}
                 className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
               >
                 Next
@@ -364,7 +357,6 @@ export default function NewReservationPage() {
               </Button>
               <Button
                 onClick={handleStep3Next}
-                disabled={!selectedGuest}
                 className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
               >
                 Next

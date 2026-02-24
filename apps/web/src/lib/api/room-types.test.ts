@@ -1,20 +1,22 @@
 import { roomTypesAPI, type RoomType } from './room-types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient, getAuthToken } from './client';
 
-jest.mock('./client', () => ({
+vi.mock('./client', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   },
-  getAuthToken: jest.fn(),
+  getAuthToken: vi.fn(),
 }));
 
 describe('roomTypesAPI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getAuthToken as jest.Mock).mockReturnValue('token123');
+    vi.clearAllMocks();
+    (getAuthToken as any).mockReturnValue('token123');
   });
 
   describe('getAll', () => {
@@ -33,7 +35,7 @@ describe('roomTypesAPI', () => {
         },
       ];
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockRoomTypes);
+      (apiClient.get as any).mockResolvedValue(mockRoomTypes);
 
       const result = await roomTypesAPI.getAll();
 
@@ -45,7 +47,7 @@ describe('roomTypesAPI', () => {
       const mockRoomTypes: RoomType[] = [];
       const propertyId = 'prop1';
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockRoomTypes);
+      (apiClient.get as any).mockResolvedValue(mockRoomTypes);
 
       const result = await roomTypesAPI.getAll(propertyId);
 
@@ -57,8 +59,8 @@ describe('roomTypesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue([]);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue([]);
       await roomTypesAPI.getAll();
       expect(apiClient.get).toHaveBeenCalledWith('/room-types', undefined);
     });
@@ -78,7 +80,7 @@ describe('roomTypesAPI', () => {
         propertyId: 'prop1',
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockRoomType);
+      (apiClient.get as any).mockResolvedValue(mockRoomType);
 
       const result = await roomTypesAPI.getById('1');
 
@@ -87,8 +89,8 @@ describe('roomTypesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({});
       await roomTypesAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/room-types/1', undefined);
     });
@@ -111,7 +113,7 @@ describe('roomTypesAPI', () => {
         amenities: [],
       };
 
-      (apiClient.post as jest.Mock).mockResolvedValue(mockRoomType);
+      (apiClient.post as any).mockResolvedValue(mockRoomType);
 
       const result = await roomTypesAPI.create(createDto);
 
@@ -124,8 +126,8 @@ describe('roomTypesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.post as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.post as any).mockResolvedValue({});
       await roomTypesAPI.create({
         name: 'N',
         code: 'C',
@@ -155,7 +157,7 @@ describe('roomTypesAPI', () => {
         propertyId: 'prop1',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockRoomType);
+      (apiClient.patch as any).mockResolvedValue(mockRoomType);
 
       const result = await roomTypesAPI.update('1', updateDto);
 
@@ -168,8 +170,8 @@ describe('roomTypesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await roomTypesAPI.update('1', {});
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/room-types/1',
@@ -181,7 +183,7 @@ describe('roomTypesAPI', () => {
 
   describe('delete', () => {
     it('should call apiClient.delete with correct id', async () => {
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (apiClient.delete as any).mockResolvedValue(undefined);
 
       await roomTypesAPI.delete('1');
 
@@ -192,8 +194,8 @@ describe('roomTypesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.delete as any).mockResolvedValue(undefined);
       await roomTypesAPI.delete('1');
       expect(apiClient.delete).toHaveBeenCalledWith('/room-types/1', undefined);
     });

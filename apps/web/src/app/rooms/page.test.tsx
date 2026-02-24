@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import RoomsPage from './page';
 import { roomsAPI } from '@/lib/api';
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
 }));
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   roomsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
 describe('RoomsPage', () => {
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
   const mockRooms = [
     {
       id: '1',
@@ -56,13 +57,13 @@ describe('RoomsPage', () => {
   ];
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
-    jest.clearAllMocks();
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
+    vi.clearAllMocks();
   });
 
   it('should display loading state initially', () => {
-    (roomsAPI.getAll as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (roomsAPI.getAll as any).mockReturnValue(new Promise(() => {}));
 
     render(<RoomsPage />);
 
@@ -82,13 +83,24 @@ describe('RoomsPage', () => {
 
   it('should display error message if loading fails', async () => {
     const errorMessage = 'Failed to load rooms';
-    (roomsAPI.getAll as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (roomsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     render(<RoomsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Error loading rooms')).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    });
+  });
+
+  it('should display string error message if loading fails with non-Error', async () => {
+    (roomsAPI.getAll as any).mockRejectedValue('String Error');
+
+    render(<RoomsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Error loading rooms')).toBeInTheDocument();
+      expect(screen.getByText('Failed to load rooms')).toBeInTheDocument();
     });
   });
 
@@ -109,12 +121,34 @@ describe('RoomsPage', () => {
   });
 
   it('should display empty state when no rooms', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue([]);
+    (roomsAPI.getAll as any).mockResolvedValue([]);
 
     render(<RoomsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('No rooms found')).toBeInTheDocument();
+      expect(
+        screen.getByText('Get started by adding your first room'),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should display empty state with filter message when no rooms and filter applied', async () => {
+    (roomsAPI.getAll as any).mockResolvedValue([]);
+    const user = userEvent.setup();
+
+    render(<RoomsPage />);
+
+    // We expect 0 rooms
+    await waitFor(() => {
+      expect(screen.getByText('No rooms found')).toBeInTheDocument();
+    });
+
+    const vacantCleanBadge = screen.getAllByText('Vacant Clean')[0];
+    await user.click(vacantCleanBadge);
+
+    await waitFor(() => {
+      expect(screen.getByText('Try changing the filter')).toBeInTheDocument();
     });
   });
 
@@ -170,7 +204,7 @@ describe('RoomsPage', () => {
   it('retries loading on error', async () => {
     const user = userEvent.setup();
     const errorMessage = 'Failed to load rooms';
-    (roomsAPI.getAll as jest.Mock)
+    (roomsAPI.getAll as any)
       .mockRejectedValueOnce(new Error(errorMessage))
       .mockResolvedValueOnce(mockRooms);
 

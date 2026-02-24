@@ -14,28 +14,26 @@
     "db:seed-financial": "tsx prisma/seed-financial.ts",
     "db:verify-seed": "tsx prisma/verify-seed.mts",
     "db:studio": "prisma studio",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:perf": "jest performance.test.ts --verbose",
-    "test:unit": "jest --testPathIgnorePatterns=performance.test.ts",
-    "test:isolated": "NODE_ENV=test jest --runInBand"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:perf": "vitest run performance.test.ts",
+    "test:unit": "vitest run --exclude performance.test.ts",
+    "test:isolated": "vitest run --pool=forks"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^4.0.18",
     "dotenv": "^16.4.7",
-    "jest": "^29.7.0",
     "prisma": "^6.19.2",
-    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.mts"
+    "typescript": "^5.7.3",
+    "unplugin-swc": "^1.5.9",
+    "vite-tsconfig-paths": "^6.1.0",
+    "vitest": "^4.0.18"
   }
 }

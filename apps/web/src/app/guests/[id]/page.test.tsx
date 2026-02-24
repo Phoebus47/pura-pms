@@ -1,20 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GuestDetailPage from './page';
 import { guestsAPI } from '@/lib/api';
 import { useRouter, useParams } from 'next/navigation';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   guestsAPI: {
-    getById: jest.fn(),
-    delete: jest.fn(),
-    toggleBlacklist: jest.fn(),
+    getById: vi.fn(),
+    delete: vi.fn(),
+    toggleBlacklist: vi.fn(),
   },
 }));
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-  useParams: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+  useParams: vi.fn(),
 }));
 
 describe('GuestDetailPage', () => {
@@ -32,13 +33,13 @@ describe('GuestDetailPage', () => {
     updatedAt: new Date().toISOString(),
   };
 
-  const mockPush = jest.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (useParams as jest.Mock).mockReturnValue({ id: 'guest-1' });
-    (guestsAPI.getById as jest.Mock).mockResolvedValue(mockGuest);
+    vi.clearAllMocks();
+    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useParams as any).mockReturnValue({ id: 'guest-1' });
+    (guestsAPI.getById as any).mockResolvedValue(mockGuest);
   });
 
   it('renders guest details', async () => {
@@ -53,8 +54,48 @@ describe('GuestDetailPage', () => {
     expect(screen.getByText('1234567890')).toBeInTheDocument();
   });
 
+  it('renders guest with fallbacks for missing optional info', async () => {
+    (guestsAPI.getById as any).mockResolvedValue({
+      id: 'guest-2',
+      firstName: 'Jane',
+      lastName: 'Smith',
+      vipLevel: 0,
+      isBlacklist: false,
+      totalStays: 0,
+      totalRevenue: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      // Missing email, phone, nationality, idNumber
+    });
+
+    render(<GuestDetailPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    });
+
+    // Check for fallbacks '-'
+    const fallbacks = screen.getAllByText('-');
+    expect(fallbacks.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('renders guest with address and notes', async () => {
+    (guestsAPI.getById as any).mockResolvedValue({
+      ...mockGuest,
+      address: '123 Test St',
+      notes: 'Test Notes',
+    });
+
+    render(<GuestDetailPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('123 Test St')).toBeInTheDocument();
+      expect(screen.getByText('Test Notes')).toBeInTheDocument();
+    });
+  });
+
   it('handles loading error', async () => {
-    (guestsAPI.getById as jest.Mock).mockRejectedValue(new Error('Failed'));
+    (guestsAPI.getById as any).mockRejectedValue(new Error('Failed'));
     render(<GuestDetailPage />);
 
     await waitFor(() => {
@@ -64,7 +105,7 @@ describe('GuestDetailPage', () => {
   });
 
   it('handles delete', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<GuestDetailPage />);
     await waitFor(() =>
       expect(screen.getByText('John Doe')).toBeInTheDocument(),
@@ -75,6 +116,18 @@ describe('GuestDetailPage', () => {
 
     expect(guestsAPI.delete).toHaveBeenCalledWith('guest-1');
     expect(mockPush).toHaveBeenCalledWith('/guests');
+  });
+
+  it('navigates to edit page', async () => {
+    render(<GuestDetailPage />);
+    await waitFor(() =>
+      expect(screen.getByText('John Doe')).toBeInTheDocument(),
+    );
+
+    const editBtn = screen.getByText('Edit');
+    await userEvent.click(editBtn);
+
+    expect(mockPush).toHaveBeenCalledWith('/guests/guest-1/edit');
   });
 
   it('handles blacklist toggle', async () => {
@@ -90,7 +143,7 @@ describe('GuestDetailPage', () => {
     expect(guestsAPI.getById).toHaveBeenCalledTimes(2); // Initial + Reload
   });
   it('cancels delete', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(false);
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
     render(<GuestDetailPage />);
     await waitFor(() =>
       expect(screen.getByText('John Doe')).toBeInTheDocument(),
@@ -101,11 +154,9 @@ describe('GuestDetailPage', () => {
   });
 
   it('handles delete error', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (guestsAPI.delete as jest.Mock).mockRejectedValue(
-      new Error('Delete failed'),
-    );
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (guestsAPI.delete as any).mockRejectedValue(new Error('Delete failed'));
 
     render(<GuestDetailPage />);
     await waitFor(() =>
@@ -119,8 +170,8 @@ describe('GuestDetailPage', () => {
   });
 
   it('handles blacklist toggle error', async () => {
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (guestsAPI.toggleBlacklist as jest.Mock).mockRejectedValue(
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (guestsAPI.toggleBlacklist as any).mockRejectedValue(
       new Error('Toggle failed'),
     );
 
@@ -136,7 +187,7 @@ describe('GuestDetailPage', () => {
   });
 
   it('renders blacklisted state', async () => {
-    (guestsAPI.getById as jest.Mock).mockResolvedValue({
+    (guestsAPI.getById as any).mockResolvedValue({
       ...mockGuest,
       isBlacklist: true,
     });
@@ -150,7 +201,7 @@ describe('GuestDetailPage', () => {
   });
 
   it('renders not found state when guest is null', async () => {
-    (guestsAPI.getById as jest.Mock).mockResolvedValue(null);
+    (guestsAPI.getById as any).mockResolvedValue(null);
     render(<GuestDetailPage />);
 
     await waitFor(() => {
@@ -158,9 +209,9 @@ describe('GuestDetailPage', () => {
     });
   });
   it('handles delete error with non-Error object', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (guestsAPI.delete as jest.Mock).mockRejectedValue('String error');
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (guestsAPI.delete as any).mockRejectedValue('String error');
 
     render(<GuestDetailPage />);
     await waitFor(() =>
@@ -174,7 +225,7 @@ describe('GuestDetailPage', () => {
   });
 
   it('renders VIP guest properly', async () => {
-    (guestsAPI.getById as jest.Mock).mockResolvedValue({
+    (guestsAPI.getById as any).mockResolvedValue({
       ...mockGuest,
       vipLevel: 3,
     });
@@ -190,7 +241,7 @@ describe('GuestDetailPage', () => {
   });
 
   it('handles loading error with non-Error object', async () => {
-    (guestsAPI.getById as jest.Mock).mockRejectedValue('String error');
+    (guestsAPI.getById as any).mockRejectedValue('String error');
     render(<GuestDetailPage />);
 
     await waitFor(() => {
@@ -200,8 +251,8 @@ describe('GuestDetailPage', () => {
   });
 
   it('handles blacklist toggle error with non-Error object', async () => {
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
-    (guestsAPI.toggleBlacklist as jest.Mock).mockRejectedValue('String error');
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (guestsAPI.toggleBlacklist as any).mockRejectedValue('String error');
 
     render(<GuestDetailPage />);
     await waitFor(() =>

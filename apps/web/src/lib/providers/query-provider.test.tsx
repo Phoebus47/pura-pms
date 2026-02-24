@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { QueryProvider } from './query-provider';
 
-jest.mock('@tanstack/react-query-devtools', () => ({
+vi.mock('@tanstack/react-query-devtools', () => ({
   ReactQueryDevtools: () => (
     <div data-testid="react-query-devtools">DevTools</div>
   ),

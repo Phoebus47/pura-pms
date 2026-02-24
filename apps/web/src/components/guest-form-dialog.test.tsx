@@ -1,18 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { GuestFormDialog } from './guest-form-dialog';
 import { guestsAPI } from '@/lib/api';
 
-jest.mock('@/lib/api', () => ({
-  guestsAPI: {
-    create: jest.fn(),
-    update: jest.fn(),
-  },
-}));
-
 describe('GuestFormDialog', () => {
-  const mockOnClose = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSuccess = vi.fn();
   const mockGuest = {
     id: '1',
     firstName: 'Existing',
@@ -31,7 +24,7 @@ describe('GuestFormDialog', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders form elements', () => {
@@ -65,10 +58,10 @@ describe('GuestFormDialog', () => {
   });
 
   it('submits new guest', async () => {
-    (guestsAPI.create as jest.Mock).mockResolvedValue({
+    vi.spyOn(guestsAPI, 'create').mockResolvedValue({
       ...mockGuest,
       id: 'new',
-    });
+    } as any);
     render(
       <GuestFormDialog
         isOpen={true}
@@ -77,34 +70,48 @@ describe('GuestFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/first name/i), 'New');
-    await userEvent.type(screen.getByLabelText(/last name/i), 'User');
-    await userEvent.type(screen.getByLabelText(/email/i), 'new@test.com');
-    await userEvent.type(screen.getByLabelText(/phone/i), '0999999999');
-    await userEvent.type(screen.getByLabelText(/nationality/i), 'US');
-    await userEvent.type(screen.getByLabelText(/id number/i), 'P123');
-    await userEvent.type(screen.getByLabelText(/address/i), 'Address');
+    fireEvent.change(screen.getByLabelText(/first name/i), {
+      target: { value: 'New' },
+    });
+    fireEvent.change(screen.getByLabelText(/last name/i), {
+      target: { value: 'User' },
+    });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'new@test.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: '0999999999' },
+    });
+    fireEvent.change(screen.getByLabelText(/nationality/i), {
+      target: { value: 'US' },
+    });
+    fireEvent.change(screen.getByLabelText(/id number/i), {
+      target: { value: 'P123' },
+    });
+    fireEvent.change(screen.getByLabelText(/address/i), {
+      target: { value: 'Address' },
+    });
 
     // Select VIP Level 2
-    await userEvent.click(screen.getByLabelText(/vip level 2/i));
+    fireEvent.click(screen.getByLabelText(/vip level 2/i));
 
-    await userEvent.click(
-      screen.getByRole('button', { name: /create guest/i }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: /create guest/i }));
 
-    expect(guestsAPI.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        firstName: 'New',
-        lastName: 'User',
-        email: 'new@test.com',
-        vipLevel: 2,
-      }),
-    );
-    expect(mockOnSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(guestsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'New',
+          lastName: 'User',
+          email: 'new@test.com',
+          vipLevel: 2,
+        }),
+      );
+      expect(mockOnSuccess).toHaveBeenCalled();
+    });
   });
 
   it('handles update guest', async () => {
-    (guestsAPI.update as jest.Mock).mockResolvedValue(mockGuest);
+    vi.spyOn(guestsAPI, 'update').mockResolvedValue(mockGuest as any);
     render(
       <GuestFormDialog
         isOpen={true}
@@ -114,23 +121,23 @@ describe('GuestFormDialog', () => {
       />,
     );
 
-    await userEvent.clear(screen.getByLabelText(/first name/i));
-    await userEvent.type(screen.getByLabelText(/first name/i), 'Updated');
+    const firstNameInput = screen.getByLabelText(/first name/i);
+    fireEvent.change(firstNameInput, { target: { value: 'Updated' } });
 
-    await userEvent.click(
-      screen.getByRole('button', { name: /update guest/i }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: /update guest/i }));
 
-    expect(guestsAPI.update).toHaveBeenCalledWith(
-      '1',
-      expect.objectContaining({
-        firstName: 'Updated',
-      }),
-    );
+    await waitFor(() => {
+      expect(guestsAPI.update).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          firstName: 'Updated',
+        }),
+      );
+    });
   });
 
   it('handles submission error when unknown error occurs', async () => {
-    (guestsAPI.create as jest.Mock).mockRejectedValue('Unknown error');
+    vi.spyOn(guestsAPI, 'create').mockRejectedValue('Unknown error');
     render(
       <GuestFormDialog
         isOpen={true}
@@ -139,11 +146,13 @@ describe('GuestFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/first name/i), 'Fail');
-    await userEvent.type(screen.getByLabelText(/last name/i), 'Fail'); // Required
-    await userEvent.click(
-      screen.getByRole('button', { name: /create guest/i }),
-    );
+    fireEvent.change(screen.getByLabelText(/first name/i), {
+      target: { value: 'Fail' },
+    });
+    fireEvent.change(screen.getByLabelText(/last name/i), {
+      target: { value: 'Fail' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /create guest/i }));
 
     await waitFor(() =>
       expect(screen.getByText('Failed to save guest')).toBeInTheDocument(),
@@ -151,7 +160,7 @@ describe('GuestFormDialog', () => {
   });
 
   it('handles submission error with message', async () => {
-    (guestsAPI.create as jest.Mock).mockRejectedValue(new Error('API Error'));
+    vi.spyOn(guestsAPI, 'create').mockRejectedValue(new Error('API Error'));
     render(
       <GuestFormDialog
         isOpen={true}
@@ -160,14 +169,40 @@ describe('GuestFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/first name/i), 'Fail');
-    await userEvent.type(screen.getByLabelText(/last name/i), 'Fail'); // Required
-    await userEvent.click(
-      screen.getByRole('button', { name: /create guest/i }),
-    );
+    fireEvent.change(screen.getByLabelText(/first name/i), {
+      target: { value: 'Fail' },
+    });
+    fireEvent.change(screen.getByLabelText(/last name/i), {
+      target: { value: 'Fail' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /create guest/i }));
 
     await waitFor(() =>
       expect(screen.getByText('API Error')).toBeInTheDocument(),
     );
+  });
+
+  it('handles editing guest with missing optional fields', () => {
+    const minGuest = {
+      ...mockGuest,
+      email: undefined,
+      phone: undefined,
+      nationality: undefined,
+      idNumber: undefined,
+      address: undefined,
+    };
+    render(
+      <GuestFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+        guest={minGuest as any}
+      />,
+    );
+    expect(screen.getByLabelText(/email/i)).toHaveValue('');
+    expect(screen.getByLabelText(/phone/i)).toHaveValue('');
+    expect(screen.getByLabelText(/nationality/i)).toHaveValue('');
+    expect(screen.getByLabelText(/id number/i)).toHaveValue('');
+    expect(screen.getByLabelText(/address/i)).toHaveValue('');
   });
 });

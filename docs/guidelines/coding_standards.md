@@ -328,7 +328,7 @@ Use Conventional Commits:
 
 ### Testing stack
 
-- **Unit tests:** Jest + React Testing Library (Web) / Jest + Supertest (API).
+- **Unit tests:** Vitest + React Testing Library (Web) / Vitest + Supertest (API).
 - **E2E:** Playwright.
 
 ### Test quality

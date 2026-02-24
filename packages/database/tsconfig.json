@@ -11,8 +11,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "types": ["vitest/globals", "node"]
   },
-  "include": ["src", "prisma"],
+  "include": ["src", "prisma", "prisma.config.ts"],
   "exclude": ["node_modules", "dist", "prisma/migrations"]
 }

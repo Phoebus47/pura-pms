@@ -1,28 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RoomTypeFormDialog } from './room-type-form-dialog';
-import { roomTypesAPI } from '@/lib/api';
-
-jest.mock('@/lib/api', () => ({
-  roomTypesAPI: {
-    create: jest.fn(),
-    update: jest.fn(),
-  },
-  propertiesAPI: {
-    getAll: jest.fn().mockResolvedValue([{ id: 'p-1', name: 'Hotel A' }]),
-  },
-}));
-
-jest.mock('@/hooks/use-properties', () => ({
-  useProperties: () => ({
-    properties: [{ id: 'p-1', name: 'Hotel A' }],
-    isLoading: false,
-  }),
-}));
+import { roomTypesAPI, propertiesAPI } from '@/lib/api';
 
 describe('RoomTypeFormDialog', () => {
-  const mockOnClose = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSuccess = vi.fn();
   const mockRoomType = {
     id: '1',
     name: 'Deluxe',
@@ -43,10 +27,13 @@ describe('RoomTypeFormDialog', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('manages amenities', async () => {
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
     render(
       <RoomTypeFormDialog
         isOpen={true}
@@ -55,51 +42,50 @@ describe('RoomTypeFormDialog', () => {
       />,
     );
 
-    // Wait for properties to load to avoid act warning
+    // Wait for properties to load
     await screen.findByRole('combobox', { name: /property/i });
 
     // Add amenity
     const amenityInput = screen.getByPlaceholderText(/e.g., WiFi/i);
     const addButton = screen.getByRole('button', { name: /add amenity/i });
-    // Actually the button has no text, just an icon. The code uses <Plus /> inside.
-    // I should check if I can select by something else or add aria-label.
-    // Looking at source: propertiesAPI mock is needed too.
 
-    await userEvent.type(amenityInput, 'WiFi');
-    // Pressing Enter
-    await userEvent.keyboard('{Enter}');
+    fireEvent.change(amenityInput, { target: { value: 'WiFi' } });
+    fireEvent.click(addButton);
 
     expect(screen.getByText('WiFi')).toBeInTheDocument();
 
     // Add another via button
-    await userEvent.type(amenityInput, 'TV');
-    await userEvent.click(addButton);
+    fireEvent.change(amenityInput, { target: { value: 'TV' } });
+    fireEvent.click(addButton);
 
     expect(screen.getByText('TV')).toBeInTheDocument();
 
+    // Add amenity via Enter key
+    fireEvent.change(amenityInput, { target: { value: 'Mini Bar' } });
+    fireEvent.keyDown(amenityInput, {
+      key: 'Enter',
+      code: 'Enter',
+      charCode: 13,
+    });
+    expect(screen.getByText('Mini Bar')).toBeInTheDocument();
+
+    // Ignore other keys
+    fireEvent.keyDown(amenityInput, { key: 'Escape', code: 'Escape' });
+
     // Remove amenity (WiFi)
-    // Find the remove button for WiFi. It's inside the pill.
-    // The pill text is "WiFi". The button is next to it.
-    // I can get by role button within the pill?
-    // Or just getAllByRole('button') and click the one that looks like trash?
-    // Trash icon is used.
-    // I'll assume it's the first remove button?
-    // "WiFi" was added first, then "TV".
-    // So "WiFi" is index 0.
-    // We have 2 amenities. 2 delete buttons.
-    // Use accessible name if possible?
-    // The component has: <Trash2 ... /> inside button. No aria-label.
-    // I need to add aria-label to remove button too.
     const removeWifiButton = screen.getByRole('button', {
       name: /remove WiFi/i,
     });
-    await userEvent.click(removeWifiButton);
+    fireEvent.click(removeWifiButton);
 
     expect(screen.queryByText('WiFi')).not.toBeInTheDocument();
     expect(screen.getByText('TV')).toBeInTheDocument();
   });
 
   it('renders correctly', async () => {
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
     render(
       <RoomTypeFormDialog
         isOpen={true}
@@ -111,8 +97,27 @@ describe('RoomTypeFormDialog', () => {
     await screen.findByRole('combobox', { name: /property/i });
   });
 
+  it('renders with existing room type', async () => {
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
+    render(
+      <RoomTypeFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+        roomType={mockRoomType}
+      />,
+    );
+    await screen.findByRole('combobox', { name: /property/i });
+    expect(screen.getByLabelText(/name/i)).toHaveValue('Deluxe');
+  });
+
   it('submits new room type', async () => {
-    (roomTypesAPI.create as jest.Mock).mockResolvedValue({});
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
+    vi.spyOn(roomTypesAPI, 'create').mockResolvedValue({} as any);
     render(
       <RoomTypeFormDialog
         isOpen={true}
@@ -121,32 +126,50 @@ describe('RoomTypeFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/name/i), 'Suite');
-    await userEvent.type(screen.getByLabelText(/code/i), 'SUI');
-    await userEvent.type(screen.getByLabelText(/base rate/i), '5000');
-    await userEvent.selectOptions(screen.getByLabelText(/property/i), 'p-1');
-    await userEvent.type(screen.getByLabelText(/description/i), 'Luxury');
+    fireEvent.change(screen.getByLabelText(/name/i), {
+      target: { value: 'Suite' },
+    });
+    fireEvent.change(screen.getByLabelText(/code/i), {
+      target: { value: 'SUI' },
+    });
+    fireEvent.change(screen.getByLabelText(/base rate/i), {
+      target: { value: '5000' },
+    });
+
+    fireEvent.change(
+      await screen.findByRole('combobox', { name: /property/i }),
+      { target: { value: 'p-1' } },
+    );
+
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: 'Luxury' },
+    });
 
     // Test helper text input/textarea interaction explicitly
     const adultsInput = screen.getByLabelText(/max adults/i);
-    await userEvent.clear(adultsInput);
-    await userEvent.type(adultsInput, '2');
+    fireEvent.change(adultsInput, { target: { value: '3' } });
 
-    await userEvent.click(
-      screen.getByRole('button', { name: /create room type/i }),
-    );
+    const childrenInput = screen.getByLabelText(/max children/i);
+    fireEvent.change(childrenInput, { target: { value: '2' } });
 
-    expect(roomTypesAPI.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Suite',
-        code: 'SUI',
-        baseRate: 5000,
-      }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: /create room type/i }));
+
+    await waitFor(() => {
+      expect(roomTypesAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Suite',
+          code: 'SUI',
+          baseRate: 5000,
+        }),
+      );
+    });
   });
 
   it('handles update and error', async () => {
-    (roomTypesAPI.update as jest.Mock).mockRejectedValue(
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
+    vi.spyOn(roomTypesAPI, 'update').mockRejectedValue(
       new Error('Update Fail'),
     );
     render(
@@ -158,13 +181,106 @@ describe('RoomTypeFormDialog', () => {
       />,
     );
 
-    await userEvent.click(
-      screen.getByRole('button', { name: /update room type/i }),
-    );
+    await screen.findByRole('combobox', { name: /property/i });
+
+    fireEvent.click(screen.getByRole('button', { name: /update room type/i }));
 
     await waitFor(() => expect(roomTypesAPI.update).toHaveBeenCalled());
     await waitFor(() =>
       expect(screen.getByText('Update Fail')).toBeInTheDocument(),
     );
+  });
+
+  it('handles non-Error exception during submission', async () => {
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
+    vi.spyOn(roomTypesAPI, 'create').mockRejectedValue('String Error');
+    render(
+      <RoomTypeFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/name/i), {
+      target: { value: 'Suite' },
+    });
+    fireEvent.change(screen.getByLabelText(/code/i), {
+      target: { value: 'SUI' },
+    });
+    fireEvent.change(screen.getByLabelText(/base rate/i), {
+      target: { value: '5000' },
+    });
+    fireEvent.change(
+      await screen.findByRole('combobox', { name: /property/i }),
+      { target: { value: 'p-1' } },
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create room type/i }));
+
+    await waitFor(() =>
+      expect(screen.getByText('Failed to save room type')).toBeInTheDocument(),
+    );
+  });
+
+  it('handles editing room type with missing optional fields', async () => {
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
+    const minRoomType = {
+      ...mockRoomType,
+      description: undefined,
+      amenities: undefined,
+    };
+    render(
+      <RoomTypeFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+        roomType={minRoomType as any}
+      />,
+    );
+    await screen.findByRole('combobox', { name: /property/i });
+    expect(screen.getByLabelText(/description/i)).toHaveValue('');
+  });
+
+  it('adds and removes amenities', async () => {
+    vi.spyOn(propertiesAPI, 'getAll').mockResolvedValue([
+      { id: 'p-1', name: 'Hotel A' } as any,
+    ]);
+    const user = userEvent.setup();
+    render(
+      <RoomTypeFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+      />,
+    );
+
+    const amenityInput = screen.getByPlaceholderText(/e.g., WiFi/i);
+    const addButton = screen.getByRole('button', { name: /add amenity/i });
+
+    // Add amenity via button
+    await user.type(amenityInput, 'WiFi');
+    await user.click(addButton);
+
+    expect(screen.getByText('WiFi')).toBeInTheDocument();
+
+    // Add amenity via Enter key
+    await user.type(amenityInput, 'Pool{enter}');
+    expect(screen.getByText('Pool')).toBeInTheDocument();
+
+    // Ignore adding empty or existing amenity branches
+    await user.type(amenityInput, 'WiFi{enter}');
+
+    // Remove amenity
+    const removeWifiButton = screen.getByRole('button', {
+      name: /remove WiFi/i,
+    });
+    await user.click(removeWifiButton);
+
+    expect(screen.queryByText('WiFi')).not.toBeInTheDocument();
+    expect(screen.getByText('Pool')).toBeInTheDocument();
   });
 });

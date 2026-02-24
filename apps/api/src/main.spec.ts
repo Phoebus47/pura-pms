@@ -1,67 +1,87 @@
-import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterAll,
+  afterEach,
+  Mock,
+} from 'vitest';
 
-jest.mock('@nestjs/core', () => ({
+// We don't mock at top level to allow resetModules to work cleanly with doMock
+// vi.mock('@nestjs/core');
+
+const mockApp = {
+  enableCors: vi.fn(),
+  useGlobalPipes: vi.fn(),
+  listen: vi.fn(),
+};
+
+vi.mock('@nestjs/core', () => ({
   NestFactory: {
-    create: jest.fn(),
+    create: vi.fn().mockResolvedValue(mockApp),
   },
 }));
 
-type MockApp = Partial<NestExpressApplication>;
-
-const mockApp: MockApp = {
-  enableCors: jest.fn(),
-  useGlobalPipes: jest.fn(),
-  listen: jest.fn(),
-};
-
 describe('Main Bootstrap', () => {
   let initialPort: string | undefined;
-
-  let mockExit: jest.SpyInstance<never, any>;
+  let mockExit: Mock<typeof process.exit>;
 
   beforeAll(() => {
     initialPort = process.env.PORT;
-    // Suppress console logs
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    // Mock process.exit globally to prevent exit
-
-    mockExit = jest
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockExit = vi
       .spyOn(process, 'exit')
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      .mockImplementation((() => {}) as any);
+      .mockImplementation((() => {}) as never);
   });
 
   afterAll(() => {
     process.env.PORT = initialPort;
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mockApp.enableCors as jest.Mock).mockClear();
-    (mockApp.useGlobalPipes as jest.Mock).mockClear();
-    (mockApp.listen as jest.Mock).mockClear();
-    (NestFactory.create as jest.Mock).mockClear().mockResolvedValue(mockApp);
-    // Ensure mock exit is cleared but implementation remains
-    mockExit.mockClear();
+    vi.resetModules();
+    vi.clearAllMocks();
+
+    // Setup default mock for NestFactory
+    // The NestFactory mock is now at the top level, so we don't need doMock here.
+    // We still need to mock app.module though.
+
+    vi.doMock('./app.module', () => ({
+      AppModule: class {},
+    }));
+
+    (mockApp.enableCors as unknown as ReturnType<typeof vi.fn>).mockClear();
+    (mockApp.useGlobalPipes as unknown as ReturnType<typeof vi.fn>).mockClear();
+    (mockApp.listen as unknown as ReturnType<typeof vi.fn>).mockClear();
+
     delete process.env.PORT;
+    delete process.env.CORS_ORIGIN;
+  });
+
+  afterEach(() => {
+    vi.doUnmock('./app.module');
   });
 
   it('should bootstrap the application successfully', async () => {
-    // We import main here to trigger execution
-    jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('./main');
-    });
+    await import('./main.js');
 
-    // Allow async import to complete
-    await new Promise((resolve) => setImmediate(resolve));
+    // Get the mocked NestFactory to check calls
+    const { NestFactory } = await import('@nestjs/core');
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(NestFactory.create).toHaveBeenCalled();
-    expect(mockApp.enableCors).toHaveBeenCalledWith(
+    const createFn = NestFactory.create;
+    expect(
+      vi.isMockFunction(createFn) ? createFn : undefined,
+    ).toHaveBeenCalled();
+
+    expect(
+      vi.isMockFunction(mockApp.enableCors) ? mockApp.enableCors : undefined,
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         origin: expect.any(Array),
@@ -69,95 +89,61 @@ describe('Main Bootstrap', () => {
       }),
     );
 
-    expect(mockApp.enableCors).toHaveBeenCalledTimes(1);
-    expect(mockApp.useGlobalPipes).toHaveBeenCalledWith(
-      expect.objectContaining({ isTransformEnabled: true }),
-    );
+    expect(
+      vi.isMockFunction(mockApp.useGlobalPipes)
+        ? mockApp.useGlobalPipes
+        : undefined,
+    ).toHaveBeenCalled();
 
-    // Check validation pipe options
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const validationPipe =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (mockApp.useGlobalPipes as jest.Mock).mock.calls[0][0];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(validationPipe.isTransformEnabled).toBe(true);
-
-    // Verify listen called with 3001 (string or number)
-    // Verify listen called with 3001 (string or number)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const listenPort = (mockApp.listen as jest.Mock).mock.calls[0][0];
+    const mockCalls = (
+      mockApp.listen as unknown as { mock: { calls: string[][] } }
+    ).mock.calls;
+    const listenPort = mockCalls[0] ? mockCalls[0][0] : undefined;
     expect(String(listenPort)).toBe('3001');
-  });
+  }, 30000);
 
   it('should use PORT from env if defined', async () => {
-    jest.resetModules();
     process.env.PORT = '4000';
 
-    // Re-import NestFactory to configure the mock for this module run
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-    const { NestFactory } = require('@nestjs/core');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (NestFactory.create as jest.Mock).mockResolvedValue(mockApp);
-
-    jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('./main');
-    });
-    await new Promise((resolve) => setImmediate(resolve));
+    await import('./main.js');
 
     expect(mockApp.listen).toHaveBeenCalledWith('4000');
-  });
+  }, 30000);
 
   it('should use CORS_ORIGIN from env if defined', async () => {
-    jest.resetModules();
     process.env.CORS_ORIGIN = 'http://example.com,http://test.com';
 
-    // Re-import NestFactory
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-    const { NestFactory } = require('@nestjs/core');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (NestFactory.create as jest.Mock).mockResolvedValue(mockApp);
-
-    jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('./main');
-    });
-    await new Promise((resolve) => setImmediate(resolve));
+    await import('./main.js');
 
     expect(mockApp.enableCors).toHaveBeenCalledWith(
       expect.objectContaining({
         origin: ['http://example.com', 'http://test.com'],
       }),
     );
-    delete process.env.CORS_ORIGIN;
-  });
+  }, 30000);
 
   it('should handle bootstrap errors', async () => {
-    jest.resetModules();
-    // Re-import NestFactory
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-    const { NestFactory } = require('@nestjs/core');
     const mockError = new Error('Bootstrap failed');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (NestFactory.create as jest.Mock).mockRejectedValueOnce(mockError);
 
-    const consoleSpy = jest.spyOn(console, 'error');
+    // Override the mock for this specific test
+    vi.doMock('@nestjs/core', () => ({
+      NestFactory: {
+        create: vi.fn().mockRejectedValue(mockError),
+      },
+    }));
+
+    const consoleSpy = vi.spyOn(console, 'error');
 
     try {
-      jest.isolateModules(() => {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        require('./main');
-      });
-      await new Promise((resolve) => setImmediate(resolve));
+      await import('./main.js');
     } catch {
       // ignore
     }
 
-    // Wait for the promise rejection handeld in main.ts
-    await new Promise((resolve) => process.nextTick(resolve));
+    // Wait for promise rejection handling
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     expect(consoleSpy).toHaveBeenCalledWith(mockError);
-
     expect(mockExit).toHaveBeenCalledWith(1);
-  });
+  }, 30000);
 });

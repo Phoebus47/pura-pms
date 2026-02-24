@@ -166,8 +166,8 @@ All pages must achieve **100/100** in all Lighthouse categories:
 ## Testing
 
 ### Testing Stack
-- **Backend (NestJS):** Jest + @nestjs/testing + Supertest
-- **Frontend (Next.js):** Jest + React Testing Library + @testing-library/jest-dom
+- **Backend (NestJS):** Vitest + @nestjs/testing + Supertest
+- **Frontend (Next.js):** Vitest + React Testing Library + @testing-library/jest-dom
 - **E2E Testing:** Playwright
 
 ### Coverage Requirements

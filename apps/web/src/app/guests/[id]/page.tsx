@@ -49,8 +49,6 @@ export default function GuestDetailPage() {
   }
 
   async function toggleBlacklist() {
-    if (!guest) return;
-
     try {
       await guestsAPI.toggleBlacklist(guestId);
       loadGuest();

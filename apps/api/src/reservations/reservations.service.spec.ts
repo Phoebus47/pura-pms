@@ -2,6 +2,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReservationsService } from './reservations.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { FoliosService } from '../folios/folios.service';
 import {
   BadRequestException,
   ConflictException,
@@ -12,21 +13,27 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 
 const mockPrismaService = {
   reservation: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    update: jest.fn(),
-    count: jest.fn(),
+    create: vi.fn(),
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
+    count: vi.fn(),
   },
   room: {
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    update: vi.fn(),
   },
   guest: {
-    findUnique: jest.fn(),
-    update: jest.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
   },
+};
+
+const mockFoliosService = {
+  create: vi.fn(),
+  findByReservationId: vi.fn().mockResolvedValue([]),
+  postTransaction: vi.fn(),
 };
 
 describe('ReservationsService', () => {
@@ -41,13 +48,17 @@ describe('ReservationsService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: FoliosService,
+          useValue: mockFoliosService,
+        },
       ],
     }).compile();
 
     service = module.get<ReservationsService>(ReservationsService);
     prisma = module.get<PrismaService>(PrismaService);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -408,6 +419,25 @@ describe('ReservationsService', () => {
 
       const result = await service.checkIn('res-1');
       expect(result.status).toBe(ReservationStatus.CHECKED_IN);
+    });
+
+    it('should check in a reservation and not create folio if one exists', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        id: 'res-1',
+        status: ReservationStatus.CONFIRMED,
+        roomId: 'room-1',
+      });
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        status: ReservationStatus.CHECKED_IN,
+      });
+      mockPrismaService.room.update.mockResolvedValue({});
+      mockFoliosService.findByReservationId.mockResolvedValueOnce([
+        { id: 'folio-1' },
+      ]);
+
+      await service.checkIn('res-1');
+      expect(mockFoliosService.create).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if not confirmed', async () => {

@@ -3,14 +3,14 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 const mockAuthService = {
-  login: jest.fn(),
+  login: vi.fn(),
 };
 
 describe('AuthController', () => {
   let controller: AuthController;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],

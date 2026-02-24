@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
 import { Sidebar } from './sidebar';
 
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(),
 }));
 
-jest.mock('next/image', () => ({
+vi.mock('next/image', () => ({
   __esModule: true,
   default: (
     props: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean },
@@ -20,7 +21,7 @@ jest.mock('next/image', () => ({
 
 describe('Sidebar', () => {
   beforeEach(() => {
-    (usePathname as jest.Mock).mockReturnValue('/');
+    (usePathname as any).mockReturnValue('/');
   });
 
   it('should render logo', () => {
@@ -40,7 +41,7 @@ describe('Sidebar', () => {
   });
 
   it('should highlight active navigation item', () => {
-    (usePathname as jest.Mock).mockReturnValue('/reservations');
+    (usePathname as any).mockReturnValue('/reservations');
 
     render(<Sidebar />);
 

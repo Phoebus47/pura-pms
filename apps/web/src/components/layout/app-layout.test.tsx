@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { AppLayout } from './app-layout';
 
-jest.mock('./sidebar', () => ({
+vi.mock('./sidebar', () => ({
   Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
 }));
 
-jest.mock('./header', () => ({
+vi.mock('./header', () => ({
   Header: () => <header data-testid="header">Header</header>,
 }));
 
-jest.mock('./bottom-navigation', () => ({
+vi.mock('./bottom-navigation', () => ({
   BottomNavigation: () => (
     <nav data-testid="bottom-navigation">Bottom Navigation</nav>
   ),

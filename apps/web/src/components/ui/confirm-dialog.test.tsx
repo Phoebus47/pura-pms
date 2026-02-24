@@ -7,7 +7,7 @@ function TestComponent() {
 
   return (
     <div>
-      <button onClick={() => confirm('Test Title', 'Test Message', jest.fn())}>
+      <button onClick={() => confirm('Test Title', 'Test Message', vi.fn())}>
         Open Dialog
       </button>
       {Dialog}
@@ -40,7 +40,7 @@ describe('useConfirmDialog', () => {
 
   it('should call onConfirm when confirm button is clicked', async () => {
     const user = userEvent.setup();
-    const onConfirm = jest.fn();
+    const onConfirm = vi.fn();
 
     function TestComponentWithCallback() {
       const { confirm, Dialog } = useConfirmDialog();
@@ -76,7 +76,7 @@ describe('useConfirmDialog', () => {
 
   it('should call onCancel when cancel button is clicked', async () => {
     const user = userEvent.setup();
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
 
     function TestComponentWithCancel() {
       const { confirm, Dialog } = useConfirmDialog();
@@ -84,7 +84,7 @@ describe('useConfirmDialog', () => {
       return (
         <div>
           <button
-            onClick={() => confirm('Title', 'Message', jest.fn(), { onCancel })}
+            onClick={() => confirm('Title', 'Message', vi.fn(), { onCancel })}
             type="button"
           >
             Open
@@ -120,7 +120,7 @@ describe('useConfirmDialog', () => {
         <div>
           <button
             onClick={() =>
-              confirm('Title', 'Message', jest.fn(), {
+              confirm('Title', 'Message', vi.fn(), {
                 confirmText: 'Yes',
                 cancelText: 'No',
               })
@@ -165,7 +165,7 @@ describe('useConfirmDialog', () => {
 
   it('should handle async onConfirm', async () => {
     const user = userEvent.setup();
-    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
 
     function TestComponentAsync() {
       const { confirm, Dialog } = useConfirmDialog();
@@ -196,6 +196,63 @@ describe('useConfirmDialog', () => {
 
     await waitFor(() => {
       expect(onConfirm).toHaveBeenCalled();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+  it('should handle cancel without onCancel callback', async () => {
+    const user = userEvent.setup();
+
+    render(<TestComponent />);
+
+    await user.click(screen.getByText('Open Dialog'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    const cancelButton = screen.getByText('Cancel');
+    await user.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should guard against double confirm clicks', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
+
+    function TestComponentDouble() {
+      const { confirm, Dialog } = useConfirmDialog();
+
+      return (
+        <div>
+          <button
+            onClick={() => confirm('Title', 'Message', onConfirm)}
+            type="button"
+          >
+            Open
+          </button>
+          {Dialog}
+        </div>
+      );
+    }
+
+    render(<TestComponentDouble />);
+
+    await user.click(screen.getByText('Open'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByText('Confirm');
+    // Simulate rapid double click
+    await user.click(confirmButton);
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(onConfirm).toHaveBeenCalledTimes(1);
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });

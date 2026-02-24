@@ -1,20 +1,22 @@
 import { propertiesAPI } from './properties';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient, getAuthToken } from './client';
 
-jest.mock('./client', () => ({
+vi.mock('./client', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   },
-  getAuthToken: jest.fn(),
+  getAuthToken: vi.fn(),
 }));
 
 describe('propertiesAPI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getAuthToken as jest.Mock).mockReturnValue('token123');
+    vi.clearAllMocks();
+    (getAuthToken as any).mockReturnValue('token123');
   });
 
   describe('getAll', () => {
@@ -29,7 +31,7 @@ describe('propertiesAPI', () => {
         },
       ];
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockProperties);
+      (apiClient.get as any).mockResolvedValue(mockProperties);
 
       const result = await propertiesAPI.getAll();
 
@@ -38,8 +40,8 @@ describe('propertiesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue([]);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue([]);
       await propertiesAPI.getAll();
       expect(apiClient.get).toHaveBeenCalledWith('/properties', undefined);
     });
@@ -55,7 +57,7 @@ describe('propertiesAPI', () => {
         createdAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockProperty);
+      (apiClient.get as any).mockResolvedValue(mockProperty);
 
       const result = await propertiesAPI.getById('1');
 
@@ -64,8 +66,8 @@ describe('propertiesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({});
       await propertiesAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/properties/1', undefined);
     });
@@ -85,7 +87,7 @@ describe('propertiesAPI', () => {
         createdAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.post as jest.Mock).mockResolvedValue(mockProperty);
+      (apiClient.post as any).mockResolvedValue(mockProperty);
 
       const result = await propertiesAPI.create(createDto);
 
@@ -98,8 +100,8 @@ describe('propertiesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.post as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.post as any).mockResolvedValue({});
       await propertiesAPI.create({
         name: 'A',
         address: 'B',
@@ -125,7 +127,7 @@ describe('propertiesAPI', () => {
         createdAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockProperty);
+      (apiClient.patch as any).mockResolvedValue(mockProperty);
 
       const result = await propertiesAPI.update('1', updateDto);
 
@@ -138,8 +140,8 @@ describe('propertiesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await propertiesAPI.update('1', {});
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/properties/1',
@@ -151,7 +153,7 @@ describe('propertiesAPI', () => {
 
   describe('delete', () => {
     it('should call apiClient.delete with correct id', async () => {
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (apiClient.delete as any).mockResolvedValue(undefined);
 
       await propertiesAPI.delete('1');
 
@@ -162,8 +164,8 @@ describe('propertiesAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.delete as any).mockResolvedValue(undefined);
       await propertiesAPI.delete('1');
       expect(apiClient.delete).toHaveBeenCalledWith('/properties/1', undefined);
     });

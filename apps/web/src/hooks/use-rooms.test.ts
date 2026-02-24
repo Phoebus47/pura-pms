@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useRooms } from './use-rooms';
 import { roomsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   roomsAPI: {
-    getAll: jest.fn(),
+    getAll: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -40,7 +41,7 @@ describe('useRooms', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have initial loading state', () => {
@@ -52,7 +53,7 @@ describe('useRooms', () => {
   });
 
   it('should load rooms when loadRooms is called', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     const { result } = renderHook(() => useRooms());
 
@@ -70,7 +71,7 @@ describe('useRooms', () => {
 
   it('should handle loading error', async () => {
     const errorMessage = 'Failed to load rooms';
-    (roomsAPI.getAll as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (roomsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useRooms());
 
@@ -89,7 +90,7 @@ describe('useRooms', () => {
 
   it('should handle non-Error rejection', async () => {
     const errorMessage = 'Failed to load rooms';
-    (roomsAPI.getAll as jest.Mock).mockRejectedValue(errorMessage);
+    (roomsAPI.getAll as any).mockRejectedValue(errorMessage);
 
     const { result } = renderHook(() => useRooms());
 
@@ -106,7 +107,7 @@ describe('useRooms', () => {
   });
 
   it('should apply propertyId filter when provided', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     const { result } = renderHook(() => useRooms({ propertyId: 'prop1' }));
 
@@ -122,7 +123,7 @@ describe('useRooms', () => {
   });
 
   it('should apply roomTypeId filter when provided', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     const { result } = renderHook(() => useRooms({ roomTypeId: 'type1' }));
 
@@ -138,7 +139,7 @@ describe('useRooms', () => {
   });
 
   it('should apply status filter when provided', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     const { result } = renderHook(() => useRooms({ status: 'VACANT_CLEAN' }));
 
@@ -154,7 +155,7 @@ describe('useRooms', () => {
   });
 
   it('should apply all filters when provided', async () => {
-    (roomsAPI.getAll as jest.Mock).mockResolvedValue(mockRooms);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     const { result } = renderHook(() =>
       useRooms({

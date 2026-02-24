@@ -1,18 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import { PropertyFormDialog } from './property-form-dialog';
 import { propertiesAPI } from '@/lib/api';
 
-jest.mock('@/lib/api', () => ({
-  propertiesAPI: {
-    create: jest.fn(),
-    update: jest.fn(),
-  },
-}));
-
 describe('PropertyFormDialog', () => {
-  const mockOnClose = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSuccess = vi.fn();
   const mockProperty = {
     id: '1',
     name: 'Existing Property',
@@ -25,7 +19,7 @@ describe('PropertyFormDialog', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders empty form for new property', () => {
@@ -72,7 +66,7 @@ describe('PropertyFormDialog', () => {
   });
 
   it('creates new property on submit', async () => {
-    (propertiesAPI.create as jest.Mock).mockResolvedValue({});
+    vi.spyOn(propertiesAPI, 'create').mockResolvedValue({} as any);
 
     render(
       <PropertyFormDialog
@@ -82,28 +76,39 @@ describe('PropertyFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/property name/i), 'New Hotel');
-    await userEvent.type(screen.getByLabelText(/address/i), '123 New St');
-    await userEvent.type(screen.getByLabelText(/phone/i), '123-456-7890');
-    await userEvent.type(screen.getByLabelText(/email/i), 'hotel@test.com');
-    await userEvent.click(
-      screen.getByRole('button', { name: /create property/i }),
-    );
+    fireEvent.change(screen.getByLabelText(/property name/i), {
+      target: { value: 'New Hotel' },
+    });
+    fireEvent.change(screen.getByLabelText(/address/i), {
+      target: { value: '123 New St' },
+    });
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: '123-456-7890' },
+    });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'hotel@test.com' },
+    });
 
-    expect(propertiesAPI.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'New Hotel',
-        address: '123 New St',
-        phone: '123-456-7890',
-        email: 'hotel@test.com',
-      }),
-    );
-    expect(mockOnSuccess).toHaveBeenCalled();
-    expect(mockOnClose).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: /create property/i }));
+
+    await waitFor(() => {
+      expect(propertiesAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'New Hotel',
+          address: '123 New St',
+          phone: '123-456-7890',
+          email: 'hotel@test.com',
+        }),
+      );
+      expect(mockOnSuccess).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
   });
 
   it('updates existing property on submit', async () => {
-    (propertiesAPI.update as jest.Mock).mockResolvedValue({});
+    const updateSpy = vi
+      .spyOn(propertiesAPI, 'update')
+      .mockResolvedValue({} as any);
 
     render(
       <PropertyFormDialog
@@ -115,25 +120,24 @@ describe('PropertyFormDialog', () => {
     );
 
     const nameInput = screen.getByLabelText(/property name/i);
-    await userEvent.clear(nameInput);
-    await userEvent.type(nameInput, 'Updated Hotel');
+    fireEvent.change(nameInput, { target: { value: 'Updated Hotel' } });
 
-    await userEvent.click(
-      screen.getByRole('button', { name: /update property/i }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: /update property/i }));
 
-    expect(propertiesAPI.update).toHaveBeenCalledWith(
-      '1',
-      expect.objectContaining({
-        name: 'Updated Hotel',
-      }),
-    );
-    expect(mockOnSuccess).toHaveBeenCalled();
-    expect(mockOnClose).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          name: 'Updated Hotel',
+        }),
+      );
+      expect(mockOnSuccess).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
   });
 
   it('displays error message on failure', async () => {
-    (propertiesAPI.create as jest.Mock).mockRejectedValue(
+    vi.spyOn(propertiesAPI, 'create').mockRejectedValue(
       new Error('Failed to create'),
     );
 
@@ -145,10 +149,10 @@ describe('PropertyFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/property name/i), 'Fail Hotel');
-    await userEvent.click(
-      screen.getByRole('button', { name: /create property/i }),
-    );
+    fireEvent.change(screen.getByLabelText(/property name/i), {
+      target: { value: 'Fail Hotel' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /create property/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Failed to create')).toBeInTheDocument();
@@ -177,7 +181,7 @@ describe('PropertyFormDialog', () => {
   });
 
   it('handles generic non-Error failures', async () => {
-    (propertiesAPI.create as jest.Mock).mockRejectedValue('String Error');
+    vi.spyOn(propertiesAPI, 'create').mockRejectedValue('String Error');
 
     render(
       <PropertyFormDialog
@@ -187,13 +191,49 @@ describe('PropertyFormDialog', () => {
       />,
     );
 
-    await userEvent.type(screen.getByLabelText(/property name/i), 'Fail Hotel');
-    await userEvent.click(
-      screen.getByRole('button', { name: /create property/i }),
-    );
+    fireEvent.change(screen.getByLabelText(/property name/i), {
+      target: { value: 'Fail Hotel' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /create property/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Failed to save property')).toBeInTheDocument();
     });
+  });
+
+  it('updates form when property prop changes', () => {
+    const { rerender } = render(
+      <PropertyFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+      />,
+    );
+    expect(screen.getByLabelText(/property name/i)).toHaveValue('');
+
+    rerender(
+      <PropertyFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+        property={mockProperty}
+      />,
+    );
+    expect(screen.getByLabelText(/property name/i)).toHaveValue(
+      'Existing Property',
+    );
+  });
+
+  it('resets form state when opened without property', () => {
+    render(
+      <PropertyFormDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+      />,
+    );
+
+    const nameInput = screen.getByLabelText(/property name/i);
+    expect(nameInput).toHaveValue('');
   });
 });

@@ -9,16 +9,16 @@ import { UpdateGuestDto } from './dto/update-guest.dto';
 
 const mockPrismaService = {
   guest: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    count: jest.fn(),
-    findUnique: jest.fn(),
-    findFirst: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    create: vi.fn(),
+    findMany: vi.fn(),
+    count: vi.fn(),
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
   reservation: {
-    findMany: jest.fn(),
+    findMany: vi.fn(),
   },
 };
 
@@ -27,7 +27,7 @@ describe('GuestsService', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

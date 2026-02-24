@@ -13,6 +13,8 @@ import {
 import { reservationsAPI, type Reservation } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
+import { FolioDetail } from '@/components/folio-detail';
+import { cn } from '@/lib/utils';
 
 export default function ReservationDetailPage() {
   const params = useParams();
@@ -22,6 +24,7 @@ export default function ReservationDetailPage() {
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'details' | 'billing'>('details');
 
   const loadReservation = useCallback(async () => {
     try {
@@ -199,191 +202,223 @@ export default function ReservationDetailPage() {
         </div>
       </div>
 
-      {/* Reservation Information */}
-      <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        {/* Main Info Card */}
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
-            Reservation Details
-          </h2>
-
-          <div className="gap-6 grid grid-cols-2">
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">
-                Confirmation Number
-              </p>
-              <p className="font-mono font-semibold mt-1 text-[#1e4b8e] text-lg">
-                {reservation.confirmNumber}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">Status</p>
-              <div className="mt-1">
-                <ReservationStatusBadge status={reservation.status} />
-              </div>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">Guest</p>
-              <p className="font-semibold mt-1 text-lg text-slate-800">
-                {reservation.guest?.firstName} {reservation.guest?.lastName}
-              </p>
-              <p className="text-slate-500 text-sm">
-                {reservation.guest?.email}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">Room</p>
-              <p className="font-semibold mt-1 text-lg text-slate-800">
-                Room {reservation.room?.number}
-              </p>
-              <p className="text-slate-500 text-sm">
-                {reservation.room?.roomType.name}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">
-                Check-in Date
-              </p>
-              <p className="font-semibold mt-1 text-lg text-slate-800">
-                <Calendar className="h-4 inline mr-1 w-4" />
-                {formatDate(reservation.checkIn)}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">
-                Check-out Date
-              </p>
-              <p className="font-semibold mt-1 text-lg text-slate-800">
-                <Calendar className="h-4 inline mr-1 w-4" />
-                {formatDate(reservation.checkOut)}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">
-                Number of Nights
-              </p>
-              <p className="font-semibold mt-1 text-lg text-slate-800">
-                {reservation.nights}{' '}
-                {reservation.nights === 1 ? 'night' : 'nights'}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-600 text-sm">
-                Number of Guests
-              </p>
-              <p className="font-semibold mt-1 text-lg text-slate-800">
-                {reservation.numberOfGuests}{' '}
-                {reservation.numberOfGuests === 1 ? 'guest' : 'guests'}
-              </p>
-            </div>
-          </div>
-
-          {reservation.specialRequests && (
-            <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">
-                Special Requests
-              </p>
-              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
-                {reservation.specialRequests}
-              </p>
-            </div>
+      {/* Tabs */}
+      <div className="border-b border-slate-200 flex gap-4">
+        <button
+          onClick={() => setActiveTab('details')}
+          className={cn(
+            'px-4 py-3 text-sm font-bold transition-all border-b-2',
+            activeTab === 'details'
+              ? 'border-[#1e4b8e] text-[#1e4b8e]'
+              : 'border-transparent text-slate-400 hover:text-slate-600',
           )}
-
-          {reservation.cancellationReason && (
-            <div className="-m-6 bg-red-50/50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-3xl">
-              <p className="font-semibold text-red-600 text-sm">
-                Cancellation Reason
-              </p>
-              <p className="mt-2 text-red-700 whitespace-pre-wrap">
-                {reservation.cancellationReason}
-              </p>
-            </div>
+        >
+          Details
+        </button>
+        <button
+          onClick={() => setActiveTab('billing')}
+          className={cn(
+            'px-4 py-3 text-sm font-bold transition-all border-b-2',
+            activeTab === 'billing'
+              ? 'border-[#1e4b8e] text-[#1e4b8e]'
+              : 'border-transparent text-slate-400 hover:text-slate-600',
           )}
-        </div>
-
-        {/* Pricing Card */}
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">Pricing</h2>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Room Rate</span>
-              <span className="font-semibold text-slate-800">
-                ฿
-                {Number(
-                  reservation.room?.roomType.baseRate || 0,
-                ).toLocaleString()}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Nights</span>
-              <span className="font-semibold text-slate-800">
-                × {reservation.nights}
-              </span>
-            </div>
-
-            <div className="border-slate-200 border-t pt-4">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-lg text-slate-700">
-                  Total Amount
-                </span>
-                <span className="font-bold text-[#1e4b8e] text-2xl">
-                  ฿{Number(reservation.totalAmount).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            {reservation.actualCheckIn && (
-              <div className="border-slate-200 border-t pt-4">
-                <p className="font-semibold text-slate-600 text-sm">
-                  Actual Check-in
-                </p>
-                <p className="mt-1 text-slate-700">
-                  {new Date(reservation.actualCheckIn).toLocaleString()}
-                </p>
-              </div>
-            )}
-
-            {reservation.actualCheckOut && (
-              <div className="border-slate-200 border-t pt-4">
-                <p className="font-semibold text-slate-600 text-sm">
-                  Actual Check-out
-                </p>
-                <p className="mt-1 text-slate-700">
-                  {new Date(reservation.actualCheckOut).toLocaleString()}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        >
+          Billing & Folio
+        </button>
       </div>
 
-      {/* Metadata */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-        <h2 className="font-bold mb-4 text-[#1e4b8e] text-xl">Metadata</h2>
-        <div className="gap-4 grid grid-cols-2 text-sm">
-          <div>
-            <span className="text-slate-600">Created:</span>{' '}
-            <span className="font-medium text-slate-800">
-              {new Date(reservation.createdAt).toLocaleString()}
-            </span>
+      {activeTab === 'details' ? (
+        <div className="space-y-6">
+          {/* Reservation Information */}
+          <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
+            {/* Main Info Card */}
+            <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
+              <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
+                Reservation Details
+              </h2>
+
+              <div className="gap-6 grid grid-cols-2">
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    Confirmation Number
+                  </p>
+                  <p className="font-mono font-semibold mt-1 text-[#1e4b8e] text-lg">
+                    {reservation.confirmNumber}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">Status</p>
+                  <div className="mt-1">
+                    <ReservationStatusBadge status={reservation.status} />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">Guest</p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    {reservation.guest?.firstName} {reservation.guest?.lastName}
+                  </p>
+                  <p className="text-slate-500 text-sm">
+                    {reservation.guest?.email}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">Room</p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    Room {reservation.room?.number}
+                  </p>
+                  <p className="text-slate-500 text-sm">
+                    {reservation.room?.roomType.name}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    Check-in Date
+                  </p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    <Calendar className="h-4 inline mr-1 w-4" />
+                    {formatDate(reservation.checkIn)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    Check-out Date
+                  </p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    <Calendar className="h-4 inline mr-1 w-4" />
+                    {formatDate(reservation.checkOut)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    Number of Nights
+                  </p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    {reservation.nights}{' '}
+                    {reservation.nights === 1 ? 'night' : 'nights'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    Number of Guests
+                  </p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    {reservation.numberOfGuests}{' '}
+                    {reservation.numberOfGuests === 1 ? 'guest' : 'guests'}
+                  </p>
+                </div>
+              </div>
+
+              {reservation.specialRequests && (
+                <div className="border-slate-200 border-t mt-6 pt-6">
+                  <p className="font-semibold text-slate-600 text-sm">
+                    Special Requests
+                  </p>
+                  <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+                    {reservation.specialRequests}
+                  </p>
+                </div>
+              )}
+
+              {reservation.cancellationReason && (
+                <div className="-m-6 bg-red-50/50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-3xl">
+                  <p className="font-semibold text-red-600 text-sm">
+                    Cancellation Reason
+                  </p>
+                  <p className="mt-2 text-red-700 whitespace-pre-wrap">
+                    {reservation.cancellationReason}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Pricing Card */}
+            <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+              <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">Pricing</h2>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Room Rate</span>
+                  <span className="font-semibold text-slate-800">
+                    ฿
+                    {Number(
+                      reservation.room?.roomType.baseRate || 0,
+                    ).toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Nights</span>
+                  <span className="font-semibold text-slate-800">
+                    × {reservation.nights}
+                  </span>
+                </div>
+
+                <div className="border-slate-200 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-lg text-slate-700">
+                      Total Amount
+                    </span>
+                    <span className="font-bold text-[#1e4b8e] text-2xl">
+                      ฿{Number(reservation.totalAmount).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {reservation.actualCheckIn && (
+                  <div className="border-slate-200 border-t pt-4">
+                    <p className="font-semibold text-slate-600 text-sm">
+                      Actual Check-in
+                    </p>
+                    <p className="mt-1 text-slate-700">
+                      {new Date(reservation.actualCheckIn).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+
+                {reservation.actualCheckOut && (
+                  <div className="border-slate-200 border-t pt-4">
+                    <p className="font-semibold text-slate-600 text-sm">
+                      Actual Check-out
+                    </p>
+                    <p className="mt-1 text-slate-700">
+                      {new Date(reservation.actualCheckOut).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="text-slate-600">Last Updated:</span>{' '}
-            <span className="font-medium text-slate-800">
-              {new Date(reservation.updatedAt).toLocaleString()}
-            </span>
+
+          {/* Metadata */}
+          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+            <h2 className="font-bold mb-4 text-[#1e4b8e] text-xl">Metadata</h2>
+            <div className="gap-4 grid grid-cols-2 text-sm">
+              <div>
+                <span className="text-slate-600">Created:</span>{' '}
+                <span className="font-medium text-slate-800">
+                  {new Date(reservation.createdAt).toLocaleString()}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-600">Last Updated:</span>{' '}
+                <span className="font-medium text-slate-800">
+                  {new Date(reservation.updatedAt).toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <FolioDetail reservationId={reservationId} />
+      )}
     </div>
   );
 }

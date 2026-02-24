@@ -133,8 +133,8 @@ See [docs/guidelines/coding_standards.md](./docs/guidelines/coding_standards.md)
 
 ### Test Stack
 
-- **Backend:** Jest + @nestjs/testing
-- **Frontend:** Jest + React Testing Library
+- **Backend:** Vitest + @nestjs/testing
+- **Frontend:** Vitest + React Testing Library
 - **E2E:** Playwright (Future)
 
 ### Commands

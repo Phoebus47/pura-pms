@@ -5,23 +5,23 @@ import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
 
 const mockGuestsService = {
-  create: jest.fn(),
-  findAll: jest.fn(),
-  findByEmail: jest.fn(),
-  findByPhone: jest.fn(),
-  findOne: jest.fn(),
-  getGuestHistory: jest.fn(),
-  update: jest.fn(),
-  updateVipLevel: jest.fn(),
-  toggleBlacklist: jest.fn(),
-  remove: jest.fn(),
+  create: vi.fn(),
+  findAll: vi.fn(),
+  findByEmail: vi.fn(),
+  findByPhone: vi.fn(),
+  findOne: vi.fn(),
+  getGuestHistory: vi.fn(),
+  update: vi.fn(),
+  updateVipLevel: vi.fn(),
+  toggleBlacklist: vi.fn(),
+  remove: vi.fn(),
 };
 
 describe('GuestsController', () => {
   let controller: GuestsController;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [GuestsController],

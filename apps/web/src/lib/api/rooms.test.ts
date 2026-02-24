@@ -1,20 +1,22 @@
 import { roomsAPI, type Room } from './rooms';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient, getAuthToken } from './client';
 
-jest.mock('./client', () => ({
+vi.mock('./client', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   },
-  getAuthToken: jest.fn(),
+  getAuthToken: vi.fn(),
 }));
 
 describe('roomsAPI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getAuthToken as jest.Mock).mockReturnValue('token123');
+    vi.clearAllMocks();
+    (getAuthToken as any).mockReturnValue('token123');
   });
 
   describe('getAll', () => {
@@ -31,7 +33,7 @@ describe('roomsAPI', () => {
         },
       ];
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockRooms);
+      (apiClient.get as any).mockResolvedValue(mockRooms);
 
       const result = await roomsAPI.getAll();
 
@@ -47,7 +49,7 @@ describe('roomsAPI', () => {
         status: 'VACANT_CLEAN' as const,
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockRooms);
+      (apiClient.get as any).mockResolvedValue(mockRooms);
 
       const result = await roomsAPI.getAll(filters);
 
@@ -59,8 +61,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue([]);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue([]);
       await roomsAPI.getAll();
       expect(apiClient.get).toHaveBeenCalledWith('/rooms', undefined);
     });
@@ -78,7 +80,7 @@ describe('roomsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockRoom);
+      (apiClient.get as any).mockResolvedValue(mockRoom);
 
       const result = await roomsAPI.getById('1');
 
@@ -87,8 +89,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({});
       await roomsAPI.getById('1');
       expect(apiClient.get).toHaveBeenCalledWith('/rooms/1', undefined);
     });
@@ -109,7 +111,7 @@ describe('roomsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.post as jest.Mock).mockResolvedValue(mockRoom);
+      (apiClient.post as any).mockResolvedValue(mockRoom);
 
       const result = await roomsAPI.create(createDto);
 
@@ -122,8 +124,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.post as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.post as any).mockResolvedValue({});
       await roomsAPI.create({
         number: '101',
         roomTypeId: 't1',
@@ -150,7 +152,7 @@ describe('roomsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockRoom);
+      (apiClient.patch as any).mockResolvedValue(mockRoom);
 
       const result = await roomsAPI.update('1', updateDto);
 
@@ -163,8 +165,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await roomsAPI.update('1', {});
       expect(apiClient.patch).toHaveBeenCalledWith('/rooms/1', {}, undefined);
     });
@@ -182,7 +184,7 @@ describe('roomsAPI', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      (apiClient.patch as jest.Mock).mockResolvedValue(mockRoom);
+      (apiClient.patch as any).mockResolvedValue(mockRoom);
 
       const result = await roomsAPI.updateStatus('1', 'OCCUPIED_CLEAN');
 
@@ -195,8 +197,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.patch as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.patch as any).mockResolvedValue({});
       await roomsAPI.updateStatus('1', 'VACANT_CLEAN');
       expect(apiClient.patch).toHaveBeenCalledWith(
         '/rooms/1/status',
@@ -208,7 +210,7 @@ describe('roomsAPI', () => {
 
   describe('delete', () => {
     it('should call apiClient.delete with correct id', async () => {
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (apiClient.delete as any).mockResolvedValue(undefined);
 
       await roomsAPI.delete('1');
 
@@ -216,8 +218,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.delete as jest.Mock).mockResolvedValue(undefined);
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.delete as any).mockResolvedValue(undefined);
       await roomsAPI.delete('1');
       expect(apiClient.delete).toHaveBeenCalledWith('/rooms/1', undefined);
     });
@@ -233,7 +235,7 @@ describe('roomsAPI', () => {
       };
       const mockAvailability = { available: true };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockAvailability);
+      (apiClient.get as any).mockResolvedValue(mockAvailability);
 
       const result = await roomsAPI.checkAvailability(params);
 
@@ -252,7 +254,7 @@ describe('roomsAPI', () => {
       };
       const mockAvailability = { available: true };
 
-      (apiClient.get as jest.Mock).mockResolvedValue(mockAvailability);
+      (apiClient.get as any).mockResolvedValue(mockAvailability);
 
       const result = await roomsAPI.checkAvailability(params);
 
@@ -264,8 +266,8 @@ describe('roomsAPI', () => {
     });
 
     it('should handle missing auth token', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
-      (apiClient.get as jest.Mock).mockResolvedValue({});
+      (getAuthToken as any).mockReturnValue(null);
+      (apiClient.get as any).mockResolvedValue({});
       await roomsAPI.checkAvailability({
         propertyId: 'p1',
         checkIn: 'd1',

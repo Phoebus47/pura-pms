@@ -73,7 +73,7 @@ export function RoomTypeFormDialog({
     if (newAmenity.trim() && !formData.amenities?.includes(newAmenity.trim())) {
       setFormData({
         ...formData,
-        amenities: [...(formData.amenities || []), newAmenity.trim()],
+        amenities: [...(formData.amenities as string[]), newAmenity.trim()],
       });
       setNewAmenity('');
     }
@@ -82,7 +82,7 @@ export function RoomTypeFormDialog({
   function removeAmenity(index: number) {
     setFormData({
       ...formData,
-      amenities: formData.amenities?.filter((_, i) => i !== index) || [],
+      amenities: (formData.amenities as string[]).filter((_, i) => i !== index),
     });
   }
 

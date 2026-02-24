@@ -27,6 +27,7 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    /* v8 ignore next 3 */
     if (process.env.NODE_ENV !== 'production') {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }

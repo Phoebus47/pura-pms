@@ -1,19 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useProperties } from './use-properties';
 import { propertiesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
-jest.mock('@/lib/api', () => ({
+vi.mock('@/lib/api', () => ({
   propertiesAPI: {
-    getAll: jest.fn(),
-    delete: jest.fn(),
+    getAll: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
-jest.mock('@/lib/toast', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: {
-    success: jest.fn(),
-    error: jest.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -42,7 +43,7 @@ describe('useProperties', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have initial loading state', () => {
@@ -54,7 +55,7 @@ describe('useProperties', () => {
   });
 
   it('should load properties when loadProperties is called', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
 
     const { result } = renderHook(() => useProperties());
 
@@ -72,9 +73,7 @@ describe('useProperties', () => {
 
   it('should handle loading error', async () => {
     const errorMessage = 'Failed to load properties';
-    (propertiesAPI.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    (propertiesAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useProperties());
 
@@ -91,8 +90,8 @@ describe('useProperties', () => {
   });
 
   it('should delete property successfully', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
-    (propertiesAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
+    (propertiesAPI.delete as any).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useProperties());
 
@@ -109,9 +108,7 @@ describe('useProperties', () => {
 
   it('should handle delete error', async () => {
     const errorMessage = 'Failed to delete property';
-    (propertiesAPI.delete as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    (propertiesAPI.delete as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useProperties());
 
@@ -125,8 +122,8 @@ describe('useProperties', () => {
   });
 
   it('should reload properties after successful delete', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue(mockProperties);
-    (propertiesAPI.delete as jest.Mock).mockResolvedValue(undefined);
+    (propertiesAPI.getAll as any).mockResolvedValue(mockProperties);
+    (propertiesAPI.delete as any).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useProperties());
 
@@ -138,7 +135,7 @@ describe('useProperties', () => {
   });
 
   it('handles non-Error objects during load', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockRejectedValue('String error');
+    (propertiesAPI.getAll as any).mockRejectedValue('String error');
 
     const { result } = renderHook(() => useProperties());
 
@@ -152,9 +149,9 @@ describe('useProperties', () => {
   });
 
   it('handles non-Error objects during delete', async () => {
-    (propertiesAPI.getAll as jest.Mock).mockResolvedValue([]);
+    (propertiesAPI.getAll as any).mockResolvedValue([]);
     const { result } = renderHook(() => useProperties());
-    (propertiesAPI.delete as jest.Mock).mockRejectedValue(123);
+    (propertiesAPI.delete as any).mockRejectedValue(123);
 
     let deleteResult;
     await act(async () => {

@@ -3,11 +3,11 @@ import userEvent from '@testing-library/user-event';
 import { DateRangePicker } from './date-range-picker';
 
 describe('DateRangePicker', () => {
-  const mockOnCheckInChange = jest.fn();
-  const mockOnCheckOutChange = jest.fn();
+  const mockOnCheckInChange = vi.fn();
+  const mockOnCheckOutChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render check-in and check-out date inputs', () => {

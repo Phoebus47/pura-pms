@@ -17,7 +17,7 @@ describe('FormDialogFooter', () => {
   });
 
   it('should call onCancel when cancel button is clicked', async () => {
-    const handleCancel = jest.fn();
+    const handleCancel = vi.fn();
     const user = userEvent.setup();
 
     render(
