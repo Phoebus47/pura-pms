@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { TransactionCode } from './transaction-codes';
 
 export type FolioType = 'GUEST' | 'MASTER' | 'COMPANY';
 export type FolioStatus =
@@ -6,18 +7,6 @@ export type FolioStatus =
   | 'CLOSED'
   | 'POSTED_TO_CITY_LEDGER'
   | 'TRANSFERRED';
-
-export interface TransactionCode {
-  id: string;
-  code: string;
-  description: string;
-  descriptionTh?: string;
-  type: 'CHARGE' | 'PAYMENT' | 'ADJUSTMENT';
-  group: string;
-  hasTax: boolean;
-  hasService: boolean;
-  serviceRate?: number;
-}
 
 export interface FolioTransaction {
   id: string;

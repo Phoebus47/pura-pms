@@ -15,7 +15,7 @@
     "dev:api": "pnpm --filter api dev",
     "db:push": "pnpm --filter database db:push",
     "db:generate": "pnpm --filter database db:generate",
-    "sonar": "npx dotenv-cli -- npx sonarqube-scanner",
+    "sonar": "pnpm test:coverage && npx dotenv-cli -- npx sonarqube-scanner",
     "prepare": "husky || true",
     "test": "turbo test",
     "test:coverage": "turbo test:cov",

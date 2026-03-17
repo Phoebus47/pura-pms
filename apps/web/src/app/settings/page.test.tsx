@@ -11,10 +11,10 @@ describe('SettingsPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display coming soon message', () => {
+  it('should show master data section', () => {
     render(<SettingsPage />);
 
-    expect(screen.getByText('Settings Coming Soon')).toBeInTheDocument();
-    expect(screen.getByText(/under development/i)).toBeInTheDocument();
+    expect(screen.getByText('Master Data')).toBeInTheDocument();
+    expect(screen.getByText('Transaction Codes')).toBeInTheDocument();
   });
 });
