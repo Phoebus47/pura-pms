@@ -4,6 +4,7 @@ updates:
   # Keep GitHub Actions up to date (checkout/setup-node/upload-artifact, etc.)
   - package-ecosystem: 'github-actions'
     directory: '/'
+    target-branch: 'dev'
     schedule:
       interval: 'weekly'
     groups:
@@ -14,6 +15,7 @@ updates:
   # Monorepo root dependencies (pnpm lockfile lives at repo root)
   - package-ecosystem: 'npm'
     directory: '/'
+    target-branch: 'dev'
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
@@ -25,6 +27,7 @@ updates:
   # Workspace packages (Dependabot needs each manifest directory explicitly)
   - package-ecosystem: 'npm'
     directory: '/apps/web'
+    target-branch: 'dev'
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
@@ -35,6 +38,7 @@ updates:
 
   - package-ecosystem: 'npm'
     directory: '/apps/api'
+    target-branch: 'dev'
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
@@ -45,6 +49,7 @@ updates:
 
   - package-ecosystem: 'npm'
     directory: '/packages/database'
+    target-branch: 'dev'
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
