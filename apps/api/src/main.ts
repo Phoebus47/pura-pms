@@ -27,9 +27,7 @@ async function bootstrap() {
   );
 }
 
-try {
-  await bootstrap();
-} catch (err: unknown) {
+bootstrap().catch((err: unknown) => {
   console.error(err);
   process.exit(1);
-}
+});

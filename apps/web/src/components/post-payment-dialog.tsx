@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { foliosAPI, type TransactionCode } from '@/lib/api/folios';
+import { foliosAPI } from '@/lib/api/folios';
+import type { TransactionCode } from '@/lib/api/transaction-codes';
 import { toast } from '@/lib/toast';
 
 interface PostPaymentDialogProps {

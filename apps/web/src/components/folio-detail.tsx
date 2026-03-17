@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Receipt, CreditCard, AlertCircle } from 'lucide-react';
-import { foliosAPI, type Folio, type TransactionCode } from '@/lib/api/folios';
+import { foliosAPI, type Folio } from '@/lib/api/folios';
+import type { TransactionCode } from '@/lib/api/transaction-codes';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
