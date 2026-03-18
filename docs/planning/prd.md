@@ -187,6 +187,26 @@
 - Audit log with timestamps, Re-run capability for corrections
 - **Queue System** (BullMQ) for background processing
 
+**Implemented in Phase 3 (WP5):**
+
+- **API**
+  - `POST /night-audit/run` (start a run for `{ propertyId, businessDate }`)
+  - `GET /night-audit/status/:propertyId/:businessDate` (poll status + errors + reports)
+- **Idempotency**
+  - deterministic queue job id (`night-audit:${propertyId}:${YYYY-MM-DD}`)
+  - posting-level guard to prevent double room-charge for same business date
+- **Persistence**
+  - `NightAudit` state machine (`PENDING`/`IN_PROGRESS`/`COMPLETED`/`FAILED`)
+  - `AuditError` persisted on failures
+  - `ReportArchive` entry created for run summary
+- **UI**
+  - `/night-audit` page can trigger run and poll status
+
+See ADRs:
+
+- `docs/adr/001-posting-model-tax-service-split.md`
+- `docs/adr/002-night-audit-idempotency-status-report-archive.md`
+
 #### 4.6 Shift Management
 
 - Shift open/close procedures, Cash drawer management
