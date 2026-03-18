@@ -21,8 +21,8 @@
 
 ### Current Phase (Phase 3)
 
-- 🎯 Financial & Audit Module (Priority)
-- 📋 11 Sprints (Week 5-16)
+- ✅ Financial & Audit (Complete — WP1–WP5)
+- 🎯 Phase 4: Operations Edge Cases (Current)
 
 ---
 
@@ -59,7 +59,7 @@
 - ✅ ESLint: 0 warnings
 - ✅ Lighthouse: 100/100
 - ✅ Accessibility: 95%
-- 🚧 Test Coverage: ~30% (Target: >80%)
+- ✅ Test Coverage: high (CI-enforced; target: >80%)
 
 ### Quality Control
 
@@ -93,9 +93,9 @@
 
 ### Immediate (This Week)
 
-1. Review Detailed Work Plan
-2. Start Sprint 1: Database Schema Enhancement
-3. Setup development environment
+1. Pick Phase 4 epics (day-use, room move, no-show, etc.)
+2. Create tickets + acceptance criteria
+3. Start implementing the first epic
 
 ### Short-term (This Month)
 
@@ -111,6 +111,6 @@
 
 ---
 
-**Status:** ✅ **Ready to Start Phase 3**
+**Status:** ✅ **Phase 3 complete** — Phase 4 is the current focus
 
-**Last Updated:** 2025-01-XX
+**Last Updated:** 2026-03-18

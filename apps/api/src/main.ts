@@ -27,7 +27,10 @@ async function bootstrap() {
   );
 }
 
-bootstrap().catch((err: unknown) => {
-  console.error(err);
-  process.exit(1);
-});
+function start() {
+  bootstrap().catch((err: unknown) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+start();

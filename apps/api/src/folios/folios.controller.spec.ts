@@ -3,12 +3,14 @@ import { FoliosController } from './folios.controller';
 import { FoliosService } from './folios.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
+import { VoidTransactionDto } from './dto/void-transaction.dto';
 
 const mockFoliosService = {
   create: vi.fn(),
   findOne: vi.fn(),
   findByReservationId: vi.fn(),
   postTransaction: vi.fn(),
+  voidTransaction: vi.fn(),
 };
 
 describe('FoliosController', () => {
@@ -74,6 +76,7 @@ describe('FoliosController', () => {
         trxCodeId: 'trx-1',
         amountNet: 500,
         userId: 'user-1',
+        businessDate: '2025-01-15',
       };
       mockFoliosService.postTransaction.mockResolvedValue({ id: 'txn-1' });
 
@@ -81,6 +84,25 @@ describe('FoliosController', () => {
 
       expect(mockFoliosService.postTransaction).toHaveBeenCalledWith(
         'folio-1',
+        dto,
+      );
+    });
+  });
+
+  describe('voidTransaction', () => {
+    it('should void a transaction', async () => {
+      const dto: VoidTransactionDto = {
+        userId: 'user-1',
+        reasonCodeId: 'reason-1',
+      };
+      mockFoliosService.voidTransaction.mockResolvedValue({
+        id: 'trx-void',
+      });
+
+      await controller.voidTransaction('trx-1', dto);
+
+      expect(mockFoliosService.voidTransaction).toHaveBeenCalledWith(
+        'trx-1',
         dto,
       );
     });

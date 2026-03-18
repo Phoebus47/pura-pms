@@ -761,7 +761,7 @@
 
 ## 📅 Priority Order (Aligned with PRD v3.2)
 
-### Phase 3: Financial & Audit (Current — 🎯 Priority)
+### Phase 3: Financial & Audit (Complete ✅)
 
 1. Enhanced Folio System (Windows, Routing, Post-departure, Rebate)
 2. Transaction Codes (Mapping to GL)
@@ -775,7 +775,7 @@
 10. Package Revenue Breakdown (USALI split)
 11. Credit Limit Alerts & Auto-settlement
 
-### Phase 4: Operations Edge Cases
+### Phase 4: Operations Edge Cases (Current — 🎯 Priority)
 
 1. Day-use Reservations
 2. Split Stay

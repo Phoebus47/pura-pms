@@ -15,7 +15,7 @@
     "dev:api": "pnpm --filter api dev",
     "db:push": "pnpm --filter database db:push",
     "db:generate": "pnpm --filter database db:generate",
-    "sonar": "npx dotenv-cli -- npx sonarqube-scanner",
+    "sonar": "pnpm test:coverage && npx dotenv-cli -- npx sonarqube-scanner",
     "prepare": "husky || true",
     "test": "turbo test",
     "test:coverage": "turbo test:cov",
@@ -27,7 +27,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.4.2",
-    "turbo": "^2.8.10"
+    "turbo": "^2.8.17"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -42,9 +42,19 @@
   "pnpm": {
     "overrides": {
       "lodash": "4.17.23",
-      "next": ">=16.1.5",
+      "next": ">=16.1.7",
       "@isaacs/brace-expansion": ">=5.0.1",
-      "minimatch": ">=10.2.1"
+      "minimatch": ">=10.2.3",
+      "rollup": ">=4.59.0",
+      "multer": ">=2.1.1",
+      "undici": ">=7.24.0",
+      "serialize-javascript": ">=7.0.3",
+      "flatted": ">=3.4.0",
+      "file-type": ">=21.3.2",
+      "qs": ">=6.14.2",
+      "ajv": ">=8.18.0",
+      "eslint>ajv": "6.14.0",
+      "@eslint/eslintrc>ajv": "6.14.0"
     }
   }
 }

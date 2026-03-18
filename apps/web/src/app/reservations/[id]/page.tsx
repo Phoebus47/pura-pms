@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -417,7 +418,20 @@ export default function ReservationDetailPage() {
           </div>
         </div>
       ) : (
-        <FolioDetail reservationId={reservationId} />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button
+              asChild
+              variant="outline"
+              className="border-[#1e4b8e] rounded-xl text-[#1e4b8e]"
+            >
+              <Link href={`/billing?reservationId=${reservationId}`}>
+                Open billing dashboard
+              </Link>
+            </Button>
+          </div>
+          <FolioDetail reservationId={reservationId} />
+        </div>
       )}
     </div>
   );

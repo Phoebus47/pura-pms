@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { FoliosService } from './folios.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
+import { VoidTransactionDto } from './dto/void-transaction.dto';
 
 @Controller('folios')
 export class FoliosController {
@@ -28,5 +29,16 @@ export class FoliosController {
     @Body() postTransactionDto: PostTransactionDto,
   ) {
     return this.foliosService.postTransaction(id, postTransactionDto);
+  }
+
+  @Post('transactions/:transactionId/void')
+  voidTransaction(
+    @Param('transactionId') transactionId: string,
+    @Body() voidTransactionDto: VoidTransactionDto,
+  ) {
+    return this.foliosService.voidTransaction(
+      transactionId,
+      voidTransactionDto,
+    );
   }
 }

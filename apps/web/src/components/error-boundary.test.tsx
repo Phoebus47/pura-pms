@@ -1,16 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { type Mock } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from './error-boundary';
 
-function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
+function ThrowError({ shouldThrow }: Readonly<{ shouldThrow: boolean }>) {
   if (shouldThrow) {
     throw new Error('Test error');
   }
   return <div>No error</div>;
+}
+
+function ThrowErrorWithoutMessage(): never {
+  const err = new Error('placeholder');
+  err.message = '';
+  throw err;
 }
 
 describe('ErrorBoundary', () => {
@@ -46,10 +51,6 @@ describe('ErrorBoundary', () => {
   });
 
   it('should display default error message when error has no message', () => {
-    function ThrowErrorWithoutMessage(): never {
-      throw new Error();
-    }
-
     render(
       <ErrorBoundary>
         <ThrowErrorWithoutMessage />
@@ -98,7 +99,6 @@ describe('ErrorBoundary', () => {
   });
 
   it('should not crash when Go to home is clicked and window is undefined', async () => {
-    const user = userEvent.setup();
     render(
       <ErrorBoundary key="nowindow">
         <ThrowError shouldThrow={true} />

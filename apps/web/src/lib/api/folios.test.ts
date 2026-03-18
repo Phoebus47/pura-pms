@@ -1,4 +1,4 @@
-import { foliosAPI } from './folios';
+import { foliosAPI, type VoidTransactionDto } from './folios';
 import { apiClient } from './client';
 
 vi.mock('./client', () => ({
@@ -47,6 +47,7 @@ describe('foliosAPI', () => {
       trxCodeId: 'code-1',
       amountNet: 100,
       userId: 'user-1',
+      businessDate: '2025-01-15',
     };
     const mockResponse = { id: 'trx-1', ...mockData };
     vi.mocked(apiClient.post).mockResolvedValue(mockResponse);
@@ -54,6 +55,23 @@ describe('foliosAPI', () => {
     const result = await foliosAPI.postTransaction('folio-1', mockData);
     expect(apiClient.post).toHaveBeenCalledWith(
       '/folios/folio-1/transactions',
+      mockData,
+    );
+    expect(result).toEqual(mockResponse);
+  });
+
+  it('should void a transaction', async () => {
+    const mockData: VoidTransactionDto = {
+      userId: 'user-1',
+      reasonCodeId: 'reason-1',
+      remark: 'Void test',
+    };
+    const mockResponse = { id: 'trx-void', ...mockData };
+    vi.mocked(apiClient.post).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.voidTransaction('trx-1', mockData);
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/folios/transactions/trx-1/void',
       mockData,
     );
     expect(result).toEqual(mockResponse);

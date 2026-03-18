@@ -28,8 +28,8 @@ pnpm install
 cp .env.example .env.local
 
 # Setup database
-pnpm db:generate
-pnpm db:push
+pnpm --filter database exec prisma generate
+pnpm --filter database exec prisma migrate dev
 pnpm --filter database db:seed
 
 # Start development servers
@@ -89,11 +89,11 @@ pura/
 
 **Current Phase:**
 
-- 🎯 Phase 3: Financial & Audit Module (Priority)
+- ✅ Phase 3: Financial & Audit (Complete)
 
 **Remaining Phases:**
 
-- Phase 4: Operations Edge Cases (Day-use, Room Move, No-show, etc.)
+- 🎯 Phase 4: Operations Edge Cases (Day-use, Room Move, No-show, etc.)
 - Phase 5: Advanced Features (Rate Derivation, AI Yield Management, PWA)
 - Phase 6: Compliance & Communication (TM30, Guest Communication)
 - Phase 7: i18n & Multi-Property

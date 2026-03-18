@@ -3,6 +3,7 @@ import { FoliosService } from './folios.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { FolioStatus } from '@pura/database';
+import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { vi } from 'vitest';
 
 const mockPrismaService = {
@@ -19,12 +20,18 @@ const mockPrismaService = {
   folioWindow: {
     findUnique: vi.fn(),
     update: vi.fn(),
+    createMany: vi.fn(),
   },
   transactionCode: {
     findUnique: vi.fn(),
   },
+  reasonCode: {
+    findUnique: vi.fn(),
+  },
   folioTransaction: {
     create: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
   },
   $transaction: vi.fn(),
 };
@@ -77,6 +84,14 @@ describe('FoliosService', () => {
             reservationId: 'res-1',
             type: 'GUEST',
             status: FolioStatus.OPEN,
+            windows: {
+              create: [
+                { windowNumber: 1, description: 'Main Billing' },
+                { windowNumber: 2, description: 'Auxiliary window 2' },
+                { windowNumber: 3, description: 'Auxiliary window 3' },
+                { windowNumber: 4, description: 'Auxiliary window 4' },
+              ],
+            },
           }),
         }),
       );
@@ -158,20 +173,36 @@ describe('FoliosService', () => {
   });
 
   describe('findByReservationId', () => {
-    it('should return folios for a reservation', async () => {
-      const mockFolios = [
-        { id: 'folio-1', windows: [] },
-        { id: 'folio-2', windows: [] },
+    it('should return empty array when no folios', async () => {
+      mockPrismaService.folio.findMany.mockResolvedValueOnce([]);
+
+      const result = await service.findByReservationId('res-empty');
+
+      expect(result).toEqual([]);
+      expect(mockPrismaService.folioWindow.createMany).not.toHaveBeenCalled();
+    });
+
+    it('should ensure windows and return folios with ordered relations', async () => {
+      const fullFolios = [
+        { id: 'folio-1', windows: [{ windowNumber: 1, transactions: [] }] },
       ];
-      mockPrismaService.folio.findMany.mockResolvedValue(mockFolios);
+      mockPrismaService.folio.findMany
+        .mockResolvedValueOnce([{ id: 'folio-1' }, { id: 'folio-2' }])
+        .mockResolvedValueOnce(fullFolios);
+      mockPrismaService.folioWindow.createMany.mockResolvedValue({ count: 4 });
 
       const result = await service.findByReservationId('res-1');
 
-      expect(result).toHaveLength(2);
-
-      expect(prisma.folio.findMany).toHaveBeenCalledWith(
+      expect(result).toEqual(fullFolios);
+      expect(mockPrismaService.folioWindow.createMany).toHaveBeenCalledTimes(2);
+      expect(prisma.folio.findMany).toHaveBeenLastCalledWith(
         expect.objectContaining({
           where: { reservationId: 'res-1' },
+          include: expect.objectContaining({
+            windows: expect.objectContaining({
+              orderBy: { windowNumber: 'asc' },
+            }),
+          }),
         }),
       );
     });
@@ -183,6 +214,7 @@ describe('FoliosService', () => {
       trxCodeId: 'trx-1',
       amountNet: 1000,
       userId: 'user-1',
+      businessDate: '2025-01-15',
     };
 
     it('should post a CHARGE transaction with tax and service', async () => {
@@ -226,6 +258,7 @@ describe('FoliosService', () => {
 
             amountTax: expect.closeTo(77, 0), // 7% of (1000 + 100)
             sign: 1,
+            businessDate: new Date('2025-01-15'),
           }),
         }),
       );
@@ -267,6 +300,7 @@ describe('FoliosService', () => {
             amountService: 0,
             amountTax: 0,
             sign: -1,
+            businessDate: new Date('2025-01-15'),
           }),
         }),
       );
@@ -304,6 +338,30 @@ describe('FoliosService', () => {
           }),
         }),
       );
+    });
+
+    it('should require businessDate', async () => {
+      expect.assertions(3);
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+
+      await expect(
+        service.postTransaction('folio-1', {
+          ...baseDto,
+          businessDate: '' as never,
+        }),
+      ).rejects.toThrow('businessDate is required for posting');
+
+      expect(true).toBe(true);
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if window not found', async () => {
@@ -356,6 +414,162 @@ describe('FoliosService', () => {
           data: expect.objectContaining({
             amountService: 100,
             amountTax: 0,
+            businessDate: new Date('2025-01-15'),
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('voidTransaction', () => {
+    const baseDto = {
+      userId: 'user-1',
+      reasonCodeId: 'reason-1',
+    };
+
+    it('should throw NotFoundException if transaction not found', async () => {
+      expect.assertions(2);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.voidTransaction('missing-trx', baseDto),
+      ).rejects.toThrow(NotFoundException);
+      expect(true).toBe(true);
+    });
+
+    it('should throw BadRequestException if already voided', async () => {
+      expect.assertions(2);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        isVoid: true,
+      });
+
+      await expect(service.voidTransaction('trx-1', baseDto)).rejects.toThrow(
+        'Transaction is already voided',
+      );
+      expect(true).toBe(true);
+    });
+
+    it('should throw BadRequestException if reasonCodeId missing', async () => {
+      expect.assertions(2);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        isVoid: false,
+      });
+
+      await expect(
+        service.voidTransaction('trx-1', {
+          userId: 'user-1',
+        } as unknown as VoidTransactionDto),
+      ).rejects.toThrow('reasonCodeId is required for voiding');
+      expect(true).toBe(true);
+    });
+
+    it('should throw BadRequestException if reason code invalid or inactive', async () => {
+      expect.assertions(3);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        isVoid: false,
+      });
+      mockPrismaService.reasonCode.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.voidTransaction('trx-1', baseDto)).rejects.toThrow(
+        'Invalid or inactive reason code',
+      );
+      expect(true).toBe(true);
+
+      mockPrismaService.reasonCode.findUnique.mockResolvedValueOnce({
+        id: 'reason-1',
+        isActive: false,
+      });
+
+      await expect(service.voidTransaction('trx-1', baseDto)).rejects.toThrow(
+        'Invalid or inactive reason code',
+      );
+    });
+
+    it('should create correcting transaction and mark original as void', async () => {
+      const original = {
+        id: 'trx-1',
+        windowId: 'win-1',
+        trxCodeId: 'code-1',
+        businessDate: new Date('2025-01-15'),
+        amountNet: 100,
+        amountService: 10,
+        amountTax: 7,
+        amountTotal: 117,
+        sign: 1,
+        isVoid: false,
+        reference: 'Ref',
+      };
+
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue(original);
+      mockPrismaService.reasonCode.findUnique.mockResolvedValue({
+        id: 'reason-1',
+        isActive: true,
+      });
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          cb(mockPrismaService),
+      );
+
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-correction',
+      });
+
+      mockPrismaService.folioTransaction.update.mockResolvedValue({});
+      mockPrismaService.folioWindow.update.mockResolvedValue({
+        id: 'win-1',
+        folioId: 'folio-1',
+      });
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      const result = await service.voidTransaction('trx-1', {
+        ...baseDto,
+        remark: 'Void test',
+      });
+
+      expect(result).toEqual({ id: 'trx-correction' });
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            windowId: original.windowId,
+            trxCodeId: original.trxCodeId,
+            amountNet: original.amountNet,
+            amountService: original.amountService,
+            amountTax: original.amountTax,
+            amountTotal: original.amountTotal,
+            sign: -1,
+            userId: baseDto.userId,
+            reasonCodeId: baseDto.reasonCodeId,
+            relatedTrxId: original.id,
+          }),
+        }),
+      );
+      expect(mockPrismaService.folioTransaction.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: original.id },
+          data: expect.objectContaining({
+            isVoid: true,
+            voidedBy: baseDto.userId,
+            reasonCodeId: baseDto.reasonCodeId,
+          }),
+        }),
+      );
+      expect(mockPrismaService.folioWindow.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: original.windowId },
+          data: expect.objectContaining({
+            balance: { increment: -117 },
+          }),
+        }),
+      );
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'folio-1' },
+          data: expect.objectContaining({
+            balance: { increment: -117 },
           }),
         }),
       );

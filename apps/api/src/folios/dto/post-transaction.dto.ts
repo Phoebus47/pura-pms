@@ -32,6 +32,5 @@ export class PostTransactionDto {
   reasonCodeId?: string;
 
   @IsDateString()
-  @IsOptional()
-  businessDate?: string;
+  businessDate: string;
 }

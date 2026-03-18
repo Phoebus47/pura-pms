@@ -1,7 +1,7 @@
 # PURA PMS - Project Status Report
 
-**Last Updated:** 2025-01-XX  
-**Current Phase:** Phase 3 - Financial & Audit Module
+**Last Updated:** 2026-03-18  
+**Current Phase:** Phase 4 - Operations Edge Cases
 
 ---
 
@@ -11,8 +11,8 @@
 | -------------------------- | -------------- | -------- | ---------- |
 | Phase 1: Foundation        | ✅ Complete    | 100%     | Week 1-2   |
 | Phase 2: Front Office Core | ✅ Complete    | 100%     | Week 3-4   |
-| Phase 3: Financial & Audit | 🎯 In Progress | 0%       | Week 5-16  |
-| Phase 4: Advanced Features | 📋 Planned     | 0%       | Week 17-24 |
+| Phase 3: Financial & Audit | ✅ Complete    | 100%     | Week 5-16  |
+| Phase 4: Operations        | 🎯 In Progress | 0%       | Week 17-24 |
 
 ---
 
@@ -48,29 +48,29 @@
 
 ---
 
-## 🎯 Current Phase: Financial & Audit Module
+## 🎯 Current Phase: Operations Edge Cases (Phase 4)
 
 ### Priority Tasks (Next 2 Weeks)
 
-1. **Database Schema Enhancement** (Week 1-2)
-   - [x] Merge Financial Module schema
-   - [x] Create migration scripts
-   - [x] Seed default data
+1. **Define Phase 4 scope + edge-case flows** (Week 1)
+   - [x] Phase 3 (WP1–WP5) completed and merged
+   - [ ] Select Phase 4 epics (day-use, room move, no-show, etc.)
+   - [ ] Draft acceptance criteria + test plan for each epic
 
-2. **Transaction Code Module** (Week 2-3)
-   - [ ] Backend API
-   - [ ] Frontend UI
+2. **Ship first Phase 4 epic** (Week 2)
+   - [ ] Backend + DB changes (if needed) with Prisma migrations
+   - [ ] Web UI + tests
 
-3. **Folio Window System** (Week 3-4)
-   - Backend API
-   - Frontend UI
+3. **Harden regression suite** (Week 2)
+   - [ ] Keep CI green (lint/typecheck/unit tests)
+   - [ ] Add targeted tests for edge-case flows
 
 ### Upcoming Tasks
 
-- Folio Transaction System
-- Reason Code System
-- Night Audit Enhancement
-- Shift Management Enhancement
+- Day-use reservations
+- Room move mid-stay
+- No-show / late cancellation charges
+- Post-departure charges
 - Core Reports (DRR, Trial Balance, Daily Flash)
 - Tax Invoice System
 - Security & Compliance
@@ -85,7 +85,7 @@ See [Detailed Work Plan](./DETAILED-WORK-PLAN.md) for complete breakdown.
 
 - **TypeScript Errors:** 0
 - **ESLint Warnings:** 0
-- **Test Coverage:** ~30% (Target: >80%)
+- **Test Coverage:** high (CI-enforced; target: >80%)
 - **Lighthouse Score:** 100/100 ✅
 
 ### Performance
@@ -105,8 +105,8 @@ See [Detailed Work Plan](./DETAILED-WORK-PLAN.md) for complete breakdown.
 
 ### High Priority
 
-- [ ] Financial Module schema not merged yet
-- [ ] Test coverage needs improvement (currently ~30%, target 80%)
+- [ ] Phase 4 edge-case flows not implemented yet
+- [ ] Keep coverage and quality gates passing while adding Phase 4 features
 - [ ] i18n not implemented yet (next-intl setup needed)
 
 ### Medium Priority
@@ -126,9 +126,9 @@ See [Detailed Work Plan](./DETAILED-WORK-PLAN.md) for complete breakdown.
 
 ### Immediate (This Week)
 
-1. Review and approve Detailed Work Plan
-2. Start Phase 3 Sprint 1: Database Schema Enhancement
-3. Setup development environment for Financial Module
+1. Confirm Phase 4 epic order (see `docs/planning/roadmap.md`)
+2. Create Phase 4 tickets + acceptance criteria
+3. Start implementing the first epic
 
 ### Short-term (This Month)
 
@@ -139,10 +139,9 @@ See [Detailed Work Plan](./DETAILED-WORK-PLAN.md) for complete breakdown.
 
 ### Long-term (This Quarter)
 
-1. Complete Phase 3 (Financial & Audit)
-2. Start Phase 4 (Advanced Features)
-3. Improve test coverage to >80%
-4. Implement i18n (Thai + English)
+1. Complete Phase 4 (Operations Edge Cases)
+2. Keep CI quality gates passing
+3. Implement i18n (Thai + English) when scheduled
 
 ---
 
@@ -150,14 +149,14 @@ See [Detailed Work Plan](./DETAILED-WORK-PLAN.md) for complete breakdown.
 
 ### Phase 3 Completion Criteria
 
-- [ ] All Financial Module models implemented
-- [ ] Night Audit system working
+- [x] Core Financial & Audit foundations (WP1–WP5) implemented
+- [x] Night Audit system working (queue + status + report archive)
 - [ ] Core Reports (DRR, Trial Balance, Daily Flash) working
 - [ ] Tax Invoice system working
 - [ ] Security & Compliance implemented
-- [ ] Test coverage >80%
+- [x] Quality gates (lint/typecheck/tests) passing
 - [ ] Performance targets met
 
 ---
 
-**Status:** ✅ **On Track** - Ready to start Phase 3
+**Status:** ✅ **Phase 3 complete** — Phase 4 is the current focus

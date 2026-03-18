@@ -25,7 +25,9 @@ NODE_ENV=production
 
 ```bash
 # Database Connection (Supabase PostgreSQL)
-DATABASE_URL=postgresql://user:password@host:5432/database?schema=public
+# Recommended on Render: use Supabase Pooler (PgBouncer) URL when available.
+# Example (transaction pooler): postgresql://...@aws-0-...pooler.supabase.com:6543/postgres?pgbouncer=true
+DATABASE_URL=postgresql://user:password@host:6543/database?pgbouncer=true
 
 # JWT Secret - ใช้สำหรับ sign/verify JWT tokens (ต้องเป็น random string ที่แข็งแรง)
 # สร้างด้วย: openssl rand -base64 32
@@ -60,8 +62,8 @@ SENTRY_DSN=your-sentry-dsn-here
 2. **ตั้งค่า Environment Variables** (ตามด้านบน)
 
 3. **ตั้งค่า Database Migration**
-   - เพิ่ม **Post Deploy Script**: `cd packages/database && pnpm prisma migrate deploy`
-   - หรือรัน migration ด้วยมือ: `pnpm --filter database prisma migrate deploy`
+   - เพิ่ม **Post Deploy Script**: `cd packages/database && pnpm exec prisma migrate deploy`
+   - หรือรัน migration ด้วยมือ: `pnpm --filter database exec prisma migrate deploy`
 
 ### 2. Deploy Frontend (Vercel)
 
@@ -86,7 +88,7 @@ SENTRY_DSN=your-sentry-dsn-here
 3. **Run Migration**:
    ```bash
    cd packages/database
-   pnpm prisma migrate deploy
+   pnpm exec prisma migrate deploy
    ```
 4. **Seed Data** (Optional):
    ```bash
@@ -98,7 +100,8 @@ SENTRY_DSN=your-sentry-dsn-here
 - **CORS**: ต้องตั้ง `CORS_ORIGIN` ใน Render ให้ตรงกับ Vercel URL
 - **JWT_SECRET**: ต้องเป็น random string ที่แข็งแรง (ใช้ `openssl rand -base64 32`)
 - **DATABASE_URL**: ต้องเป็น connection string ที่ถูกต้องจาก Supabase
-- **Migration**: ต้องรัน migration ก่อน deploy API ครั้งแรก
+- **Migration**: ใช้ `prisma migrate deploy` ใน production (อย่าใช้ `db push`)
+- **Migrations**: repo มี baseline migrations แล้ว เพื่อกัน drift ระหว่าง DB กับ schema
 
 ## Troubleshooting
 

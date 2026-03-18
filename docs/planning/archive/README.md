@@ -1,6 +1,9 @@
-# PURA PMS - Planning Documentation
+# PURA PMS - Archived Planning Documentation
 
-## 📁 Documentation Structure
+> This folder is **archived** and may be **out of date**.  
+> For the current source of truth, use `docs/planning/` (e.g. `docs/planning/prd.md`, `docs/planning/roadmap.md`, `docs/planning/current-sprint.md`).
+
+## 📁 Archive Structure
 
 This directory contains all planning, technical specifications, and sprint documentation for PURA PMS.
 

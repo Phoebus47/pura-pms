@@ -140,7 +140,7 @@
 1. **Test Schema Migration:**
 
    ```bash
-   pnpm --filter database db:push
+   pnpm --filter database exec prisma migrate dev
    ```
 
 2. **Run Seed Script:**

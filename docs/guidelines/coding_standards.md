@@ -357,7 +357,11 @@ Use Conventional Commits:
 ### Database (Prisma)
 
 - **Transactions:** Use `prisma.$transaction()` for multi-step operations (especially financial postings).
-- **Migrations:** Do not edit migrations manually. Use `prisma migrate dev`.
+- **Migrations:** Do not edit migrations manually.
+  - **Dev:** use `prisma migrate dev` to create/apply migrations.
+  - **Prod:** use `prisma migrate deploy` (do not use `db push`).
+  - **Drift recovery:** if a DB already exists without migration history, create a baseline migration and
+    mark it applied using `prisma migrate resolve`.
 
 ### Logging
 

@@ -52,7 +52,9 @@ describe('Main Bootstrap', () => {
     // We still need to mock app.module though.
 
     vi.doMock('./app.module', () => ({
-      AppModule: class {},
+      AppModule: class {
+        private readonly mock = true;
+      },
     }));
 
     (mockApp.enableCors as unknown as ReturnType<typeof vi.fn>).mockClear();

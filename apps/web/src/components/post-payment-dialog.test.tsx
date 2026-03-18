@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PostPaymentDialog } from './post-payment-dialog';
-import { foliosAPI } from '@/lib/api/folios';
+import { foliosAPI, type FolioTransaction } from '@/lib/api/folios';
 import { toast } from '@/lib/toast';
 
 vi.mock('@/lib/api/folios', () => ({
@@ -25,6 +25,9 @@ describe('PostPaymentDialog', () => {
       code: 'CSH',
       description: 'Cash',
       type: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+      serviceRate: null,
       isSystem: false,
       active: true,
       createdAt: '',
@@ -56,7 +59,23 @@ describe('PostPaymentDialog', () => {
 
   it('submits successfully', async () => {
     const user = userEvent.setup();
-    (foliosAPI.postTransaction as any).mockResolvedValue({});
+    vi.mocked(foliosAPI.postTransaction).mockResolvedValue({
+      id: 'trx-2',
+      windowId: 'win-1',
+      trxCodeId: 'code-2',
+      trxCode: {} as unknown as FolioTransaction['trxCode'],
+      businessDate: '',
+      createdAt: '',
+      amountNet: 200,
+      amountService: 0,
+      amountTax: 0,
+      amountTotal: 200,
+      sign: -1,
+      reference: '',
+      remark: '',
+      userId: 'CURRENT_USER',
+      isVoid: false,
+    });
 
     render(<PostPaymentDialog {...defaultProps} />);
 
@@ -70,7 +89,7 @@ describe('PostPaymentDialog', () => {
     // Submit
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
-    fireEvent.submit(form!);
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(foliosAPI.postTransaction).toHaveBeenCalledWith(
@@ -80,6 +99,7 @@ describe('PostPaymentDialog', () => {
           trxCodeId: 'code-2',
           amountNet: 200,
           reference: '',
+          businessDate: expect.any(String),
         }),
       );
       expect(toast.success).toHaveBeenCalledWith('Payment posted successfully');
@@ -90,7 +110,7 @@ describe('PostPaymentDialog', () => {
 
   it('handles error on submit', async () => {
     const user = userEvent.setup();
-    (foliosAPI.postTransaction as any).mockRejectedValue(new Error('Failed'));
+    vi.mocked(foliosAPI.postTransaction).mockRejectedValue(new Error('Failed'));
 
     render(<PostPaymentDialog {...defaultProps} />);
 
@@ -101,7 +121,7 @@ describe('PostPaymentDialog', () => {
     // Submit explicitly to bypass Radix UI click event issues
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
-    fireEvent.submit(form!);
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -121,7 +141,7 @@ describe('PostPaymentDialog', () => {
 
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
-    fireEvent.submit(form!);
+    fireEvent.submit(form);
     expect(foliosAPI.postTransaction).not.toHaveBeenCalled();
 
     // Now test missing payment code but valid amount
@@ -131,7 +151,7 @@ describe('PostPaymentDialog', () => {
       target: { value: '200' },
     });
     // @ts-ignore
-    fireEvent.submit(screen.getByRole('dialog').querySelector('form')!);
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form'));
     expect(foliosAPI.postTransaction).not.toHaveBeenCalled();
   });
 

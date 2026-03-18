@@ -105,7 +105,171 @@ function handleFolioPostWindowBalance(
   if (fol) fol.balance += total;
 }
 
+function handleFinancialGet(path: string) {
+  if (path === '/financial/transaction-codes') {
+    return mockDb.transactionCodes;
+  }
+  if (path === '/financial/reason-codes') {
+    return mockDb.reasonCodes;
+  }
+}
+
+function handleFinancial(method: string, path: string) {
+  if (method === 'GET') return handleFinancialGet(path);
+}
+
+function handleNightAuditStatus(path: string) {
+  const match = /^\/night-audit\/status\/([^/]+)\/([^/]+)$/.exec(path);
+  if (!match) return;
+
+  const propertyId = decodeURIComponent(match[1]);
+  const businessDate = decodeURIComponent(match[2]);
+
+  const audit = mockDb.nightAudits.find(
+    (a: any) => a.propertyId === propertyId && a.businessDate === businessDate,
+  );
+  if (!audit) {
+    return { status: 'NOT_STARTED' };
+  }
+
+  const errors = mockDb.auditErrors.filter(
+    (e: any) => e.nightAuditId === audit.id,
+  );
+  const reports = mockDb.reportArchives.filter(
+    (r: any) => r.nightAuditId === audit.id,
+  );
+
+  return { ...audit, errors, reports };
+}
+
+function handleNightAuditRun(body: any) {
+  if (!body?.propertyId || !body?.businessDate) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId and businessDate are required',
+    });
+  }
+
+  const existing = mockDb.nightAudits.find(
+    (a: any) =>
+      a.propertyId === body.propertyId && a.businessDate === body.businessDate,
+  );
+  if (existing?.status === 'COMPLETED') {
+    return {
+      status: 'ALREADY_COMPLETED',
+      message: 'Night audit for this date is already completed',
+    };
+  }
+
+  const audit = existing ?? {
+    id: `na_mock_${Date.now()}`,
+    propertyId: body.propertyId,
+    businessDate: body.businessDate,
+    roomsPosted: 0,
+    revenuePosted: 0,
+    startedAt: null,
+    completedAt: null,
+    status: 'PENDING',
+  };
+
+  audit.status = 'IN_PROGRESS';
+  audit.startedAt = new Date().toISOString();
+
+  if (!existing) {
+    mockDb.nightAudits.push(audit);
+  }
+
+  // For demo/mock purposes we complete immediately and create a report archive.
+  audit.roomsPosted = 1;
+  audit.revenuePosted = 3500;
+  audit.status = 'COMPLETED';
+  audit.completedAt = new Date().toISOString();
+
+  mockDb.reportArchives.push({
+    id: `ra_mock_${Date.now()}`,
+    nightAuditId: audit.id,
+    reportType: 'NIGHT_AUDIT_SUMMARY',
+    reportName: `Night Audit Summary - ${new Date(body.businessDate).toLocaleDateString()}`,
+  });
+
+  return {
+    status: 'STARTED',
+    nightAuditId: audit.id,
+    message: 'Night audit job queued',
+  };
+}
+
+function handleNightAudit(method: string, path: string, body: any) {
+  if (method === 'GET') return handleNightAuditStatus(path);
+  if (method === 'POST' && path === '/night-audit/run')
+    return handleNightAuditRun(body);
+}
+
+function handleFolioVoid(path: string, body: any) {
+  const match = /^\/folios\/transactions\/([a-zA-Z0-9_-]+)\/void$/.exec(path);
+  if (!match) return;
+
+  const trxId = match[1];
+  const original = mockDb.folioTransactions.find((t: any) => t.id === trxId);
+  if (!original) {
+    throw new APIError(404, 'Not Found', { message: 'Transaction not found' });
+  }
+  if (original.isVoid) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Transaction is already voided',
+    });
+  }
+  if (!body?.reasonCodeId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'reasonCodeId is required for voiding',
+    });
+  }
+  const reason = mockDb.reasonCodes.find(
+    (r: any) => r.id === body.reasonCodeId,
+  );
+  if (reason?.isActive !== true) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Invalid or inactive reason code',
+    });
+  }
+
+  const correction = {
+    id: `ft_void_${Date.now()}`,
+    windowId: original.windowId,
+    trxCodeId: original.trxCodeId,
+    amountNet: original.amountNet,
+    amountService: original.amountService,
+    amountTax: original.amountTax,
+    amountTotal: original.amountTotal,
+    sign: original.sign * -1,
+    reference: original.reference || '',
+    remark: body.remark || '',
+    reasonCodeId: body.reasonCodeId,
+    createdAt: new Date().toISOString(),
+    isVoid: true,
+    relatedTrxId: original.id,
+  };
+
+  mockDb.folioTransactions.push(correction);
+
+  original.isVoid = true;
+  original.reasonCodeId = body.reasonCodeId;
+  original.relatedTrxId = correction.id;
+
+  const folioId = mockDb.folioWindows.find(
+    (w: any) => w.id === original.windowId,
+  )?.folioId;
+  const totalImpact = Number(original.amountTotal) * original.sign * -1;
+  if (folioId) {
+    handleFolioPostWindowBalance(original.windowId, folioId, totalImpact);
+  }
+
+  return { id: correction.id };
+}
+
 function handleFolioPost(path: string, body: any) {
+  const voidRes = handleFolioVoid(path, body);
+  if (voidRes !== undefined) return voidRes;
+
   const match = /^\/folios\/([a-zA-Z0-9_-]+)\/transactions$/.exec(path);
   if (!match) return;
 
@@ -412,6 +576,8 @@ export async function routeMockRequest<T>(
     const handlers = [
       () => handleAuth(method, path, body),
       () => handleMetrics(method, path),
+      () => handleFinancial(method, path),
+      () => handleNightAudit(method, path, body),
       () => handleFolios(method, path, body),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

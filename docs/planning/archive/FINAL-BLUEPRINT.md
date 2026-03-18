@@ -137,11 +137,11 @@
 
 **Must Have:**
 
-- [ ] Night Audit System
+- [x] Night Audit System
 - [ ] Financial Module (GL/AR/AP)
-- [ ] Transaction Codes
+- [x] Transaction Codes
 - [ ] Folio Windows
-- [ ] Reason Codes
+- [x] Reason Codes
 - [ ] Complete Reports (30+ Reports)
 - [ ] Budget Module
 

@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PostChargeDialog } from './post-charge-dialog';
-import { foliosAPI } from '@/lib/api/folios';
+import { foliosAPI, type FolioTransaction } from '@/lib/api/folios';
 import { toast } from '@/lib/toast';
 
 vi.mock('@/lib/api/folios', () => ({
@@ -25,6 +25,22 @@ describe('PostChargeDialog', () => {
       code: 'RM',
       description: 'Room Charge',
       type: 'CHARGE',
+      hasTax: true,
+      hasService: true,
+      serviceRate: 10,
+      isSystem: false,
+      active: true,
+      createdAt: '',
+      updatedAt: '',
+    },
+    {
+      id: 'code-3',
+      code: 'RM2',
+      description: 'Room Charge (no rate)',
+      type: 'CHARGE',
+      hasTax: false,
+      hasService: true,
+      // serviceRate intentionally missing to exercise ?? 0 branch
       isSystem: false,
       active: true,
       createdAt: '',
@@ -66,7 +82,23 @@ describe('PostChargeDialog', () => {
 
   it('submits successfully', async () => {
     const user = userEvent.setup();
-    (foliosAPI.postTransaction as any).mockResolvedValue({});
+    vi.mocked(foliosAPI.postTransaction).mockResolvedValue({
+      id: 'trx-1',
+      windowId: 'win-1',
+      trxCodeId: 'code-1',
+      trxCode: {} as unknown as FolioTransaction['trxCode'],
+      businessDate: '',
+      createdAt: '',
+      amountNet: 100,
+      amountService: 0,
+      amountTax: 0,
+      amountTotal: 100,
+      sign: 1,
+      reference: '',
+      remark: '',
+      userId: 'CURRENT_USER',
+      isVoid: false,
+    });
 
     render(<PostChargeDialog {...defaultProps} />);
 
@@ -80,7 +112,7 @@ describe('PostChargeDialog', () => {
     // Submit
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
-    fireEvent.submit(form!);
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(foliosAPI.postTransaction).toHaveBeenCalledWith(
@@ -91,6 +123,7 @@ describe('PostChargeDialog', () => {
           amountNet: 100,
           reference: '',
           remark: '',
+          businessDate: expect.any(String),
         }),
       );
       expect(toast.success).toHaveBeenCalledWith('Charge posted successfully');
@@ -99,9 +132,25 @@ describe('PostChargeDialog', () => {
     });
   });
 
+  it('uses 0% service when rate is missing', async () => {
+    const user = userEvent.setup();
+    render(<PostChargeDialog {...defaultProps} />);
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(
+      screen.getByRole('option', { name: 'RM2 - Room Charge (no rate)' }),
+    );
+
+    await user.clear(screen.getByLabelText(/amount/i));
+    await user.type(screen.getByLabelText(/amount/i), '100');
+
+    expect(screen.getByText('Service')).toBeInTheDocument();
+    expect(screen.getAllByText('฿0').length).toBeGreaterThanOrEqual(1);
+  });
+
   it('handles error on submit', async () => {
     const user = userEvent.setup();
-    (foliosAPI.postTransaction as any).mockRejectedValue(new Error('Failed'));
+    vi.mocked(foliosAPI.postTransaction).mockRejectedValue(new Error('Failed'));
 
     render(<PostChargeDialog {...defaultProps} />);
 
@@ -110,7 +159,7 @@ describe('PostChargeDialog', () => {
     await user.type(screen.getByLabelText(/amount/i), '100');
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
-    fireEvent.submit(form!);
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -130,7 +179,7 @@ describe('PostChargeDialog', () => {
 
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
-    fireEvent.submit(form!);
+    fireEvent.submit(form);
     expect(foliosAPI.postTransaction).not.toHaveBeenCalled();
 
     // Now test missing charge code but valid amount
@@ -140,7 +189,7 @@ describe('PostChargeDialog', () => {
       target: { value: '100' },
     });
     // @ts-ignore
-    fireEvent.submit(screen.getByRole('dialog').querySelector('form')!);
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form'));
     expect(foliosAPI.postTransaction).not.toHaveBeenCalled();
   });
 

@@ -2,7 +2,7 @@
 
 ## 🚀 เริ่มต้นทำงานต่อจากนี้
 
-เอกสารนี้เป็นคู่มือเริ่มต้นสำหรับทีมพัฒนาเพื่อเริ่มทำงาน Phase 3: Financial & Audit Module
+เอกสารนี้เป็นคู่มือเริ่มต้นสำหรับทีมพัฒนา (อัปเดตหลังปิด Phase 3 — WP1–WP5)
 
 ---
 
@@ -15,11 +15,13 @@
 
 **Current:**
 
-- 🎯 Phase 3: Financial & Audit Module (Sprint 1)
+- 🎯 Phase 4: Operations Edge Cases
 
 ---
 
-## 🎯 Task แรกที่ต้องทำ (Sprint 1)
+## 🎯 เริ่มทำงานต่อ (Phase 4)
+
+เริ่มจากเช็คลำดับงานใน `docs/planning/roadmap.md` และใช้ `docs/planning/prd.md` เป็น source of truth
 
 ### Task 3.1.1: Merge Financial Schema Enhancements
 
@@ -42,9 +44,9 @@
 3. Merge เข้า `packages/database/prisma/schema.prisma`
 4. Update Folio model (add status, businessDate, closedAt, closedBy)
 5. Update Reservation model (add relations)
-6. Create migration: `pnpm --filter database db:push`
-7. Test migration
-8. Generate Prisma Client: `pnpm --filter database db:generate`
+6. Create migration (dev): `pnpm --filter database exec prisma migrate dev`
+7. Test migration + app flows
+8. Generate Prisma Client: `pnpm --filter database exec prisma generate`
 
 **Acceptance Criteria:**
 

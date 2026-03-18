@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { foliosAPI, type TransactionCode } from '@/lib/api/folios';
-import { toast } from '@/lib/toast';
+import type { TransactionCode } from '@/lib/api/transaction-codes';
+import { submitFolioTransaction } from '@/lib/posting';
 
 interface PostChargeDialogProps {
   readonly isOpen: boolean;
@@ -45,6 +45,12 @@ export function PostChargeDialog({
   const [remark, setRemark] = useState('');
 
   const chargeCodes = transactionCodes.filter((c) => c.type === 'CHARGE');
+  const selected = transactionCodes.find((c) => c.id === trxCodeId);
+  const net = Number.parseFloat(amountNet || '0') || 0;
+  const serviceRate = selected?.hasService ? (selected.serviceRate ?? 0) : 0;
+  const service = selected?.hasService ? (net * Number(serviceRate)) / 100 : 0;
+  const tax = selected?.hasTax ? (net + service) * 0.07 : 0;
+  const total = net + service + tax;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,19 +58,22 @@ export function PostChargeDialog({
 
     try {
       setLoading(true);
-      await foliosAPI.postTransaction(folioId, {
-        windowNumber,
-        trxCodeId,
-        amountNet: Number.parseFloat(amountNet),
-        reference,
-        remark,
-        userId: 'CURRENT_USER', // Replace with actual auth user
+      await submitFolioTransaction({
+        folioId,
+        payload: {
+          windowNumber,
+          trxCodeId,
+          amountNet: Number.parseFloat(amountNet),
+          reference,
+          remark,
+          userId: 'CURRENT_USER', // Replace with actual auth user
+          businessDate: new Date().toISOString().slice(0, 10),
+        },
+        successMessage: 'Charge posted successfully',
+        errorPrefix: 'Failed to post charge',
+        onSuccess,
+        onClose,
       });
-      toast.success('Charge posted successfully');
-      onSuccess();
-      onClose();
-    } catch (err) {
-      toast.error(`Failed to post charge: ${(err as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -111,6 +120,20 @@ export function PostChargeDialog({
               className="rounded-xl"
               required
             />
+          </div>
+          <div className="bg-slate-50 border border-slate-200 gap-x-4 gap-y-2 grid grid-cols-2 p-4 rounded-2xl text-sm">
+            <p className="text-slate-500">Service</p>
+            <p className="font-semibold text-right text-slate-700">
+              ฿{service.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-slate-500">Tax</p>
+            <p className="font-semibold text-right text-slate-700">
+              ฿{tax.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
+            <p className="font-semibold text-slate-700">Total</p>
+            <p className="font-bold text-right text-slate-900">
+              ฿{total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="reference">Reference</Label>

@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FolioDetail } from './folio-detail';
 import { foliosAPI } from '@/lib/api/folios';
-import { toast } from '@/lib/toast';
 
 vi.mock('@/lib/api/folios', () => ({
   foliosAPI: {
@@ -35,6 +34,16 @@ vi.mock('./post-payment-dialog', () => ({
       <div data-testid="payment-dialog">
         <button onClick={onClose}>Close Payment</button>
         <button onClick={onSuccess}>Success Payment</button>
+      </div>
+    ) : null,
+}));
+
+vi.mock('./void-transaction-dialog', () => ({
+  VoidTransactionDialog: ({ isOpen, onClose, onSuccess }: any) =>
+    isOpen ? (
+      <div data-testid="void-dialog">
+        <button onClick={onClose}>Close Void</button>
+        <button onClick={onSuccess}>Success Void</button>
       </div>
     ) : null,
 }));
@@ -248,7 +257,6 @@ describe('FolioDetail', () => {
   });
 
   it('renders zero balance correctly for folio and window', async () => {
-    const user = userEvent.setup();
     const zeroFolio = {
       ...mockFolio,
       id: 'f-zero',
@@ -310,5 +318,42 @@ describe('FolioDetail', () => {
     await waitFor(() => {
       expect(screen.getByText('500')).toBeInTheDocument(); // Badge content
     });
+  });
+
+  it('opens and closes void dialog for non-void transaction', async () => {
+    const user = userEvent.setup();
+    (foliosAPI.getByReservationId as any).mockResolvedValue([mockFolio]);
+
+    render(<FolioDetail reservationId="res1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Folio 1001 (GUEST)')).toBeInTheDocument();
+    });
+
+    const voidButtons = screen.getAllByText('Void');
+    await user.click(voidButtons[0]);
+
+    expect(screen.getByTestId('void-dialog')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Close Void'));
+    expect(screen.queryByTestId('void-dialog')).not.toBeInTheDocument();
+  });
+
+  it('calls onSuccess for void dialog (reloads data)', async () => {
+    const user = userEvent.setup();
+    (foliosAPI.getByReservationId as any).mockResolvedValue([mockFolio]);
+
+    render(<FolioDetail reservationId="res1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Folio 1001 (GUEST)')).toBeInTheDocument();
+    });
+
+    const voidButtons = screen.getAllByText('Void');
+    await user.click(voidButtons[0]);
+    await user.click(screen.getByText('Success Void'));
+
+    // initial load + after success
+    expect(foliosAPI.getByReservationId).toHaveBeenCalledTimes(3);
   });
 });

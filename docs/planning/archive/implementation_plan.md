@@ -87,7 +87,7 @@ npx @nestjs/cli new api --package-manager pnpm --strict
 
 ```powershell
 cd packages/database
-pnpm db:push
+pnpm --filter database exec prisma migrate dev
 ```
 
 ### Step 5: shadcn/ui
@@ -139,9 +139,13 @@ packages:
 
 ## Next Steps
 
-### Phase 3: Financial & Audit Module 🎯 (Current Priority)
+### Phase 3: Financial & Audit Module ✅ (WP1–WP5 Complete)
 
-See [Detailed Work Plan](./DETAILED-WORK-PLAN.md) for complete task breakdown.
+See `docs/planning/prd.md` and `docs/planning/roadmap.md` for current status and priorities.
+
+### Phase 4: Operations Edge Cases 🎯 (Current Priority)
+
+See `docs/planning/roadmap.md` for the Phase 4 epic order.
 
 **Key Tasks:**
 

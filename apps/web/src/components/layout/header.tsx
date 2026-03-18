@@ -4,6 +4,7 @@ import { Bell, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { clearAuthToken } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import {
@@ -41,13 +42,13 @@ export function Header() {
       <div className="flex flex-1 gap-4 items-center">
         <div className="group max-w-md relative w-full">
           <Search className="-translate-y-1/2 absolute group-focus-within:text-[#1e4b8e] h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
-          <input
+          <Input
             id="global-search"
             name="search"
             type="search"
             placeholder="Search guests, reservations, rooms..."
             aria-label="Search guests, reservations, rooms"
-            className="backdrop-blur-xl bg-white/60 border border-white/60 focus:bg-white/80 focus:border-[#1e4b8e]/40 focus:outline-none focus:ring-[#1e4b8e]/10 focus:ring-4 hover:bg-white/70 hover:shadow-xl pl-10 placeholder:text-slate-500 pr-4 py-2.5 rounded-2xl shadow-black/5 shadow-lg text-sm transition-all w-full"
+            className="backdrop-blur-xl bg-white/60 border border-white/60 hover:bg-white/70 hover:shadow-xl pl-10 pr-4 py-2.5 rounded-2xl shadow-black/5 shadow-lg text-sm transition-all w-full"
           />
         </div>
       </div>
