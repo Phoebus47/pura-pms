@@ -9,6 +9,7 @@ export interface Property {
   taxId?: string;
   currency: string;
   timezone: string;
+  businessDate: string;
   createdAt: string;
   _count?: {
     rooms: number;

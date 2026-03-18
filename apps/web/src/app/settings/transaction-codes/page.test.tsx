@@ -173,7 +173,7 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /edit/i }));
     await screen.findByText('Edit Transaction Code');
 
-    const desc = screen.getByLabelText('Description');
+    const desc = screen.getByLabelText(/^Description/);
     await user.clear(desc);
     await user.type(desc, 'Updated');
 
@@ -213,7 +213,7 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /edit/i }));
     await screen.findByText('Edit Transaction Code');
 
-    expect(screen.getByLabelText('Service %')).toHaveValue(10);
+    expect(screen.getByLabelText(/^Service %/)).toHaveValue(10);
   });
 
   it('edit update with hasService off sends undefined serviceRate', async () => {
@@ -247,7 +247,7 @@ describe('TransactionCodesSettingsPage', () => {
     fireEvent.click(serviceToggle);
     fireEvent.change(serviceToggle, { target: { checked: false } });
 
-    const form = screen.getByLabelText('Description').closest('form');
+    const form = screen.getByLabelText(/^Description/).closest('form');
     expect(form).toBeTruthy();
     fireEvent.submit(form as HTMLFormElement);
 
@@ -273,14 +273,14 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /new code/i }));
     await screen.findByText('New Transaction Code');
 
-    const serviceRate = screen.getByLabelText('Service %');
+    const serviceRate = screen.getByLabelText(/^Service %/);
     expect(serviceRate).not.toBeDisabled();
 
     const serviceToggle = screen.getByLabelText('Apply Service Charge');
     fireEvent.click(serviceToggle);
     fireEvent.change(serviceToggle, { target: { checked: false } });
     await waitFor(() => {
-      expect(screen.getByLabelText('Service %')).toBeDisabled();
+      expect(screen.getByLabelText(/^Service %/)).toBeDisabled();
     });
   });
 
@@ -308,11 +308,11 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /new code/i }));
     await screen.findByText('New Transaction Code');
 
-    await user.type(screen.getByLabelText('Code'), '1000');
-    await user.type(screen.getByLabelText('GL Account'), '4000-01');
-    await user.type(screen.getByLabelText('Description'), 'Room Charge');
+    await user.type(screen.getByLabelText(/^Code/), '1000');
+    await user.type(screen.getByLabelText(/^GL Account/), '4000-01');
+    await user.type(screen.getByLabelText(/^Description/), 'Room Charge');
 
-    const form = screen.getByLabelText('Description').closest('form');
+    const form = screen.getByLabelText(/^Description/).closest('form');
     expect(form).toBeTruthy();
     fireEvent.submit(form as HTMLFormElement);
 
@@ -363,11 +363,11 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /new code/i }));
     await screen.findByText('New Transaction Code');
 
-    await user.type(screen.getByLabelText('Code'), '1000');
-    await user.type(screen.getByLabelText('GL Account'), '4000-01');
-    await user.type(screen.getByLabelText('Description'), 'Room Charge');
+    await user.type(screen.getByLabelText(/^Code/), '1000');
+    await user.type(screen.getByLabelText(/^GL Account/), '4000-01');
+    await user.type(screen.getByLabelText(/^Description/), 'Room Charge');
 
-    const form = screen.getByLabelText('Description').closest('form');
+    const form = screen.getByLabelText(/^Description/).closest('form');
     expect(form).toBeTruthy();
     fireEvent.submit(form as HTMLFormElement);
 
@@ -392,11 +392,11 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /new code/i }));
     await screen.findByText('New Transaction Code');
 
-    await user.type(screen.getByLabelText('Code'), '1000');
-    await user.type(screen.getByLabelText('GL Account'), '4000-01');
-    await user.type(screen.getByLabelText('Description'), 'Room Charge');
+    await user.type(screen.getByLabelText(/^Code/), '1000');
+    await user.type(screen.getByLabelText(/^GL Account/), '4000-01');
+    await user.type(screen.getByLabelText(/^Description/), 'Room Charge');
 
-    const form = screen.getByLabelText('Description').closest('form');
+    const form = screen.getByLabelText(/^Description/).closest('form');
     expect(form).toBeTruthy();
     fireEvent.submit(form as HTMLFormElement);
 
@@ -419,15 +419,15 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /new code/i }));
     await screen.findByText('New Transaction Code');
 
-    await user.type(screen.getByLabelText('Code'), '3000');
-    await user.type(screen.getByLabelText('GL Account'), '4200-01');
-    await user.type(screen.getByLabelText('Description'), 'Cash Payment');
+    await user.type(screen.getByLabelText(/^Code/), '3000');
+    await user.type(screen.getByLabelText(/^GL Account/), '4200-01');
+    await user.type(screen.getByLabelText(/^Description/), 'Cash Payment');
 
     const serviceToggle = screen.getByLabelText('Apply Service Charge');
     fireEvent.click(serviceToggle);
     fireEvent.change(serviceToggle, { target: { checked: false } });
 
-    const form = screen.getByLabelText('Description').closest('form');
+    const form = screen.getByLabelText(/^Description/).closest('form');
     expect(form).toBeTruthy();
     fireEvent.submit(form as HTMLFormElement);
 
@@ -456,15 +456,15 @@ describe('TransactionCodesSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: /new code/i }));
     await screen.findByText('New Transaction Code');
 
-    await user.type(screen.getByLabelText('Code'), '2000');
-    await user.type(screen.getByLabelText('GL Account'), '4100-01');
-    await user.type(screen.getByLabelText('Description'), 'Breakfast');
+    await user.type(screen.getByLabelText(/^Code/), '2000');
+    await user.type(screen.getByLabelText(/^GL Account/), '4100-01');
+    await user.type(screen.getByLabelText(/^Description/), 'Breakfast');
 
     // change selects
-    fireEvent.change(screen.getByLabelText('Type'), {
+    fireEvent.change(screen.getByLabelText(/^Type/), {
       target: { value: 'PAYMENT' },
     });
-    fireEvent.change(screen.getByLabelText('Group'), {
+    fireEvent.change(screen.getByLabelText(/^Group/), {
       target: { value: 'FOOD' },
     });
 
@@ -476,10 +476,10 @@ describe('TransactionCodesSettingsPage', () => {
     fireEvent.change(vatToggle, { target: { checked: true } });
 
     // change service rate input
-    await user.clear(screen.getByLabelText('Service %'));
-    await user.type(screen.getByLabelText('Service %'), '7');
+    await user.clear(screen.getByLabelText(/^Service %/));
+    await user.type(screen.getByLabelText(/^Service %/), '7');
 
-    const form = screen.getByLabelText('Description').closest('form');
+    const form = screen.getByLabelText(/^Description/).closest('form');
     expect(form).toBeTruthy();
     fireEvent.submit(form as HTMLFormElement);
 

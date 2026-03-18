@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
 import { transactionCodesAPI } from '@/lib/api/transaction-codes';
 import type {
   CreateTransactionCodeDto,
@@ -12,13 +13,13 @@ import type {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { BaseFormDialog } from '@/components/shared/base-form-dialog';
+import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  TextInput,
+  Select,
+  NumberInput,
+} from '@/components/shared/form-fields';
 
 const ALL_TYPES: readonly TransactionType[] = [
   'CHARGE',
@@ -171,16 +172,18 @@ export default function TransactionCodesSettingsPage() {
 
       <div className="backdrop-blur-2xl bg-white/40 border border-white/60 p-4 rounded-2xl shadow-2xl shadow-black/5">
         <div className="flex gap-3 items-center justify-between">
-          <div className="max-w-md w-full">
+          <div className="max-w-md relative w-full">
             <Label htmlFor="search" className="sr-only">
               Search
             </Label>
+            <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-slate-400 top-1/2 w-4" />
             <Input
               id="search"
+              type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by code or description..."
-              className="rounded-xl"
+              className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-2.5 rounded-2xl text-slate-800 text-sm w-full"
             />
           </div>
           <Button
@@ -201,7 +204,7 @@ export default function TransactionCodesSettingsPage() {
         )}
 
         <div className="mt-4 overflow-x-auto">
-          <table className="min-w-[860px] text-left w-full">
+          <table className="min-w-215 text-left w-full">
             <thead>
               <tr className="text-slate-500 text-xs uppercase">
                 <th className="px-3 py-2">Code</th>
@@ -318,152 +321,97 @@ function TransactionCodeDialog({
     }
   }
 
-  const submitLabel = useMemo(() => {
-    if (loading) return 'Saving...';
-    if (editing) return 'Save Changes';
-    return 'Create Code';
-  }, [editing, loading]);
-
   return (
-    <Dialog open={isOpen}>
-      <DialogContent
-        aria-describedby={undefined}
-        className="rounded-3xl sm:max-w-2xl"
-        onEscapeKeyDown={onClose}
-        onPointerDownOutside={onClose}
-      >
-        <DialogHeader>
-          <DialogTitle className="font-bold text-[#1e4b8e] text-2xl">
-            {editing ? 'Edit Transaction Code' : 'New Transaction Code'}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="py-4 space-y-4">
-          <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="tc-code">Code</Label>
-              <Input
-                id="tc-code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="e.g. 1000"
-                className="rounded-xl"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tc-gl">GL Account</Label>
-              <Input
-                id="tc-gl"
-                value={glAccountCode}
-                onChange={(e) => setGlAccountCode(e.target.value)}
-                placeholder="e.g. 4000-01"
-                className="rounded-xl"
-                required
-              />
-            </div>
-          </div>
+    <BaseFormDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editing ? 'Edit Transaction Code' : 'New Transaction Code'}
+    >
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
+          <TextInput
+            id="tc-code"
+            label="Code"
+            value={code}
+            onChange={setCode}
+            placeholder="e.g. 1000"
+            required
+          />
+          <TextInput
+            id="tc-gl"
+            label="GL Account"
+            value={glAccountCode}
+            onChange={setGlAccountCode}
+            placeholder="e.g. 4000-01"
+            required
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tc-desc">Description</Label>
-            <Input
-              id="tc-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Room Charge"
-              className="rounded-xl"
-              required
+        <TextInput
+          id="tc-desc"
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          placeholder="e.g. Room Charge"
+          required
+        />
+
+        <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
+          <Select
+            id="tc-type"
+            label="Type"
+            value={type}
+            onChange={(v) => setType(v as TransactionType)}
+            options={ALL_TYPES.map((t) => ({ value: t, label: t }))}
+          />
+          <Select
+            id="tc-group"
+            label="Group"
+            value={group}
+            onChange={(v) => setGroup(v as TrxGroup)}
+            options={ALL_GROUPS.map((g) => ({ value: g, label: g }))}
+          />
+        </div>
+
+        <div className="gap-4 grid grid-cols-1 items-end md:grid-cols-3">
+          <label className="flex gap-2 items-center mb-4 text-slate-700 text-sm">
+            <input
+              type="checkbox"
+              checked={hasTax}
+              onChange={(e) => setHasTax(e.target.checked)}
             />
+            <span className="font-semibold">Apply VAT</span>
+          </label>
+          <label className="flex gap-2 items-center mb-4 text-slate-700 text-sm">
+            <input
+              type="checkbox"
+              checked={hasService}
+              onChange={(e) => setHasService(e.target.checked)}
+            />
+            <span className="font-semibold">Apply Service Charge</span>
+          </label>
+          <NumberInput
+            id="tc-serviceRate"
+            label="Service %"
+            value={Number(serviceRate)}
+            onChange={(v) => setServiceRate(v.toString())}
+            step={0.01}
+            disabled={!hasService}
+          />
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
+        )}
 
-          <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="tc-type">Type</Label>
-              <select
-                id="tc-type"
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-3 py-2 rounded-xl transition-all w-full"
-                value={type}
-                onChange={(e) => setType(e.target.value as TransactionType)}
-              >
-                {ALL_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tc-group">Group</Label>
-              <select
-                id="tc-group"
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-3 py-2 rounded-xl transition-all w-full"
-                value={group}
-                onChange={(e) => setGroup(e.target.value as TrxGroup)}
-              >
-                {ALL_GROUPS.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
-            <label className="flex gap-2 items-center text-slate-700 text-sm">
-              <input
-                type="checkbox"
-                checked={hasTax}
-                onChange={(e) => setHasTax(e.target.checked)}
-              />
-              <span>Apply VAT</span>
-            </label>
-            <label className="flex gap-2 items-center text-slate-700 text-sm">
-              <input
-                type="checkbox"
-                checked={hasService}
-                onChange={(e) => setHasService(e.target.checked)}
-              />
-              <span>Apply Service Charge</span>
-            </label>
-            <div className="space-y-2">
-              <Label htmlFor="tc-serviceRate">Service %</Label>
-              <Input
-                id="tc-serviceRate"
-                type="number"
-                step="0.01"
-                value={serviceRate}
-                onChange={(e) => setServiceRate(e.target.value)}
-                className="rounded-xl"
-                disabled={!hasService}
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
-          )}
-
-          <DialogFooter className="pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="rounded-xl"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
-            >
-              {submitLabel}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <FormDialogFooter
+          onCancel={onClose}
+          loading={loading}
+          submitLabel={editing ? 'Save Changes' : 'Create Code'}
+        />
+      </form>
+    </BaseFormDialog>
   );
 }

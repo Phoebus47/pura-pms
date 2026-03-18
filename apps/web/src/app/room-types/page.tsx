@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useRoomTypes } from '@/hooks/use-room-types';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
@@ -77,12 +78,12 @@ export default function RoomTypesPage() {
         <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
           <div className="relative">
             <Search className="-translate-y-1/2 absolute h-5 left-4 text-slate-400 top-1/2 w-5" />
-            <input
-              type="text"
+            <Input
+              type="search"
               placeholder="Search room types by name or code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-12 pr-4 py-3 rounded-xl transition-all w-full"
+              className="h-12 pl-12 pr-4 py-3 rounded-2xl shadow-lg w-full"
             />
           </div>
         </div>

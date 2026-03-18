@@ -47,4 +47,6 @@ Thumbs.db
 # Database dumps (keep seed.sql but ignore dumps)
 *.dump
 *.sql
+!prisma/migrations/*.sql
+!prisma/legacy-migrations/*.sql
 !prisma/seed.sql

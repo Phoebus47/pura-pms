@@ -6,6 +6,8 @@ import { authAPI } from '@/lib/api';
 import { setAuthToken } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,13 +56,10 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email */}
             <div>
-              <label
-                htmlFor="email"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
-              >
+              <Label htmlFor="email" className="block font-semibold mb-2">
                 Email
-              </label>
-              <input
+              </Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
@@ -68,19 +67,16 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@pura.com"
                 required
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                className="h-12 px-4 py-3 rounded-xl"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label
-                htmlFor="password"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
-              >
+              <Label htmlFor="password" className="block font-semibold mb-2">
                 Password
-              </label>
-              <input
+              </Label>
+              <Input
                 id="password"
                 name="password"
                 type="password"
@@ -88,7 +84,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                className="h-12 px-4 py-3 rounded-xl"
               />
             </div>
 

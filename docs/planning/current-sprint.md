@@ -116,6 +116,11 @@ Each “Work Package” below is delivered as a small PR-sized unit.
 - **@QA**
   - Failure modes: Redis down, partial posting, retry safety.
 
+- **Done:**
+  - **Backend:** `POST /night-audit/run` + `GET /night-audit/status/:propertyId/:businessDate`; queue job idempotency; audit progress + `AuditError` + `ReportArchive` persisted.
+  - **Backend tests:** service/processor specs cover double-run safety + failure recording.
+  - **Frontend:** `/night-audit` UI can trigger run and poll status; shows summary/errors/archived reports.
+
 **Acceptance criteria**
 
 - Night audit can run safely, report progress, and archive results.

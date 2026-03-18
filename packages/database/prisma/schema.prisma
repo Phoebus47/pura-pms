@@ -42,10 +42,13 @@ model Property {
   taxId       String?
   currency    String     @default("THB")
   timezone    String     @default("Asia/Bangkok")
+  businessDate DateTime  @default(now()) @db.Date
   roomTypes   RoomType[]
   rooms       Room[]
   rates       Rate[]
-  createdAt   DateTime   @default(now())
+  nightAudits    NightAudit[]
+  reportArchives ReportArchive[]
+  createdAt      DateTime   @default(now())
 }
 
 model RoomType {
@@ -397,6 +400,8 @@ model Shift {
 
 model NightAudit {
   id            String          @id @default(cuid())
+  propertyId    String
+  property      Property        @relation(fields: [propertyId], references: [id])
   businessDate  DateTime        @db.Date
   status        AuditStatus     @default(PENDING)
   startedAt     DateTime?
@@ -408,7 +413,7 @@ model NightAudit {
   notes         String?
   reports       ReportArchive[]
   errors        AuditError[]
-  @@unique([businessDate])
+  @@unique([propertyId, businessDate])
 }
 
 model AuditError {
@@ -426,6 +431,8 @@ model AuditError {
 
 model ReportArchive {
   id           String      @id @default(cuid())
+  propertyId   String
+  property     Property    @relation(fields: [propertyId], references: [id])
   reportType   String
   reportName   String
   businessDate DateTime    @db.Date
@@ -438,6 +445,7 @@ model ReportArchive {
   nightAudit   NightAudit? @relation(fields: [nightAuditId], references: [id])
   generatedBy  String
   generatedAt  DateTime    @default(now())
+  @@index([propertyId])
   @@index([reportType, businessDate])
   @@index([businessDate])
 }

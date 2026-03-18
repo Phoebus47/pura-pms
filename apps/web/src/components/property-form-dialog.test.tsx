@@ -15,6 +15,7 @@ describe('PropertyFormDialog', () => {
     email: 'test@example.com',
     currency: 'THB',
     timezone: 'Asia/Bangkok',
+    businessDate: new Date().toISOString(),
     createdAt: new Date().toISOString(),
   };
 

@@ -5,18 +5,18 @@ import { APIError } from '../client';
 import { mockDb } from './data';
 
 describe('Mock API Router', () => {
-  const originalMockDb = JSON.parse(JSON.stringify(mockDb));
+  const originalMockDb = structuredClone(mockDb);
 
   beforeEach(() => {
     // Reset mockDb to its original state before each test
-    Object.assign(mockDb, JSON.parse(JSON.stringify(originalMockDb)));
+    Object.assign(mockDb, structuredClone(originalMockDb));
   });
 
   describe('Authentication', () => {
     it('should login successfully with valid credentials', async () => {
       const response: any = await routeMockRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email: 'admin@pura.com', password: 'admin123' }),
+        body: JSON.stringify({ email: 'admin@pura.com', password: 'admin123' }), // NOSONAR
       });
       expect(response.access_token).toBeDefined();
       expect(response.user.email).toBe('admin@pura.com');
@@ -26,7 +26,7 @@ describe('Mock API Router', () => {
       await expect(
         routeMockRequest('/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ email: 'admin@pura.com', password: 'wrong' }),
+          body: JSON.stringify({ email: 'admin@pura.com', password: 'wrong' }), // NOSONAR
         }),
       ).rejects.toThrow(APIError);
     });
@@ -527,6 +527,101 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('Night Audit', () => {
+    it('should start night audit run', async () => {
+      const response: any = await routeMockRequest('/night-audit/run', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: 'prop_mock_1',
+          businessDate: '2025-01-15T00:00:00.000Z',
+        }),
+      });
+      expect(response.status).toBe('STARTED');
+      expect(response.nightAuditId).toBeDefined();
+    });
+
+    it('should return NOT_STARTED status when missing audit', async () => {
+      const response: any = await routeMockRequest(
+        '/night-audit/status/prop_mock_1/2025-01-14T00:00:00.000Z',
+        { method: 'GET' },
+      );
+      expect(response.status).toBe('NOT_STARTED');
+    });
+
+    it('should throw 400 when starting without required fields', async () => {
+      await expect(
+        routeMockRequest('/night-audit/run', {
+          method: 'POST',
+          body: JSON.stringify({ propertyId: 'prop_mock_1' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('should return ALREADY_COMPLETED when run already completed', async () => {
+      mockDb.nightAudits.push({
+        id: 'na_completed_1',
+        propertyId: 'prop_mock_1',
+        businessDate: '2025-01-15T00:00:00.000Z',
+        roomsPosted: 1,
+        revenuePosted: 3500,
+        startedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        status: 'COMPLETED',
+      });
+
+      const response: any = await routeMockRequest('/night-audit/run', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: 'prop_mock_1',
+          businessDate: '2025-01-15T00:00:00.000Z',
+        }),
+      });
+
+      expect(response.status).toBe('ALREADY_COMPLETED');
+    });
+
+    it('should return status with errors and reports when audit exists', async () => {
+      mockDb.nightAudits.push({
+        id: 'na_1',
+        propertyId: 'prop encoded',
+        businessDate: '2025-01-16T00:00:00.000Z',
+        roomsPosted: 0,
+        revenuePosted: 0,
+        startedAt: null,
+        completedAt: null,
+        status: 'FAILED',
+      });
+      mockDb.auditErrors.push({
+        id: 'ae_1',
+        nightAuditId: 'na_1',
+        errorType: 'PROCESSOR_FAILURE',
+        description: 'boom',
+        resolved: false,
+      });
+      mockDb.reportArchives.push({
+        id: 'ra_1',
+        nightAuditId: 'na_1',
+        reportType: 'NIGHT_AUDIT_SUMMARY',
+        reportName: 'Night Audit Summary',
+      });
+
+      const response: any = await routeMockRequest(
+        '/night-audit/status/prop%20encoded/2025-01-16T00:00:00.000Z',
+        { method: 'GET' },
+      );
+
+      expect(response.status).toBe('FAILED');
+      expect(response.errors).toHaveLength(1);
+      expect(response.reports).toHaveLength(1);
+    });
+
+    it('should 404 when status url is malformed', async () => {
+      await expect(
+        routeMockRequest('/night-audit/status/prop_mock_1', { method: 'GET' }),
+      ).rejects.toThrow(APIError);
+    });
+  });
+
   describe('Error Handling', () => {
     it('should throw 404 for undefined routes', async () => {
       await expect(
@@ -554,6 +649,151 @@ describe('Mock API Router', () => {
       await expect(
         routeMockRequest('/rooms', { method: 'POST', body: '{bad}' }),
       ).rejects.toThrow(APIError);
+    });
+
+    it('should throw 404 for unknown financial routes', async () => {
+      await expect(
+        routeMockRequest('/financial/unknown', { method: 'GET' }),
+      ).rejects.toThrow(APIError);
+    });
+  });
+
+  describe('Folio Voiding Transactions', () => {
+    it('should successfully void a transaction', async () => {
+      const folioId = mockDb.folios[0].id;
+      // First create a transaction to void
+      const postRes: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 100,
+          }),
+        },
+      );
+
+      const voidRes: any = await routeMockRequest(
+        `/folios/transactions/${postRes.id}/void`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            reasonCodeId: mockDb.reasonCodes[0].id,
+            remark: 'Wrong posting',
+          }),
+        },
+      );
+
+      expect(voidRes.id).toBeDefined();
+
+      // Attempt to void it again to trigger 400 Already voided
+      await expect(
+        routeMockRequest(`/folios/transactions/${postRes.id}/void`, {
+          method: 'POST',
+          body: JSON.stringify({ reasonCodeId: mockDb.reasonCodes[0].id }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('should successfully void a transaction without a remark', async () => {
+      const folioId = mockDb.folios[0].id;
+      const postRes: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 100,
+          }),
+        },
+      );
+
+      const voidRes: any = await routeMockRequest(
+        `/folios/transactions/${postRes.id}/void`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ reasonCodeId: mockDb.reasonCodes[0].id }), // no remark
+        },
+      );
+
+      expect(voidRes.id).toBeDefined();
+    });
+
+    it('should throw 404 if transaction to void is not found', async () => {
+      await expect(
+        routeMockRequest(`/folios/transactions/invalid-tx/void`, {
+          method: 'POST',
+          body: JSON.stringify({ reasonCodeId: mockDb.reasonCodes[0].id }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('should throw 400 if reasonCodeId is missing when voiding', async () => {
+      const folioId = mockDb.folios[0].id;
+      const postRes: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 50,
+          }),
+        },
+      );
+
+      await expect(
+        routeMockRequest(`/folios/transactions/${postRes.id}/void`, {
+          method: 'POST',
+          body: JSON.stringify({ remark: 'Test' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('should throw 400 if reasonCode is inactive or invalid', async () => {
+      const folioId = mockDb.folios[0].id;
+      const postRes: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 50,
+          }),
+        },
+      );
+
+      mockDb.reasonCodes.push({
+        id: 'inactive_reason',
+        isActive: false,
+      } as any);
+
+      await expect(
+        routeMockRequest(`/folios/transactions/${postRes.id}/void`, {
+          method: 'POST',
+          body: JSON.stringify({ reasonCodeId: 'inactive_reason' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+  });
+
+  describe('Financial Configuration', () => {
+    it('should return transaction codes from financial path', async () => {
+      const response: any = await routeMockRequest(
+        '/financial/transaction-codes',
+        { method: 'GET' },
+      );
+      expect(Array.isArray(response)).toBe(true);
+    });
+
+    it('should return reason codes from financial path', async () => {
+      const response: any = await routeMockRequest('/financial/reason-codes', {
+        method: 'GET',
+      });
+      expect(Array.isArray(response)).toBe(true);
     });
   });
 });

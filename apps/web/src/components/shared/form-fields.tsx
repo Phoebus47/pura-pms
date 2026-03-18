@@ -69,7 +69,7 @@ export function TextInput({
         id={id}
         name={name}
         type={type}
-        value={value}
+        value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
@@ -92,6 +92,7 @@ interface NumberInputProps {
   readonly step?: number;
   readonly error?: string;
   readonly className?: string;
+  readonly disabled?: boolean;
 }
 
 export function NumberInput({
@@ -107,6 +108,7 @@ export function NumberInput({
   step,
   error,
   className = '',
+  disabled,
 }: NumberInputProps) {
   return (
     <FieldWrapper id={id} label={label} required={required} error={error}>
@@ -121,7 +123,8 @@ export function NumberInput({
         min={min}
         max={max}
         step={step}
-        className={`border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full ${className}`}
+        disabled={disabled}
+        className={`border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed ${className}`}
       />
     </FieldWrapper>
   );

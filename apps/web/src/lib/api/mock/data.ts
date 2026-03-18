@@ -34,6 +34,7 @@ export const mockDb: any = {
       taxId: '1234567890123',
       currency: 'THB',
       timezone: 'Asia/Bangkok',
+      businessDate: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       _count: { rooms: 15, roomTypes: 3 },
     },
@@ -303,4 +304,23 @@ export const mockDb: any = {
       isVoid: false,
     },
   ],
+  reasonCodes: [
+    {
+      id: 'reason-1',
+      code: 'VOID',
+      description: 'Void transaction',
+      category: 'VOID',
+      isActive: true,
+    },
+    {
+      id: 'reason-2',
+      code: 'ADJ',
+      description: 'Adjustment',
+      category: 'ADJUSTMENT',
+      isActive: true,
+    },
+  ],
+  nightAudits: [],
+  reportArchives: [],
+  auditErrors: [],
 };
