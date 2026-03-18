@@ -3,6 +3,7 @@ import { FoliosService } from './folios.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { FolioStatus } from '@pura/database';
+import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { vi } from 'vitest';
 
 const mockPrismaService = {
@@ -457,8 +458,9 @@ describe('FoliosService', () => {
       });
 
       await expect(
-        // Cast to any so we can omit reasonCodeId intentionally
-        service.voidTransaction('trx-1', { userId: 'user-1' } as any),
+        service.voidTransaction('trx-1', {
+          userId: 'user-1',
+        } as unknown as VoidTransactionDto),
       ).rejects.toThrow('reasonCodeId is required for voiding');
       expect(true).toBe(true);
     });

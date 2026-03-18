@@ -2,24 +2,23 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import NightAuditPage from './page';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type {
+  UseMutationOptions,
+  UseQueryOptions,
+} from '@tanstack/react-query';
 import React from 'react';
 import { toast } from 'sonner';
 import { nightAuditAPI } from '@/lib/api/night-audit';
 
 import { propertiesAPI } from '@/lib/api/properties';
 
-type QueryOptions = {
-  queryKey: readonly unknown[];
-  queryFn?: () => Promise<unknown>;
-  enabled?: boolean;
-  refetchInterval?: (query: unknown) => number | false;
-};
-
-type MutationOptions = {
-  mutationFn?: () => Promise<unknown>;
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-};
+type QueryOptions = UseQueryOptions<
+  unknown,
+  unknown,
+  unknown,
+  readonly unknown[]
+>;
+type MutationOptions = UseMutationOptions<unknown, Error, void, unknown>;
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -296,19 +295,40 @@ describe('NightAuditPage', () => {
     );
     const options = (auditStatusCall?.[0] ?? {}) as QueryOptions;
 
+    if (typeof options.refetchInterval !== 'function') {
+      throw new TypeError('Expected refetchInterval to be a function');
+    }
+
     expect(
-      options.refetchInterval({ state: { data: { status: 'IN_PROGRESS' } } }),
+      options.refetchInterval({
+        state: { data: { status: 'IN_PROGRESS' } },
+      } as unknown as Parameters<
+        NonNullable<typeof options.refetchInterval>
+      >[0]),
     ).toBe(3000);
     expect(
-      options.refetchInterval({ state: { data: { status: 'COMPLETED' } } }),
+      options.refetchInterval({
+        state: { data: { status: 'COMPLETED' } },
+      } as unknown as Parameters<
+        NonNullable<typeof options.refetchInterval>
+      >[0]),
     ).toBe(false);
-    expect(options.refetchInterval({})).toBe(false);
+    expect(
+      options.refetchInterval(
+        {} as unknown as Parameters<
+          NonNullable<typeof options.refetchInterval>
+        >[0],
+      ),
+    ).toBe(false);
 
     // Also test queryFn branch
     vi.mocked(nightAuditAPI.getStatus).mockResolvedValue({
       status: 'PENDING',
     } as unknown as never);
-    await options.queryFn?.();
+    if (typeof options.queryFn !== 'function') {
+      throw new TypeError('Expected queryFn to be a function');
+    }
+    await options.queryFn({ queryKey: options.queryKey } as never);
     expect(nightAuditAPI.getStatus).toHaveBeenCalledWith(
       'prop-1',
       '2025-01-15T00:00:00.000Z',
@@ -336,8 +356,13 @@ describe('NightAuditPage', () => {
     render(<NightAuditPage />);
     const useMutationCall = vi.mocked(useMutation).mock.calls[0] ?? [];
     const options = (useMutationCall[0] ?? {}) as MutationOptions;
+    const callbacks = options as unknown as {
+      onSuccess?: () => void;
+      onError?: (error: Error) => void;
+      mutationFn?: () => Promise<unknown>;
+    };
 
-    options.onSuccess?.();
+    callbacks.onSuccess?.();
     expect(toast.success).toHaveBeenCalledWith(
       'Night Audit started successfully',
     );
@@ -345,7 +370,7 @@ describe('NightAuditPage', () => {
       queryKey: ['night-audit-status'],
     });
 
-    options.onError?.(new Error('Test mutation error'));
+    callbacks.onError?.(new Error('Test mutation error'));
     expect(toast.error).toHaveBeenCalledWith(
       'Failed to start Night Audit: Test mutation error',
     );
@@ -353,7 +378,10 @@ describe('NightAuditPage', () => {
     vi.mocked(nightAuditAPI.start).mockResolvedValue({
       status: 'STARTED',
     } as unknown as never);
-    await options.mutationFn?.();
+    if (!callbacks.mutationFn) {
+      throw new Error('Expected mutationFn to be defined');
+    }
+    await callbacks.mutationFn();
     expect(nightAuditAPI.start).toHaveBeenCalledWith(
       'prop-1',
       '2025-01-15T00:00:00.000Z',
@@ -416,7 +444,10 @@ describe('NightAuditPage', () => {
     const options = (propCall?.[0] ?? {}) as QueryOptions;
 
     vi.mocked(propertiesAPI.getAll).mockResolvedValue([] as unknown as never);
-    await options.queryFn?.();
+    if (typeof options.queryFn !== 'function') {
+      throw new TypeError('Expected queryFn to be a function');
+    }
+    await options.queryFn({ queryKey: options.queryKey } as never);
     expect(propertiesAPI.getAll).toHaveBeenCalled();
   });
 });
