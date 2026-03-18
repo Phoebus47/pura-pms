@@ -47,6 +47,7 @@ describe('foliosAPI', () => {
       trxCodeId: 'code-1',
       amountNet: 100,
       userId: 'user-1',
+      businessDate: '2025-01-15',
     };
     const mockResponse = { id: 'trx-1', ...mockData };
     vi.mocked(apiClient.post).mockResolvedValue(mockResponse);

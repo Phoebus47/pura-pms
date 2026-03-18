@@ -74,6 +74,7 @@ describe('FoliosController', () => {
         trxCodeId: 'trx-1',
         amountNet: 500,
         userId: 'user-1',
+        businessDate: '2025-01-15',
       };
       mockFoliosService.postTransaction.mockResolvedValue({ id: 'txn-1' });
 

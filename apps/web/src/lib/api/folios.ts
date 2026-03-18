@@ -60,7 +60,7 @@ export interface PostTransactionDto {
   remark?: string;
   userId: string;
   reasonCodeId?: string;
-  businessDate?: string;
+  businessDate: string;
 }
 
 export const foliosAPI = {

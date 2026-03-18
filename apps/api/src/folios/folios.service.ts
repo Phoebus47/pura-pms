@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
@@ -124,31 +128,39 @@ export class FoliosService {
       );
     }
 
+    if (!postTransactionDto.businessDate) {
+      throw new BadRequestException('businessDate is required for posting');
+    }
+
     // Tax and Service Charge calculations
-    const amountNet = Number(postTransactionDto.amountNet);
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+    const amountNet = round2(Number(postTransactionDto.amountNet));
     let amountService = 0;
     let amountTax = 0;
 
     if (trxCode.hasService && trxCode.serviceRate) {
-      amountService = (amountNet * Number(trxCode.serviceRate)) / 100;
+      amountService = round2((amountNet * Number(trxCode.serviceRate)) / 100);
     }
 
     if (trxCode.hasTax) {
       // Assuming 7% VAT for now, ideally fetch from tax configuration
-      amountTax = (amountNet + amountService) * 0.07;
+      amountTax = round2((amountNet + amountService) * 0.07);
     }
 
-    const amountTotal = amountNet + amountService + amountTax;
-    const sign = trxCode.type === 'CHARGE' ? 1 : -1;
+    const amountTotal = round2(amountNet + amountService + amountTax);
+    const sign =
+      trxCode.type === 'PAYMENT' ||
+      trxCode.type === 'DEPOSIT' ||
+      trxCode.type === 'REFUND'
+        ? -1
+        : 1;
 
     return this.prisma.$transaction(async (tx) => {
       const transaction = await tx.folioTransaction.create({
         data: {
           windowId: window.id,
           trxCodeId: trxCode.id,
-          businessDate: postTransactionDto.businessDate
-            ? new Date(postTransactionDto.businessDate)
-            : new Date(),
+          businessDate: new Date(postTransactionDto.businessDate),
           amountNet,
           amountService,
           amountTax,

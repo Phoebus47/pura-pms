@@ -18,9 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { foliosAPI } from '@/lib/api/folios';
 import type { TransactionCode } from '@/lib/api/transaction-codes';
-import { toast } from '@/lib/toast';
+import { submitFolioTransaction } from '@/lib/posting';
 
 interface PostPaymentDialogProps {
   readonly isOpen: boolean;
@@ -45,6 +44,7 @@ export function PostPaymentDialog({
   const [reference, setReference] = useState('');
 
   const paymentCodes = transactionCodes.filter((c) => c.type === 'PAYMENT');
+  const net = Number.parseFloat(amountNet || '0') || 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,18 +52,21 @@ export function PostPaymentDialog({
 
     try {
       setLoading(true);
-      await foliosAPI.postTransaction(folioId, {
-        windowNumber,
-        trxCodeId,
-        amountNet: Number.parseFloat(amountNet),
-        reference,
-        userId: 'CURRENT_USER', // Replace with actual auth user
+      await submitFolioTransaction({
+        folioId,
+        payload: {
+          windowNumber,
+          trxCodeId,
+          amountNet: Number.parseFloat(amountNet),
+          reference,
+          userId: 'CURRENT_USER', // Replace with actual auth user
+          businessDate: new Date().toISOString().slice(0, 10),
+        },
+        successMessage: 'Payment posted successfully',
+        errorPrefix: 'Failed to post payment',
+        onSuccess,
+        onClose,
       });
-      toast.success('Payment posted successfully');
-      onSuccess();
-      onClose();
-    } catch (err) {
-      toast.error(`Failed to post payment: ${(err as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -110,6 +113,12 @@ export function PostPaymentDialog({
               className="rounded-xl"
               required
             />
+          </div>
+          <div className="bg-slate-50 border border-slate-200 flex items-center justify-between p-4 rounded-2xl text-sm">
+            <p className="font-semibold text-slate-700">Total</p>
+            <p className="font-bold text-slate-900">
+              ฿{net.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="reference">Reference / Card Last 4</Label>

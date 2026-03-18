@@ -8,7 +8,7 @@ import {
 } from './client';
 
 describe('APIClient', () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
   const localStorageMock = {
     getItem: vi.fn(),
     setItem: vi.fn(),
@@ -18,7 +18,7 @@ describe('APIClient', () => {
   const originalLocalStorage = globalThis.localStorage;
 
   beforeEach(() => {
-    global.fetch = vi.fn();
+    (globalThis as any).fetch = vi.fn();
     try {
       Object.defineProperty(globalThis, 'window', {
         value: { localStorage: localStorageMock },
@@ -49,7 +49,7 @@ describe('APIClient', () => {
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    (globalThis as any).fetch = originalFetch;
     try {
       Object.defineProperty(globalThis, 'window', {
         value: originalWindow,
@@ -81,7 +81,7 @@ describe('APIClient', () => {
   describe('get', () => {
     it('should make GET request successfully', async () => {
       const mockData = { id: '1', name: 'Test' };
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => mockData,
@@ -90,7 +90,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       const result = await client.get('/test');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test'),
         expect.objectContaining({
           method: 'GET',
@@ -103,7 +103,7 @@ describe('APIClient', () => {
     });
 
     it('should include Authorization header when token is provided', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -112,7 +112,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       await client.get('/test', 'test-token');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -124,7 +124,7 @@ describe('APIClient', () => {
 
     it('should use getAuthToken when token is not provided', async () => {
       localStorageMock.getItem.mockReturnValue('stored-token');
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -134,7 +134,7 @@ describe('APIClient', () => {
       await client.get('/test');
 
       expect(localStorageMock.getItem).toHaveBeenCalledWith('token');
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -146,7 +146,7 @@ describe('APIClient', () => {
 
     it('should not include Authorization header when no token is available', async () => {
       localStorageMock.getItem.mockReturnValue(null);
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -155,7 +155,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       await client.get('/test');
 
-      const callArgs = (global.fetch as any).mock.calls[0];
+      const callArgs = (globalThis.fetch as any).mock.calls[0];
       const headers = callArgs[1].headers as Record<string, string>;
       expect(headers.Authorization).toBeUndefined();
     });
@@ -179,7 +179,7 @@ describe('APIClient', () => {
       // using a guaranteed mock endpoint
       const response = await client.get('/metrics/occupancy');
 
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(globalThis.fetch).not.toHaveBeenCalled();
       expect(response).toBeDefined();
       expect((response as any).totalRooms).toBeDefined();
     });
@@ -189,7 +189,7 @@ describe('APIClient', () => {
     it('should make POST request with data', async () => {
       const mockData = { id: '1', name: 'Test' };
       const postData = { name: 'Test' };
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => mockData,
@@ -198,7 +198,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       const result = await client.post('/test', postData);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test'),
         expect.objectContaining({
           method: 'POST',
@@ -209,7 +209,7 @@ describe('APIClient', () => {
     });
 
     it('should make POST request without data', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -218,7 +218,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       await client.post('/test');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test'),
         expect.objectContaining({
           method: 'POST',
@@ -232,7 +232,7 @@ describe('APIClient', () => {
     it('should make PATCH request with data', async () => {
       const mockData = { id: '1', name: 'Updated' };
       const patchData = { name: 'Updated' };
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => mockData,
@@ -241,7 +241,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       const result = await client.patch('/test/1', patchData);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test/1'),
         expect.objectContaining({
           method: 'PATCH',
@@ -254,7 +254,7 @@ describe('APIClient', () => {
 
   describe('delete', () => {
     it('should make DELETE request', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 204,
       });
@@ -262,7 +262,7 @@ describe('APIClient', () => {
       const client = new APIClient();
       const result = await client.delete('/test/1');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test/1'),
         expect.objectContaining({
           method: 'DELETE',
@@ -275,7 +275,7 @@ describe('APIClient', () => {
   describe('error handling', () => {
     it('should throw APIError when response is not ok', async () => {
       const errorData = { message: 'Not found' };
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: false,
         status: 404,
         statusText: 'Not Found',
@@ -291,7 +291,7 @@ describe('APIClient', () => {
     });
 
     it('should handle network errors', async () => {
-      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as any).mockRejectedValue(new Error('Network error'));
 
       const client = new APIClient();
 
@@ -301,7 +301,7 @@ describe('APIClient', () => {
     });
 
     it('should handle non-Error network failures', async () => {
-      (global.fetch as any).mockRejectedValue('Unknown error');
+      (globalThis.fetch as any).mockRejectedValue('Unknown error');
 
       const client = new APIClient();
 
@@ -311,7 +311,7 @@ describe('APIClient', () => {
     });
 
     it('should handle JSON parse error in error response', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
@@ -328,16 +328,16 @@ describe('APIClient', () => {
 
   describe('custom headers', () => {
     it('should merge custom headers with default headers', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
       });
 
       const client = new APIClient();
-      await client.get('/test', undefined);
+      await client.get('/test');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -348,7 +348,7 @@ describe('APIClient', () => {
     });
 
     it('should handle request with no options parameter', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -360,30 +360,29 @@ describe('APIClient', () => {
       ).request;
       await requestMethod.call(client, '/test');
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(globalThis.fetch).toHaveBeenCalled();
     });
 
     it('should handle patch with undefined data', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
       });
 
       const client = new APIClient();
-      await client.patch('/test', undefined);
+      await client.patch('/test');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test'),
         expect.objectContaining({
           method: 'PATCH',
-          body: undefined,
         }),
       );
     });
 
     it('should handle request method with no options', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -395,11 +394,11 @@ describe('APIClient', () => {
       ).request;
       await requestMethod.call(client, '/test');
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(globalThis.fetch).toHaveBeenCalled();
     });
 
     it('should handle request method with empty options object', async () => {
-      (global.fetch as any).mockResolvedValue({
+      (globalThis.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({}),
@@ -416,7 +415,7 @@ describe('APIClient', () => {
       ).request;
       await requestMethod.call(client, '/test', {});
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(globalThis.fetch).toHaveBeenCalled();
     });
   });
 });

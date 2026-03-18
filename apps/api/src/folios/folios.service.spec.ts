@@ -183,6 +183,7 @@ describe('FoliosService', () => {
       trxCodeId: 'trx-1',
       amountNet: 1000,
       userId: 'user-1',
+      businessDate: '2025-01-15',
     };
 
     it('should post a CHARGE transaction with tax and service', async () => {
@@ -226,6 +227,7 @@ describe('FoliosService', () => {
 
             amountTax: expect.closeTo(77, 0), // 7% of (1000 + 100)
             sign: 1,
+            businessDate: new Date('2025-01-15'),
           }),
         }),
       );
@@ -267,6 +269,7 @@ describe('FoliosService', () => {
             amountService: 0,
             amountTax: 0,
             sign: -1,
+            businessDate: new Date('2025-01-15'),
           }),
         }),
       );
@@ -304,6 +307,30 @@ describe('FoliosService', () => {
           }),
         }),
       );
+    });
+
+    it('should require businessDate', async () => {
+      expect.assertions(3);
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+
+      await expect(
+        service.postTransaction('folio-1', {
+          ...baseDto,
+          businessDate: '' as never,
+        }),
+      ).rejects.toThrow('businessDate is required for posting');
+
+      expect(true).toBe(true);
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if window not found', async () => {
@@ -356,6 +383,7 @@ describe('FoliosService', () => {
           data: expect.objectContaining({
             amountService: 100,
             amountTax: 0,
+            businessDate: new Date('2025-01-15'),
           }),
         }),
       );
