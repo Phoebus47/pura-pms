@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
 import { FolioStatus } from '@pura/database';
+import { VoidTransactionDto } from './dto/void-transaction.dto';
 
 @Injectable()
 export class FoliosService {
@@ -223,6 +224,79 @@ export class FoliosService {
       });
 
       return transaction;
+    });
+  }
+
+  async voidTransaction(transactionId: string, dto: VoidTransactionDto) {
+    const original = await this.prisma.folioTransaction.findUnique({
+      where: { id: transactionId },
+    });
+
+    if (!original) {
+      throw new NotFoundException(
+        `Transaction with ID ${transactionId} not found`,
+      );
+    }
+
+    if (original.isVoid) {
+      throw new BadRequestException('Transaction is already voided');
+    }
+
+    if (!dto.reasonCodeId) {
+      throw new BadRequestException('reasonCodeId is required for voiding');
+    }
+
+    const reasonCode = await this.prisma.reasonCode.findUnique({
+      where: { id: dto.reasonCodeId },
+    });
+
+    if (!reasonCode?.isActive) {
+      throw new BadRequestException('Invalid or inactive reason code');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const correction = await tx.folioTransaction.create({
+        data: {
+          windowId: original.windowId,
+          trxCodeId: original.trxCodeId,
+          businessDate: original.businessDate,
+          amountNet: original.amountNet,
+          amountService: original.amountService,
+          amountTax: original.amountTax,
+          amountTotal: original.amountTotal,
+          sign: original.sign * -1,
+          userId: dto.userId,
+          reference: original.reference,
+          remark: dto.remark,
+          reasonCodeId: dto.reasonCodeId,
+          relatedTrxId: original.id,
+        },
+      });
+
+      await tx.folioTransaction.update({
+        where: { id: original.id },
+        data: {
+          isVoid: true,
+          voidedAt: new Date(),
+          voidedBy: dto.userId,
+          reasonCodeId: dto.reasonCodeId,
+          relatedTrxId: correction.id,
+        },
+      });
+
+      const totalImpact = Number(original.amountTotal) * original.sign * -1;
+
+      const window = await tx.folioWindow.update({
+        where: { id: original.windowId },
+        data: { balance: { increment: totalImpact } },
+      });
+
+      await tx.folio.update({
+        where: { id: window.folioId },
+        data: { balance: { increment: totalImpact } },
+      });
+
+      return correction;
     });
   }
 }

@@ -9,6 +9,7 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import { PostChargeDialog } from './post-charge-dialog';
 import { PostPaymentDialog } from './post-payment-dialog';
+import { VoidTransactionDialog } from './void-transaction-dialog';
 
 interface FolioDetailProps {
   readonly reservationId: string;
@@ -24,6 +25,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
   );
   const [isChargeDialogOpen, setIsChargeDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [isVoidDialogOpen, setIsVoidDialogOpen] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<
+    string | null
+  >(null);
 
   const loadFolioData = useCallback(async () => {
     try {
@@ -192,6 +197,9 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
                   Total
                 </th>
+                <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-slate-100 divide-y">
@@ -241,12 +249,26 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                       {trx.sign > 0 ? '' : '-'}฿
                       {Number(trx.amountTotal).toLocaleString()}
                     </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-300 hover:bg-red-50 text-red-600"
+                        disabled={trx.isVoid}
+                        onClick={() => {
+                          setSelectedTransactionId(trx.id);
+                          setIsVoidDialogOpen(true);
+                        }}
+                      >
+                        Void
+                      </Button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="italic px-6 py-12 text-center text-slate-500"
                   >
                     No transactions found in this window.
@@ -311,6 +333,15 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
             windowNumber={activeWindowNumber}
             onSuccess={loadFolioData}
             transactionCodes={transactionCodes}
+          />
+          <VoidTransactionDialog
+            isOpen={isVoidDialogOpen}
+            onClose={() => {
+              setIsVoidDialogOpen(false);
+              setSelectedTransactionId(null);
+            }}
+            transactionId={selectedTransactionId}
+            onSuccess={loadFolioData}
           />
         </>
       )}

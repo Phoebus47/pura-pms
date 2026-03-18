@@ -24,6 +24,8 @@ export interface FolioTransaction {
   remark?: string;
   userId: string;
   isVoid: boolean;
+  reasonCodeId?: string;
+  relatedTrxId?: string;
 }
 
 export interface FolioWindow {
@@ -63,6 +65,12 @@ export interface PostTransactionDto {
   businessDate: string;
 }
 
+export interface VoidTransactionDto {
+  userId: string;
+  reasonCodeId: string;
+  remark?: string;
+}
+
 export const foliosAPI = {
   async getById(id: string): Promise<Folio> {
     return apiClient.get<Folio>(`/folios/${id}`);
@@ -82,6 +90,16 @@ export const foliosAPI = {
   ): Promise<FolioTransaction> {
     return apiClient.post<FolioTransaction>(
       `/folios/${folioId}/transactions`,
+      data,
+    );
+  },
+
+  async voidTransaction(
+    transactionId: string,
+    data: VoidTransactionDto,
+  ): Promise<FolioTransaction> {
+    return apiClient.post<FolioTransaction>(
+      `/folios/transactions/${transactionId}/void`,
       data,
     );
   },

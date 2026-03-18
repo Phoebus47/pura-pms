@@ -24,8 +24,13 @@ const mockPrismaService = {
   transactionCode: {
     findUnique: vi.fn(),
   },
+  reasonCode: {
+    findUnique: vi.fn(),
+  },
   folioTransaction: {
     create: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
   },
   $transaction: vi.fn(),
 };
@@ -409,6 +414,160 @@ describe('FoliosService', () => {
             amountService: 100,
             amountTax: 0,
             businessDate: new Date('2025-01-15'),
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('voidTransaction', () => {
+    const baseDto = {
+      userId: 'user-1',
+      reasonCodeId: 'reason-1',
+    };
+
+    it('should throw NotFoundException if transaction not found', async () => {
+      expect.assertions(2);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.voidTransaction('missing-trx', baseDto),
+      ).rejects.toThrow(NotFoundException);
+      expect(true).toBe(true);
+    });
+
+    it('should throw BadRequestException if already voided', async () => {
+      expect.assertions(2);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        isVoid: true,
+      });
+
+      await expect(service.voidTransaction('trx-1', baseDto)).rejects.toThrow(
+        'Transaction is already voided',
+      );
+      expect(true).toBe(true);
+    });
+
+    it('should throw BadRequestException if reasonCodeId missing', async () => {
+      expect.assertions(2);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        isVoid: false,
+      });
+
+      await expect(
+        // Cast to any so we can omit reasonCodeId intentionally
+        service.voidTransaction('trx-1', { userId: 'user-1' } as any),
+      ).rejects.toThrow('reasonCodeId is required for voiding');
+      expect(true).toBe(true);
+    });
+
+    it('should throw BadRequestException if reason code invalid or inactive', async () => {
+      expect.assertions(3);
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        isVoid: false,
+      });
+      mockPrismaService.reasonCode.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.voidTransaction('trx-1', baseDto)).rejects.toThrow(
+        'Invalid or inactive reason code',
+      );
+      expect(true).toBe(true);
+
+      mockPrismaService.reasonCode.findUnique.mockResolvedValueOnce({
+        id: 'reason-1',
+        isActive: false,
+      });
+
+      await expect(service.voidTransaction('trx-1', baseDto)).rejects.toThrow(
+        'Invalid or inactive reason code',
+      );
+    });
+
+    it('should create correcting transaction and mark original as void', async () => {
+      const original = {
+        id: 'trx-1',
+        windowId: 'win-1',
+        trxCodeId: 'code-1',
+        businessDate: new Date('2025-01-15'),
+        amountNet: 100,
+        amountService: 10,
+        amountTax: 7,
+        amountTotal: 117,
+        sign: 1,
+        isVoid: false,
+        reference: 'Ref',
+      };
+
+      mockPrismaService.folioTransaction.findUnique.mockResolvedValue(original);
+      mockPrismaService.reasonCode.findUnique.mockResolvedValue({
+        id: 'reason-1',
+        isActive: true,
+      });
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          cb(mockPrismaService),
+      );
+
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-correction',
+      });
+
+      mockPrismaService.folioTransaction.update.mockResolvedValue({});
+      mockPrismaService.folioWindow.update.mockResolvedValue({
+        id: 'win-1',
+        folioId: 'folio-1',
+      });
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      const result = await service.voidTransaction('trx-1', {
+        ...baseDto,
+        remark: 'Void test',
+      });
+
+      expect(result).toEqual({ id: 'trx-correction' });
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            windowId: original.windowId,
+            trxCodeId: original.trxCodeId,
+            amountNet: original.amountNet,
+            amountService: original.amountService,
+            amountTax: original.amountTax,
+            amountTotal: original.amountTotal,
+            sign: -1,
+            userId: baseDto.userId,
+            reasonCodeId: baseDto.reasonCodeId,
+            relatedTrxId: original.id,
+          }),
+        }),
+      );
+      expect(mockPrismaService.folioTransaction.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: original.id },
+          data: expect.objectContaining({
+            isVoid: true,
+            voidedBy: baseDto.userId,
+            reasonCodeId: baseDto.reasonCodeId,
+          }),
+        }),
+      );
+      expect(mockPrismaService.folioWindow.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: original.windowId },
+          data: expect.objectContaining({
+            balance: { increment: -117 },
+          }),
+        }),
+      );
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'folio-1' },
+          data: expect.objectContaining({
+            balance: { increment: -117 },
           }),
         }),
       );
