@@ -1213,10 +1213,10 @@ graph LR
 
 ### Phase 3: Financial & Audit (Next — 🎯 Priority)
 
-- [ ] Enhanced Folio System (Windows, Routing, Post-departure, Rebate)
-- [ ] Transaction Codes (Mapping to GL)
-- [ ] Reason Codes (Audit Trail)
-- [ ] Night Audit System (Enhanced with Queue)
+- [x] Enhanced Folio System (Windows, Routing, Post-departure, Rebate)
+- [x] Transaction Codes (Mapping to GL)
+- [x] Reason Codes (Audit Trail)
+- [x] Night Audit System (Enhanced with Queue)
 - [ ] Shift Management (Enhanced)
 - [ ] GL/AR/AP modules (USALI Compliant)
 - [ ] Tax Invoice (e-Tax Invoice Ready)

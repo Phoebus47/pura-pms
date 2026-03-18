@@ -44,16 +44,16 @@ Modify `packages/database/prisma/schema.prisma`:
 
 ### 3) Generate client and apply schema to DB (choose method)
 
-PURA has scripts:
+PURA uses Prisma Migrate as the primary workflow:
 
-- `pnpm db:generate` (root) → `pnpm --filter database db:generate`
-- `pnpm db:push` (root) → `pnpm --filter database db:push`
-- `pnpm --filter database db:migrate` (dev migrations)
+- Generate client: `pnpm --filter database exec prisma generate`
+- Dev migration: `pnpm --filter database exec prisma migrate dev`
+- Prod migration: `pnpm --filter database exec prisma migrate deploy` (see `DEPLOYMENT.md`)
 
 Rules of thumb:
 
-- **Dev iteration / prototype**: `db:push` is fastest.
-- **Production deployment**: prefer `prisma migrate` and `prisma migrate deploy` (see `DEPLOYMENT.md`).
+- **Development**: use `prisma migrate dev` so migration history stays consistent.
+- **Production**: use `prisma migrate deploy` (never `db push`).
 
 ### 4) Seed and verify
 
@@ -87,7 +87,7 @@ Follow `DEPLOYMENT.md`:
 
 - build database package before API (`@pura/database build` generates Prisma client)
 - run migrations:
-  - `pnpm --filter database prisma migrate deploy`
+  - `pnpm --filter database exec prisma migrate deploy`
 
 ## “Done” criteria
 

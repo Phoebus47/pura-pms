@@ -621,12 +621,12 @@ GL Account ต้องจัดหมวดหมู่ตามมาตรฐ
 - [x] Housekeeping module (Basic)
 - [x] Dashboard
 
-### Phase 3: Financial & Audit (Next - 🎯 Priority)
+### Phase 3: Financial & Audit (Complete ✅ — WP1–WP5)
 
-- [ ] **Enhanced Folio System** (Windows, Routing)
-- [ ] **Transaction Codes** (Mapping to GL)
-- [ ] **Reason Codes** (Audit Trail)
-- [ ] **Night Audit System** (Enhanced with Queue)
+- [x] **Enhanced Folio System** (Windows, Routing)
+- [x] **Transaction Codes** (Mapping to GL)
+- [x] **Reason Codes** (Audit Trail)
+- [x] **Night Audit System** (Enhanced with Queue)
 - [ ] **Shift Management** (Enhanced)
 - [ ] **GL/AR/AP modules** (USALI Compliant)
 - [ ] **Tax Invoice** (e-Tax Invoice Ready)

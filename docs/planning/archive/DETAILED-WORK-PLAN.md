@@ -4,8 +4,10 @@
 
 เอกสารนี้เป็น **แผนการทำงานที่ละเอียด** สำหรับการพัฒนา PURA PMS โดยแบ่งงานออกเป็น Tasks ย่อยๆ เพื่อควบคุมคุณภาพโค้ดและติดตามความคืบหน้า
 
-**Current Status:** Phase 1 ✅ Complete | Phase 2 ✅ Complete  
-**Next Phase:** Phase 3 - Financial & Audit (Priority)
+**Current Status:** Phase 1 ✅ Complete | Phase 2 ✅ Complete | Phase 3 ✅ Complete (WP1–WP5)  
+**Next Phase:** Phase 4 - Operations Edge Cases (Current Priority)
+
+> Note: This document is an archived work plan snapshot. For the current source of truth, use `docs/planning/roadmap.md` and `docs/planning/prd.md`.
 
 ---
 
@@ -807,5 +809,5 @@
 
 ---
 
-**Last Updated:** 2025-01-XX  
-**Status:** ✅ Ready to Start Phase 3
+**Last Updated:** 2026-03-18  
+**Status:** ✅ Phase 3 (WP1–WP5) complete — Phase 4 is current

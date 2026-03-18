@@ -198,8 +198,8 @@
 
 ### Immediate (This Week)
 
-1. ✅ Generate Prisma Client: `pnpm --filter database db:generate`
-2. ⏳ Test schema migration: `pnpm --filter database db:push`
+1. ✅ Generate Prisma Client: `pnpm --filter database exec prisma generate`
+2. ⏳ Apply dev migration: `pnpm --filter database exec prisma migrate dev`
 3. ⏳ Run seed script: `pnpm --filter database db:seed`
 4. ⏳ Verify Prisma Client types generated correctly
 
@@ -250,17 +250,14 @@ ts-node prisma/seed-financial.ts
 ### Generating Prisma Client
 
 ```bash
-pnpm --filter database db:generate
+pnpm --filter database exec prisma generate
 ```
 
 ### Testing Migration
 
 ```bash
-# Push schema to database (development)
-pnpm --filter database db:push
-
-# Or create migration
-pnpm --filter database db:migrate dev --name add_financial_module
+# Create/apply a dev migration (recommended)
+pnpm --filter database exec prisma migrate dev
 ```
 
 ---

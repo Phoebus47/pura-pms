@@ -74,7 +74,7 @@ From `DEPLOYMENT.md`:
 
 Use Prisma migrate deploy (not db push) for production:
 
-- [ ] Apply migrations: `pnpm --filter database prisma migrate deploy`
+- [ ] Apply migrations: `pnpm --filter database exec prisma migrate deploy`
 - [ ] Confirm schema compatibility with running API (avoid breaking changes)
 - [ ] If adding required fields, use a staged rollout:
   - add nullable field → backfill → enforce required in follow-up

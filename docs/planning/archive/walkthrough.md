@@ -100,10 +100,11 @@ npx pnpm --filter web dev
 npx pnpm --filter api start:dev
 
 # Run database migrations
-npx pnpm --filter @pura/database db:push
+npx pnpm --filter database exec prisma migrate dev
 
 # Seed database
 npx pnpm --filter @pura/database db:seed
 ```
 
 The application is now accessible at `http://localhost:3000` (frontend) and `http://localhost:3000` (API).
+The API is typically accessible on a separate port (see `apps/api` config) and via `NEXT_PUBLIC_API_URL` from the web app.

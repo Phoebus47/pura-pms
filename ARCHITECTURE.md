@@ -405,7 +405,7 @@ Tasks are orchestrated via `turbo.json`:
 
 - `dev` is persistent and uncached
 - `build`, `lint`, `type-check`, `test` depend on upstream `^build`
-- DB tasks (`db:push`, `db:generate`) are uncached
+- DB tasks (`prisma migrate` / `prisma generate`) are uncached
 
 ```mermaid
 flowchart LR
