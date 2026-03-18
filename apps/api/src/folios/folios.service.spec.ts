@@ -19,6 +19,7 @@ const mockPrismaService = {
   folioWindow: {
     findUnique: vi.fn(),
     update: vi.fn(),
+    createMany: vi.fn(),
   },
   transactionCode: {
     findUnique: vi.fn(),
@@ -77,6 +78,14 @@ describe('FoliosService', () => {
             reservationId: 'res-1',
             type: 'GUEST',
             status: FolioStatus.OPEN,
+            windows: {
+              create: [
+                { windowNumber: 1, description: 'Main Billing' },
+                { windowNumber: 2, description: 'Auxiliary window 2' },
+                { windowNumber: 3, description: 'Auxiliary window 3' },
+                { windowNumber: 4, description: 'Auxiliary window 4' },
+              ],
+            },
           }),
         }),
       );
@@ -158,20 +167,36 @@ describe('FoliosService', () => {
   });
 
   describe('findByReservationId', () => {
-    it('should return folios for a reservation', async () => {
-      const mockFolios = [
-        { id: 'folio-1', windows: [] },
-        { id: 'folio-2', windows: [] },
+    it('should return empty array when no folios', async () => {
+      mockPrismaService.folio.findMany.mockResolvedValueOnce([]);
+
+      const result = await service.findByReservationId('res-empty');
+
+      expect(result).toEqual([]);
+      expect(mockPrismaService.folioWindow.createMany).not.toHaveBeenCalled();
+    });
+
+    it('should ensure windows and return folios with ordered relations', async () => {
+      const fullFolios = [
+        { id: 'folio-1', windows: [{ windowNumber: 1, transactions: [] }] },
       ];
-      mockPrismaService.folio.findMany.mockResolvedValue(mockFolios);
+      mockPrismaService.folio.findMany
+        .mockResolvedValueOnce([{ id: 'folio-1' }, { id: 'folio-2' }])
+        .mockResolvedValueOnce(fullFolios);
+      mockPrismaService.folioWindow.createMany.mockResolvedValue({ count: 4 });
 
       const result = await service.findByReservationId('res-1');
 
-      expect(result).toHaveLength(2);
-
-      expect(prisma.folio.findMany).toHaveBeenCalledWith(
+      expect(result).toEqual(fullFolios);
+      expect(mockPrismaService.folioWindow.createMany).toHaveBeenCalledTimes(2);
+      expect(prisma.folio.findMany).toHaveBeenLastCalledWith(
         expect.objectContaining({
           where: { reservationId: 'res-1' },
+          include: expect.objectContaining({
+            windows: expect.objectContaining({
+              orderBy: { windowNumber: 'asc' },
+            }),
+          }),
         }),
       );
     });

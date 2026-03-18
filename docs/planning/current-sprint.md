@@ -70,14 +70,17 @@ Each “Work Package” below is delivered as a small PR-sized unit.
   - Confirm UI flow aligns with PRD: windows 1–4, routing readiness, audit trail visibility.
 - **@Backend**
   - Ensure `GET /folios/reservation/:id` returns windows + transactions with needed joins.
+  - **Done:** New folios get windows 1–4; legacy folios backfilled via `createMany` + `skipDuplicates`; ordered windows/transactions on read.
 - **@Frontend**
   - Replace `apps/web/src/app/billing/page.tsx` “Coming Soon” with usable Billing dashboard:
     - show 4 windows with balances
     - show transaction list
     - post charge/payment dialogs wired to WP2
   - Add page/component tests.
+  - **Done:** `/billing` + `?reservationId=` loads guest/room header + `FolioDetail`; reservation page links to full dashboard.
 - **@QA**
   - Add smoke test coverage for billing flow (unit/integration now; e2e later if stable).
+  - **Done:** `billing/page.test.tsx`, `billing-client.test.tsx`.
 
 **Acceptance criteria**
 

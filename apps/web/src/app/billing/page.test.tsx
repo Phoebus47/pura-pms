@@ -1,20 +1,16 @@
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import BillingPage from './page';
 
+vi.mock('./billing-client', () => ({
+  BillingClient: () => <div data-testid="billing-dashboard">Dashboard</div>,
+}));
+
 describe('BillingPage', () => {
-  it('should render billing page', () => {
+  it('renders billing dashboard inside suspense', () => {
     render(<BillingPage />);
 
-    expect(screen.getByText('Billing')).toBeInTheDocument();
-    expect(
-      screen.getByText(/manage invoices and payments/i),
-    ).toBeInTheDocument();
-  });
-
-  it('should display coming soon message', () => {
-    render(<BillingPage />);
-
-    expect(screen.getByText('Billing Module Coming Soon')).toBeInTheDocument();
-    expect(screen.getByText(/under development/i)).toBeInTheDocument();
+    expect(screen.getByTestId('billing-dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
   });
 });

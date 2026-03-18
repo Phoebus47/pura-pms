@@ -27,6 +27,13 @@ export class FoliosService {
     const folioCount = await this.prisma.folio.count();
     const folioNumber = `F${(folioCount + 1).toString().padStart(6, '0')}`;
 
+    const windowDescriptions = [
+      'Main Billing',
+      'Auxiliary window 2',
+      'Auxiliary window 3',
+      'Auxiliary window 4',
+    ] as const;
+
     return this.prisma.folio.create({
       data: {
         folioNumber,
@@ -35,15 +42,33 @@ export class FoliosService {
         status: FolioStatus.OPEN,
         businessDate: new Date(), // Should ideally come from property/system settings
         windows: {
-          create: {
-            windowNumber: 1,
-            description: 'Main Billing',
-          },
+          create: [1, 2, 3, 4].map((n) => ({
+            windowNumber: n,
+            description: windowDescriptions[n - 1],
+          })),
         },
       },
       include: {
-        windows: true,
+        windows: { orderBy: { windowNumber: 'asc' } },
       },
+    });
+  }
+
+  /** Ensures folios created before 4-window rollout still have windows 1–4. */
+  private async ensureStandardWindows(folioId: string): Promise<void> {
+    const descriptions = [
+      'Main Billing',
+      'Auxiliary window 2',
+      'Auxiliary window 3',
+      'Auxiliary window 4',
+    ] as const;
+    await this.prisma.folioWindow.createMany({
+      data: [1, 2, 3, 4].map((n) => ({
+        folioId,
+        windowNumber: n,
+        description: descriptions[n - 1],
+      })),
+      skipDuplicates: true,
     });
   }
 
@@ -83,6 +108,14 @@ export class FoliosService {
   }
 
   async findByReservationId(reservationId: string) {
+    const folioIds = await this.prisma.folio.findMany({
+      where: { reservationId },
+      select: { id: true },
+    });
+    if (folioIds.length === 0) {
+      return [];
+    }
+    await Promise.all(folioIds.map(({ id }) => this.ensureStandardWindows(id)));
     return this.prisma.folio.findMany({
       where: { reservationId },
       include: {
@@ -92,10 +125,13 @@ export class FoliosService {
               include: {
                 trxCode: true,
               },
+              orderBy: { createdAt: 'desc' },
             },
           },
+          orderBy: { windowNumber: 'asc' },
         },
       },
+      orderBy: { createdAt: 'asc' },
     });
   }
 

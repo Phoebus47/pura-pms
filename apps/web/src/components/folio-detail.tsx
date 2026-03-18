@@ -288,8 +288,8 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
             Billing Instructions
           </h4>
           <p className="mt-1 text-slate-600 text-xs">
-            Currently no routing instructions set. All charges will post to
-            Window 1 by default.
+            Select a window (1–4) before posting. Charges and payments apply to
+            the active window only.
           </p>
         </div>
       </div>
