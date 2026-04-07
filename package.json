@@ -22,12 +22,12 @@
     "test:e2e": "pnpm --filter web test:e2e"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.4.2",
-    "turbo": "^2.8.17"
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "turbo": "^2.9.5"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
