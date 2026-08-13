@@ -336,6 +336,20 @@ describe('ReservationDetailPage', () => {
     expect(screen.getByText('1 guest')).toBeInTheDocument();
   });
 
+  it('renders a day-use badge instead of nights', async () => {
+    (reservationsAPI.getById as any).mockResolvedValue({
+      ...mockReservation,
+      isDayUse: true,
+      nights: 0,
+    });
+    render(<ReservationDetailPage />);
+
+    await waitFor(() =>
+      expect(screen.getAllByText('Day use').length).toBeGreaterThan(0),
+    );
+    expect(screen.getByText('Stay type')).toBeInTheDocument();
+  });
+
   it('handles non-Error objects in load', async () => {
     (reservationsAPI.getById as any).mockRejectedValue('String error');
     render(<ReservationDetailPage />);

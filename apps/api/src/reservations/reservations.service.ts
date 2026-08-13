@@ -10,6 +10,12 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { Prisma, ReservationStatus } from '@pura/database';
 import { FoliosService } from '../folios/folios.service';
+import {
+  buildRoomConflictWhere,
+  calculateNights,
+  calculateStayTotal,
+  stayDatesError,
+} from './reservation-stay.util';
 
 @Injectable()
 export class ReservationsService {
@@ -21,20 +27,18 @@ export class ReservationsService {
   async create(createReservationDto: CreateReservationDto) {
     const checkIn = new Date(createReservationDto.checkIn);
     const checkOut = new Date(createReservationDto.checkOut);
+    const isDayUse = createReservationDto.isDayUse === true;
 
-    if (checkIn >= checkOut) {
-      throw new BadRequestException(
-        'Check-out date must be after check-in date',
-      );
+    const datesError = stayDatesError(checkIn, checkOut, isDayUse);
+    if (datesError) {
+      throw new BadRequestException(datesError);
     }
 
     if (checkIn < new Date(new Date().setHours(0, 0, 0, 0))) {
       throw new BadRequestException('Check-in date cannot be in the past');
     }
 
-    const nights = Math.ceil(
-      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const nights = calculateNights(checkIn, checkOut, isDayUse);
 
     const room = await this.prisma.room.findUnique({
       where: { id: createReservationDto.roomId },
@@ -58,26 +62,12 @@ export class ReservationsService {
     }
 
     const conflictingReservations = await this.prisma.reservation.findMany({
-      where: {
-        roomId: createReservationDto.roomId,
-        AND: [
-          {
-            checkIn: {
-              lt: checkOut,
-            },
-          },
-          {
-            checkOut: {
-              gt: checkIn,
-            },
-          },
-          {
-            status: {
-              notIn: ['CANCELLED', 'NO_SHOW'],
-            },
-          },
-        ],
-      },
+      where: buildRoomConflictWhere(
+        createReservationDto.roomId,
+        checkIn,
+        checkOut,
+        isDayUse,
+      ),
     });
 
     if (conflictingReservations.length > 0) {
@@ -86,9 +76,12 @@ export class ReservationsService {
       );
     }
 
-    const totalAmount =
-      createReservationDto.totalAmount ||
-      nights * Number(createReservationDto.roomRate);
+    const totalAmount = calculateStayTotal(
+      nights,
+      Number(createReservationDto.roomRate),
+      isDayUse,
+      createReservationDto.totalAmount,
+    );
 
     const confirmNumber = this.generateConfirmNumber();
 
@@ -107,6 +100,7 @@ export class ReservationsService {
         totalAmount,
         notes: createReservationDto.notes,
         specialRequest: createReservationDto.specialRequest,
+        isDayUse,
         roomId: createReservationDto.roomId,
         guestId: createReservationDto.guestId,
       },
@@ -274,8 +268,14 @@ export class ReservationsService {
     const updateData: Prisma.ReservationUpdateInput = {
       ...updateReservationDto,
     };
+    const isDayUse = updateReservationDto.isDayUse ?? reservation.isDayUse;
+    const stayDatesChanged = Boolean(
+      updateReservationDto.checkIn ||
+      updateReservationDto.checkOut ||
+      updateReservationDto.isDayUse !== undefined,
+    );
 
-    if (updateReservationDto.checkIn || updateReservationDto.checkOut) {
+    if (stayDatesChanged) {
       const checkIn = updateReservationDto.checkIn
         ? new Date(updateReservationDto.checkIn)
         : reservation.checkIn;
@@ -283,34 +283,19 @@ export class ReservationsService {
         ? new Date(updateReservationDto.checkOut)
         : reservation.checkOut;
 
-      if (checkIn >= checkOut) {
-        throw new BadRequestException(
-          'Check-out date must be after check-in date',
-        );
+      const datesError = stayDatesError(checkIn, checkOut, isDayUse);
+      if (datesError) {
+        throw new BadRequestException(datesError);
       }
 
       const conflictingReservations = await this.prisma.reservation.findMany({
-        where: {
-          roomId: reservation.roomId,
-          id: { not: id },
-          AND: [
-            {
-              checkIn: {
-                lt: checkOut,
-              },
-            },
-            {
-              checkOut: {
-                gt: checkIn,
-              },
-            },
-            {
-              status: {
-                notIn: ['CANCELLED', 'NO_SHOW'],
-              },
-            },
-          ],
-        },
+        where: buildRoomConflictWhere(
+          reservation.roomId,
+          checkIn,
+          checkOut,
+          isDayUse,
+          id,
+        ),
       });
 
       if (conflictingReservations.length > 0) {
@@ -319,15 +304,14 @@ export class ReservationsService {
         );
       }
 
-      const nights = Math.ceil(
-        (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
-      );
+      const nights = calculateNights(checkIn, checkOut, isDayUse);
       const roomRate =
         updateReservationDto.roomRate || Number(reservation.roomRate);
-      const totalAmount = nights * roomRate;
+      const totalAmount = calculateStayTotal(nights, roomRate, isDayUse);
 
       updateData.nights = nights;
       updateData.totalAmount = totalAmount;
+      updateData.isDayUse = isDayUse;
     }
 
     return this.prisma.reservation.update({
@@ -541,6 +525,7 @@ export class ReservationsService {
           checkOut: res.checkOut,
           nights: res.nights,
           status: res.status,
+          isDayUse: res.isDayUse,
           guest: res.guest,
           roomRate: res.roomRate,
           totalAmount: res.totalAmount,

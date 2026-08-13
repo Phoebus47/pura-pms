@@ -5,6 +5,7 @@ import {
   IsDateString,
   IsNumber,
   IsEnum,
+  IsBoolean,
   Min,
 } from 'class-validator';
 import { ReservationStatus } from '@pura/database';
@@ -65,4 +66,8 @@ export class CreateReservationDto {
   @IsString()
   @IsOptional()
   specialRequest?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isDayUse?: boolean;
 }

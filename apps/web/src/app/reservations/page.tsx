@@ -6,6 +6,7 @@ import { reservationsAPI, type Reservation } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
+import { DayUseBadge } from '@/components/day-use-badge';
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -193,7 +194,10 @@ export default function ReservationsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <ReservationStatusBadge status={reservation.status} />
+                        <div className="flex flex-wrap gap-1 items-center">
+                          <ReservationStatusBadge status={reservation.status} />
+                          {reservation.isDayUse ? <DayUseBadge /> : null}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -219,6 +223,7 @@ export default function ReservationsPage() {
                         {reservation.confirmNumber}
                       </div>
                       <ReservationStatusBadge status={reservation.status} />
+                      {reservation.isDayUse ? <DayUseBadge size="xs" /> : null}
                     </div>
                     <div className="mt-2">
                       <div className="font-semibold text-slate-800 text-sm">
@@ -239,7 +244,9 @@ export default function ReservationsPage() {
                       ฿{Number(reservation.totalAmount).toLocaleString()}
                     </div>
                     <div className="mt-1 text-slate-500 text-xs">
-                      {reservation.nights} nights
+                      {reservation.isDayUse
+                        ? 'Day use'
+                        : `${reservation.nights} nights`}
                     </div>
                   </div>
                 </div>

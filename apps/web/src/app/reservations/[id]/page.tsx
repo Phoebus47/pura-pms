@@ -14,6 +14,7 @@ import {
 import { reservationsAPI, type Reservation } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
+import { DayUseBadge } from '@/components/day-use-badge';
 import { FolioDetail } from '@/components/folio-detail';
 import { cn } from '@/lib/utils';
 
@@ -152,6 +153,7 @@ export default function ReservationDetailPage() {
             </h1>
             <div className="flex gap-2 items-center mt-1">
               <ReservationStatusBadge status={reservation.status} />
+              {reservation.isDayUse ? <DayUseBadge /> : null}
             </div>
           </div>
         </div>
@@ -301,8 +303,14 @@ export default function ReservationDetailPage() {
                     Number of Nights
                   </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
-                    {reservation.nights}{' '}
-                    {reservation.nights === 1 ? 'night' : 'nights'}
+                    {reservation.isDayUse ? (
+                      <DayUseBadge />
+                    ) : (
+                      <>
+                        {reservation.nights}{' '}
+                        {reservation.nights === 1 ? 'night' : 'nights'}
+                      </>
+                    )}
                   </p>
                 </div>
 
@@ -356,9 +364,15 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Nights</span>
+                  <span className="text-slate-600">
+                    {reservation.isDayUse ? 'Stay type' : 'Nights'}
+                  </span>
                   <span className="font-semibold text-slate-800">
-                    × {reservation.nights}
+                    {reservation.isDayUse ? (
+                      <DayUseBadge />
+                    ) : (
+                      `× ${reservation.nights}`
+                    )}
                   </span>
                 </div>
 

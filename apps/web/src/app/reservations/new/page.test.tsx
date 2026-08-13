@@ -435,9 +435,59 @@ describe('NewReservationPage', () => {
       expect(reservationsAPI.create).toHaveBeenCalledWith(
         expect.objectContaining({
           totalAmount: 0,
+          isDayUse: false,
         }),
       );
     });
+  });
+
+  it('creates a day-use reservation billed as one day', async () => {
+    render(<NewReservationPage />);
+
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select Dates'));
+    fireEvent.click(screen.getByRole('checkbox', { name: /day-use stay/i }));
+    expect(
+      screen.getByRole('checkbox', { name: /day-use stay/i }),
+    ).toBeChecked();
+    await userEvent.click(screen.getByText('Next'));
+    await waitFor(() => screen.getByText('Select a Room'));
+    await userEvent.click(screen.getByText('Room 101'));
+    await userEvent.click(screen.getByText('Next'));
+    await userEvent.click(screen.getByText('Search Existing Guest'));
+    await userEvent.click(screen.getByText('Select John'));
+    await userEvent.click(screen.getByText('Next'));
+
+    expect(screen.getByText('Day use')).toBeInTheDocument();
+
+    const confirmBtn = screen.getByRole('button', {
+      name: /confirm reservation/i,
+    });
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(reservationsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isDayUse: true,
+          totalAmount: 1000,
+        }),
+      );
+    });
+  });
+
+  it('clears day-use and restores overnight checkout', async () => {
+    render(<NewReservationPage />);
+
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select 0 Dates'));
+    const dayUseCheckbox = screen.getByRole('checkbox', {
+      name: /day-use stay/i,
+    });
+    fireEvent.click(dayUseCheckbox);
+    expect(dayUseCheckbox).toBeChecked();
+
+    fireEvent.click(dayUseCheckbox);
+    expect(dayUseCheckbox).not.toBeChecked();
   });
 
   it('handles non-Error exception during submission', async () => {
