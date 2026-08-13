@@ -8,6 +8,7 @@ interface DateRangePickerProps {
   readonly onCheckInChange: (date: string) => void;
   readonly onCheckOutChange: (date: string) => void;
   readonly minDate?: string;
+  readonly sameDayStay?: boolean;
 }
 
 export function DateRangePicker({
@@ -16,6 +17,7 @@ export function DateRangePicker({
   onCheckInChange,
   onCheckOutChange,
   minDate,
+  sameDayStay = false,
 }: DateRangePickerProps) {
   const today = minDate || new Date().toISOString().split('T')[0];
 
@@ -29,6 +31,10 @@ export function DateRangePicker({
 
   const handleCheckInChange = (date: string) => {
     onCheckInChange(date);
+    if (sameDayStay) {
+      onCheckOutChange(date);
+      return;
+    }
     if (checkOut && date >= checkOut) {
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
@@ -80,19 +86,27 @@ export function DateRangePicker({
               onChange={(e) => onCheckOutChange(e.target.value)}
               min={checkIn || today}
               required
-              className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
+              disabled={sameDayStay}
+              aria-disabled={sameDayStay}
+              className="border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
             />
           </div>
         </div>
       </div>
 
       {/* Nights Display */}
-      {nights > 0 && (
-        <div className="bg-[#1e4b8e]/5 border border-[#1e4b8e]/20 flex items-center justify-center p-3 rounded-xl">
-          <p className="font-semibold text-[#1e4b8e] text-sm">
-            {nights} {nights === 1 ? 'night' : 'nights'}
-          </p>
+      {sameDayStay && checkIn && checkOut ? (
+        <div className="bg-amber-50 border border-amber-200 flex items-center justify-center p-3 rounded-xl">
+          <p className="font-semibold text-amber-800 text-sm">Day use</p>
         </div>
+      ) : (
+        nights > 0 && (
+          <div className="bg-[#1e4b8e]/5 border border-[#1e4b8e]/20 flex items-center justify-center p-3 rounded-xl">
+            <p className="font-semibold text-[#1e4b8e] text-sm">
+              {nights} {nights === 1 ? 'night' : 'nights'}
+            </p>
+          </div>
+        )
       )}
     </div>
   );

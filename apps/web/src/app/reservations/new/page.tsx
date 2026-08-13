@@ -23,6 +23,7 @@ import { PropertySelector } from '@/components/property-selector';
 import { GuestSearchDialog } from '@/components/guest-search-dialog';
 import { GuestFormDialog } from '@/components/guest-form-dialog';
 import { toast } from '@/lib/toast';
+import { DayUseBadge } from '@/components/day-use-badge';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -44,7 +45,21 @@ export default function NewReservationPage() {
 
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
+  const [isDayUse, setIsDayUse] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  function handleDayUseChange(checked: boolean) {
+    setIsDayUse(checked);
+    if (checked && checkIn) {
+      setCheckOut(checkIn);
+      return;
+    }
+    if (!checked && checkIn && checkOut === checkIn) {
+      const nextDay = new Date(checkIn);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setCheckOut(nextDay.toISOString().split('T')[0]);
+    }
+  }
 
   async function handleStep1Next() {
     if (!propertyId || !checkIn || !checkOut) {
@@ -87,7 +102,8 @@ export default function NewReservationPage() {
     setSubmitting(true);
     try {
       const baseRate = Number(selectedRoom!.roomType?.baseRate || 0);
-      const calculatedTotal = baseRate * nights;
+      const billedNights = isDayUse ? 1 : nights;
+      const calculatedTotal = baseRate * billedNights;
 
       const reservationData: CreateReservationDto = {
         guestId: selectedGuest!.id,
@@ -100,6 +116,7 @@ export default function NewReservationPage() {
         totalAmount: calculatedTotal,
         specialRequest: specialRequests || undefined,
         status: 'CONFIRMED',
+        isDayUse,
       };
 
       const reservation = await reservationsAPI.create(reservationData);
@@ -138,9 +155,10 @@ export default function NewReservationPage() {
         )
       : 0;
 
+  const billedNights = isDayUse ? 1 : nights;
   const totalAmount =
-    selectedRoom && nights > 0
-      ? Number(selectedRoom.roomType?.baseRate || 0) * nights
+    selectedRoom && billedNights > 0
+      ? Number(selectedRoom.roomType?.baseRate || 0) * billedNights
       : 0;
 
   return (
@@ -217,7 +235,31 @@ export default function NewReservationPage() {
               checkOut={checkOut}
               onCheckInChange={setCheckIn}
               onCheckOutChange={setCheckOut}
+              sameDayStay={isDayUse}
             />
+
+            <div className="flex gap-3 items-start">
+              <input
+                id="day-use"
+                name="isDayUse"
+                type="checkbox"
+                checked={isDayUse}
+                onChange={(e) => handleDayUseChange(e.target.checked)}
+                className="border-slate-300 focus-visible:outline-none focus-visible:ring-[#1e4b8e] focus-visible:ring-2 h-4 mt-1 rounded text-[#1e4b8e] w-4"
+              />
+              <div>
+                <label
+                  htmlFor="day-use"
+                  className="font-semibold text-slate-700 text-sm"
+                >
+                  Day-use stay
+                </label>
+                <p className="mt-1 text-slate-500 text-xs">
+                  Same-day check-in and check-out. Night Audit will not post a
+                  room charge.
+                </p>
+              </div>
+            </div>
 
             <div className="flex justify-end pt-4">
               <Button
@@ -394,7 +436,9 @@ export default function NewReservationPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">Nights:</span>
-                    <span className="font-semibold">{nights}</span>
+                    <span className="font-semibold">
+                      {isDayUse ? <DayUseBadge /> : nights}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">Room:</span>
@@ -465,7 +509,7 @@ export default function NewReservationPage() {
                   {Number(
                     selectedRoom?.roomType?.baseRate || 0,
                   ).toLocaleString()}{' '}
-                  × {nights} nights
+                  × {isDayUse ? '1 day use' : `${nights} nights`}
                 </p>
               </div>
             </div>
