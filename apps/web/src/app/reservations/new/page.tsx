@@ -238,7 +238,7 @@ export default function NewReservationPage() {
               sameDayStay={isDayUse}
             />
 
-            <div className="flex gap-3 items-start">
+            <label className="cursor-pointer flex gap-3 items-start min-h-11">
               <input
                 id="day-use"
                 name="isDayUse"
@@ -247,19 +247,16 @@ export default function NewReservationPage() {
                 onChange={(e) => handleDayUseChange(e.target.checked)}
                 className="border-slate-300 focus-visible:outline-none focus-visible:ring-[#1e4b8e] focus-visible:ring-2 h-4 mt-1 rounded text-[#1e4b8e] w-4"
               />
-              <div>
-                <label
-                  htmlFor="day-use"
-                  className="font-semibold text-slate-700 text-sm"
-                >
+              <span>
+                <span className="block font-semibold text-slate-700 text-sm">
                   Day-use stay
-                </label>
-                <p className="mt-1 text-slate-500 text-xs">
+                </span>
+                <span className="block mt-1 text-slate-500 text-xs">
                   Same-day check-in and check-out. Night Audit will not post a
                   room charge.
-                </p>
-              </div>
-            </div>
+                </span>
+              </span>
+            </label>
 
             <div className="flex justify-end pt-4">
               <Button

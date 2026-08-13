@@ -446,7 +446,10 @@ describe('NewReservationPage', () => {
 
     await userEvent.click(screen.getByText('Select Property'));
     await userEvent.click(screen.getByText('Select Dates'));
-    await userEvent.click(screen.getByLabelText('Day-use stay'));
+    fireEvent.click(screen.getByRole('checkbox', { name: /day-use stay/i }));
+    expect(
+      screen.getByRole('checkbox', { name: /day-use stay/i }),
+    ).toBeChecked();
     await userEvent.click(screen.getByText('Next'));
     await waitFor(() => screen.getByText('Select a Room'));
     await userEvent.click(screen.getByText('Room 101'));
@@ -477,11 +480,14 @@ describe('NewReservationPage', () => {
 
     await userEvent.click(screen.getByText('Select Property'));
     await userEvent.click(screen.getByText('Select 0 Dates'));
-    await userEvent.click(screen.getByLabelText('Day-use stay'));
-    expect(screen.getByLabelText('Day-use stay')).toBeChecked();
+    const dayUseCheckbox = screen.getByRole('checkbox', {
+      name: /day-use stay/i,
+    });
+    fireEvent.click(dayUseCheckbox);
+    expect(dayUseCheckbox).toBeChecked();
 
-    await userEvent.click(screen.getByLabelText('Day-use stay'));
-    expect(screen.getByLabelText('Day-use stay')).not.toBeChecked();
+    fireEvent.click(dayUseCheckbox);
+    expect(dayUseCheckbox).not.toBeChecked();
   });
 
   it('handles non-Error exception during submission', async () => {
