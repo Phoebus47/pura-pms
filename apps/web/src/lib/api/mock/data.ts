@@ -137,6 +137,7 @@ export const mockDb: any = {
         number: '102',
         roomType: { name: 'Deluxe Ocean View' },
       },
+      stays: [],
     },
     {
       id: 'res_mock_2',

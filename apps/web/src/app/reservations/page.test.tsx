@@ -39,6 +39,24 @@ describe('ReservationsPage', () => {
           name: 'Standard',
         },
       },
+      stays: [
+        {
+          sequence: 0,
+          startDate: '2024-01-15',
+          endDate: '2024-01-16',
+          roomId: '1',
+          roomRate: 1000,
+          nights: 1,
+        },
+        {
+          sequence: 1,
+          startDate: '2024-01-16',
+          endDate: '2024-01-17',
+          roomId: '3',
+          roomRate: 1000,
+          nights: 1,
+        },
+      ],
     },
     {
       id: '2',
@@ -96,6 +114,7 @@ describe('ReservationsPage', () => {
       expect(res001Elements.length).toBeGreaterThan(0);
       const res002Elements = screen.getAllByText('RES002');
       expect(res002Elements.length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Split stay').length).toBeGreaterThan(0);
     });
   });
 

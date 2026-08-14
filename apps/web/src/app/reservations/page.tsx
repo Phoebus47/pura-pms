@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { DayUseBadge } from '@/components/day-use-badge';
+import { SplitStayBadge } from '@/components/split-stay-badge';
+import { isSplitStay } from '@/lib/split-stay';
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -197,6 +199,7 @@ export default function ReservationsPage() {
                         <div className="flex flex-wrap gap-1 items-center">
                           <ReservationStatusBadge status={reservation.status} />
                           {reservation.isDayUse ? <DayUseBadge /> : null}
+                          {isSplitStay(reservation) ? <SplitStayBadge /> : null}
                         </div>
                       </td>
                     </tr>
@@ -224,6 +227,9 @@ export default function ReservationsPage() {
                       </div>
                       <ReservationStatusBadge status={reservation.status} />
                       {reservation.isDayUse ? <DayUseBadge size="xs" /> : null}
+                      {isSplitStay(reservation) ? (
+                        <SplitStayBadge size="xs" />
+                      ) : null}
                     </div>
                     <div className="mt-2">
                       <div className="font-semibold text-slate-800 text-sm">
