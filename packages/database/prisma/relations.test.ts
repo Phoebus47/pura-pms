@@ -129,6 +129,9 @@ describe('Financial Module Relations', () => {
     await prisma.shift.deleteMany({ where: { userId: testUser.id } });
     await prisma.user.deleteMany({ where: { email: 'relationuser@test.com' } });
     await prisma.role.deleteMany({ where: { name: 'Relation Test Role' } });
+    await prisma.packageSplitRule.deleteMany({
+      where: { trxCodeId: testTrxCode.id },
+    });
     await prisma.transactionCode.deleteMany({
       where: { code: 'REL-TRX-CODE' },
     });
@@ -422,6 +425,45 @@ describe('Financial Module Relations', () => {
 
       await prisma.room.delete({ where: { id: suiteRoom.id } });
       await prisma.roomType.delete({ where: { id: suiteType.id } });
+    });
+  });
+
+  describe('TransactionCode → PackageSplitRule', () => {
+    it('should create a package split rule and load it from TransactionCode', async () => {
+      const rule = await prisma.packageSplitRule.create({
+        data: {
+          rateCode: 'PKG-BB-REL',
+          trxCodeId: testTrxCode.id,
+          percent: 80,
+          sortOrder: 0,
+        },
+      });
+
+      expect(rule.rateCode).toBe('PKG-BB-REL');
+      expect(Number(rule.percent)).toBe(80);
+      expect(rule.isActive).toBe(true);
+
+      const trxCodeWithRules = await prisma.transactionCode.findUnique({
+        where: { id: testTrxCode.id },
+        include: { packageSplitRules: true },
+      });
+
+      expect(trxCodeWithRules?.packageSplitRules).toHaveLength(1);
+      expect(trxCodeWithRules?.packageSplitRules[0].id).toBe(rule.id);
+
+      await expect(
+        prisma.transactionCode.delete({ where: { id: testTrxCode.id } }),
+      ).rejects.toThrow();
+
+      const indexes = await prisma.$queryRaw<Array<{ indexname: string }>>`
+        SELECT indexname FROM pg_indexes
+        WHERE indexname = 'PackageSplitRule_rateCode_isActive_idx'
+      `;
+      expect(indexes.map((row) => row.indexname)).toContain(
+        'PackageSplitRule_rateCode_isActive_idx',
+      );
+
+      await prisma.packageSplitRule.delete({ where: { id: rule.id } });
     });
   });
 });

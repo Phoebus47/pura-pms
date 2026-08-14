@@ -206,10 +206,25 @@ model TransactionCode {
   glAccountCode String   // e.g., "4000-01" (Revenue-Room)
   departmentCode String? // สำหรับ USALI
   
-  transactions  FolioTransaction[]
-  fixedCharges  FixedCharge[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  transactions      FolioTransaction[]
+  fixedCharges      FixedCharge[]
+  packageSplitRules PackageSplitRule[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Package split at posting time (rateCode → USALI trx codes). Percents are 0–100.
+model PackageSplitRule {
+  id        String          @id @default(cuid())
+  rateCode  String
+  trxCodeId String
+  trxCode   TransactionCode @relation(fields: [trxCodeId], references: [id], onDelete: Restrict)
+  percent   Decimal         @db.Decimal(5, 2)
+  sortOrder Int             @default(0)
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+
+  @@index([rateCode, isActive])
 }
 
 // Folio Window - การแยกบิล
