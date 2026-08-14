@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FoliosService } from './folios.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { FolioStatus } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { vi } from 'vitest';
@@ -1176,6 +1180,106 @@ describe('FoliosService', () => {
           where: { id: 'folio-1' },
           data: expect.objectContaining({
             balance: { increment: -117 },
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('credit limit', () => {
+    it('should warn when a post pushes the folio over its credit limit', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          cb(mockPrismaService),
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-over',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        balance: 1500,
+        creditLimit: 1000,
+        reservation: {
+          room: {
+            property: { defaultCreditLimit: null },
+            propertyId: 'prop-1',
+          },
+          rateCode: null,
+        },
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([]);
+
+      const result = await service.postTransaction('folio-1', {
+        windowNumber: 1,
+        trxCodeId: 'trx-1',
+        amountNet: 1000,
+        userId: 'user-1',
+        businessDate: '2025-01-15',
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'trx-over',
+          creditLimitExceeded: true,
+        }),
+      );
+    });
+
+    it('should block checkout when the folio is over the limit', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        balance: 1500,
+        creditLimit: 1000,
+        isClosed: false,
+        status: FolioStatus.OPEN,
+        reservation: {
+          room: { property: { defaultCreditLimit: null } },
+        },
+      });
+
+      await expect(
+        service.checkout('folio-1', 'user-1'),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('should close a folio that is within the credit limit', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        balance: 500,
+        creditLimit: 1000,
+        isClosed: false,
+        status: FolioStatus.OPEN,
+        reservation: {
+          room: { property: { defaultCreditLimit: null } },
+        },
+      });
+      const closed = { id: 'folio-1', status: FolioStatus.CLOSED };
+      mockPrismaService.folio.update.mockResolvedValue(closed);
+
+      const result = await service.checkout('folio-1', 'user-1');
+
+      expect(result).toEqual(closed);
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: FolioStatus.CLOSED,
+            isClosed: true,
+            closedBy: 'user-1',
           }),
         }),
       );

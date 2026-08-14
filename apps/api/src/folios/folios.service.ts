@@ -1,16 +1,18 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
-import { FolioStatus } from '@pura/database';
+import { FolioStatus, Prisma } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
 import { computePostingAmounts, standardWindowCreates } from './folio-posting';
 import { persistPostingLines, resolvePostingLines } from './package-split';
+import { isOverCreditLimit, resolveCreditLimit } from './credit-limit';
 import {
   convertForeignToBase,
   formatFxReference,
@@ -183,8 +185,8 @@ export class FoliosService {
       ...amounts,
     });
 
-    return this.prisma.$transaction((tx) =>
-      persistPostingLines(tx, {
+    return this.prisma.$transaction(async (tx) => {
+      const posted = await persistPostingLines(tx, {
         folioId,
         windowId: window.id,
         businessDate: new Date(postTransactionDto.businessDate),
@@ -194,8 +196,12 @@ export class FoliosService {
         reasonCodeId: postTransactionDto.reasonCodeId,
         shiftId,
         lines,
-      }),
-    );
+      });
+      if (await this.isBalanceOverLimit(tx, folioId)) {
+        return { ...posted, creditLimitExceeded: true };
+      }
+      return posted;
+    });
   }
 
   private async resolveCashFxAmount(
@@ -316,5 +322,85 @@ export class FoliosService {
 
       return correction;
     });
+  }
+
+  async checkout(id: string, userId: string) {
+    const folio = await this.loadFolioCreditContext(this.prisma, id);
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    if (folio.isClosed || folio.status === FolioStatus.CLOSED) {
+      throw new ConflictException('Folio is already closed');
+    }
+    if (this.folioExceedsLimit(folio)) {
+      throw new ConflictException('Folio balance exceeds credit limit');
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: {
+        status: FolioStatus.CLOSED,
+        isClosed: true,
+        closedAt: new Date(),
+        closedBy: userId,
+      },
+    });
+  }
+
+  async setCreditLimit(id: string, creditLimit: number | null | undefined) {
+    const folio = await this.prisma.folio.findUnique({ where: { id } });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: { creditLimit: creditLimit ?? null },
+    });
+  }
+
+  private async isBalanceOverLimit(
+    db: PrismaService | Prisma.TransactionClient,
+    folioId: string,
+  ): Promise<boolean> {
+    const folio = await this.loadFolioCreditContext(db, folioId);
+    return folio ? this.folioExceedsLimit(folio) : false;
+  }
+
+  private async loadFolioCreditContext(
+    db: PrismaService | Prisma.TransactionClient,
+    folioId: string,
+  ) {
+    return db.folio.findUnique({
+      where: { id: folioId },
+      select: {
+        id: true,
+        balance: true,
+        creditLimit: true,
+        isClosed: true,
+        status: true,
+        reservation: {
+          select: {
+            room: {
+              select: {
+                property: { select: { defaultCreditLimit: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  private folioExceedsLimit(folio: {
+    balance: unknown;
+    creditLimit: unknown;
+    reservation?: {
+      room?: { property?: { defaultCreditLimit: unknown } | null } | null;
+    } | null;
+  }): boolean {
+    const limit = resolveCreditLimit(
+      folio.creditLimit,
+      folio.reservation?.room?.property?.defaultCreditLimit,
+    );
+    return isOverCreditLimit(Number(folio.balance), limit);
   }
 }

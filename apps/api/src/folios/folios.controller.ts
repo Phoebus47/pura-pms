@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Body, Param } from '@nestjs/common';
 import { FoliosService } from './folios.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
+import { CheckoutFolioDto, SetCreditLimitDto } from './dto/credit-limit.dto';
 
 @Controller('folios')
 export class FoliosController {
@@ -29,6 +30,16 @@ export class FoliosController {
     @Body() postTransactionDto: PostTransactionDto,
   ) {
     return this.foliosService.postTransaction(id, postTransactionDto);
+  }
+
+  @Post(':id/checkout')
+  checkout(@Param('id') id: string, @Body() dto: CheckoutFolioDto) {
+    return this.foliosService.checkout(id, dto.userId);
+  }
+
+  @Patch(':id/credit-limit')
+  setCreditLimit(@Param('id') id: string, @Body() dto: SetCreditLimitDto) {
+    return this.foliosService.setCreditLimit(id, dto.creditLimit);
   }
 
   @Post('transactions/:transactionId/void')

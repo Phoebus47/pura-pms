@@ -43,6 +43,7 @@ model Property {
   currency    String     @default("THB")
   timezone    String     @default("Asia/Bangkok")
   businessDate DateTime  @default(now()) @db.Date
+  defaultCreditLimit Decimal? @db.Decimal(12, 2)
   roomTypes   RoomType[]
   rooms       Room[]
   rates       Rate[]
@@ -176,6 +177,7 @@ model Folio {
   reservation   Reservation   @relation(fields: [reservationId], references: [id])
   type          FolioType     @default(GUEST)
   balance       Decimal       @default(0) @db.Decimal(12, 2)
+  creditLimit   Decimal?      @db.Decimal(12, 2)
   isClosed      Boolean       @default(false) // Deprecated: Use status instead
   status        FolioStatus?  @default(OPEN)
   businessDate  DateTime?     @db.Date

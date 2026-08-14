@@ -47,8 +47,11 @@ export async function submitFolioTransaction({
   onClose,
 }: SubmitFolioTransactionOptions) {
   try {
-    await foliosAPI.postTransaction(folioId, payload);
+    const posted = await foliosAPI.postTransaction(folioId, payload);
     toast.success(successMessage);
+    if (posted.creditLimitExceeded) {
+      toast.warning(t('folios.creditLimitExceeded'));
+    }
     onSuccess();
     onClose();
   } catch (err) {

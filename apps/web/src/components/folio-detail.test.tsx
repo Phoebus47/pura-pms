@@ -48,6 +48,10 @@ vi.mock('./void-transaction-dialog', () => ({
     ) : null,
 }));
 
+vi.mock('./folio-checkout-bar', () => ({
+  FolioCheckoutBar: () => <div data-testid="checkout-bar" />,
+}));
+
 describe('FolioDetail', () => {
   const mockFolio = {
     id: 'f1',

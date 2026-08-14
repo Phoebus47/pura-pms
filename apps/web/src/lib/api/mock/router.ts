@@ -1048,12 +1048,57 @@ function handleFolioPost(path: string, body: any) {
   mockDb.folioTransactions.push(newTrx);
   handleFolioPostWindowBalance(windowId, folioId, total);
 
-  return { id: newTrx.id };
+  const folio = mockDb.folios.find((row: any) => row.id === folioId);
+  const property = mockDb.properties[0];
+  const limit = folio?.creditLimit ?? property?.defaultCreditLimit ?? null;
+  const exceeded =
+    limit !== null && folio && Number(folio.balance) > Number(limit);
+  return { id: newTrx.id, creditLimitExceeded: exceeded || undefined };
+}
+
+function handleFolioCheckout(path: string, body: any) {
+  const match = /^\/folios\/([a-zA-Z0-9_-]+)\/checkout$/.exec(path);
+  if (!match) return;
+  const folio = mockDb.folios.find((row: any) => row.id === match[1]);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  const property = mockDb.properties[0];
+  const limit = folio.creditLimit ?? property?.defaultCreditLimit ?? null;
+  if (limit !== null && Number(folio.balance) > Number(limit)) {
+    throw new APIError(409, 'Conflict', {
+      message: 'Folio balance exceeds credit limit',
+    });
+  }
+  if (folio.status === 'CLOSED' || folio.isClosed) {
+    throw new APIError(409, 'Conflict', { message: 'Folio is already closed' });
+  }
+  folio.status = 'CLOSED';
+  folio.isClosed = true;
+  folio.closedAt = new Date().toISOString();
+  folio.closedBy = body?.userId;
+  return folio;
+}
+
+function handleFolioCreditLimit(path: string, body: any) {
+  const match = /^\/folios\/([a-zA-Z0-9_-]+)\/credit-limit$/.exec(path);
+  if (!match) return;
+  const folio = mockDb.folios.find((row: any) => row.id === match[1]);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  folio.creditLimit = body.creditLimit ?? null;
+  return folio;
 }
 
 function handleFolios(method: string, path: string, body: any) {
   if (method === 'GET') return handleFolioGet(path);
-  if (method === 'POST') return handleFolioPost(path, body);
+  if (method === 'PATCH') return handleFolioCreditLimit(path, body);
+  if (method === 'POST') {
+    const checkout = handleFolioCheckout(path, body);
+    if (checkout !== undefined) return checkout;
+    return handleFolioPost(path, body);
+  }
 }
 
 function handlePropertiesGet(path: string) {
