@@ -15,6 +15,9 @@ import { reservationsAPI, type Reservation } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { DayUseBadge } from '@/components/day-use-badge';
+import { SplitStayBadge } from '@/components/split-stay-badge';
+import { SplitStayTable } from '@/components/split-stay-table';
+import { isSplitStay } from '@/lib/split-stay';
 import { FolioDetail } from '@/components/folio-detail';
 import { cn } from '@/lib/utils';
 
@@ -154,6 +157,7 @@ export default function ReservationDetailPage() {
             <div className="flex gap-2 items-center mt-1">
               <ReservationStatusBadge status={reservation.status} />
               {reservation.isDayUse ? <DayUseBadge /> : null}
+              {isSplitStay(reservation) ? <SplitStayBadge /> : null}
             </div>
           </div>
         </div>
@@ -324,6 +328,12 @@ export default function ReservationDetailPage() {
                   </p>
                 </div>
               </div>
+
+              {reservation.stays ? (
+                <div className="border-slate-200 border-t mt-6 pt-6">
+                  <SplitStayTable stays={reservation.stays} />
+                </div>
+              ) : null}
 
               {reservation.specialRequests && (
                 <div className="border-slate-200 border-t mt-6 pt-6">

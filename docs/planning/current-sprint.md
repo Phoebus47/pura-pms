@@ -13,7 +13,7 @@
 - `Reservation.roomId` = **CURRENT** room (`stays[0].roomId` on create; same after replace-on-update).
 - `isDayUse` + `stays` = invalid (400).
 - Nested on existing `POST` / `PATCH /reservations` (`stays?: ReservationStayInputDto[]`). No new REST resource.
-- Inventory = header `buildRoomConflictWhere` **AND** `ReservationStay` overlap.
+- Inventory = header-only `buildRoomConflictWhere` (`stays: none`) **UNION** `ReservationStay` overlap. Split headers are not counted on `Reservation.roomId` for the full stay.
 - Night Audit PR 1: post **covering stay** rate for `businessDate`. Not a new job.
 - No hardcoded UI copy. New strings in `messages/en.json` + `messages/th.json` (camelCase). Do not build full i18n foundation (locale routing) in this PR.
 - Tests with the change; >80% on new critical paths.

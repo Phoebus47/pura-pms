@@ -6,9 +6,13 @@ import {
   IsNumber,
   IsEnum,
   IsBoolean,
+  IsArray,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ReservationStatus } from '@pura/database';
+import { ReservationStayInputDto } from './reservation-stay.dto';
 
 export class CreateReservationDto {
   @IsDateString()
@@ -70,4 +74,10 @@ export class CreateReservationDto {
   @IsBoolean()
   @IsOptional()
   isDayUse?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReservationStayInputDto)
+  stays?: ReservationStayInputDto[];
 }

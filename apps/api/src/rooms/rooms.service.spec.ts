@@ -21,6 +21,9 @@ const mockPrismaService = {
   reservation: {
     count: vi.fn(),
   },
+  reservationStay: {
+    count: vi.fn(),
+  },
 };
 
 describe('RoomsService', () => {
@@ -37,6 +40,8 @@ describe('RoomsService', () => {
     mockPrismaService.property.findUnique.mockReset();
     mockPrismaService.roomType.findUnique.mockReset();
     mockPrismaService.reservation.count.mockReset();
+    mockPrismaService.reservationStay.count.mockReset();
+    mockPrismaService.reservationStay.count.mockResolvedValue(0);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -234,6 +239,16 @@ describe('RoomsService', () => {
         BadRequestException,
       );
     });
+
+    it('should throw BadRequestException if active stay segments exist', async () => {
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.reservation.count.mockResolvedValue(0);
+      mockPrismaService.reservationStay.count.mockResolvedValue(1);
+
+      await expect(service.remove('room-1')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
   });
 
   describe('getAvailability', () => {
@@ -330,6 +345,39 @@ describe('RoomsService', () => {
       );
       expect(deluxe?.availableCount).toBe(2); // Both room-1 and room-2
       expect(deluxe?.rooms).toHaveLength(2);
+    });
+
+    it('should hide rooms occupied by a stay segment', async () => {
+      mockPrismaService.room.findMany.mockResolvedValue([
+        {
+          id: 'room-2',
+          roomTypeId: 'type-1',
+          roomType: { id: 'type-1', name: 'Deluxe' },
+          reservations: [],
+          reservationStays: [{ id: 'stay-1' }],
+          status: RoomStatus.VACANT_CLEAN,
+        },
+      ]);
+
+      const result = await service.getAvailability(
+        'prop-1',
+        new Date(),
+        new Date(),
+      );
+
+      expect(result.totalAvailable).toBe(0);
+      expect(prisma.room.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            reservations: expect.objectContaining({
+              where: expect.objectContaining({
+                stays: { none: {} },
+              }),
+            }),
+            reservationStays: expect.anything(),
+          }),
+        }),
+      );
     });
   });
 });

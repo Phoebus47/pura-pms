@@ -429,6 +429,7 @@ function handleReservationsPost(path: string, body: any) {
       confirmNumber: `CN-DM-${randomSuffix}`,
       status: 'CONFIRMED',
       createdAt: new Date().toISOString(),
+      stays: Array.isArray(body?.stays) ? body.stays : [],
     };
     mockDb.reservations.push(newRes);
     return newRes;

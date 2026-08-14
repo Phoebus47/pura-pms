@@ -350,6 +350,41 @@ describe('ReservationDetailPage', () => {
     expect(screen.getByText('Stay type')).toBeInTheDocument();
   });
 
+  it('renders split stay segments', async () => {
+    (reservationsAPI.getById as any).mockResolvedValue({
+      ...mockReservation,
+      stays: [
+        {
+          sequence: 0,
+          startDate: '2024-01-01',
+          endDate: '2024-01-03',
+          roomId: 'room-1',
+          roomRate: 1000,
+          nights: 2,
+          room: { id: 'room-1', number: '101' },
+          roomType: { id: 'type-a', name: 'Deluxe' },
+        },
+        {
+          sequence: 1,
+          startDate: '2024-01-03',
+          endDate: '2024-01-05',
+          roomId: 'room-2',
+          roomRate: 1500,
+          nights: 2,
+          room: { id: 'room-2', number: '201' },
+          roomType: { id: 'type-b', name: 'Suite' },
+        },
+      ],
+    });
+    render(<ReservationDetailPage />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Stay segments')).toBeInTheDocument(),
+    );
+    expect(screen.getAllByText('Split stay').length).toBeGreaterThan(0);
+    expect(screen.getByText(/201/)).toBeInTheDocument();
+  });
+
   it('handles non-Error objects in load', async () => {
     (reservationsAPI.getById as any).mockRejectedValue('String error');
     render(<ReservationDetailPage />);

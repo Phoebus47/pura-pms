@@ -62,6 +62,34 @@ describe('ReservationsController', () => {
       await controller.create(dto);
       expect(mockReservationsService.create).toHaveBeenCalledWith(dto);
     });
+
+    it('should accept nested stay segments on create', async () => {
+      const dto: CreateReservationDto = {
+        guestId: 'guest-1',
+        roomId: 'room-1',
+        checkIn: '2026-08-14T00:00:00.000Z',
+        checkOut: '2026-08-18T00:00:00.000Z',
+        adults: 2,
+        roomRate: 1000,
+        stays: [
+          {
+            startDate: '2026-08-14T00:00:00.000Z',
+            endDate: '2026-08-16T00:00:00.000Z',
+            roomId: 'room-1',
+            roomRate: 1000,
+          },
+          {
+            startDate: '2026-08-16T00:00:00.000Z',
+            endDate: '2026-08-18T00:00:00.000Z',
+            roomId: 'room-2',
+            roomRate: 1500,
+          },
+        ],
+      };
+      mockReservationsService.create.mockResolvedValue({ id: '1', ...dto });
+      await controller.create(dto);
+      expect(mockReservationsService.create).toHaveBeenCalledWith(dto);
+    });
   });
 
   describe('findAll', () => {
@@ -138,6 +166,13 @@ describe('ReservationsController', () => {
     it('should update reservation', async () => {
       const dto: UpdateReservationDto = { status: ReservationStatus.CONFIRMED };
       mockReservationsService.update.mockResolvedValue({ id: '1', ...dto });
+      await controller.update('1', dto);
+      expect(mockReservationsService.update).toHaveBeenCalledWith('1', dto);
+    });
+
+    it('should accept nested stay segments on update', async () => {
+      const dto: UpdateReservationDto = { stays: [] };
+      mockReservationsService.update.mockResolvedValue({ id: '1' });
       await controller.update('1', dto);
       expect(mockReservationsService.update).toHaveBeenCalledWith('1', dto);
     });
