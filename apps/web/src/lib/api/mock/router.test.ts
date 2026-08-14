@@ -1112,4 +1112,21 @@ describe('Mock API Router', () => {
       expect(voided.voidReason).toBe('Wrong tax id');
     });
   });
+
+  describe('Folio credit limit', () => {
+    it('blocks checkout when the folio is over its credit limit', async () => {
+      const folioId = mockDb.folios[0].id;
+      await routeMockRequest(`/folios/${folioId}/credit-limit`, {
+        method: 'PATCH',
+        body: JSON.stringify({ creditLimit: 1 }),
+      });
+
+      await expect(
+        routeMockRequest(`/folios/${folioId}/checkout`, {
+          method: 'POST',
+          body: JSON.stringify({ userId: 'usr_mock_1' }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+  });
 });

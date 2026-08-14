@@ -26,6 +26,7 @@ export interface FolioTransaction {
   isVoid: boolean;
   reasonCodeId?: string;
   relatedTrxId?: string;
+  creditLimitExceeded?: boolean;
 }
 
 export interface FolioWindow {
@@ -44,6 +45,7 @@ export interface Folio {
   type: FolioType;
   status: FolioStatus;
   balance: number;
+  creditLimit?: number | null;
   businessDate: string;
   windows: FolioWindow[];
   createdAt: string;
@@ -104,6 +106,19 @@ export const foliosAPI = {
       `/folios/transactions/${transactionId}/void`,
       data,
     );
+  },
+
+  async checkout(folioId: string, data: { userId: string }): Promise<Folio> {
+    return apiClient.post<Folio>(`/folios/${folioId}/checkout`, data);
+  },
+
+  async setCreditLimit(
+    folioId: string,
+    creditLimit: number | null,
+  ): Promise<Folio> {
+    return apiClient.patch<Folio>(`/folios/${folioId}/credit-limit`, {
+      creditLimit,
+    });
   },
 
   async getTransactionCodes(): Promise<TransactionCode[]> {

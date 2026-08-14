@@ -100,6 +100,13 @@
     "loading": "กำลังโหลดใบกำกับภาษี",
     "notFound": "ไม่พบใบกำกับภาษี"
   },
+  "folios": {
+    "checkout": "เช็คเอาต์โฟลิโอ",
+    "checkoutSuccess": "ปิดโฟลิโอแล้ว",
+    "creditLimit": "วงเงินเครดิต",
+    "creditLimitExceeded": "ยอดโฟลิโอเกินวงเงินเครดิต",
+    "setLimit": "บันทึกวงเงิน"
+  },
   "reservations": {
     "splitStay": {
       "badge": "พักแยกประเภทห้อง",

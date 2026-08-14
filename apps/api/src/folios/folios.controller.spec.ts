@@ -11,6 +11,8 @@ const mockFoliosService = {
   findByReservationId: vi.fn(),
   postTransaction: vi.fn(),
   voidTransaction: vi.fn(),
+  checkout: vi.fn(),
+  setCreditLimit: vi.fn(),
 };
 
 describe('FoliosController', () => {
@@ -104,6 +106,35 @@ describe('FoliosController', () => {
       expect(mockFoliosService.voidTransaction).toHaveBeenCalledWith(
         'trx-1',
         dto,
+      );
+    });
+  });
+
+  describe('checkout', () => {
+    it('should checkout a folio', async () => {
+      mockFoliosService.checkout.mockResolvedValue({ id: 'folio-1' });
+
+      await controller.checkout('folio-1', { userId: 'user-1' });
+
+      expect(mockFoliosService.checkout).toHaveBeenCalledWith(
+        'folio-1',
+        'user-1',
+      );
+    });
+  });
+
+  describe('setCreditLimit', () => {
+    it('should patch the folio credit limit', async () => {
+      mockFoliosService.setCreditLimit.mockResolvedValue({
+        id: 'folio-1',
+        creditLimit: 2000,
+      });
+
+      await controller.setCreditLimit('folio-1', { creditLimit: 2000 });
+
+      expect(mockFoliosService.setCreditLimit).toHaveBeenCalledWith(
+        'folio-1',
+        2000,
       );
     });
   });

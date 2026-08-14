@@ -50,6 +50,7 @@ export const mockDb: any = {
       businessDate: MOCK_NOW,
       createdAt: MOCK_NOW,
       _count: { rooms: 15, roomTypes: 3 },
+      defaultCreditLimit: 50000,
     },
   ],
   roomTypes: [
@@ -245,6 +246,7 @@ export const mockDb: any = {
       type: 'GUEST',
       status: 'OPEN',
       balance: 1572.5, // Total + VAT
+      creditLimit: null,
       createdAt: new Date().toISOString(),
       businessDate: new Date().toISOString(),
       reservation: {

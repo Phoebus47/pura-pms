@@ -16,6 +16,7 @@ vi.mock('./toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
+    warning: vi.fn(),
   },
 }));
 
@@ -53,6 +54,25 @@ describe('submitFolioTransaction', () => {
     expect(toast.success).toHaveBeenCalledWith('Posted');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('toasts a warning when the posted balance exceeds the credit limit', async () => {
+    vi.mocked(foliosAPI.postTransaction).mockResolvedValue({
+      id: 'ft_1',
+      creditLimitExceeded: true,
+    } as FolioTransaction);
+
+    await submitFolioTransaction({
+      folioId: 'fol_1',
+      payload,
+      successMessage: 'Posted',
+      errorPrefix: 'Failed to post charge',
+      onSuccess,
+      onClose,
+    });
+
+    expect(toast.warning).toHaveBeenCalledWith(t('folios.creditLimitExceeded'));
+    expect(onSuccess).toHaveBeenCalled();
   });
 
   it('toasts the no-open-shift copy for a 400 open-shift error', async () => {
