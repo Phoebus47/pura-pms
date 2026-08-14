@@ -24,3 +24,16 @@ export const navigationItems: NavigationItem[] = [
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
+
+export const primaryBottomNavItems: NavigationItem[] = [
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Reservations', href: '/reservations', icon: Calendar },
+  { name: 'Guests', href: '/guests', icon: Users },
+  { name: 'Rooms', href: '/rooms', icon: Bed },
+  { name: 'Billing', href: '/billing', icon: CreditCard },
+];
+
+export const moreBottomNavItems: NavigationItem[] = [
+  { name: 'Reports', href: '/reports', icon: FileText },
+  { name: 'Settings', href: '/settings', icon: Settings },
+];

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Bell, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { clearAuthToken } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +21,8 @@ import {
 export function Header() {
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   function handleLogout() {
     clearAuthToken();
@@ -37,12 +41,36 @@ export function Header() {
     user?.role === 'ADMIN' ? 'Super Admin' : user?.role || 'Guest';
   const userEmail = user?.email || 'guest@pura.com';
 
+  useEffect(() => {
+    if (isSearchOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [isSearchOpen]);
+
   return (
-    <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-16 items-center justify-between md:px-6 px-4 shadow-black/5 shadow-lg sticky top-0 z-20">
-      <div className="flex flex-1 gap-4 items-center min-w-0">
-        <div className="group max-w-md min-w-0 relative w-full">
+    <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-14 items-center justify-between lg:h-16 lg:px-6 px-3 shadow-black/5 shadow-lg sticky top-0 z-20">
+      <div className="flex flex-1 gap-2 items-center lg:gap-4 min-w-0">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Open search"
+          aria-expanded={isSearchOpen}
+          aria-controls="global-search"
+          onClick={() => setIsSearchOpen((open) => !open)}
+          className="lg:hidden min-h-11 min-w-11 rounded-full"
+        >
+          <Search className="h-5 text-muted-foreground w-5" />
+        </Button>
+        <div
+          className={cn(
+            'group max-w-md min-w-0 relative w-full',
+            isSearchOpen ? 'block' : 'hidden lg:block',
+          )}
+        >
           <Search className="-translate-y-1/2 absolute group-focus-within:text-pura-blue h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
           <Input
+            ref={searchInputRef}
             id="global-search"
             name="search"
             type="search"
@@ -53,12 +81,12 @@ export function Header() {
         </div>
       </div>
 
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-2 items-center lg:gap-3">
         <Button
           variant="ghost"
           size="icon"
           aria-label="Notifications"
-          className="active:scale-95 group hover:bg-muted/80 relative rounded-full transition-all"
+          className="active:scale-95 group hover:bg-muted/80 min-h-11 min-w-11 relative rounded-full transition-all"
         >
           <Bell className="group-hover:text-pura-blue h-5 text-muted-foreground transition-colors w-5" />
           <span

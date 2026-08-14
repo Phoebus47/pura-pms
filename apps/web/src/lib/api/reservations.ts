@@ -1,5 +1,7 @@
 import { apiClient } from './client';
 
+import type { ReservationStay, ReservationStayInput } from '@/lib/split-stay';
+
 export type ReservationStatus =
   | 'TENTATIVE'
   | 'CONFIRMED'
@@ -27,6 +29,7 @@ export interface Reservation {
   specialRequest?: string;
   specialRequests?: string;
   isDayUse?: boolean;
+  stays?: ReservationStay[];
   cancellationReason?: string;
   actualCheckIn?: string;
   actualCheckOut?: string;
@@ -74,6 +77,7 @@ export interface CreateReservationDto {
   specialRequest?: string;
   status?: ReservationStatus;
   isDayUse?: boolean;
+  stays?: ReservationStayInput[];
 }
 
 export type UpdateReservationDto = Partial<CreateReservationDto>;

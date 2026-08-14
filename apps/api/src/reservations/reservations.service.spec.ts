@@ -18,6 +18,11 @@ const mockPrismaService = {
     update: vi.fn(),
     count: vi.fn(),
   },
+  reservationStay: {
+    findMany: vi.fn(),
+    deleteMany: vi.fn(),
+    createMany: vi.fn(),
+  },
   room: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -27,6 +32,7 @@ const mockPrismaService = {
     findUnique: vi.fn(),
     update: vi.fn(),
   },
+  $transaction: vi.fn(),
 };
 
 const mockFoliosService = {
@@ -58,6 +64,17 @@ describe('ReservationsService', () => {
     prisma = module.get<PrismaService>(PrismaService);
 
     vi.clearAllMocks();
+    mockPrismaService.reservationStay.findMany.mockResolvedValue([]);
+    mockPrismaService.reservationStay.deleteMany.mockResolvedValue({
+      count: 0,
+    });
+    mockPrismaService.reservationStay.createMany.mockResolvedValue({
+      count: 0,
+    });
+    mockPrismaService.$transaction.mockImplementation(
+      async (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+        callback(mockPrismaService),
+    );
   });
 
   it('should be defined', () => {
@@ -185,6 +202,188 @@ describe('ReservationsService', () => {
         BadRequestException,
       );
     });
+
+    it('should reject day-use reservations that include split stays', async () => {
+      const checkIn = new Date();
+      checkIn.setDate(checkIn.getDate() + 1);
+      checkIn.setHours(0, 0, 0, 0);
+      const dayUseDto: CreateReservationDto = {
+        ...createDto,
+        checkIn: checkIn.toISOString(),
+        checkOut: checkIn.toISOString(),
+        isDayUse: true,
+        stays: [
+          {
+            startDate: checkIn.toISOString(),
+            endDate: checkIn.toISOString(),
+            roomId: 'room-1',
+            roomRate: 1500,
+          },
+          {
+            startDate: checkIn.toISOString(),
+            endDate: checkIn.toISOString(),
+            roomId: 'room-2',
+            roomRate: 1800,
+          },
+        ],
+      };
+
+      mockPrismaService.room.findUnique
+        .mockResolvedValueOnce({ id: 'room-1' })
+        .mockResolvedValueOnce({
+          id: 'room-1',
+          roomTypeId: 'type-a',
+        })
+        .mockResolvedValueOnce({
+          id: 'room-2',
+          roomTypeId: 'type-b',
+        });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+
+      await expect(service.create(dayUseDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should create a split stay with nested stay segments', async () => {
+      const checkIn = new Date();
+      checkIn.setDate(checkIn.getDate() + 1);
+      checkIn.setHours(0, 0, 0, 0);
+      const splitDate = new Date(checkIn);
+      splitDate.setDate(splitDate.getDate() + 2);
+      const checkOut = new Date(checkIn);
+      checkOut.setDate(checkOut.getDate() + 4);
+
+      const splitDto: CreateReservationDto = {
+        ...createDto,
+        checkIn: checkIn.toISOString(),
+        checkOut: checkOut.toISOString(),
+        roomId: 'room-1',
+        roomRate: 1000,
+        stays: [
+          {
+            startDate: checkIn.toISOString(),
+            endDate: splitDate.toISOString(),
+            roomId: 'room-1',
+            roomRate: 1000,
+          },
+          {
+            startDate: splitDate.toISOString(),
+            endDate: checkOut.toISOString(),
+            roomId: 'room-2',
+            roomRate: 1500,
+          },
+        ],
+      };
+
+      mockPrismaService.room.findUnique
+        .mockResolvedValueOnce({ id: 'room-1' })
+        .mockResolvedValueOnce({
+          id: 'room-1',
+          roomTypeId: 'type-a',
+        })
+        .mockResolvedValueOnce({
+          id: 'room-2',
+          roomTypeId: 'type-b',
+        });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.create.mockResolvedValue({
+        id: 'res-split',
+        ...splitDto,
+      });
+      mockPrismaService.guest.update.mockResolvedValue({});
+
+      await service.create(splitDto);
+
+      expect(prisma.reservation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            roomId: 'room-1',
+            isDayUse: false,
+            nights: 4,
+            totalAmount: 5000,
+            stays: expect.objectContaining({
+              create: expect.arrayContaining([
+                expect.objectContaining({
+                  sequence: 0,
+                  roomId: 'room-1',
+                  roomTypeId: 'type-a',
+                }),
+                expect.objectContaining({
+                  sequence: 1,
+                  roomId: 'room-2',
+                  roomTypeId: 'type-b',
+                }),
+              ]),
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('should reject a split stay that overlaps another stay segment', async () => {
+      const checkIn = new Date();
+      checkIn.setDate(checkIn.getDate() + 1);
+      checkIn.setHours(0, 0, 0, 0);
+      const splitDate = new Date(checkIn);
+      splitDate.setDate(splitDate.getDate() + 2);
+      const checkOut = new Date(checkIn);
+      checkOut.setDate(checkOut.getDate() + 4);
+
+      mockPrismaService.room.findUnique
+        .mockResolvedValueOnce({ id: 'room-1', propertyId: 'prop-1' })
+        .mockResolvedValueOnce({
+          id: 'room-1',
+          roomTypeId: 'type-a',
+          propertyId: 'prop-1',
+        })
+        .mockResolvedValueOnce({
+          id: 'room-2',
+          roomTypeId: 'type-b',
+          propertyId: 'prop-1',
+        });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservationStay.findMany.mockResolvedValue([
+        { id: 'stay-conflict' },
+      ]);
+
+      await expect(
+        service.create({
+          ...createDto,
+          checkIn: checkIn.toISOString(),
+          checkOut: checkOut.toISOString(),
+          stays: [
+            {
+              startDate: checkIn.toISOString(),
+              endDate: splitDate.toISOString(),
+              roomId: 'room-1',
+              roomRate: 1000,
+            },
+            {
+              startDate: splitDate.toISOString(),
+              endDate: checkOut.toISOString(),
+              roomId: 'room-2',
+              roomRate: 1500,
+            },
+          ],
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reject a header-only create that overlaps a stay segment', async () => {
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservationStay.findMany.mockResolvedValue([
+        { id: 'stay-conflict' },
+      ]);
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
   });
 
   describe('findAll', () => {
@@ -257,9 +456,19 @@ describe('ReservationsService', () => {
     it('should return a reservation', async () => {
       mockPrismaService.reservation.findUnique.mockResolvedValue({
         id: 'res-1',
+        stays: [],
       });
       const result = await service.findOne('res-1');
-      expect(result).toEqual({ id: 'res-1' });
+      expect(result).toEqual({ id: 'res-1', stays: [] });
+      expect(prisma.reservation.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            stays: expect.objectContaining({
+              orderBy: { sequence: 'asc' },
+            }),
+          }),
+        }),
+      );
     });
 
     it('should throw NotFoundException if not found', async () => {
@@ -294,6 +503,8 @@ describe('ReservationsService', () => {
       checkOut: new Date('2024-01-05'),
       roomRate: 100,
       isDayUse: false,
+      stays: [],
+      room: { propertyId: 'prop-1' },
     };
 
     it('should update simple fields without checks', async () => {
@@ -416,6 +627,157 @@ describe('ReservationsService', () => {
           }),
         }),
       );
+    });
+
+    it('should reject date changes on a split stay without replacement stays', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        stays: [{ id: 'stay-1' }, { id: 'stay-2' }],
+      });
+
+      await expect(
+        service.update('res-1', {
+          checkOut: new Date('2024-01-08').toISOString(),
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should replace stay segments on update', async () => {
+      const checkIn = new Date('2024-01-01T00:00:00.000Z');
+      const splitDate = new Date('2024-01-03T00:00:00.000Z');
+      const checkOut = new Date('2024-01-05T00:00:00.000Z');
+
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        stays: [{ id: 'stay-1' }, { id: 'stay-2' }],
+      });
+      mockPrismaService.room.findUnique
+        .mockResolvedValueOnce({
+          id: 'room-1',
+          roomTypeId: 'type-a',
+          propertyId: 'prop-1',
+        })
+        .mockResolvedValueOnce({
+          id: 'room-2',
+          roomTypeId: 'type-b',
+          propertyId: 'prop-1',
+        });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+      });
+
+      await service.update('res-1', {
+        stays: [
+          {
+            startDate: checkIn.toISOString(),
+            endDate: splitDate.toISOString(),
+            roomId: 'room-1',
+            roomRate: 1000,
+          },
+          {
+            startDate: splitDate.toISOString(),
+            endDate: checkOut.toISOString(),
+            roomId: 'room-2',
+            roomRate: 1500,
+          },
+        ],
+      });
+
+      expect(prisma.reservationStay.deleteMany).toHaveBeenCalledWith({
+        where: { reservationId: 'res-1' },
+      });
+      expect(prisma.reservationStay.createMany).toHaveBeenCalled();
+    });
+
+    it('should replace the first stay room on update', async () => {
+      const checkIn = new Date('2024-01-01T00:00:00.000Z');
+      const splitDate = new Date('2024-01-03T00:00:00.000Z');
+      const checkOut = new Date('2024-01-05T00:00:00.000Z');
+
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        stays: [{ id: 'stay-1' }, { id: 'stay-2' }],
+      });
+      mockPrismaService.room.findUnique
+        .mockResolvedValueOnce({
+          id: 'room-3',
+          roomTypeId: 'type-c',
+          propertyId: 'prop-1',
+        })
+        .mockResolvedValueOnce({
+          id: 'room-2',
+          roomTypeId: 'type-b',
+          propertyId: 'prop-1',
+        });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        roomId: 'room-3',
+      });
+
+      await service.update('res-1', {
+        roomId: 'room-3',
+        stays: [
+          {
+            startDate: checkIn.toISOString(),
+            endDate: splitDate.toISOString(),
+            roomId: 'room-3',
+            roomRate: 1200,
+          },
+          {
+            startDate: splitDate.toISOString(),
+            endDate: checkOut.toISOString(),
+            roomId: 'room-2',
+            roomRate: 1500,
+          },
+        ],
+      });
+
+      expect(prisma.reservation.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            room: { connect: { id: 'room-3' } },
+            roomRate: 1200,
+          }),
+        }),
+      );
+      expect(prisma.reservationStay.deleteMany).toHaveBeenCalled();
+    });
+
+    it('should not replace stays when only notes change on a split reservation', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        stays: [{ id: 'stay-1' }, { id: 'stay-2' }],
+        notes: 'Old',
+      });
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        notes: 'Quiet room',
+      });
+
+      await service.update('res-1', { notes: 'Quiet room' });
+
+      expect(prisma.reservationStay.deleteMany).not.toHaveBeenCalled();
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('should clear stay segments when stays is an empty array', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        stays: [{ id: 'stay-1' }, { id: 'stay-2' }],
+      });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+      });
+
+      await service.update('res-1', { stays: [] });
+
+      expect(prisma.reservationStay.deleteMany).toHaveBeenCalledWith({
+        where: { reservationId: 'res-1' },
+      });
+      expect(prisma.reservationStay.createMany).not.toHaveBeenCalled();
     });
   });
 
@@ -586,6 +948,70 @@ describe('ReservationsService', () => {
           where: expect.objectContaining({ roomTypeId: 'type-1' }),
         }),
       );
+    });
+
+    it('should paint split occupancy on the segment room only', async () => {
+      const startDate = new Date('2026-08-14T00:00:00.000Z');
+      const splitDate = new Date('2026-08-16T00:00:00.000Z');
+      const endDate = new Date('2026-08-18T00:00:00.000Z');
+
+      mockPrismaService.room.findMany.mockResolvedValue([
+        { id: 'room-1', number: '101', roomType: { id: 'type-a' } },
+        { id: 'room-2', number: '201', roomType: { id: 'type-b' } },
+      ]);
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservationStay.findMany.mockResolvedValue([
+        {
+          sequence: 0,
+          startDate,
+          endDate: splitDate,
+          nights: 2,
+          roomId: 'room-1',
+          roomRate: 1000,
+          reservation: {
+            id: 'res-split',
+            confirmNumber: 'PURA-1',
+            status: 'CONFIRMED',
+            totalAmount: 5000,
+            guest: { id: 'guest-1', firstName: 'Ada', lastName: 'Lovelace' },
+          },
+        },
+        {
+          sequence: 1,
+          startDate: splitDate,
+          endDate,
+          nights: 2,
+          roomId: 'room-2',
+          roomRate: 1500,
+          reservation: {
+            id: 'res-split',
+            confirmNumber: 'PURA-1',
+            status: 'CONFIRMED',
+            totalAmount: 5000,
+            guest: { id: 'guest-1', firstName: 'Ada', lastName: 'Lovelace' },
+          },
+        },
+      ]);
+
+      const result = await service.getCalendar('prop-1', startDate, endDate);
+
+      expect(result.calendar[0].reservations).toEqual([
+        expect.objectContaining({
+          id: 'res-split',
+          checkIn: startDate,
+          checkOut: splitDate,
+          staySequence: 0,
+        }),
+      ]);
+      expect(result.calendar[1].reservations).toEqual([
+        expect.objectContaining({
+          id: 'res-split',
+          checkIn: splitDate,
+          checkOut: endDate,
+          staySequence: 1,
+          roomRate: 1500,
+        }),
+      ]);
     });
   });
 });

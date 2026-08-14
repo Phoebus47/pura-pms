@@ -25,7 +25,7 @@ export function AppLayout({
 
       <div className="flex flex-1 flex-col overflow-hidden relative z-10">
         <Header />
-        <main className="flex-1 lg:p-8 md:p-6 md:pb-8 overflow-y-auto p-4 pb-20">
+        <main className="flex-1 lg:p-8 lg:pb-8 overflow-y-auto p-4 pb-20">
           {children}
         </main>
       </div>

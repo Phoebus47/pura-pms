@@ -278,4 +278,101 @@ describe('Financial Module Relations', () => {
       await prisma.shift.delete({ where: { id: shift.id } });
     });
   });
+
+  describe('Reservation → ReservationStay', () => {
+    it('should leave header-only reservations without stay rows', async () => {
+      const reservation = await prisma.reservation.findUnique({
+        where: { id: testReservation.id },
+        include: { stays: true },
+      });
+
+      expect(reservation?.stays).toEqual([]);
+    });
+
+    it('should persist ordered stay segments and cascade on delete', async () => {
+      const suiteType = await prisma.roomType.create({
+        data: {
+          name: 'Suite Relations',
+          code: 'STE-REL',
+          baseRate: 2000,
+          propertyId: testProperty.id,
+        },
+      });
+      const suiteRoom = await prisma.room.create({
+        data: {
+          number: '301',
+          floor: 3,
+          status: RoomStatus.VACANT_CLEAN,
+          roomTypeId: suiteType.id,
+          propertyId: testProperty.id,
+        },
+      });
+      const splitReservation = await prisma.reservation.create({
+        data: {
+          confirmNumber: 'REL-SPLIT-001',
+          checkIn: new Date('2025-02-01'),
+          checkOut: new Date('2025-02-05'),
+          nights: 4,
+          adults: 2,
+          roomRate: 1000,
+          totalAmount: 6000,
+          roomId: testRoom.id,
+          guestId: testGuest.id,
+          stays: {
+            create: [
+              {
+                sequence: 0,
+                startDate: new Date('2025-02-01'),
+                endDate: new Date('2025-02-03'),
+                nights: 2,
+                roomId: testRoom.id,
+                roomTypeId: testRoom.roomTypeId,
+                roomRate: 1000,
+              },
+              {
+                sequence: 1,
+                startDate: new Date('2025-02-03'),
+                endDate: new Date('2025-02-05'),
+                nights: 2,
+                roomId: suiteRoom.id,
+                roomTypeId: suiteType.id,
+                roomRate: 2000,
+              },
+            ],
+          },
+        },
+        include: { stays: { orderBy: { sequence: 'asc' } } },
+      });
+
+      expect(splitReservation.stays).toHaveLength(2);
+      expect(splitReservation.stays[0].roomId).toBe(testRoom.id);
+      expect(splitReservation.stays[1].roomId).toBe(suiteRoom.id);
+
+      await expect(
+        prisma.reservationStay.create({
+          data: {
+            reservationId: splitReservation.id,
+            sequence: 0,
+            startDate: new Date('2025-02-01'),
+            endDate: new Date('2025-02-02'),
+            nights: 1,
+            roomId: testRoom.id,
+            roomTypeId: testRoom.roomTypeId,
+            roomRate: 1000,
+          },
+        }),
+      ).rejects.toThrow();
+
+      await prisma.reservation.delete({
+        where: { id: splitReservation.id },
+      });
+      const leftover = await prisma.reservationStay.findMany({
+        where: { reservationId: splitReservation.id },
+      });
+      expect(leftover).toHaveLength(0);
+
+      await prisma.room.delete({ where: { id: suiteRoom.id } });
+      await prisma.roomType.delete({ where: { id: suiteType.id } });
+    });
+  });
 });

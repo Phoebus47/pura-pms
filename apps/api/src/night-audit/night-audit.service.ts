@@ -4,6 +4,10 @@ import { FoliosService } from '../folios/folios.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Prisma } from '@pura/database';
+import {
+  findStayCoveringBusinessDate,
+  resolveNightAuditRoomCharge,
+} from '../reservations/reservation-stay.util';
 
 type StartAuditResult =
   | {
@@ -132,6 +136,10 @@ export class NightAuditService {
           },
         },
         room: true,
+        stays: {
+          include: { room: true },
+          orderBy: { sequence: 'asc' },
+        },
       },
     });
 
@@ -184,17 +192,36 @@ export class NightAuditService {
         continue;
       }
 
+      const amountNet = resolveNightAuditRoomCharge(
+        Number(res.roomRate),
+        res.stays ?? [],
+        businessDate,
+      );
+      if (amountNet === null) {
+        continue;
+      }
+
+      const coveringStay = findStayCoveringBusinessDate(
+        res.stays ?? [],
+        businessDate,
+      );
+      const roomNumber = coveringStay?.room?.number ?? res.room?.number;
+      const dateLabel = businessDate.toLocaleDateString();
+      const reference = roomNumber
+        ? `Night Audit - ${dateLabel} - Room ${roomNumber}`
+        : `Night Audit - ${dateLabel}`;
+
       await this.foliosService.postTransaction(folio.id, {
         windowNumber: 1,
         trxCodeId: roomTrxCode.id,
-        amountNet: Number(res.roomRate),
-        reference: `Night Audit - ${businessDate.toLocaleDateString()}`,
+        amountNet,
+        reference,
         userId: 'SYSTEM',
         businessDate: businessDate.toISOString(),
       });
 
       roomsPosted++;
-      totalRevenue += Number(res.roomRate);
+      totalRevenue += amountNet;
     }
 
     // 3. Update audit record with progress

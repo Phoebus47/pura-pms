@@ -15,10 +15,22 @@ export interface StatCardItem {
 }
 
 const TONE_CLASSES: Record<GlowTone, { glow: string; icon: string }> = {
-  blue: { glow: 'bg-pura-blue', icon: 'bg-pura-blue' },
-  orange: { glow: 'bg-pura-orange', icon: 'bg-pura-orange' },
-  sky: { glow: 'bg-pura-sky', icon: 'bg-pura-sky' },
-  blueDark: { glow: 'bg-pura-blue-dark', icon: 'bg-pura-blue-dark' },
+  blue: {
+    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-blue)_0%,transparent_70%)]',
+    icon: 'bg-pura-blue',
+  },
+  orange: {
+    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-orange)_0%,transparent_70%)]',
+    icon: 'bg-pura-orange',
+  },
+  sky: {
+    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-sky)_0%,transparent_70%)]',
+    icon: 'bg-pura-sky',
+  },
+  blueDark: {
+    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-blue-dark)_0%,transparent_70%)]',
+    icon: 'bg-pura-blue-dark',
+  },
 };
 
 interface StatCardProps {
@@ -33,11 +45,11 @@ export function StatCard({ stat }: StatCardProps) {
     <div className="backdrop-blur-2xl bg-white/40 border border-white/50 duration-300 group hover:-translate-y-2 hover:bg-white/50 hover:border-white/70 hover:shadow-2xl hover:shadow-black/10 motion-reduce:hover:translate-y-0 p-6 relative rounded-3xl shadow-black/5 shadow-xl transition-all">
       <div
         aria-hidden="true"
-        className="absolute inset-0 overflow-hidden pointer-events-none rounded-[inherit]"
+        className="[clip-path:inset(0_round_1.5rem)] absolute inset-0 isolate overflow-hidden pointer-events-none rounded-3xl"
       >
         <div
           className={cn(
-            '-right-4 -top-4 absolute blur-2xl duration-500 group-hover:opacity-30 group-hover:scale-150 h-32 motion-reduce:transform-none opacity-20 rounded-full transition-all w-32',
+            'absolute -right-4 -top-4 h-32 w-32 opacity-20 group-hover:opacity-30',
             tones.glow,
           )}
         />

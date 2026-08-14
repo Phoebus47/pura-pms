@@ -133,24 +133,33 @@ describe('Dashboard', () => {
 
     expect(glowRegions).toHaveLength(4);
 
-    const glowTokens = [
-      'bg-pura-blue',
-      'bg-pura-orange',
-      'bg-pura-sky',
-      'bg-pura-blue-dark',
-    ];
-
     for (const region of glowRegions) {
-      expect(region).toHaveClass('overflow-hidden');
+      expect(region).toHaveClass(
+        'pointer-events-none',
+        'absolute',
+        'inset-0',
+        'isolate',
+        'overflow-hidden',
+        'rounded-3xl',
+      );
+      expect(region.className).toContain('[clip-path:inset(0_round_1.5rem)]');
+      expect(region.parentElement).not.toHaveClass('overflow-hidden');
+
       const orb = region.querySelector('div');
       if (!orb) {
-        throw new Error('expected a blurred glow orb inside the clip region');
+        throw new Error('expected a radial glow inside the clip region');
       }
-      expect(orb).toHaveClass('blur-2xl', 'rounded-full');
-      const usesToken = glowTokens.some((token) =>
-        orb.classList.contains(token),
+      expect(orb).not.toHaveClass('blur-2xl');
+      expect(orb).not.toHaveClass('rounded-full');
+      expect(orb.className).toContain('bg-[radial-gradient');
+      expect(orb).toHaveClass(
+        'absolute',
+        '-right-4',
+        '-top-4',
+        'h-32',
+        'w-32',
+        'opacity-20',
       );
-      expect(usesToken).toBe(true);
     }
   });
 

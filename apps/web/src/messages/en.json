@@ -1,0 +1,19 @@
+{
+  "reservations": {
+    "splitStay": {
+      "badge": "Split stay",
+      "label": "Split stay",
+      "hint": "Stay in different room types during one reservation.",
+      "splitDate": "Room change date",
+      "firstRoom": "First room",
+      "secondRoom": "Second room",
+      "segments": "Stay segments",
+      "room": "Room",
+      "dates": "Dates",
+      "nights": "Nights",
+      "rate": "Rate",
+      "needSecondRoom": "Select a second room of a different type",
+      "invalidDates": "Choose a room-change date between check-in and check-out"
+    }
+  }
+}
