@@ -10,6 +10,7 @@ vi.mock('@/lib/api/folios', () => ({
   foliosAPI: {
     checkout: vi.fn(),
     setCreditLimit: vi.fn(),
+    setArAccount: vi.fn(),
   },
 }));
 
@@ -38,6 +39,7 @@ describe('FolioCheckoutBar', () => {
   it('renders credit limit and checkout controls', () => {
     render(<FolioCheckoutBar folio={folio} onUpdated={vi.fn()} />);
     expect(screen.getByLabelText(t('folios.creditLimit'))).toBeInTheDocument();
+    expect(screen.getByLabelText(t('folios.arAccountId'))).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: t('folios.checkout') }),
     ).toBeInTheDocument();

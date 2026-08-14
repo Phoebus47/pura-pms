@@ -95,6 +95,26 @@ describe('submitFolioTransaction', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
+  it('toasts AR credit copy when a company limit blocks the post', async () => {
+    vi.mocked(foliosAPI.postTransaction).mockRejectedValue(
+      new APIError(409, 'Conflict', {
+        message: 'Folio balance exceeds the company AR credit limit',
+      }),
+    );
+
+    await submitFolioTransaction({
+      folioId: 'fol_1',
+      payload,
+      successMessage: 'Posted',
+      errorPrefix: 'Failed to post charge',
+      onSuccess,
+      onClose,
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(t('folios.arCreditExceeded'));
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
   it('toasts the error prefix for other failures', async () => {
     vi.mocked(foliosAPI.postTransaction).mockRejectedValue(new Error('boom'));
 

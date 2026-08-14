@@ -189,6 +189,8 @@ model Folio {
   windows       FolioWindow[]
   taxInvoices   TaxInvoice[]
   invoices      Invoice[]
+  arAccountId   String?
+  arAccount     ARAccount?    @relation(fields: [arAccountId], references: [id])
   createdAt     DateTime      @default(now())
 }
 
@@ -579,6 +581,7 @@ model ARAccount {
   paymentTerms   Int       @default(30)
   isActive       Boolean   @default(true)
   invoices       Invoice[]
+  folios         Folio[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

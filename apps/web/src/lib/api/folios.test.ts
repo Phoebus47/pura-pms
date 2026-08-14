@@ -101,6 +101,17 @@ describe('foliosAPI', () => {
     expect(result).toEqual(mockResponse);
   });
 
+  it('should patch a folio AR account', async () => {
+    const mockResponse = { id: 'folio-1', arAccountId: 'ar-1' };
+    vi.mocked(apiClient.patch).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.setArAccount('folio-1', 'ar-1');
+    expect(apiClient.patch).toHaveBeenCalledWith('/folios/folio-1/ar-account', {
+      arAccountId: 'ar-1',
+    });
+    expect(result).toEqual(mockResponse);
+  });
+
   it('should get transaction codes', async () => {
     const mockResponse = [{ id: 'code-1', code: 'ROOM' }];
     vi.mocked(apiClient.get).mockResolvedValue(mockResponse);

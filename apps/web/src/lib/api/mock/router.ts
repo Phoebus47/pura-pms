@@ -1347,6 +1347,23 @@ function handleFolioPost(path: string, body: any) {
   const sign = tc.type === 'CHARGE' ? 1 : -1;
   const total = (net + srv + tax) * sign;
 
+  const folioForAr = mockDb.folios.find((row: any) => row.id === folioId);
+  if (sign > 0 && folioForAr?.arAccountId) {
+    const account = mockDb.arAccounts.find(
+      (row: any) => row.id === folioForAr.arAccountId,
+    );
+    if (account) {
+      const remaining =
+        Number(account.creditLimit) - Number(account.currentBalance);
+      const projected = Number(folioForAr.balance) + total;
+      if (projected > remaining) {
+        throw new APIError(409, 'Conflict', {
+          message: 'Folio balance exceeds the company AR credit limit',
+        });
+      }
+    }
+  }
+
   const newTrx = {
     id: `ft_mock_${Date.now()}`,
     windowId,
@@ -1409,9 +1426,24 @@ function handleFolioCreditLimit(path: string, body: any) {
   return folio;
 }
 
+function handleFolioArAccount(path: string, body: any) {
+  const match = /^\/folios\/([a-zA-Z0-9_-]+)\/ar-account$/.exec(path);
+  if (!match) return;
+  const folio = mockDb.folios.find((row: any) => row.id === match[1]);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  folio.arAccountId = body.arAccountId ?? null;
+  return folio;
+}
+
 function handleFolios(method: string, path: string, body: any) {
   if (method === 'GET') return handleFolioGet(path);
-  if (method === 'PATCH') return handleFolioCreditLimit(path, body);
+  if (method === 'PATCH') {
+    return (
+      handleFolioCreditLimit(path, body) ?? handleFolioArAccount(path, body)
+    );
+  }
   if (method === 'POST') {
     const checkout = handleFolioCheckout(path, body);
     if (checkout !== undefined) return checkout;

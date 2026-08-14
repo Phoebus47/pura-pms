@@ -160,6 +160,9 @@
     "checkoutSuccess": "Folio closed",
     "creditLimit": "Credit limit",
     "creditLimitExceeded": "Folio balance exceeds the credit limit",
+    "arCreditExceeded": "Folio balance exceeds the company AR credit limit",
+    "arAccountId": "AR account ID",
+    "setArAccount": "Link AR account",
     "setLimit": "Save limit"
   },
   "reservations": {

@@ -34,8 +34,20 @@ export function toastPostingError(err: unknown, errorPrefix: string): void {
     toast.error(t('shifts.noOpenShift'));
     return;
   }
+  if (isArCreditExceededError(err)) {
+    toast.error(t('folios.arCreditExceeded'));
+    return;
+  }
   const suffix = err instanceof Error ? err.message : '';
   toast.error(`${errorPrefix}: ${suffix}`);
+}
+
+export function isArCreditExceededError(err: unknown): boolean {
+  if (!(err instanceof APIError) || err.status !== 409) {
+    return false;
+  }
+  const combined = `${errorDataMessage(err)} ${err.message}`.toLowerCase();
+  return combined.includes('company ar credit');
 }
 
 export async function submitFolioTransaction({
