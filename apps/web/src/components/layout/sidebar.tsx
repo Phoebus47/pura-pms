@@ -11,7 +11,7 @@ export function Sidebar() {
 
   return (
     <div className="backdrop-blur-2xl border-r border-white/20 flex-col h-full hidden md:flex overflow-hidden relative shadow-2xl text-white w-64 z-20">
-      <div className="absolute bg-linear-to-b from-[#1e4b8e]/90 inset-0 to-[#153a6e]/90 via-[#1a4280]/85" />
+      <div className="absolute bg-linear-to-b from-pura-blue/90 inset-0 to-pura-blue-dark/90 via-pura-blue/85" />
       <div className="absolute backdrop-blur-xl inset-0" />
 
       <div className="flex flex-col h-full relative z-10">
@@ -39,7 +39,7 @@ export function Sidebar() {
                 className={cn(
                   'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-white/95 text-[#1e4b8e] shadow-xl shadow-black/20 backdrop-blur-xl'
+                    ? 'bg-white/95 text-pura-blue shadow-xl shadow-black/20 backdrop-blur-xl'
                     : 'text-white/90 hover:bg-white/15 hover:text-white hover:shadow-lg hover:shadow-white/10 active:scale-95 backdrop-blur-sm',
                 )}
               >
@@ -47,7 +47,7 @@ export function Sidebar() {
                   className={cn(
                     'h-5 w-5 transition-transform duration-200',
                     isActive
-                      ? 'text-[#f5a623]'
+                      ? 'text-pura-orange'
                       : 'text-white/70 group-hover:text-white group-hover:scale-110',
                   )}
                 />
