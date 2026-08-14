@@ -60,6 +60,28 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('Daily Revenue Report', () => {
+    it('groups mock folio transactions by trx code group', async () => {
+      const response: any = await routeMockRequest(
+        '/financial/reports/drr?propertyId=prop_mock_1&date=2026-08-14',
+        { method: 'GET' },
+      );
+      expect(response.propertyId).toBe('prop_mock_1');
+      expect(response.businessDate).toBe('2026-08-14');
+      expect(response.summary.SPA.total).toBe(1765.5);
+      expect(response.totalRevenue).toBeGreaterThan(0);
+    });
+
+    it('returns occupancy snapshot for Daily Flash', async () => {
+      const response: any = await routeMockRequest(
+        '/financial/reports/flash?propertyId=prop_mock_1&date=2026-08-14',
+        { method: 'GET' },
+      );
+      expect(response.occupancy.totalRooms).toBeGreaterThan(0);
+      expect(response.stayOvers).toBeGreaterThanOrEqual(0);
+    });
+  });
+
   describe('Properties', () => {
     it('should return all properties', async () => {
       const response: any = await routeMockRequest('/properties', {
@@ -644,6 +666,123 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('Shifts', () => {
+    it('should return the seeded current OPEN shift', async () => {
+      const response: any = await routeMockRequest(
+        '/shifts/current?propertyId=prop_mock_1&userId=usr_mock_1',
+        { method: 'GET' },
+      );
+      expect(response.status).toBe('OPEN');
+      expect(response.userId).toBe('usr_mock_1');
+    });
+
+    it('should close a shift with zero variance as BALANCED', async () => {
+      const closed: any = await routeMockRequest('/shifts/sh_mock_1/close', {
+        method: 'POST',
+        body: JSON.stringify({
+          closingCash: 0,
+          userId: 'usr_mock_1',
+        }),
+      });
+      expect(closed.status).toBe('BALANCED');
+      expect(closed.cashVariance).toBe(0);
+    });
+
+    it('should throw 409 when opening a second OPEN shift for the same user', async () => {
+      await expect(
+        routeMockRequest('/shifts', {
+          method: 'POST',
+          body: JSON.stringify({
+            propertyId: 'prop_mock_1',
+            userId: 'usr_mock_1',
+            openingCash: 500,
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('should open then close a shift after the seeded one is closed', async () => {
+      await routeMockRequest('/shifts/sh_mock_1/close', {
+        method: 'POST',
+        body: JSON.stringify({ closingCash: 0, userId: 'usr_mock_1' }),
+      });
+
+      const opened: any = await routeMockRequest('/shifts', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: 'prop_mock_1',
+          userId: 'usr_mock_1',
+          openingCash: 1000,
+        }),
+      });
+      expect(opened.status).toBe('OPEN');
+      expect(opened.openingCash).toBe(1000);
+      expect(opened.shiftNumber).toMatch(/^SH-\d{8}-mock-\d+$/);
+
+      const closed: any = await routeMockRequest(`/shifts/${opened.id}/close`, {
+        method: 'POST',
+        body: JSON.stringify({
+          closingCash: 1000,
+          userId: 'usr_mock_1',
+        }),
+      });
+      expect(closed.status).toBe('BALANCED');
+    });
+
+    it('should post a folio transaction onto the open shift', async () => {
+      const folioId = mockDb.folios[0].id;
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 1000,
+            userId: 'CURRENT_USER',
+          }),
+        },
+      );
+      expect(response.id).toBeDefined();
+      const posted = mockDb.folioTransactions.find(
+        (t: any) => t.id === response.id,
+      );
+      expect(posted.shiftId).toBe('sh_mock_1');
+    });
+
+    it('should reject folio posting when no OPEN shift exists', async () => {
+      mockDb.shifts.forEach((s: any) => {
+        s.status = 'CLOSED';
+      });
+      const folioId = mockDb.folios[0].id;
+      await expect(
+        routeMockRequest(`/folios/${folioId}/transactions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 1000,
+          }),
+        }),
+      ).rejects.toMatchObject({
+        status: 400,
+        data: { message: 'No open shift for this user and property' },
+      });
+    });
+
+    it('should 404 getCurrent when the user has no OPEN shift', async () => {
+      mockDb.shifts.forEach((s: any) => {
+        s.status = 'CLOSED';
+      });
+      await expect(
+        routeMockRequest(
+          '/shifts/current?propertyId=prop_mock_1&userId=usr_mock_1',
+          { method: 'GET' },
+        ),
+      ).rejects.toMatchObject({ status: 404 });
+    });
+  });
+
   describe('Error Handling', () => {
     it('should throw 404 for undefined routes', async () => {
       await expect(
@@ -816,6 +955,318 @@ describe('Mock API Router', () => {
         method: 'GET',
       });
       expect(Array.isArray(response)).toBe(true);
+    });
+  });
+
+  describe('Exchange rates', () => {
+    it('lists active exchange rates', async () => {
+      const response: any = await routeMockRequest('/exchange-rates', {
+        method: 'GET',
+      });
+      expect(response.length).toBeGreaterThan(0);
+      expect(response[0].targetCurrency).toBe('USD');
+    });
+
+    it('looks up the latest rate on or before the requested date', async () => {
+      mockDb.exchangeRates.push({
+        id: 'fx_old',
+        baseCurrency: 'THB',
+        targetCurrency: 'USD',
+        rate: 30,
+        effectiveDate: '2019-01-01',
+        isActive: true,
+        createdAt: '2019-01-01',
+      });
+      const response: any = await routeMockRequest(
+        '/exchange-rates?baseCurrency=THB&targetCurrency=USD&date=2026-08-14',
+        { method: 'GET' },
+      );
+      expect(response.rate).toBe(35);
+    });
+
+    it('creates an exchange rate and rejects unique conflicts', async () => {
+      const created: any = await routeMockRequest('/exchange-rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          baseCurrency: 'THB',
+          targetCurrency: 'EUR',
+          rate: 38,
+          effectiveDate: '2026-08-14',
+        }),
+      });
+      expect(created.targetCurrency).toBe('EUR');
+      expect(created.rate).toBe(38);
+
+      await expect(
+        routeMockRequest('/exchange-rates', {
+          method: 'POST',
+          body: JSON.stringify({
+            baseCurrency: 'THB',
+            targetCurrency: 'EUR',
+            rate: 39,
+            effectiveDate: '2026-08-14',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('patches rate and isActive', async () => {
+      const response: any = await routeMockRequest(
+        '/exchange-rates/fx_mock_1',
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ rate: 36.5, isActive: false }),
+        },
+      );
+      expect(response.rate).toBe(36.5);
+      expect(response.isActive).toBe(false);
+    });
+
+    it('converts cash 9000 posts using the guest currency rate', async () => {
+      const folioId = mockDb.folios[0].id;
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_cash_9000',
+            amountNet: 0,
+            currency: 'USD',
+            foreignAmount: 100,
+            businessDate: '2026-08-14',
+          }),
+        },
+      );
+      const posted = mockDb.folioTransactions.find(
+        (trx: any) => trx.id === response.id,
+      );
+      expect(posted.amountNet).toBe(3500);
+      expect(posted.reference).toBe('FX USD 100 @ 35.0000');
+    });
+
+    it('ignores currency on non-9000 posts', async () => {
+      const folioId = mockDb.folios[0].id;
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 200,
+            currency: 'USD',
+            foreignAmount: 100,
+          }),
+        },
+      );
+      const posted = mockDb.folioTransactions.find(
+        (trx: any) => trx.id === response.id,
+      );
+      expect(posted.amountNet).toBe(200);
+    });
+  });
+
+  describe('Tax invoices', () => {
+    it('issues a snapshot invoice and voids with a reason', async () => {
+      const issued: any = await routeMockRequest('/tax-invoices', {
+        method: 'POST',
+        body: JSON.stringify({
+          folioId: mockDb.folios[0].id,
+          taxId: '1234567890123',
+          issuedBy: 'usr_mock_1',
+        }),
+      });
+      expect(issued.invoiceNumber).toMatch(/^TI-\d{4}-\d{6}$/);
+      expect(issued.amountNet).toBe(2500);
+      expect(issued.amountTotal).toBe(2942.5);
+
+      await expect(
+        routeMockRequest('/tax-invoices', {
+          method: 'POST',
+          body: JSON.stringify({
+            folioId: mockDb.folios[0].id,
+            taxId: '1234567890123',
+            issuedBy: 'usr_mock_1',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+
+      const listed: any = await routeMockRequest(
+        `/tax-invoices?propertyId=${mockDb.properties[0].id}`,
+        { method: 'GET' },
+      );
+      expect(listed.length).toBeGreaterThan(0);
+
+      const voided: any = await routeMockRequest(
+        `/tax-invoices/${issued.id}/void`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            reason: 'Wrong tax id',
+            voidedBy: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(voided.status).toBe('VOID');
+      expect(voided.voidReason).toBe('Wrong tax id');
+    });
+  });
+
+  describe('AR accounts', () => {
+    it('creates an account, transfers a folio, and allocates a payment', async () => {
+      const account: any = await routeMockRequest('/ar-accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          companyName: 'Acme Co',
+          creditLimit: 50000,
+          paymentTerms: 30,
+        }),
+      });
+      expect(account.accountNumber).toMatch(/^AR-\d{6}$/);
+
+      const folio = {
+        id: 'fol_mock_ar',
+        reservationId: 'res_mock_1',
+        folioNumber: 'F-AR-1',
+        type: 'GUEST',
+        status: 'OPEN',
+        balance: 250,
+        businessDate: '2026-08-14',
+        isClosed: false,
+      };
+      mockDb.folios.push(folio);
+      mockDb.folioWindows.push({
+        id: 'fw_mock_ar',
+        folioId: folio.id,
+        windowNumber: 1,
+        balance: 250,
+      });
+
+      const invoice: any = await routeMockRequest(
+        `/ar-accounts/${account.id}/transfer`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            folioId: folio.id,
+            userId: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(invoice.invoiceNumber).toMatch(/^AR-\d{4}-\d{6}$/);
+      expect(invoice.amount).toBe(250);
+      expect(folio.status).toBe('POSTED_TO_CITY_LEDGER');
+      expect(account.currentBalance).toBe(250);
+
+      const paid: any = await routeMockRequest(
+        `/ar-invoices/${invoice.id}/payments`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            amount: 50,
+            method: 'BANK_TRANSFER',
+            paidBy: 'usr_mock_1',
+            businessDate: '2026-08-14',
+          }),
+        },
+      );
+      expect(paid.status).toBe('PARTIAL');
+      expect(paid.paidAmount).toBe(50);
+      expect(account.currentBalance).toBe(200);
+
+      const aging: any = await routeMockRequest(
+        `/ar-accounts/${account.id}/aging?asOf=2026-08-14`,
+        { method: 'GET' },
+      );
+      expect(aging.current).toBe(200);
+    });
+  });
+
+  describe('AR auto-settlement', () => {
+    it('blocks a charge that would exceed linked AR credit', async () => {
+      const account: any = await routeMockRequest('/ar-accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          companyName: 'Limit Co',
+          creditLimit: 10,
+        }),
+      });
+      const folioId = mockDb.folios[0].id;
+      await routeMockRequest(`/folios/${folioId}/ar-account`, {
+        method: 'PATCH',
+        body: JSON.stringify({ arAccountId: account.id }),
+      });
+      await expect(
+        routeMockRequest(`/folios/${folioId}/transactions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 200,
+            userId: 'usr_mock_1',
+            businessDate: '2026-08-14',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+  });
+
+  describe('Folio credit limit', () => {
+    it('blocks checkout when the folio is over its credit limit', async () => {
+      const folioId = mockDb.folios[0].id;
+      await routeMockRequest(`/folios/${folioId}/credit-limit`, {
+        method: 'PATCH',
+        body: JSON.stringify({ creditLimit: 1 }),
+      });
+
+      await expect(
+        routeMockRequest(`/folios/${folioId}/checkout`, {
+          method: 'POST',
+          body: JSON.stringify({ userId: 'usr_mock_1' }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+  });
+
+  describe('Card pre-auths', () => {
+    it('holds, increments, and captures as a card payment', async () => {
+      const held: any = await routeMockRequest('/card-preauths', {
+        method: 'POST',
+        body: JSON.stringify({
+          reservationId: mockDb.reservations[0].id,
+          amount: 500,
+          last4: '4242',
+          expiryMonth: 12,
+          expiryYear: 2028,
+          manualRef: 'AUTH-1',
+          createdBy: 'usr_mock_1',
+        }),
+      });
+      expect(held.status).toBe('HELD');
+
+      const increased: any = await routeMockRequest(
+        `/card-preauths/${held.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ amount: 700 }),
+        },
+      );
+      expect(increased.status).toBe('INCREMENTAL');
+      expect(increased.amount).toBe(700);
+
+      const captured: any = await routeMockRequest(
+        `/card-preauths/${held.id}/capture`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            folioId: mockDb.folios[0].id,
+            userId: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(captured.status).toBe('CAPTURED');
     });
   });
 });

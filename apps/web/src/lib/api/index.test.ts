@@ -37,6 +37,14 @@ describe('API Index', () => {
     expect(api.reservationsAPI).toBeDefined();
   });
 
+  it('should export shiftsAPI', () => {
+    expect(api.shiftsAPI).toBeDefined();
+  });
+
+  it('should export reportsAPI', () => {
+    expect(api.reportsAPI).toBeDefined();
+  });
+
   it('should export getAuthToken', () => {
     expect(api.getAuthToken).toBeDefined();
   });

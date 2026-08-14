@@ -5,6 +5,7 @@ vi.mock('./client', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
+    patch: vi.fn(),
   },
 }));
 
@@ -74,6 +75,40 @@ describe('foliosAPI', () => {
       '/folios/transactions/trx-1/void',
       mockData,
     );
+    expect(result).toEqual(mockResponse);
+  });
+
+  it('should checkout a folio', async () => {
+    const mockResponse = { id: 'folio-1', status: 'CLOSED' };
+    vi.mocked(apiClient.post).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.checkout('folio-1', { userId: 'user-1' });
+    expect(apiClient.post).toHaveBeenCalledWith('/folios/folio-1/checkout', {
+      userId: 'user-1',
+    });
+    expect(result).toEqual(mockResponse);
+  });
+
+  it('should patch a folio credit limit', async () => {
+    const mockResponse = { id: 'folio-1', creditLimit: 2000 };
+    vi.mocked(apiClient.patch).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.setCreditLimit('folio-1', 2000);
+    expect(apiClient.patch).toHaveBeenCalledWith(
+      '/folios/folio-1/credit-limit',
+      { creditLimit: 2000 },
+    );
+    expect(result).toEqual(mockResponse);
+  });
+
+  it('should patch a folio AR account', async () => {
+    const mockResponse = { id: 'folio-1', arAccountId: 'ar-1' };
+    vi.mocked(apiClient.patch).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.setArAccount('folio-1', 'ar-1');
+    expect(apiClient.patch).toHaveBeenCalledWith('/folios/folio-1/ar-account', {
+      arAccountId: 'ar-1',
+    });
     expect(result).toEqual(mockResponse);
   });
 

@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { FoliosService } from '../folios/folios.service';
+import { JournalsService } from '../financial/journals.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Prisma } from '@pura/database';
@@ -28,6 +29,7 @@ export class NightAuditService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly foliosService: FoliosService,
+    private readonly journalsService: JournalsService,
     @InjectQueue('night-audit') private readonly nightAuditQueue: Queue,
   ) {}
 
@@ -59,6 +61,19 @@ export class NightAuditService {
         nightAuditId: existingAudit.id,
         message: 'Night audit for this date is already in progress',
       };
+    }
+
+    const openShiftCount = await this.prisma.shift.count({
+      where: {
+        propertyId,
+        businessDate,
+        status: 'OPEN',
+      },
+    });
+    if (openShiftCount > 0) {
+      throw new BadRequestException(
+        'Cannot start night audit while an open shift exists',
+      );
     }
 
     // 2. Create or Update NightAudit record to IN_PROGRESS
@@ -292,6 +307,13 @@ export class NightAuditService {
   async completeAudit(propertyId: string, businessDate: Date) {
     this.logger.log(
       `Completing Night Audit for ${propertyId} on ${businessDate.toISOString()}`,
+    );
+
+    await this.journalsService.postForBusinessDate(
+      propertyId,
+      businessDate,
+      'NIGHT_AUDIT',
+      'SYSTEM',
     );
 
     await this.prisma.nightAudit.update({

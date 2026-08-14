@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+const MOCK_NOW = new Date().toISOString();
+
 export interface MockData {
   users: any[];
   properties: any[];
@@ -10,6 +12,13 @@ export interface MockData {
   folioWindows: any[];
   transactionCodes: any[];
   folioTransactions: any[];
+  shifts: any[];
+  taxInvoices: any[];
+  journalEntries: any[];
+  arAccounts: any[];
+  invoices: any[];
+  invoicePayments: any[];
+  cardPreauths: any[];
 }
 
 export const mockDb: any = {
@@ -23,6 +32,15 @@ export const mockDb: any = {
       role: 'ADMIN',
       isActive: true,
     },
+    {
+      id: 'usr_mock_2',
+      email: 'cashier@pura.com',
+      password: 'cashier123', // NOSONAR: Intentional mock data password for demo
+      firstName: 'Mock',
+      lastName: 'Cashier',
+      role: 'CASHIER',
+      isActive: true,
+    },
   ],
   properties: [
     {
@@ -34,9 +52,10 @@ export const mockDb: any = {
       taxId: '1234567890123',
       currency: 'THB',
       timezone: 'Asia/Bangkok',
-      businessDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
+      businessDate: MOCK_NOW,
+      createdAt: MOCK_NOW,
       _count: { rooms: 15, roomTypes: 3 },
+      defaultCreditLimit: 50000,
     },
   ],
   roomTypes: [
@@ -214,6 +233,33 @@ export const mockDb: any = {
       hasTax: false,
       hasService: false,
     },
+    {
+      id: 'tc_cash_9000',
+      code: '9000',
+      description: 'Cash Payment',
+      type: 'PAYMENT',
+      group: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+    },
+    {
+      id: 'tc_city_9005',
+      code: '9005',
+      description: 'Direct Bill',
+      type: 'PAYMENT',
+      group: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+    },
+    {
+      id: 'tc_card_9001',
+      code: '9001',
+      description: 'Credit Card Payment',
+      type: 'PAYMENT',
+      group: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+    },
   ],
   folios: [
     {
@@ -223,6 +269,7 @@ export const mockDb: any = {
       type: 'GUEST',
       status: 'OPEN',
       balance: 1572.5, // Total + VAT
+      creditLimit: null,
       createdAt: new Date().toISOString(),
       businessDate: new Date().toISOString(),
       reservation: {
@@ -324,4 +371,44 @@ export const mockDb: any = {
   nightAudits: [],
   reportArchives: [],
   auditErrors: [],
+  shifts: [
+    {
+      id: 'sh_mock_1',
+      shiftNumber: `SH-${MOCK_NOW.slice(0, 10).replaceAll('-', '')}-mock-1`,
+      userId: 'usr_mock_1',
+      propertyId: 'prop_mock_1',
+      businessDate: MOCK_NOW,
+      startTime: MOCK_NOW,
+      endTime: null,
+      openingCash: 0,
+      closingCash: null,
+      expectedCash: 0,
+      cashVariance: null,
+      status: 'OPEN',
+      closedBy: null,
+      managerApprovedBy: null,
+      managerApprovedAt: null,
+      varianceReason: null,
+      handoverToUserId: null,
+      handoverFromShiftId: null,
+      notes: null,
+    },
+  ],
+  exchangeRates: [
+    {
+      id: 'fx_mock_1',
+      baseCurrency: 'THB',
+      targetCurrency: 'USD',
+      rate: 35,
+      effectiveDate: '2020-01-01',
+      isActive: true,
+      createdAt: MOCK_NOW,
+    },
+  ],
+  taxInvoices: [],
+  journalEntries: [],
+  arAccounts: [],
+  invoices: [],
+  invoicePayments: [],
+  cardPreauths: [],
 };

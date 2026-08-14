@@ -1,13 +1,37 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
-import { FolioStatus } from '@pura/database';
+import { FolioStatus, Prisma } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
+import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
+import { computePostingAmounts, standardWindowCreates } from './folio-posting';
+import {
+  persistPostingLines,
+  resolvePostingLines,
+  sumBalanceImpact,
+} from './package-split';
+import {
+  AR_ACCOUNT_INACTIVE_MESSAGE,
+  AR_CREDIT_EXCEEDED_MESSAGE,
+  isOverCreditLimit,
+  remainingArCredit,
+  resolveCreditLimit,
+  wouldExceedArCredit,
+} from './credit-limit';
+import {
+  convertForeignToBase,
+  formatFxReference,
+  MISSING_FX_RATE_MESSAGE,
+  needsCashFxConversion,
+  requireForeignAmount,
+} from '../exchange-rates/cash-fx';
+import { postingRateQuery } from '../exchange-rates/exchange-rate-query';
 
 @Injectable()
 export class FoliosService {
@@ -28,13 +52,6 @@ export class FoliosService {
     const folioCount = await this.prisma.folio.count();
     const folioNumber = `F${(folioCount + 1).toString().padStart(6, '0')}`;
 
-    const windowDescriptions = [
-      'Main Billing',
-      'Auxiliary window 2',
-      'Auxiliary window 3',
-      'Auxiliary window 4',
-    ] as const;
-
     return this.prisma.folio.create({
       data: {
         folioNumber,
@@ -43,10 +60,7 @@ export class FoliosService {
         status: FolioStatus.OPEN,
         businessDate: new Date(), // Should ideally come from property/system settings
         windows: {
-          create: [1, 2, 3, 4].map((n) => ({
-            windowNumber: n,
-            description: windowDescriptions[n - 1],
-          })),
+          create: standardWindowCreates(),
         },
       },
       include: {
@@ -57,17 +71,10 @@ export class FoliosService {
 
   /** Ensures folios created before 4-window rollout still have windows 1–4. */
   private async ensureStandardWindows(folioId: string): Promise<void> {
-    const descriptions = [
-      'Main Billing',
-      'Auxiliary window 2',
-      'Auxiliary window 3',
-      'Auxiliary window 4',
-    ] as const;
     await this.prisma.folioWindow.createMany({
-      data: [1, 2, 3, 4].map((n) => ({
+      data: standardWindowCreates().map((window) => ({
         folioId,
-        windowNumber: n,
-        description: descriptions[n - 1],
+        ...window,
       })),
       skipDuplicates: true,
     });
@@ -169,67 +176,90 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    // Tax and Service Charge calculations
-    const round2 = (n: number) => Math.round(n * 100) / 100;
-    const amountNet = round2(Number(postTransactionDto.amountNet));
-    let amountService = 0;
-    let amountTax = 0;
+    const { shiftId, rateCode, propertyCurrency } = await resolvePostShiftId(
+      this.prisma,
+      folioId,
+      postTransactionDto.userId,
+    );
 
-    if (trxCode.hasService && trxCode.serviceRate) {
-      amountService = round2((amountNet * Number(trxCode.serviceRate)) / 100);
-    }
+    const { amountNet, reference } = await this.resolveCashFxAmount(
+      trxCode.code,
+      postTransactionDto,
+      propertyCurrency,
+    );
 
-    if (trxCode.hasTax) {
-      // Assuming 7% VAT for now, ideally fetch from tax configuration
-      amountTax = round2((amountNet + amountService) * 0.07);
-    }
+    const amounts = computePostingAmounts(amountNet, trxCode);
 
-    const amountTotal = round2(amountNet + amountService + amountTax);
-    const sign =
-      trxCode.type === 'PAYMENT' ||
-      trxCode.type === 'DEPOSIT' ||
-      trxCode.type === 'REFUND'
-        ? -1
-        : 1;
+    const lines = await resolvePostingLines(this.prisma, trxCode, rateCode, {
+      trxCodeId: trxCode.id,
+      code: trxCode.code,
+      ...amounts,
+    });
+
+    await this.assertArCreditAllowsPost(folioId, sumBalanceImpact(lines));
 
     return this.prisma.$transaction(async (tx) => {
-      const transaction = await tx.folioTransaction.create({
-        data: {
-          windowId: window.id,
-          trxCodeId: trxCode.id,
-          businessDate: new Date(postTransactionDto.businessDate),
-          amountNet,
-          amountService,
-          amountTax,
-          amountTotal,
-          sign,
-          reference: postTransactionDto.reference,
-          remark: postTransactionDto.remark,
-          userId: postTransactionDto.userId,
-          reasonCodeId: postTransactionDto.reasonCodeId,
-        },
+      const posted = await persistPostingLines(tx, {
+        folioId,
+        windowId: window.id,
+        businessDate: new Date(postTransactionDto.businessDate),
+        reference,
+        remark: postTransactionDto.remark,
+        userId: postTransactionDto.userId,
+        reasonCodeId: postTransactionDto.reasonCodeId,
+        shiftId,
+        lines,
       });
-
-      // Update balances
-      const totalImpact = amountTotal * sign;
-
-      await tx.folioWindow.update({
-        where: { id: window.id },
-        data: { balance: { increment: totalImpact } },
-      });
-
-      await tx.folio.update({
-        where: { id: folioId },
-        data: { balance: { increment: totalImpact } },
-      });
-
-      return transaction;
+      if (await this.isBalanceOverLimit(tx, folioId)) {
+        return { ...posted, creditLimitExceeded: true };
+      }
+      return posted;
     });
+  }
+
+  private async resolveCashFxAmount(
+    trxCode: string,
+    dto: PostTransactionDto,
+    propertyCurrency: string,
+  ): Promise<{ amountNet: number; reference?: string }> {
+    const guestCurrency = dto.currency;
+    if (!needsCashFxConversion(trxCode, guestCurrency, propertyCurrency)) {
+      return { amountNet: dto.amountNet, reference: dto.reference };
+    }
+
+    const foreignAmount = requireForeignAmount(dto.foreignAmount);
+    const rateRow = await this.prisma.exchangeRate.findFirst(
+      postingRateQuery(
+        propertyCurrency,
+        guestCurrency,
+        new Date(dto.businessDate),
+      ),
+    );
+    if (!rateRow) {
+      throw new BadRequestException(MISSING_FX_RATE_MESSAGE);
+    }
+
+    const rate = Number(rateRow.rate);
+    return {
+      amountNet: convertForeignToBase(foreignAmount, rate),
+      reference: formatFxReference(guestCurrency, foreignAmount, rate),
+    };
   }
 
   async voidTransaction(transactionId: string, dto: VoidTransactionDto) {
     const original = await this.prisma.folioTransaction.findUnique({
       where: { id: transactionId },
+      include: {
+        window: {
+          include: {
+            folio: {
+              include: {
+                reservation: { include: { room: true } },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!original) {
@@ -254,6 +284,12 @@ export class FoliosService {
       throw new BadRequestException('Invalid or inactive reason code');
     }
 
+    const shiftId = await resolveCashierShiftId(
+      this.prisma,
+      dto.userId,
+      original.window?.folio?.reservation?.room?.propertyId,
+    );
+
     return this.prisma.$transaction(async (tx) => {
       const correction = await tx.folioTransaction.create({
         data: {
@@ -270,6 +306,7 @@ export class FoliosService {
           remark: dto.remark,
           reasonCodeId: dto.reasonCodeId,
           relatedTrxId: original.id,
+          shiftId,
         },
       });
 
@@ -298,5 +335,154 @@ export class FoliosService {
 
       return correction;
     });
+  }
+
+  async checkout(id: string, userId: string) {
+    const folio = await this.loadFolioCreditContext(this.prisma, id);
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    if (folio.isClosed || folio.status === FolioStatus.CLOSED) {
+      throw new ConflictException('Folio is already closed');
+    }
+    if (this.folioExceedsLimit(folio)) {
+      throw new ConflictException('Folio balance exceeds credit limit');
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: {
+        status: FolioStatus.CLOSED,
+        isClosed: true,
+        closedAt: new Date(),
+        closedBy: userId,
+      },
+    });
+  }
+
+  async setCreditLimit(id: string, creditLimit: number | null | undefined) {
+    const folio = await this.prisma.folio.findUnique({ where: { id } });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: { creditLimit: creditLimit ?? null },
+    });
+  }
+
+  async setArAccount(id: string, arAccountId: string | null | undefined) {
+    const folio = await this.prisma.folio.findUnique({
+      where: { id },
+      include: { reservation: { include: { room: true } } },
+    });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    if (!arAccountId) {
+      return this.prisma.folio.update({
+        where: { id },
+        data: { arAccountId: null },
+      });
+    }
+    const account = await this.prisma.aRAccount.findUnique({
+      where: { id: arAccountId },
+    });
+    if (!account) {
+      throw new NotFoundException(
+        `AR account with ID ${arAccountId} not found`,
+      );
+    }
+    if (!account.isActive) {
+      throw new ConflictException(AR_ACCOUNT_INACTIVE_MESSAGE);
+    }
+    if (account.propertyId !== folio.reservation.room.propertyId) {
+      throw new BadRequestException(
+        'AR account does not belong to this property',
+      );
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: { arAccountId },
+    });
+  }
+
+  private async isBalanceOverLimit(
+    db: PrismaService | Prisma.TransactionClient,
+    folioId: string,
+  ): Promise<boolean> {
+    const folio = await this.loadFolioCreditContext(db, folioId);
+    return folio ? this.folioExceedsLimit(folio) : false;
+  }
+
+  private async assertArCreditAllowsPost(folioId: string, impact: number) {
+    if (impact <= 0) {
+      return;
+    }
+    const folio = await this.prisma.folio.findUnique({
+      where: { id: folioId },
+      select: {
+        balance: true,
+        arAccount: {
+          select: {
+            isActive: true,
+            creditLimit: true,
+            currentBalance: true,
+          },
+        },
+      },
+    });
+    if (!folio?.arAccount) {
+      return;
+    }
+    if (!folio.arAccount.isActive) {
+      throw new ConflictException(AR_ACCOUNT_INACTIVE_MESSAGE);
+    }
+    const remaining = remainingArCredit(
+      folio.arAccount.creditLimit,
+      folio.arAccount.currentBalance,
+    );
+    const projected = Number(folio.balance) + impact;
+    if (wouldExceedArCredit(projected, remaining)) {
+      throw new ConflictException(AR_CREDIT_EXCEEDED_MESSAGE);
+    }
+  }
+
+  private async loadFolioCreditContext(
+    db: PrismaService | Prisma.TransactionClient,
+    folioId: string,
+  ) {
+    return db.folio.findUnique({
+      where: { id: folioId },
+      select: {
+        id: true,
+        balance: true,
+        creditLimit: true,
+        isClosed: true,
+        status: true,
+        reservation: {
+          select: {
+            room: {
+              select: {
+                property: { select: { defaultCreditLimit: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  private folioExceedsLimit(folio: {
+    balance: unknown;
+    creditLimit: unknown;
+    reservation?: {
+      room?: { property?: { defaultCreditLimit: unknown } | null } | null;
+    } | null;
+  }): boolean {
+    const limit = resolveCreditLimit(
+      folio.creditLimit,
+      folio.reservation?.room?.property?.defaultCreditLimit,
+    );
+    return isOverCreditLimit(Number(folio.balance), limit);
   }
 }

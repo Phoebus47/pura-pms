@@ -43,11 +43,16 @@ model Property {
   currency    String     @default("THB")
   timezone    String     @default("Asia/Bangkok")
   businessDate DateTime  @default(now()) @db.Date
+  defaultCreditLimit Decimal? @db.Decimal(12, 2)
   roomTypes   RoomType[]
   rooms       Room[]
   rates       Rate[]
   nightAudits    NightAudit[]
   reportArchives ReportArchive[]
+  shifts         Shift[]
+  taxInvoices    TaxInvoice[]
+  journalEntries JournalEntry[]
+  arAccounts     ARAccount[]
   createdAt      DateTime   @default(now())
 }
 
@@ -134,6 +139,7 @@ model Reservation {
   fixedCharges   FixedCharge[]
   deposits       Deposit[]
   taxInvoices    TaxInvoice[]
+  cardPreauths   CardPreauth[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -174,6 +180,7 @@ model Folio {
   reservation   Reservation   @relation(fields: [reservationId], references: [id])
   type          FolioType     @default(GUEST)
   balance       Decimal       @default(0) @db.Decimal(12, 2)
+  creditLimit   Decimal?      @db.Decimal(12, 2)
   isClosed      Boolean       @default(false) // Deprecated: Use status instead
   status        FolioStatus?  @default(OPEN)
   businessDate  DateTime?     @db.Date
@@ -181,6 +188,10 @@ model Folio {
   closedBy      String?
   transactions  Transaction[]  // Legacy: Will be replaced by FolioTransaction
   windows       FolioWindow[]
+  taxInvoices   TaxInvoice[]
+  invoices      Invoice[]
+  arAccountId   String?
+  arAccount     ARAccount?    @relation(fields: [arAccountId], references: [id])
   createdAt     DateTime      @default(now())
 }
 
@@ -205,10 +216,25 @@ model TransactionCode {
   glAccountCode String   // e.g., "4000-01" (Revenue-Room)
   departmentCode String? // สำหรับ USALI
   
-  transactions  FolioTransaction[]
-  fixedCharges  FixedCharge[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  transactions      FolioTransaction[]
+  fixedCharges      FixedCharge[]
+  packageSplitRules PackageSplitRule[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Package split at posting time (rateCode → USALI trx codes). Percents are 0–100.
+model PackageSplitRule {
+  id        String          @id @default(cuid())
+  rateCode  String
+  trxCodeId String
+  trxCode   TransactionCode @relation(fields: [trxCodeId], references: [id], onDelete: Restrict)
+  percent   Decimal         @db.Decimal(5, 2)
+  sortOrder Int             @default(0)
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+
+  @@index([rateCode, isActive])
 }
 
 // Folio Window - การแยกบิล
@@ -271,6 +297,7 @@ model FolioTransaction {
   @@index([userId])
   @@index([isVoid])
   @@index([relatedTrxId])
+  @@index([shiftId])
 }
 
 // Reason Code
@@ -329,33 +356,40 @@ model ExchangeRate {
   @@unique([baseCurrency, targetCurrency, effectiveDate])
 }
 
-// Tax Invoice
+// Tax Invoice — internal running number. RD e-Tax API is out of scope.
 model TaxInvoice {
-  id            String   @id @default(cuid())
-  invoiceNumber String   @unique // Running Number ต้องเป๊ะ ห้ามข้าม
+  id            String         @id @default(cuid())
+  invoiceNumber String
+  propertyId    String
+  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Restrict)
   folioId       String?
+  folio         Folio?         @relation(fields: [folioId], references: [id], onDelete: SetNull)
   reservationId String?
-  reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  businessDate  DateTime @db.Date
-  
-  // Taxpayer Info
-  taxId         String   // เลขประจำตัวผู้เสียภาษี
-  branchNumber  String? // สาขา
-  
-  // Amounts
-  amountNet     Decimal  @db.Decimal(12, 2)
-  amountTax     Decimal  @db.Decimal(12, 2)
-  amountTotal   Decimal  @db.Decimal(12, 2)
-  
-  // e-Tax Invoice
-  eTaxInvoiceId String? // ID จากกรมสรรพากร (ถ้ามี)
-  qrCode        String? // QR Code สำหรับ e-Tax Invoice
-  
-  // Status
-  status        InvoiceStatus @default(OPEN)
+  reservation   Reservation?   @relation(fields: [reservationId], references: [id])
+  businessDate  DateTime       @db.Date
+
+  taxId         String
+  branchNumber  String?
+  buyerName     String?
+
+  amountNet     Decimal        @db.Decimal(12, 2)
+  amountTax     Decimal        @db.Decimal(12, 2)
+  amountTotal   Decimal        @db.Decimal(12, 2)
+
+  eTaxInvoiceId String?
+  qrCode        String?
+
+  status        InvoiceStatus  @default(OPEN)
   issuedAt      DateTime?
   issuedBy      String?
-  createdAt     DateTime @default(now())
+  voidReason    String?
+  voidedAt      DateTime?
+  voidedBy      String?
+  createdAt     DateTime       @default(now())
+
+  @@unique([propertyId, invoiceNumber])
+  @@index([propertyId, businessDate])
+  @@index([folioId])
 }
 
 // Fixed Charges (Recurring)
@@ -408,19 +442,32 @@ model Payment {
 // ==================== SHIFT MANAGEMENT ====================
 
 model Shift {
-  id           String        @id @default(cuid())
-  shiftNumber  String        @unique
-  userId       String
-  user         User          @relation(fields: [userId], references: [id])
-  startTime    DateTime
-  endTime      DateTime?
-  openingCash  Decimal       @db.Decimal(12, 2)
-  closingCash  Decimal?      @db.Decimal(12, 2)
-  cashVariance Decimal?      @db.Decimal(12, 2)
-  status       ShiftStatus   @default(OPEN)
-  transactions Transaction[] // Legacy: Will be removed after migration
-  folioTransactions FolioTransaction[] // New: Use this instead
-  notes        String?
+  id                  String      @id @default(cuid())
+  shiftNumber         String      @unique
+  userId              String
+  user                User        @relation(fields: [userId], references: [id])
+  propertyId          String
+  property            Property    @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  businessDate        DateTime    @db.Date
+  startTime           DateTime
+  endTime             DateTime?
+  openingCash         Decimal     @db.Decimal(12, 2)
+  closingCash         Decimal?    @db.Decimal(12, 2)
+  expectedCash        Decimal?    @db.Decimal(12, 2)
+  cashVariance        Decimal?    @db.Decimal(12, 2)
+  status              ShiftStatus @default(OPEN)
+  closedBy            String?
+  managerApprovedBy   String?
+  managerApprovedAt   DateTime?
+  varianceReason      String?
+  handoverToUserId    String?
+  handoverFromShiftId String?
+  notes               String?
+  transactions        Transaction[] // Legacy: Will be removed after migration
+  folioTransactions   FolioTransaction[]
+
+  @@index([propertyId, businessDate, status])
+  @@index([userId, status])
 }
 
 // ==================== NIGHT AUDIT ====================
@@ -493,15 +540,20 @@ model GLAccount {
 model JournalEntry {
   id          String        @id @default(cuid())
   entryNumber String        @unique
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id], onDelete: Restrict)
   entryDate   DateTime      @db.Date
   reference   String?
   description String
-  source      String?
+  source      String
   lines       JournalLine[]
   isPosted    Boolean       @default(false)
   postedBy    String?
   postedAt    DateTime?
   createdAt   DateTime      @default(now())
+
+  @@unique([propertyId, entryDate, source])
+  @@index([propertyId, entryDate])
 }
 
 model JournalLine {
@@ -517,7 +569,9 @@ model JournalLine {
 
 model ARAccount {
   id             String    @id @default(cuid())
-  accountNumber  String    @unique
+  propertyId     String
+  property       Property  @relation(fields: [propertyId], references: [id])
+  accountNumber  String
   companyName    String
   contactPerson  String?
   email          String?
@@ -528,19 +582,68 @@ model ARAccount {
   paymentTerms   Int       @default(30)
   isActive       Boolean   @default(true)
   invoices       Invoice[]
+  folios         Folio[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([propertyId, accountNumber])
+  @@index([propertyId, isActive])
 }
 
 model Invoice {
-  id            String        @id @default(cuid())
-  invoiceNumber String        @unique
+  id            String           @id @default(cuid())
+  invoiceNumber String
+  propertyId    String
   arAccountId   String
-  arAccount     ARAccount     @relation(fields: [arAccountId], references: [id])
-  invoiceDate   DateTime      @db.Date
-  dueDate       DateTime      @db.Date
-  amount        Decimal       @db.Decimal(14, 2)
-  paidAmount    Decimal       @default(0) @db.Decimal(14, 2)
-  status        InvoiceStatus @default(OPEN)
-  createdAt     DateTime      @default(now())
+  arAccount     ARAccount        @relation(fields: [arAccountId], references: [id])
+  folioId       String?
+  folio         Folio?           @relation(fields: [folioId], references: [id])
+  invoiceDate   DateTime         @db.Date
+  dueDate       DateTime         @db.Date
+  amount        Decimal          @db.Decimal(14, 2)
+  paidAmount    Decimal          @default(0) @db.Decimal(14, 2)
+  status        InvoiceStatus    @default(OPEN)
+  payments      InvoicePayment[]
+  createdAt     DateTime         @default(now())
+
+  @@unique([propertyId, invoiceNumber])
+  @@index([propertyId, invoiceDate])
+  @@index([arAccountId, status])
+  @@index([folioId])
+}
+
+model InvoicePayment {
+  id           String   @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id])
+  amount       Decimal  @db.Decimal(14, 2)
+  method       String
+  reference    String?
+  paidBy       String
+  businessDate DateTime @db.Date
+  createdAt    DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+model CardPreauth {
+  id                 String            @id @default(cuid())
+  reservationId      String
+  reservation        Reservation       @relation(fields: [reservationId], references: [id])
+  amount             Decimal           @db.Decimal(12, 2)
+  status             CardPreauthStatus @default(HELD)
+  last4              String
+  expiryMonth        Int
+  expiryYear         Int
+  manualRef          String
+  capturedAmount     Decimal?          @db.Decimal(12, 2)
+  folioId            String?
+  folioTransactionId String?
+  createdBy          String
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([reservationId, status])
 }
 
 // ==================== HOUSEKEEPING ====================
@@ -709,4 +812,12 @@ enum TaskStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum CardPreauthStatus {
+  HELD
+  INCREMENTAL
+  CAPTURED
+  RELEASED
+  EXPIRED
 }

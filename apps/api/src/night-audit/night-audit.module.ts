@@ -4,6 +4,7 @@ import { NightAuditService } from './night-audit.service';
 import { NightAuditProcessor } from './night-audit.processor';
 import { NightAuditController } from './night-audit.controller';
 import { FoliosModule } from '../folios/folios.module';
+import { FinancialModule } from '../financial/financial.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { FoliosModule } from '../folios/folios.module';
       name: 'night-audit',
     }),
     FoliosModule,
+    FinancialModule,
   ],
   controllers: [NightAuditController],
   providers: [NightAuditService, NightAuditProcessor],

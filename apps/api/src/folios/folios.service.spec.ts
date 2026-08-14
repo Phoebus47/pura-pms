@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FoliosService } from './folios.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { FolioStatus } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { vi } from 'vitest';
@@ -16,6 +20,9 @@ const mockPrismaService = {
     findMany: vi.fn(),
     count: vi.fn(),
     update: vi.fn(),
+  },
+  aRAccount: {
+    findUnique: vi.fn(),
   },
   folioWindow: {
     findUnique: vi.fn(),
@@ -32,6 +39,15 @@ const mockPrismaService = {
     create: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
+  },
+  shift: {
+    findFirst: vi.fn(),
+  },
+  packageSplitRule: {
+    findMany: vi.fn().mockResolvedValue([]),
+  },
+  exchangeRate: {
+    findFirst: vi.fn(),
   },
   $transaction: vi.fn(),
 };
@@ -217,6 +233,17 @@ describe('FoliosService', () => {
       businessDate: '2025-01-15',
     };
 
+    beforeEach(() => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { rateCode: null, room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([]);
+    });
+
     it('should post a CHARGE transaction with tax and service', async () => {
       const mockWindow = { id: 'win-1' };
       const mockTrxCode = {
@@ -259,6 +286,7 @@ describe('FoliosService', () => {
             amountTax: expect.closeTo(77, 0), // 7% of (1000 + 100)
             sign: 1,
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -301,6 +329,7 @@ describe('FoliosService', () => {
             amountTax: 0,
             sign: -1,
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -335,6 +364,7 @@ describe('FoliosService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -415,6 +445,574 @@ describe('FoliosService', () => {
             amountService: 100,
             amountTax: 0,
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
+          }),
+        }),
+      );
+    });
+
+    it('should throw BadRequestException when no OPEN shift exists', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue(null);
+
+      await expect(service.postTransaction('folio-1', baseDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.postTransaction('folio-1', baseDto)).rejects.toThrow(
+        /open shift/i,
+      );
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it('should leave shiftId null for SYSTEM posts without looking up a shift', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-room',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-system',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        userId: 'SYSTEM',
+      });
+
+      expect(mockPrismaService.shift.findFirst).not.toHaveBeenCalled();
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: 'SYSTEM',
+            shiftId: null,
+          }),
+        }),
+      );
+    });
+
+    it('should attach shiftId for non-9000 cashier posts', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-card',
+        type: 'PAYMENT',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-card-1',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-card',
+      });
+
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            shiftId: 'shift-1',
+            sign: -1,
+          }),
+        }),
+      );
+    });
+
+    it('should post a single row when room charge has no matching split rules', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { rateCode: 'STD', room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-room',
+        code: '1000',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([]);
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-single',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      const result = await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-room',
+      });
+
+      expect(result).toEqual({ id: 'trx-single' });
+      expect(mockPrismaService.packageSplitRule.findMany).toHaveBeenCalledWith({
+        where: { rateCode: 'STD', isActive: true },
+        orderBy: { sortOrder: 'asc' },
+        include: { trxCode: true },
+      });
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            trxCodeId: 'trx-room',
+            amountNet: 1000,
+            shiftId: 'shift-1',
+          }),
+        }),
+      );
+    });
+
+    it('should split PKG-BB 80/20 into two rows whose nets sum to original amountNet', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-room',
+        code: '1000',
+        type: 'CHARGE',
+        hasTax: true,
+        hasService: true,
+        serviceRate: 10,
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([
+        {
+          trxCodeId: 'trx-room',
+          percent: 80,
+          sortOrder: 0,
+          trxCode: {
+            id: 'trx-room',
+            code: '1000',
+            type: 'CHARGE',
+            hasTax: true,
+            hasService: true,
+            serviceRate: 10,
+          },
+        },
+        {
+          trxCodeId: 'trx-fnb',
+          percent: 20,
+          sortOrder: 1,
+          trxCode: {
+            id: 'trx-fnb',
+            code: '2000',
+            type: 'CHARGE',
+            hasTax: true,
+            hasService: true,
+            serviceRate: 10,
+          },
+        },
+      ]);
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockImplementation(
+        (args: { data: { trxCodeId: string; amountNet: number } }) => ({
+          id: args.data.trxCodeId === 'trx-room' ? 'room-line' : 'fnb-line',
+          ...args.data,
+        }),
+      );
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      const result = await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-room',
+      });
+
+      expect(result).toEqual(expect.objectContaining({ id: 'room-line' }));
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledTimes(
+        2,
+      );
+      const nets = mockPrismaService.folioTransaction.create.mock.calls.map(
+        (call: [{ data: { amountNet: number } }]) => call[0].data.amountNet,
+      );
+      expect(nets).toEqual([800, 200]);
+      expect(nets[0] + nets[1]).toBe(1000);
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            trxCodeId: 'trx-room',
+            amountNet: 800,
+            windowId: 'win-1',
+            userId: 'user-1',
+            shiftId: 'shift-1',
+            businessDate: new Date('2025-01-15'),
+          }),
+        }),
+      );
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            trxCodeId: 'trx-fnb',
+            amountNet: 200,
+            windowId: 'win-1',
+            shiftId: 'shift-1',
+            businessDate: new Date('2025-01-15'),
+          }),
+        }),
+      );
+      expect(mockPrismaService.folioWindow.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            balance: { increment: 1177 },
+          }),
+        }),
+      );
+    });
+
+    it('should not split payment code 9000', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-cash',
+        code: '9000',
+        type: 'PAYMENT',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-pay',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-cash',
+      });
+
+      expect(
+        mockPrismaService.packageSplitRule.findMany,
+      ).not.toHaveBeenCalled();
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            trxCodeId: 'trx-cash',
+            sign: -1,
+            amountNet: 1000,
+          }),
+        }),
+      );
+    });
+
+    it('should convert cash 9000 using guest currency as targetCurrency', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: {
+          rateCode: null,
+          room: { propertyId: 'prop-1', property: { currency: 'THB' } },
+        },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-cash',
+        code: '9000',
+        type: 'PAYMENT',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.exchangeRate.findFirst.mockResolvedValue({
+        id: 'fx-1',
+        rate: 35,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-pay',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-cash',
+        amountNet: 0,
+        currency: 'USD',
+        foreignAmount: 100,
+      });
+
+      expect(mockPrismaService.exchangeRate.findFirst).toHaveBeenCalledWith({
+        where: {
+          baseCurrency: 'THB',
+          targetCurrency: 'USD',
+          isActive: true,
+          effectiveDate: { lte: new Date('2025-01-15') },
+        },
+        orderBy: { effectiveDate: 'desc' },
+      });
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            amountNet: 3500,
+            sign: -1,
+            reference: 'FX USD 100 @ 35.0000',
+          }),
+        }),
+      );
+    });
+
+    it('should throw 400 when cash 9000 has no matching exchange rate', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: {
+          rateCode: null,
+          room: { propertyId: 'prop-1', property: { currency: 'THB' } },
+        },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-cash',
+        code: '9000',
+        type: 'PAYMENT',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.exchangeRate.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.postTransaction('folio-1', {
+          ...baseDto,
+          trxCodeId: 'trx-cash',
+          currency: 'USD',
+          foreignAmount: 100,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it('should ignore currency on ROOM 1000 posts', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        code: '1000',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        currency: 'USD',
+        foreignAmount: 100,
+      });
+
+      expect(mockPrismaService.exchangeRate.findFirst).not.toHaveBeenCalled();
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            amountNet: 1000,
+          }),
+        }),
+      );
+    });
+
+    it('should throw 400 when split percents do not sum to 100', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-room',
+        code: '1000',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([
+        {
+          trxCodeId: 'trx-room',
+          percent: 50,
+          sortOrder: 0,
+          trxCode: {
+            id: 'trx-room',
+            code: '1000',
+            type: 'CHARGE',
+            hasTax: false,
+            hasService: false,
+            serviceRate: null,
+          },
+        },
+        {
+          trxCodeId: 'trx-fnb',
+          percent: 30,
+          sortOrder: 1,
+          trxCode: {
+            id: 'trx-fnb',
+            code: '2000',
+            type: 'CHARGE',
+            hasTax: false,
+            hasService: false,
+            serviceRate: null,
+          },
+        },
+      ]);
+
+      await expect(
+        service.postTransaction('folio-1', {
+          ...baseDto,
+          trxCodeId: 'trx-room',
+        }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.postTransaction('folio-1', {
+          ...baseDto,
+          trxCodeId: 'trx-room',
+        }),
+      ).rejects.toThrow(/sum to 100/);
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it('should split SYSTEM room posts when rateCode matches', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-room',
+        code: '1000',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([
+        {
+          trxCodeId: 'trx-room',
+          percent: 80,
+          sortOrder: 0,
+          trxCode: {
+            id: 'trx-room',
+            code: '1000',
+            type: 'CHARGE',
+            hasTax: false,
+            hasService: false,
+            serviceRate: null,
+          },
+        },
+        {
+          trxCodeId: 'trx-fnb',
+          percent: 20,
+          sortOrder: 1,
+          trxCode: {
+            id: 'trx-fnb',
+            code: '2000',
+            type: 'CHARGE',
+            hasTax: false,
+            hasService: false,
+            serviceRate: null,
+          },
+        },
+      ]);
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-system',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-room',
+        userId: 'SYSTEM',
+      });
+
+      expect(mockPrismaService.shift.findFirst).not.toHaveBeenCalled();
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: 'SYSTEM',
+            shiftId: null,
+            amountNet: 800,
           }),
         }),
       );
@@ -501,12 +1099,23 @@ describe('FoliosService', () => {
         sign: 1,
         isVoid: false,
         reference: 'Ref',
+        window: {
+          folio: {
+            reservation: {
+              room: { propertyId: 'prop-1' },
+            },
+          },
+        },
       };
 
       mockPrismaService.folioTransaction.findUnique.mockResolvedValue(original);
       mockPrismaService.reasonCode.findUnique.mockResolvedValue({
         id: 'reason-1',
         isActive: true,
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
       });
 
       mockPrismaService.$transaction.mockImplementation(
@@ -544,6 +1153,7 @@ describe('FoliosService', () => {
             userId: baseDto.userId,
             reasonCodeId: baseDto.reasonCodeId,
             relatedTrxId: original.id,
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -557,6 +1167,9 @@ describe('FoliosService', () => {
           }),
         }),
       );
+      expect(
+        mockPrismaService.folioTransaction.update.mock.calls[0][0].data,
+      ).not.toHaveProperty('shiftId');
       expect(mockPrismaService.folioWindow.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: original.windowId },
@@ -573,6 +1186,150 @@ describe('FoliosService', () => {
           }),
         }),
       );
+    });
+  });
+
+  describe('credit limit', () => {
+    it('should warn when a post pushes the folio over its credit limit', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          cb(mockPrismaService),
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-over',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        balance: 1500,
+        creditLimit: 1000,
+        reservation: {
+          room: {
+            property: { defaultCreditLimit: null },
+            propertyId: 'prop-1',
+          },
+          rateCode: null,
+        },
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([]);
+
+      const result = await service.postTransaction('folio-1', {
+        windowNumber: 1,
+        trxCodeId: 'trx-1',
+        amountNet: 1000,
+        userId: 'user-1',
+        businessDate: '2025-01-15',
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'trx-over',
+          creditLimitExceeded: true,
+        }),
+      );
+    });
+
+    it('should block checkout when the folio is over the limit', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        balance: 1500,
+        creditLimit: 1000,
+        isClosed: false,
+        status: FolioStatus.OPEN,
+        reservation: {
+          room: { property: { defaultCreditLimit: null } },
+        },
+      });
+
+      await expect(
+        service.checkout('folio-1', 'user-1'),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('should close a folio that is within the credit limit', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        balance: 500,
+        creditLimit: 1000,
+        isClosed: false,
+        status: FolioStatus.OPEN,
+        reservation: {
+          room: { property: { defaultCreditLimit: null } },
+        },
+      });
+      const closed = { id: 'folio-1', status: FolioStatus.CLOSED };
+      mockPrismaService.folio.update.mockResolvedValue(closed);
+
+      const result = await service.checkout('folio-1', 'user-1');
+
+      expect(result).toEqual(closed);
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: FolioStatus.CLOSED,
+            isClosed: true,
+            closedBy: 'user-1',
+          }),
+        }),
+      );
+    });
+
+    it('should block a charge that would exceed linked AR credit', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        balance: 0,
+        arAccount: {
+          isActive: true,
+          creditLimit: 100,
+          currentBalance: 0,
+        },
+        reservation: {
+          room: {
+            property: { currency: 'THB', defaultCreditLimit: null },
+            propertyId: 'prop-1',
+          },
+          rateCode: null,
+        },
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.postTransaction('folio-1', {
+          windowNumber: 1,
+          trxCodeId: 'trx-1',
+          amountNet: 1000,
+          userId: 'user-1',
+          businessDate: '2025-01-15',
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
     });
   });
 });
