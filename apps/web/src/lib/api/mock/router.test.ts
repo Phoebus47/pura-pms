@@ -60,6 +60,19 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('Daily Revenue Report', () => {
+    it('groups mock folio transactions by trx code group', async () => {
+      const response: any = await routeMockRequest(
+        '/financial/reports/drr?propertyId=prop_mock_1&date=2026-08-14',
+        { method: 'GET' },
+      );
+      expect(response.propertyId).toBe('prop_mock_1');
+      expect(response.businessDate).toBe('2026-08-14');
+      expect(response.summary.SPA.total).toBe(1765.5);
+      expect(response.totalRevenue).toBeGreaterThan(0);
+    });
+  });
+
   describe('Properties', () => {
     it('should return all properties', async () => {
       const response: any = await routeMockRequest('/properties', {

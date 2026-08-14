@@ -33,6 +33,21 @@
     "cashier": "Cashier",
     "notes": "Notes"
   },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "View daily revenue and operational reports",
+    "property": "Property",
+    "businessDate": "Business date",
+    "drrTitle": "Daily Revenue Report",
+    "group": "Group",
+    "net": "Net",
+    "service": "Service",
+    "tax": "Tax",
+    "total": "Total",
+    "totalRevenue": "Total revenue",
+    "empty": "No posted revenue for this date",
+    "loading": "Loading report"
+  },
   "reservations": {
     "splitStay": {
       "badge": "Split stay",
