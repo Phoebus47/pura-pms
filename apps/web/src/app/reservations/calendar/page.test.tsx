@@ -72,6 +72,40 @@ describe('ReservationCalendarPage', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
+  it('paints split stay occupancy on the covering segment dates', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue([
+      {
+        id: 'res-split',
+        checkIn: '2024-01-14T00:00:00.000Z',
+        checkOut: '2024-01-18T00:00:00.000Z',
+        status: 'CONFIRMED',
+        guest: { firstName: 'Ada', lastName: 'Lovelace' },
+        room: { number: '101' },
+        stays: [
+          {
+            sequence: 0,
+            startDate: '2024-01-14T00:00:00.000Z',
+            endDate: '2024-01-16T00:00:00.000Z',
+            room: { number: '101' },
+          },
+          {
+            sequence: 1,
+            startDate: '2024-01-16T00:00:00.000Z',
+            endDate: '2024-01-18T00:00:00.000Z',
+            room: { number: '201' },
+          },
+        ],
+      },
+    ]);
+
+    render(<ReservationCalendarPage />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Ada Lovelace').length).toBeGreaterThan(0);
+    });
+    expect(screen.getAllByText('Split stay').length).toBeGreaterThan(0);
+  });
+
   it('navigates between months', async () => {
     render(<ReservationCalendarPage />);
     await waitFor(() =>

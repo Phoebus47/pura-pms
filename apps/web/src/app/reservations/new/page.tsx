@@ -24,6 +24,10 @@ import { GuestSearchDialog } from '@/components/guest-search-dialog';
 import { GuestFormDialog } from '@/components/guest-form-dialog';
 import { toast } from '@/lib/toast';
 import { DayUseBadge } from '@/components/day-use-badge';
+import { SplitStayBadge } from '@/components/split-stay-badge';
+import { SplitStayOptions } from '@/components/split-stay-options';
+import { t } from '@/lib/i18n';
+import { buildSplitStayPayload, calendarNights } from '@/lib/split-stay';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -46,10 +50,17 @@ export default function NewReservationPage() {
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
   const [isDayUse, setIsDayUse] = useState(false);
+  const [isSplitStay, setIsSplitStay] = useState(false);
+  const [splitDate, setSplitDate] = useState('');
+  const [secondRoom, setSecondRoom] = useState<Room | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   function handleDayUseChange(checked: boolean) {
     setIsDayUse(checked);
+    if (checked) {
+      setIsSplitStay(false);
+      setSecondRoom(null);
+    }
     if (checked && checkIn) {
       setCheckOut(checkIn);
       return;
@@ -59,6 +70,23 @@ export default function NewReservationPage() {
       nextDay.setDate(nextDay.getDate() + 1);
       setCheckOut(nextDay.toISOString().split('T')[0]);
     }
+  }
+
+  function handleSplitStayChange(enabled: boolean) {
+    setIsSplitStay(enabled);
+    if (enabled) {
+      setIsDayUse(false);
+      if (checkIn && checkOut && !splitDate) {
+        const nextDay = new Date(checkIn);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const next = nextDay.toISOString().split('T')[0];
+        if (next < checkOut) {
+          setSplitDate(next);
+        }
+      }
+      return;
+    }
+    setSecondRoom(null);
   }
 
   async function handleStep1Next() {
@@ -87,6 +115,21 @@ export default function NewReservationPage() {
       toast.warning('Please select a room');
       return;
     }
+    if (isSplitStay) {
+      if (!splitDate || splitDate <= checkIn || splitDate >= checkOut) {
+        toast.warning(t('reservations.splitStay.invalidDates'));
+        return;
+      }
+      if (
+        !secondRoom ||
+        secondRoom.id === selectedRoom.id ||
+        (secondRoom.roomType?.id || secondRoom.roomTypeId) ===
+          (selectedRoom.roomType?.id || selectedRoom.roomTypeId)
+      ) {
+        toast.warning(t('reservations.splitStay.needSecondRoom'));
+        return;
+      }
+    }
     setCurrentStep(3);
   }
 
@@ -101,9 +144,23 @@ export default function NewReservationPage() {
   async function handleSubmit() {
     setSubmitting(true);
     try {
-      const baseRate = Number(selectedRoom!.roomType?.baseRate || 0);
-      const billedNights = isDayUse ? 1 : nights;
-      const calculatedTotal = baseRate * billedNights;
+      const firstRate = Number(selectedRoom!.roomType?.baseRate || 0);
+      const secondRate = Number(secondRoom?.roomType?.baseRate || 0);
+      const stays = isSplitStay
+        ? buildSplitStayPayload({
+            checkIn,
+            splitDate,
+            checkOut,
+            firstRoomId: selectedRoom!.id,
+            secondRoomId: secondRoom!.id,
+            firstRate,
+            secondRate,
+          })
+        : undefined;
+      const calculatedTotal = stays
+        ? calendarNights(checkIn, splitDate) * firstRate +
+          calendarNights(splitDate, checkOut) * secondRate
+        : firstRate * billedNights;
 
       const reservationData: CreateReservationDto = {
         guestId: selectedGuest!.id,
@@ -112,11 +169,12 @@ export default function NewReservationPage() {
         checkOut,
         adults: numberOfGuests,
         children: 0,
-        roomRate: baseRate,
+        roomRate: firstRate,
         totalAmount: calculatedTotal,
         specialRequest: specialRequests || undefined,
         status: 'CONFIRMED',
         isDayUse,
+        stays,
       };
 
       const reservation = await reservationsAPI.create(reservationData);
@@ -156,10 +214,24 @@ export default function NewReservationPage() {
       : 0;
 
   const billedNights = isDayUse ? 1 : nights;
-  const totalAmount =
-    selectedRoom && billedNights > 0
-      ? Number(selectedRoom.roomType?.baseRate || 0) * billedNights
+  const firstRate = Number(selectedRoom?.roomType?.baseRate || 0);
+  const secondRate = Number(secondRoom?.roomType?.baseRate || 0);
+  const totalAmount = isSplitStay
+    ? calendarNights(checkIn, splitDate) * firstRate +
+      calendarNights(splitDate, checkOut) * secondRate
+    : selectedRoom && billedNights > 0
+      ? firstRate * billedNights
       : 0;
+  const splitMinDate = checkIn
+    ? new Date(new Date(checkIn).getTime() + 86400000)
+        .toISOString()
+        .split('T')[0]
+    : '';
+  const splitMaxDate = checkOut
+    ? new Date(new Date(checkOut).getTime() - 86400000)
+        .toISOString()
+        .split('T')[0]
+    : '';
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -258,6 +330,16 @@ export default function NewReservationPage() {
               </span>
             </label>
 
+            <SplitStayOptions
+              enabled={isSplitStay}
+              disabled={isDayUse}
+              splitDate={splitDate}
+              minDate={splitMinDate}
+              maxDate={splitMaxDate}
+              onEnabledChange={handleSplitStayChange}
+              onSplitDateChange={setSplitDate}
+            />
+
             <div className="flex justify-end pt-4">
               <Button
                 onClick={handleStep1Next}
@@ -273,7 +355,11 @@ export default function NewReservationPage() {
         {/* Step 2: Room Selection */}
         {currentStep === 2 && (
           <div className="space-y-6">
-            <h2 className="font-bold text-[#1e4b8e] text-2xl">Select a Room</h2>
+            <h2 className="font-bold text-[#1e4b8e] text-2xl">
+              {isSplitStay
+                ? t('reservations.splitStay.firstRoom')
+                : 'Select a Room'}
+            </h2>
 
             {availableRooms.length === 0 ? (
               <p className="py-8 text-center text-slate-500">
@@ -284,6 +370,8 @@ export default function NewReservationPage() {
                 {availableRooms.map((room) => (
                   <button
                     key={room.id}
+                    type="button"
+                    aria-label={`Room ${room.number}`}
                     onClick={() => setSelectedRoom(room)}
                     className={`p-4 rounded-2xl border-2 text-left transition-all ${
                       selectedRoom?.id === room.id
@@ -317,6 +405,38 @@ export default function NewReservationPage() {
                 ))}
               </div>
             )}
+
+            {isSplitStay ? (
+              <div className="space-y-4">
+                <h3 className="font-bold text-pura-blue text-xl">
+                  {t('reservations.splitStay.secondRoom')}
+                </h3>
+                <div className="gap-4 grid">
+                  {availableRooms
+                    .filter((room) => room.id !== selectedRoom?.id)
+                    .map((room) => (
+                      <button
+                        key={room.id}
+                        type="button"
+                        aria-label={`${t('reservations.splitStay.secondRoom')} ${room.number}`}
+                        onClick={() => setSecondRoom(room)}
+                        className={`min-h-11 p-4 rounded-2xl border-2 text-left transition-all ${
+                          secondRoom?.id === room.id
+                            ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <h3 className="font-bold text-lg text-slate-800">
+                          Room {room.number}
+                        </h3>
+                        <p className="text-slate-600 text-sm">
+                          {room.roomType?.name}
+                        </p>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="flex justify-between pt-4">
               <Button
@@ -442,6 +562,7 @@ export default function NewReservationPage() {
                     <span className="font-semibold">
                       Room {selectedRoom?.number} -{' '}
                       {selectedRoom?.roomType?.name}
+                      {isSplitStay ? <SplitStayBadge className="ml-2" /> : null}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -507,6 +628,9 @@ export default function NewReservationPage() {
                     selectedRoom?.roomType?.baseRate || 0,
                   ).toLocaleString()}{' '}
                   × {isDayUse ? '1 day use' : `${nights} nights`}
+                  {isSplitStay && secondRoom
+                    ? ` + ฿${secondRate.toLocaleString()} × ${calendarNights(splitDate, checkOut)} nights`
+                    : ''}
                 </p>
               </div>
             </div>

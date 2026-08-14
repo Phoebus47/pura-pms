@@ -60,6 +60,6 @@ describe('Sidebar', () => {
     const { container } = render(<Sidebar />);
 
     const sidebar = container.querySelector('div');
-    expect(sidebar).toHaveClass('hidden', 'md:flex');
+    expect(sidebar).toHaveClass('hidden', 'lg:flex');
   });
 });

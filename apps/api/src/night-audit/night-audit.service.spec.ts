@@ -29,6 +29,9 @@ const mockPrismaService = {
   reportArchive: {
     create: vi.fn(),
   },
+  room: {
+    update: vi.fn(),
+  },
 };
 
 const mockFoliosService = {
@@ -139,7 +142,11 @@ describe('NightAuditService', () => {
       const result = await service.processRoomPosting('prop-1', businessDate);
 
       expect(result.roomsPosted).toBe(1);
-      expect(mockFoliosService.postTransaction).toHaveBeenCalled();
+      expect(mockFoliosService.postTransaction).toHaveBeenCalledWith(
+        'folio-1',
+        expect.objectContaining({ amountNet: 3500 }),
+      );
+      expect(mockPrismaService.room.update).not.toHaveBeenCalled();
     });
 
     it('should skip if already posted (idempotency)', async () => {
@@ -239,6 +246,88 @@ describe('NightAuditService', () => {
           where: expect.objectContaining({ isDayUse: false }),
         }),
       );
+    });
+
+    it('should post the covering stay rate for a split reservation', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-split',
+          roomRate: 1000,
+          isDayUse: false,
+          room: { number: '101' },
+          stays: [
+            {
+              startDate: new Date('2025-01-14T00:00:00.000Z'),
+              endDate: new Date('2025-01-16T00:00:00.000Z'),
+              roomRate: 1000,
+              room: { number: '101' },
+            },
+            {
+              startDate: new Date('2025-01-16T00:00:00.000Z'),
+              endDate: new Date('2025-01-18T00:00:00.000Z'),
+              roomRate: 1800,
+              room: { number: '201' },
+            },
+          ],
+          folios: [
+            { id: 'folio-1', windows: [{ id: 'win-1', windowNumber: 1 }] },
+          ],
+        },
+      ]);
+      mockPrismaService.transactionCode.findFirst.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.folioTransaction.findFirst.mockResolvedValue(null);
+      mockFoliosService.postTransaction.mockResolvedValue({});
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processRoomPosting(
+        'prop-1',
+        new Date('2025-01-16T00:00:00.000Z'),
+      );
+
+      expect(result.roomsPosted).toBe(1);
+      expect(result.totalRevenue).toBe(1800);
+      expect(mockFoliosService.postTransaction).toHaveBeenCalledWith(
+        'folio-1',
+        expect.objectContaining({ amountNet: 1800 }),
+      );
+      expect(mockPrismaService.room.update).not.toHaveBeenCalled();
+    });
+
+    it('should skip split reservations with no covering stay on checkout day', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-split',
+          roomRate: 1000,
+          isDayUse: false,
+          room: { number: '101' },
+          stays: [
+            {
+              startDate: new Date('2025-01-14T00:00:00.000Z'),
+              endDate: new Date('2025-01-16T00:00:00.000Z'),
+              roomRate: 1000,
+              room: { number: '101' },
+            },
+          ],
+          folios: [
+            { id: 'folio-1', windows: [{ id: 'win-1', windowNumber: 1 }] },
+          ],
+        },
+      ]);
+      mockPrismaService.transactionCode.findFirst.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.folioTransaction.findFirst.mockResolvedValue(null);
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processRoomPosting(
+        'prop-1',
+        new Date('2025-01-16T00:00:00.000Z'),
+      );
+
+      expect(result.roomsPosted).toBe(0);
+      expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
     });
   });
 

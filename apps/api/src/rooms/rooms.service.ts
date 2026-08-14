@@ -203,7 +203,18 @@ export class RoomsService {
       },
     });
 
-    if (activeReservations > 0) {
+    const activeStaySegments = await this.prisma.reservationStay.count({
+      where: {
+        roomId: id,
+        reservation: {
+          status: {
+            in: ['CONFIRMED', 'CHECKED_IN'],
+          },
+        },
+      },
+    });
+
+    if (activeReservations > 0 || activeStaySegments > 0) {
       throw new BadRequestException(
         'Cannot delete room with active reservations. Please check out or cancel reservations first.',
       );
@@ -229,6 +240,7 @@ export class RoomsService {
         roomType: true,
         reservations: {
           where: {
+            stays: { none: {} },
             AND: [
               {
                 checkIn: {
@@ -248,11 +260,24 @@ export class RoomsService {
             ],
           },
         },
+        reservationStays: {
+          where: {
+            startDate: { lt: new Date(checkOut) },
+            endDate: { gt: new Date(checkIn) },
+            reservation: {
+              status: {
+                notIn: ['CANCELLED', 'NO_SHOW'],
+              },
+            },
+          },
+        },
       },
     });
 
     const availableRooms = rooms.filter(
-      (room) => room.reservations.length === 0,
+      (room) =>
+        room.reservations.length === 0 &&
+        (room.reservationStays ?? []).length === 0,
     );
 
     const availabilityByType: Record<string, RoomAvailability> = {};

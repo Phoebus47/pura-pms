@@ -129,10 +129,23 @@ const mockRooms = [
   {
     id: 'room-1',
     number: '101',
+    roomTypeId: 'type-a',
     roomType: {
+      id: 'type-a',
       name: 'Deluxe',
       baseRate: 1000,
       maxOccupancy: 2,
+    },
+  },
+  {
+    id: 'room-2',
+    number: '201',
+    roomTypeId: 'type-b',
+    roomType: {
+      id: 'type-b',
+      name: 'Suite',
+      baseRate: 1500,
+      maxOccupancy: 3,
     },
   },
 ];
@@ -546,5 +559,60 @@ describe('NewReservationPage', () => {
     const nextBtn3 = screen.getByText('Next');
     fireEvent.click(nextBtn3);
     expect(toast.warning).toHaveBeenCalledWith('Please select a guest');
+  });
+
+  it('creates a split stay with nested stay segments', async () => {
+    render(<NewReservationPage />);
+
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select Dates'));
+    fireEvent.click(screen.getByRole('checkbox', { name: /split stay/i }));
+    expect(screen.getByRole('checkbox', { name: /split stay/i })).toBeChecked();
+    await userEvent.click(screen.getByText('Next'));
+    await waitFor(() => screen.getByText('First room'));
+    await userEvent.click(screen.getByRole('button', { name: 'Room 101' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Second room 201' }),
+    );
+    await userEvent.click(screen.getByText('Next'));
+    await userEvent.click(screen.getByText('Search Existing Guest'));
+    await userEvent.click(screen.getByText('Select John'));
+    await userEvent.click(screen.getByText('Next'));
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /confirm reservation/i }),
+    );
+
+    await waitFor(() => {
+      expect(reservationsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roomId: 'room-1',
+          isDayUse: false,
+          stays: [
+            {
+              startDate: '2024-01-01',
+              endDate: '2024-01-02',
+              roomId: 'room-1',
+              roomRate: 1000,
+            },
+            {
+              startDate: '2024-01-02',
+              endDate: '2024-01-05',
+              roomId: 'room-2',
+              roomRate: 1500,
+            },
+          ],
+        }),
+      );
+    });
+  });
+
+  it('disables split stay when day-use is selected', async () => {
+    render(<NewReservationPage />);
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /day-use stay/i }));
+    expect(
+      screen.getByRole('checkbox', { name: /split stay/i }),
+    ).toBeDisabled();
   });
 });

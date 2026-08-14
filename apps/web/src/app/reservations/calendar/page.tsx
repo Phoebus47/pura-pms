@@ -7,6 +7,8 @@ import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { PropertySelector } from '@/components/property-selector';
+import { SplitStayBadge } from '@/components/split-stay-badge';
+import { expandCalendarOccupancy } from '@/lib/split-stay';
 
 export default function ReservationCalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -82,11 +84,11 @@ export default function ReservationCalendarPage() {
     days.push(i);
   }
 
-  function getReservationsForDay(day: number): Reservation[] {
+  function getReservationsForDay(day: number) {
     const dateStr = new Date(year, month, day).toISOString().split('T')[0];
-    return reservations.filter((r) => {
-      const checkIn = r.checkIn.split('T')[0];
-      const checkOut = r.checkOut.split('T')[0];
+    return expandCalendarOccupancy(reservations).filter((item) => {
+      const checkIn = item.checkIn.split('T')[0];
+      const checkOut = item.checkOut.split('T')[0];
       return dateStr >= checkIn && dateStr < checkOut;
     });
   }
@@ -222,19 +224,21 @@ export default function ReservationCalendarPage() {
                       {day}
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-1">
-                      {dayReservations.slice(0, 3).map((reservation) => (
+                      {dayReservations.slice(0, 3).map((item) => (
                         <div
-                          key={reservation.id}
+                          key={item.key}
                           className="bg-white/80 border border-slate-200 cursor-pointer hover:bg-white p-1 rounded text-xs transition-colors truncate"
-                          title={`${reservation.guest?.firstName} ${reservation.guest?.lastName} - Room ${reservation.room?.number}`}
+                          title={`${item.guestName} - Room ${item.roomNumber ?? ''}`}
                         >
                           <ReservationStatusBadge
-                            status={reservation.status}
+                            status={item.status as Reservation['status']}
                             size="xs"
                           />
+                          {item.isSplitStay ? (
+                            <SplitStayBadge size="xs" className="ml-1" />
+                          ) : null}
                           <div className="mt-0.5 truncate">
-                            {reservation.guest?.firstName}{' '}
-                            {reservation.guest?.lastName}
+                            {item.guestName}
                           </div>
                         </div>
                       ))}

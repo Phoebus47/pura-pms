@@ -305,6 +305,28 @@ describe('Mock API Router', () => {
       expect(response.id).toBeDefined();
     });
 
+    it('should persist nested stay segments on create', async () => {
+      const stays = [
+        {
+          startDate: '2026-08-14',
+          endDate: '2026-08-16',
+          roomId: 'room-1',
+          roomRate: 1000,
+        },
+        {
+          startDate: '2026-08-16',
+          endDate: '2026-08-18',
+          roomId: 'room-2',
+          roomRate: 1500,
+        },
+      ];
+      const response: any = await routeMockRequest('/reservations', {
+        method: 'POST',
+        body: JSON.stringify({ guestId: '123', stays }),
+      });
+      expect(response.stays).toEqual(stays);
+    });
+
     it('should update a reservation', async () => {
       const resId = mockDb.reservations[0].id;
       const response: any = await routeMockRequest(`/reservations/${resId}`, {
