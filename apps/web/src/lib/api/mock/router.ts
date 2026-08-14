@@ -105,17 +105,68 @@ function handleFolioPostWindowBalance(
   if (fol) fol.balance += total;
 }
 
-function handleFinancialGet(path: string) {
+function buildDailyRevenueReport(propertyId: string, date: string) {
+  const dateKey = toDateKey(date);
+  const summary: Record<
+    string,
+    { net: number; tax: number; service: number; total: number }
+  > = {};
+
+  for (const trx of mockDb.folioTransactions) {
+    if (trx.isVoid) continue;
+    const window = mockDb.folioWindows.find((w: any) => w.id === trx.windowId);
+    const folio = mockDb.folios.find((f: any) => f.id === window?.folioId);
+    const reservation = mockDb.reservations.find(
+      (r: any) => r.id === folio?.reservationId,
+    );
+    if (reservation && reservation.propertyId !== propertyId) continue;
+    if (trx.businessDate && toDateKey(trx.businessDate) !== dateKey) continue;
+    const code = mockDb.transactionCodes.find(
+      (c: any) => c.id === trx.trxCodeId,
+    );
+    const group = code?.group || 'MISC';
+    if (!summary[group]) {
+      summary[group] = { net: 0, tax: 0, service: 0, total: 0 };
+    }
+    summary[group].net += Number(trx.amountNet) || 0;
+    summary[group].tax += Number(trx.amountTax) || 0;
+    summary[group].service += Number(trx.amountService) || 0;
+    summary[group].total += Number(trx.amountTotal) || 0;
+  }
+
+  const totalRevenue = Object.values(summary).reduce(
+    (sum, bucket) => sum + bucket.total,
+    0,
+  );
+  return {
+    businessDate: dateKey,
+    propertyId,
+    summary,
+    totalRevenue: round2(totalRevenue),
+  };
+}
+
+function handleFinancialGet(path: string, params: URLSearchParams) {
   if (path === '/financial/transaction-codes') {
     return mockDb.transactionCodes;
   }
   if (path === '/financial/reason-codes') {
     return mockDb.reasonCodes;
   }
+  if (path === '/financial/reports/drr') {
+    return buildDailyRevenueReport(
+      params.get('propertyId') || 'prop_mock_1',
+      params.get('date') || new Date().toISOString(),
+    );
+  }
 }
 
-function handleFinancial(method: string, path: string) {
-  if (method === 'GET') return handleFinancialGet(path);
+function handleFinancial(
+  method: string,
+  path: string,
+  params: URLSearchParams,
+) {
+  if (method === 'GET') return handleFinancialGet(path, params);
 }
 
 function handleNightAuditStatus(path: string) {
@@ -939,7 +990,7 @@ export async function routeMockRequest<T>(
     const handlers = [
       () => handleAuth(method, path, body),
       () => handleMetrics(method, path),
-      () => handleFinancial(method, path),
+      () => handleFinancial(method, path, params),
       () => handleNightAudit(method, path, body),
       () => handleShifts(method, path, body, params),
       () => handleFolios(method, path, body),

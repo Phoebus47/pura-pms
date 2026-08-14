@@ -8,3 +8,4 @@ export * from './reservations';
 export * from './folios';
 export * from './transaction-codes';
 export * from './shifts';
+export * from './reports';
