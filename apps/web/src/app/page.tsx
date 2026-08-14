@@ -168,7 +168,7 @@ export default function Dashboard() {
           </Button>
           <div className="backdrop-blur-xl bg-white/50 border border-white/60 flex gap-2 items-center justify-center min-h-11 px-4 py-2.5 rounded-xl shadow-black/5 shadow-lg sm:w-auto w-full">
             <TrendingUp className="h-5 text-emerald-600 w-5" />
-            <span className="font-semibold text-slate-600 text-sm">
+            <span className="font-semibold text-slate-600 text-sm whitespace-nowrap">
               {stats.occupancyRate}% Occupancy
             </span>
           </div>

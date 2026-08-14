@@ -240,6 +240,24 @@ describe('ReservationsPage', () => {
     });
   });
 
+  it('should keep table headers such as Check-in on one line', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+
+    render(<ReservationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Reservations')).toBeInTheDocument();
+    });
+
+    const checkInHeader = screen.getByRole('columnheader', {
+      name: 'Check-in',
+    });
+    expect(checkInHeader).toHaveClass('whitespace-nowrap');
+    expect(screen.getByRole('columnheader', { name: 'Check-out' })).toHaveClass(
+      'whitespace-nowrap',
+    );
+  });
+
   it('should display a day-use badge for day-use reservations', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
 

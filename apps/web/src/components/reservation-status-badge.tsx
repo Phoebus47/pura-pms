@@ -47,7 +47,7 @@ export function ReservationStatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full font-semibold ring-1 ring-inset',
+        'inline-flex items-center rounded-full font-semibold ring-1 ring-inset shrink-0 whitespace-nowrap',
         size === 'xs' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
         config.className,
         className,

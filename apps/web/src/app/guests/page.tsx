@@ -130,140 +130,142 @@ export default function GuestsPage() {
             </p>
           </div>
         ) : (
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 overflow-hidden rounded-3xl shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50/50 border-b border-slate-200">
-                  <tr>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Guest
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Contact
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      VIP Level
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Stays
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Revenue
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Status
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-slate-200 divide-y">
-                  {guests.map((guest) => (
-                    <tr
-                      key={guest.id}
-                      className="cursor-pointer hover:bg-white/50 transition-colors"
-                      onClick={() => {
-                        router.push(`/guests/${guest.id}`);
-                      }}
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex gap-3 items-center">
-                          <div className="bg-[#1e4b8e]/10 flex h-10 items-center justify-center rounded-full w-10">
-                            <span className="font-semibold text-[#1e4b8e] text-sm">
-                              {guest.firstName[0]}
-                              {guest.lastName[0]}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="font-semibold text-slate-800">
-                              {guest.firstName} {guest.lastName}
+          <div className="relative rounded-3xl shadow-xl">
+            <div className="[clip-path:inset(0_round_1.5rem)] backdrop-blur-2xl bg-white/40 border border-white/50 isolate overflow-hidden rounded-3xl">
+              <div className="overflow-x-auto">
+                <table className="min-w-[48rem] w-full">
+                  <thead className="bg-slate-50/50 border-b border-slate-200">
+                    <tr>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Guest
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Contact
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        VIP Level
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Stays
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Revenue
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Status
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-slate-200 divide-y">
+                    {guests.map((guest) => (
+                      <tr
+                        key={guest.id}
+                        className="cursor-pointer hover:bg-white/50 transition-colors"
+                        onClick={() => {
+                          router.push(`/guests/${guest.id}`);
+                        }}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex gap-3 items-center">
+                            <div className="bg-[#1e4b8e]/10 flex h-10 items-center justify-center rounded-full w-10">
+                              <span className="font-semibold text-[#1e4b8e] text-sm">
+                                {guest.firstName[0]}
+                                {guest.lastName[0]}
+                              </span>
                             </div>
-                            {guest.nationality && (
-                              <div className="text-slate-500 text-xs">
-                                {guest.nationality}
+                            <div>
+                              <div className="font-semibold text-slate-800">
+                                {guest.firstName} {guest.lastName}
                               </div>
+                              {guest.nationality && (
+                                <div className="text-slate-500 text-xs">
+                                  {guest.nationality}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-slate-700 text-sm">
+                            {guest.email || '-'}
+                          </div>
+                          <div className="text-slate-500 text-xs">
+                            {guest.phone || '-'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-1 items-center">
+                            {Array.from({ length: guest.vipLevel }).map(
+                              (_, i) => (
+                                <Star
+                                  key={`${guest.id}-star-${i}`}
+                                  className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
+                                />
+                              ),
+                            )}
+                            {guest.vipLevel === 0 && (
+                              <span className="text-slate-400 text-xs">
+                                Standard
+                              </span>
                             )}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-slate-700 text-sm">
-                          {guest.email || '-'}
-                        </div>
-                        <div className="text-slate-500 text-xs">
-                          {guest.phone || '-'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-1 items-center">
-                          {Array.from({ length: guest.vipLevel }).map(
-                            (_, i) => (
-                              <Star
-                                key={`${guest.id}-star-${i}`}
-                                className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
-                              />
-                            ),
-                          )}
-                          {guest.vipLevel === 0 && (
-                            <span className="text-slate-400 text-xs">
-                              Standard
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-slate-800 text-sm">
+                            {guest.totalStays}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-[#1e4b8e] text-sm">
+                            ฿{Number(guest.totalRevenue).toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {guest.isBlacklist ? (
+                            <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-2.5 py-1.5 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-xs whitespace-nowrap">
+                              <Ban className="h-3 w-3" />
+                              Blacklisted
+                            </span>
+                          ) : (
+                            <span className="bg-emerald-100 font-semibold inline-flex items-center px-2.5 py-1.5 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-xs whitespace-nowrap">
+                              Active
                             </span>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800 text-sm">
-                          {guest.totalStays}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-[#1e4b8e] text-sm">
-                          ฿{Number(guest.totalRevenue).toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {guest.isBlacklist ? (
-                          <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-2.5 py-1 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-xs">
-                            <Ban className="h-3 w-3" />
-                            Blacklisted
-                          </span>
-                        ) : (
-                          <span className="bg-emerald-100 font-semibold inline-flex items-center px-2.5 py-1 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-xs">
-                            Active
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="hover:bg-blue-50 hover:text-blue-600 rounded-xl"
-                            onClick={(e) => handleEdit(e, guest)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="hover:bg-red-50 hover:text-red-600 rounded-xl"
-                            onClick={(e) =>
-                              handleDelete(
-                                e,
-                                guest.id,
-                                `${guest.firstName} ${guest.lastName}`,
-                              )
-                            }
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="hover:bg-blue-50 hover:text-blue-600 rounded-xl"
+                              onClick={(e) => handleEdit(e, guest)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="hover:bg-red-50 hover:text-red-600 rounded-xl"
+                              onClick={(e) =>
+                                handleDelete(
+                                  e,
+                                  guest.id,
+                                  `${guest.firstName} ${guest.lastName}`,
+                                )
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

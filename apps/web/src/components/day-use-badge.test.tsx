@@ -20,4 +20,9 @@ describe('DayUseBadge', () => {
     render(<DayUseBadge className="custom-class" />);
     expect(screen.getByText('Day use')).toHaveClass('custom-class');
   });
+
+  it('should keep the label on one line', () => {
+    render(<DayUseBadge />);
+    expect(screen.getByText('Day use')).toHaveClass('whitespace-nowrap');
+  });
 });
