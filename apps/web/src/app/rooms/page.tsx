@@ -58,26 +58,24 @@ export default function RoomsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="font-bold text-[#1e4b8e] text-3xl">Rooms</h1>
           <p className="mt-1 text-slate-600">Manage rooms and their status</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button variant="outline" className="min-h-11">
             <Filter className="h-4 mr-2 w-4" />
             Filter
           </Button>
-          <Button className="bg-[#1e4b8e] hover:bg-[#153a6e]">
+          <Button className="bg-[#1e4b8e] hover:bg-[#153a6e] min-h-11">
             <Plus className="h-4 mr-2 w-4" />
             Add Room
           </Button>
         </div>
       </div>
 
-      {/* Room Status Summary */}
-      <div className="gap-4 grid lg:grid-cols-6 md:grid-cols-3">
+      <div className="gap-3 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
         {(
           [
             'VACANT_CLEAN',
@@ -92,17 +90,18 @@ export default function RoomsPage() {
           return (
             <button
               key={status}
+              type="button"
               onClick={() =>
                 setStatusFilter(statusFilter === status ? undefined : status)
               }
-              className={`rounded-2xl border p-4 text-left transition-all ${
+              className={`flex flex-col gap-3 min-w-0 p-4 relative rounded-2xl text-left transition-all ${
                 statusFilter === status
-                  ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
-                  : 'border-white/50 bg-white/40 hover:bg-white/50'
+                  ? 'border border-[#1e4b8e] bg-[#1e4b8e]/5'
+                  : 'border border-white/50 bg-white/40 hover:bg-white/50'
               }`}
             >
               <div className="font-bold text-2xl text-slate-800">{count}</div>
-              <RoomStatusBadge status={status} className="mt-2" />
+              <RoomStatusBadge status={status} />
             </button>
           );
         })}
@@ -126,7 +125,8 @@ export default function RoomsPage() {
           {rooms.map((room) => (
             <button
               key={room.id}
-              className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 focus:outline-none focus:ring-[#1e4b8e] focus:ring-2 focus:ring-offset-2 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl overflow-hidden p-5 relative rounded-2xl shadow-lg text-left transition-all w-full"
+              type="button"
+              className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 focus:outline-none focus:ring-[#1e4b8e] focus:ring-2 focus:ring-offset-2 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl p-5 relative rounded-2xl shadow-lg text-left transition-all w-full"
               onClick={() => {
                 router.push(`/rooms/${room.id}`);
               }}

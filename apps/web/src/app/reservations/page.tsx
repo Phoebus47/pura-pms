@@ -113,99 +113,101 @@ export default function ReservationsPage() {
         </div>
       ) : (
         <>
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 hidden md:block overflow-hidden rounded-3xl shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50/50 border-b border-slate-200">
-                  <tr>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Confirmation
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Guest
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Room
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Check-in
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Check-out
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Nights
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Total
-                    </th>
-                    <th className="font-semibold px-6 py-4 text-left text-slate-600 text-xs tracking-wider uppercase">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-slate-200 divide-y">
-                  {reservations.map((reservation) => (
-                    <tr
-                      key={reservation.id}
-                      className="cursor-pointer hover:bg-white/50 transition-colors"
-                      onClick={() => {
-                        router.push(`/reservations/${reservation.id}`);
-                      }}
-                    >
-                      <td className="px-6 py-4">
-                        <div className="font-mono font-semibold text-[#1e4b8e] text-sm">
-                          {reservation.confirmNumber}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800">
-                          {reservation.guest?.firstName}{' '}
-                          {reservation.guest?.lastName}
-                        </div>
-                        <div className="text-slate-500 text-xs">
-                          {reservation.guest?.email}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800">
-                          Room {reservation.room?.number}
-                        </div>
-                        <div className="text-slate-500 text-xs">
-                          {reservation.room?.roomType.name}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-slate-700 text-sm">
-                          {formatDate(reservation.checkIn)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-slate-700 text-sm">
-                          {formatDate(reservation.checkOut)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800 text-sm">
-                          {reservation.nights}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-[#1e4b8e] text-sm">
-                          ฿{Number(reservation.totalAmount).toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1 items-center">
-                          <ReservationStatusBadge status={reservation.status} />
-                          {reservation.isDayUse ? <DayUseBadge /> : null}
-                          {isSplitStay(reservation) ? <SplitStayBadge /> : null}
-                        </div>
-                      </td>
+          <div className="hidden md:block relative rounded-3xl shadow-xl">
+            <div className="[clip-path:inset(0_round_1.5rem)] backdrop-blur-2xl bg-white/40 border border-white/50 isolate overflow-hidden rounded-3xl">
+              <div className="overflow-x-auto">
+                <table className="min-w-[56rem] w-full">
+                  <thead className="bg-slate-50/50 border-b border-slate-200">
+                    <tr>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Confirmation
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Guest
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Room
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Check-in
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Check-out
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Nights
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Total
+                      </th>
+                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                        Status
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-slate-200 divide-y">
+                    {reservations.map((reservation) => (
+                      <tr
+                        key={reservation.id}
+                        className="cursor-pointer hover:bg-white/50 transition-colors"
+                        onClick={() => {
+                          router.push(`/reservations/${reservation.id}`);
+                        }}
+                      >
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="font-mono font-semibold text-[#1e4b8e] text-sm">
+                            {reservation.confirmNumber}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-slate-800 whitespace-nowrap">
+                            {reservation.guest?.firstName}{' '}
+                            {reservation.guest?.lastName}
+                          </div>
+                          <div className="max-w-48 text-slate-500 text-xs truncate">
+                            {reservation.guest?.email}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-slate-800 whitespace-nowrap">
+                            Room {reservation.room?.number}
+                          </div>
+                          <div className="max-w-40 text-slate-500 text-xs truncate">
+                            {reservation.room?.roomType.name}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-slate-700 text-sm whitespace-nowrap">
+                          {formatDate(reservation.checkIn)}
+                        </td>
+                        <td className="px-4 py-3 text-slate-700 text-sm whitespace-nowrap">
+                          {formatDate(reservation.checkOut)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="font-semibold text-slate-800 text-sm">
+                            {reservation.nights}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="font-semibold text-[#1e4b8e] text-sm">
+                            ฿{Number(reservation.totalAmount).toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-nowrap gap-1 items-center">
+                            <ReservationStatusBadge
+                              status={reservation.status}
+                            />
+                            {reservation.isDayUse ? <DayUseBadge /> : null}
+                            {isSplitStay(reservation) ? (
+                              <SplitStayBadge />
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -221,7 +223,7 @@ export default function ReservationsPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex flex-wrap gap-1.5 items-center">
                       <div className="font-mono font-semibold text-[#1e4b8e] text-sm">
                         {reservation.confirmNumber}
                       </div>
@@ -258,7 +260,7 @@ export default function ReservationsPage() {
                 </div>
                 <div className="border-slate-200 border-t flex gap-4 items-center mt-3 pt-3">
                   <div className="flex-1">
-                    <div className="text-[10px] text-slate-500 tracking-wide uppercase">
+                    <div className="text-[10px] text-slate-500 tracking-wide uppercase whitespace-nowrap">
                       Check-in
                     </div>
                     <div className="font-medium mt-0.5 text-slate-700 text-xs">
@@ -266,7 +268,7 @@ export default function ReservationsPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="text-[10px] text-slate-500 tracking-wide uppercase">
+                    <div className="text-[10px] text-slate-500 tracking-wide uppercase whitespace-nowrap">
                       Check-out
                     </div>
                     <div className="font-medium mt-0.5 text-slate-700 text-xs">

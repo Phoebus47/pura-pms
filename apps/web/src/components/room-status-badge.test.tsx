@@ -38,4 +38,13 @@ describe('RoomStatusBadge', () => {
     const badge = screen.getByText('Vacant Clean');
     expect(badge).toHaveClass('custom-class');
   });
+
+  it('should keep status labels on one line', () => {
+    render(<RoomStatusBadge status="OCCUPIED_DIRTY" />);
+
+    expect(screen.getByText('Occupied Dirty')).toHaveClass(
+      'whitespace-nowrap',
+      'shrink-0',
+    );
+  });
 });

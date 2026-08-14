@@ -163,6 +163,22 @@ describe('Dashboard', () => {
     }
   });
 
+  it('should keep dashboard metric labels such as occupancy on one line', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
+
+    render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Today's check-ins")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Today's check-ins")).toHaveClass(
+      'whitespace-nowrap',
+    );
+    expect(screen.getByText('100% Occupancy')).toHaveClass('whitespace-nowrap');
+  });
+
   it('should navigate to new reservation page when button is clicked', async () => {
     const user = userEvent.setup();
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
