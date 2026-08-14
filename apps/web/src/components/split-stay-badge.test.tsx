@@ -11,4 +11,9 @@ describe('SplitStayBadge', () => {
     const { container } = render(<SplitStayBadge size="xs" />);
     expect(container.firstChild).toHaveClass('text-[10px]');
   });
+
+  it('should keep the label on one line', () => {
+    render(<SplitStayBadge />);
+    expect(screen.getByText('Split stay')).toHaveClass('whitespace-nowrap');
+  });
 });

@@ -153,7 +153,7 @@ describe('RoomsPage', () => {
   });
 
   it('should display room status summary', async () => {
-    render(<RoomsPage />);
+    const { container } = render(<RoomsPage />);
 
     await waitFor(() => {
       const vacantCleanElements = screen.getAllByText('Vacant Clean');
@@ -161,6 +161,9 @@ describe('RoomsPage', () => {
       const occupiedCleanElements = screen.getAllByText('Occupied Clean');
       expect(occupiedCleanElements.length).toBeGreaterThan(0);
     });
+
+    const summaryGrid = container.querySelector('.grid');
+    expect(summaryGrid).toHaveClass('grid-cols-2', 'xl:grid-cols-6');
   });
   it('filters rooms by status', async () => {
     const user = userEvent.setup();

@@ -54,4 +54,13 @@ describe('ReservationStatusBadge', () => {
     const badge = screen.getByText('Confirmed');
     expect(badge).toHaveClass('px-2.5', 'py-1', 'text-xs');
   });
+
+  it('should keep status labels on one line', () => {
+    render(<ReservationStatusBadge status="CHECKED_IN" />);
+
+    expect(screen.getByText('Checked In')).toHaveClass(
+      'whitespace-nowrap',
+      'shrink-0',
+    );
+  });
 });
