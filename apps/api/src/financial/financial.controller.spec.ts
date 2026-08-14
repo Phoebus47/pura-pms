@@ -13,6 +13,7 @@ const mockFinancialService = {
 
 const mockReportsService = {
   getDailyRevenueReport: vi.fn(),
+  getDailyFlash: vi.fn(),
 };
 
 describe('FinancialController', () => {
@@ -137,6 +138,30 @@ describe('FinancialController', () => {
 
       expect(result).toEqual(mockReport);
       expect(mockReportsService.getDailyRevenueReport).toHaveBeenCalledWith(
+        'prop-1',
+        expect.any(Date),
+      );
+    });
+  });
+
+  describe('getFlash', () => {
+    it('should delegate to reports service with parsed date', async () => {
+      const mockFlash = {
+        businessDate: '2025-01-15',
+        propertyId: 'prop-1',
+        occupancy: { totalRooms: 10, occupiedRooms: 1, occupancyRate: 10 },
+        arrivals: 0,
+        departures: 0,
+        stayOvers: 1,
+        roomRevenue: 0,
+        totalRevenue: 0,
+      };
+      mockReportsService.getDailyFlash.mockResolvedValue(mockFlash);
+
+      const result = await controller.getFlash('prop-1', '2025-01-15');
+
+      expect(result).toEqual(mockFlash);
+      expect(mockReportsService.getDailyFlash).toHaveBeenCalledWith(
         'prop-1',
         expect.any(Date),
       );

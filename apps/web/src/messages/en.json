@@ -46,7 +46,14 @@
     "total": "Total",
     "totalRevenue": "Total revenue",
     "empty": "No posted revenue for this date",
-    "loading": "Loading report"
+    "loading": "Loading report",
+    "flashTitle": "Daily Flash",
+    "occupancy": "Occupancy",
+    "occupiedRooms": "Occupied rooms",
+    "arrivals": "Arrivals",
+    "departures": "Departures",
+    "stayOvers": "Stay-overs",
+    "roomRevenue": "Room revenue"
   },
   "reservations": {
     "splitStay": {

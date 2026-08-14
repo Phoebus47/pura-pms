@@ -58,4 +58,12 @@ export class FinancialController {
       new Date(date),
     );
   }
+
+  @Get('reports/flash')
+  getFlash(
+    @Query('propertyId') propertyId: string,
+    @Query('date') date: string,
+  ) {
+    return this.reportsService.getDailyFlash(propertyId, new Date(date));
+  }
 }

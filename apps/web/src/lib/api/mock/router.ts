@@ -146,6 +146,38 @@ function buildDailyRevenueReport(propertyId: string, date: string) {
   };
 }
 
+function buildDailyFlash(propertyId: string, date: string) {
+  const drr = buildDailyRevenueReport(propertyId, date);
+  const rooms = mockDb.rooms.filter((r: any) => r.propertyId === propertyId);
+  const reservations = mockDb.reservations.filter(
+    (r: any) =>
+      r.propertyId === propertyId &&
+      r.status !== 'CANCELLED' &&
+      r.status !== 'NO_SHOW',
+  );
+  const occupied = reservations.filter((r: any) => r.status === 'CHECKED_IN');
+  const occupiedRooms = new Set(occupied.map((r: any) => r.roomId)).size;
+  const totalRooms = rooms.length;
+  return {
+    businessDate: drr.businessDate,
+    propertyId,
+    occupancy: {
+      totalRooms,
+      occupiedRooms,
+      occupancyRate:
+        totalRooms > 0
+          ? Math.round((occupiedRooms / totalRooms) * 10000) / 100
+          : 0,
+    },
+    arrivals: reservations.filter((r: any) => r.status === 'CONFIRMED').length,
+    departures: reservations.filter((r: any) => r.status === 'CHECKED_OUT')
+      .length,
+    stayOvers: occupiedRooms,
+    roomRevenue: drr.summary.ROOM?.total ?? 0,
+    totalRevenue: drr.totalRevenue,
+  };
+}
+
 function handleFinancialGet(path: string, params: URLSearchParams) {
   if (path === '/financial/transaction-codes') {
     return mockDb.transactionCodes;
@@ -155,6 +187,12 @@ function handleFinancialGet(path: string, params: URLSearchParams) {
   }
   if (path === '/financial/reports/drr') {
     return buildDailyRevenueReport(
+      params.get('propertyId') || 'prop_mock_1',
+      params.get('date') || new Date().toISOString(),
+    );
+  }
+  if (path === '/financial/reports/flash') {
+    return buildDailyFlash(
       params.get('propertyId') || 'prop_mock_1',
       params.get('date') || new Date().toISOString(),
     );
