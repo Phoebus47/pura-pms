@@ -10,6 +10,7 @@ import {
   Users,
   Bed,
   CreditCard,
+  Clock,
   FileText,
   Settings,
 } from 'lucide-react';
@@ -73,6 +74,13 @@ describe('navigation', () => {
       expect(billingItem?.icon).toBe(CreditCard);
     });
 
+    it('should include Shifts navigation item', () => {
+      const shiftsItem = navigationItems.find((item) => item.name === 'Shifts');
+      expect(shiftsItem).toBeDefined();
+      expect(shiftsItem?.href).toBe('/shifts');
+      expect(shiftsItem?.icon).toBe(Clock);
+    });
+
     it('should include Reports navigation item', () => {
       const reportsItem = navigationItems.find(
         (item) => item.name === 'Reports',
@@ -98,6 +106,7 @@ describe('navigation', () => {
         'Guests',
         'Rooms',
         'Billing',
+        'Shifts',
         'Reports',
         'Settings',
       ];
@@ -141,12 +150,14 @@ describe('navigation', () => {
   });
 
   describe('moreBottomNavItems', () => {
-    it('should keep Reports and Settings in the overflow menu', () => {
+    it('should keep Shifts, Reports and Settings in the overflow menu', () => {
       expect(moreBottomNavItems.map((item) => item.name)).toEqual([
+        'Shifts',
         'Reports',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
+        '/shifts',
         '/reports',
         '/settings',
       ]);

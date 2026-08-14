@@ -14,6 +14,7 @@ import { FoliosModule } from './folios/folios.module';
 import { FinancialModule } from './financial/financial.module';
 import { BullModule } from '@nestjs/bullmq';
 import { NightAuditModule } from './night-audit/night-audit.module';
+import { ShiftsModule } from './shifts/shifts.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { NightAuditModule } from './night-audit/night-audit.module';
       },
     }),
     NightAuditModule,
+    ShiftsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

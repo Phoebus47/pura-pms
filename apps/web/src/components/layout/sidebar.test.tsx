@@ -38,6 +38,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('Reservations')).toBeInTheDocument();
     expect(screen.getByText('Guests')).toBeInTheDocument();
     expect(screen.getByText('Rooms')).toBeInTheDocument();
+    expect(screen.getByText('Shifts')).toBeInTheDocument();
   });
 
   it('should highlight active navigation item', () => {

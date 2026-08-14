@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FoliosService } from './folios.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { FolioStatus } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { vi } from 'vitest';
@@ -32,6 +32,9 @@ const mockPrismaService = {
     create: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
+  },
+  shift: {
+    findFirst: vi.fn(),
   },
   $transaction: vi.fn(),
 };
@@ -217,6 +220,16 @@ describe('FoliosService', () => {
       businessDate: '2025-01-15',
     };
 
+    beforeEach(() => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        reservation: { room: { propertyId: 'prop-1' } },
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
+      });
+    });
+
     it('should post a CHARGE transaction with tax and service', async () => {
       const mockWindow = { id: 'win-1' };
       const mockTrxCode = {
@@ -259,6 +272,7 @@ describe('FoliosService', () => {
             amountTax: expect.closeTo(77, 0), // 7% of (1000 + 100)
             sign: 1,
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -301,6 +315,7 @@ describe('FoliosService', () => {
             amountTax: 0,
             sign: -1,
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -335,6 +350,7 @@ describe('FoliosService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -415,6 +431,104 @@ describe('FoliosService', () => {
             amountService: 100,
             amountTax: 0,
             businessDate: new Date('2025-01-15'),
+            shiftId: 'shift-1',
+          }),
+        }),
+      );
+    });
+
+    it('should throw BadRequestException when no OPEN shift exists', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue(null);
+
+      await expect(service.postTransaction('folio-1', baseDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.postTransaction('folio-1', baseDto)).rejects.toThrow(
+        /open shift/i,
+      );
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it('should leave shiftId null for SYSTEM posts without looking up a shift', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-room',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-system',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        userId: 'SYSTEM',
+      });
+
+      expect(mockPrismaService.shift.findFirst).not.toHaveBeenCalled();
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: 'SYSTEM',
+            shiftId: null,
+          }),
+        }),
+      );
+    });
+
+    it('should attach shiftId for non-9000 cashier posts', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-card',
+        type: 'PAYMENT',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-card-1',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', {
+        ...baseDto,
+        trxCodeId: 'trx-card',
+      });
+
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            shiftId: 'shift-1',
+            sign: -1,
           }),
         }),
       );
@@ -501,12 +615,23 @@ describe('FoliosService', () => {
         sign: 1,
         isVoid: false,
         reference: 'Ref',
+        window: {
+          folio: {
+            reservation: {
+              room: { propertyId: 'prop-1' },
+            },
+          },
+        },
       };
 
       mockPrismaService.folioTransaction.findUnique.mockResolvedValue(original);
       mockPrismaService.reasonCode.findUnique.mockResolvedValue({
         id: 'reason-1',
         isActive: true,
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
       });
 
       mockPrismaService.$transaction.mockImplementation(
@@ -544,6 +669,7 @@ describe('FoliosService', () => {
             userId: baseDto.userId,
             reasonCodeId: baseDto.reasonCodeId,
             relatedTrxId: original.id,
+            shiftId: 'shift-1',
           }),
         }),
       );
@@ -557,6 +683,9 @@ describe('FoliosService', () => {
           }),
         }),
       );
+      expect(
+        mockPrismaService.folioTransaction.update.mock.calls[0][0].data,
+      ).not.toHaveProperty('shiftId');
       expect(mockPrismaService.folioWindow.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: original.windowId },

@@ -644,6 +644,123 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('Shifts', () => {
+    it('should return the seeded current OPEN shift', async () => {
+      const response: any = await routeMockRequest(
+        '/shifts/current?propertyId=prop_mock_1&userId=usr_mock_1',
+        { method: 'GET' },
+      );
+      expect(response.status).toBe('OPEN');
+      expect(response.userId).toBe('usr_mock_1');
+    });
+
+    it('should close a shift with zero variance as BALANCED', async () => {
+      const closed: any = await routeMockRequest('/shifts/sh_mock_1/close', {
+        method: 'POST',
+        body: JSON.stringify({
+          closingCash: 0,
+          userId: 'usr_mock_1',
+        }),
+      });
+      expect(closed.status).toBe('BALANCED');
+      expect(closed.cashVariance).toBe(0);
+    });
+
+    it('should throw 409 when opening a second OPEN shift for the same user', async () => {
+      await expect(
+        routeMockRequest('/shifts', {
+          method: 'POST',
+          body: JSON.stringify({
+            propertyId: 'prop_mock_1',
+            userId: 'usr_mock_1',
+            openingCash: 500,
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('should open then close a shift after the seeded one is closed', async () => {
+      await routeMockRequest('/shifts/sh_mock_1/close', {
+        method: 'POST',
+        body: JSON.stringify({ closingCash: 0, userId: 'usr_mock_1' }),
+      });
+
+      const opened: any = await routeMockRequest('/shifts', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: 'prop_mock_1',
+          userId: 'usr_mock_1',
+          openingCash: 1000,
+        }),
+      });
+      expect(opened.status).toBe('OPEN');
+      expect(opened.openingCash).toBe(1000);
+      expect(opened.shiftNumber).toMatch(/^SH-\d{8}-mock-\d+$/);
+
+      const closed: any = await routeMockRequest(`/shifts/${opened.id}/close`, {
+        method: 'POST',
+        body: JSON.stringify({
+          closingCash: 1000,
+          userId: 'usr_mock_1',
+        }),
+      });
+      expect(closed.status).toBe('BALANCED');
+    });
+
+    it('should post a folio transaction onto the open shift', async () => {
+      const folioId = mockDb.folios[0].id;
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 1000,
+            userId: 'CURRENT_USER',
+          }),
+        },
+      );
+      expect(response.id).toBeDefined();
+      const posted = mockDb.folioTransactions.find(
+        (t: any) => t.id === response.id,
+      );
+      expect(posted.shiftId).toBe('sh_mock_1');
+    });
+
+    it('should reject folio posting when no OPEN shift exists', async () => {
+      mockDb.shifts.forEach((s: any) => {
+        s.status = 'CLOSED';
+      });
+      const folioId = mockDb.folios[0].id;
+      await expect(
+        routeMockRequest(`/folios/${folioId}/transactions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 1000,
+          }),
+        }),
+      ).rejects.toMatchObject({
+        status: 400,
+        data: { message: 'No open shift for this user and property' },
+      });
+    });
+
+    it('should 404 getCurrent when the user has no OPEN shift', async () => {
+      mockDb.shifts.forEach((s: any) => {
+        s.status = 'CLOSED';
+      });
+      await expect(
+        routeMockRequest(
+          '/shifts/current?propertyId=prop_mock_1&userId=usr_mock_1',
+          { method: 'GET' },
+        ),
+      ).rejects.toMatchObject({ status: 404 });
+    });
+  });
+
   describe('Error Handling', () => {
     it('should throw 404 for undefined routes', async () => {
       await expect(

@@ -8,6 +8,8 @@ import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
 import { FolioStatus } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
+import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
+import { computePostingAmounts, standardWindowCreates } from './folio-posting';
 
 @Injectable()
 export class FoliosService {
@@ -28,13 +30,6 @@ export class FoliosService {
     const folioCount = await this.prisma.folio.count();
     const folioNumber = `F${(folioCount + 1).toString().padStart(6, '0')}`;
 
-    const windowDescriptions = [
-      'Main Billing',
-      'Auxiliary window 2',
-      'Auxiliary window 3',
-      'Auxiliary window 4',
-    ] as const;
-
     return this.prisma.folio.create({
       data: {
         folioNumber,
@@ -43,10 +38,7 @@ export class FoliosService {
         status: FolioStatus.OPEN,
         businessDate: new Date(), // Should ideally come from property/system settings
         windows: {
-          create: [1, 2, 3, 4].map((n) => ({
-            windowNumber: n,
-            description: windowDescriptions[n - 1],
-          })),
+          create: standardWindowCreates(),
         },
       },
       include: {
@@ -57,17 +49,10 @@ export class FoliosService {
 
   /** Ensures folios created before 4-window rollout still have windows 1–4. */
   private async ensureStandardWindows(folioId: string): Promise<void> {
-    const descriptions = [
-      'Main Billing',
-      'Auxiliary window 2',
-      'Auxiliary window 3',
-      'Auxiliary window 4',
-    ] as const;
     await this.prisma.folioWindow.createMany({
-      data: [1, 2, 3, 4].map((n) => ({
+      data: standardWindowCreates().map((window) => ({
         folioId,
-        windowNumber: n,
-        description: descriptions[n - 1],
+        ...window,
       })),
       skipDuplicates: true,
     });
@@ -169,28 +154,14 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    // Tax and Service Charge calculations
-    const round2 = (n: number) => Math.round(n * 100) / 100;
-    const amountNet = round2(Number(postTransactionDto.amountNet));
-    let amountService = 0;
-    let amountTax = 0;
+    const { amountNet, amountService, amountTax, amountTotal, sign } =
+      computePostingAmounts(postTransactionDto.amountNet, trxCode);
 
-    if (trxCode.hasService && trxCode.serviceRate) {
-      amountService = round2((amountNet * Number(trxCode.serviceRate)) / 100);
-    }
-
-    if (trxCode.hasTax) {
-      // Assuming 7% VAT for now, ideally fetch from tax configuration
-      amountTax = round2((amountNet + amountService) * 0.07);
-    }
-
-    const amountTotal = round2(amountNet + amountService + amountTax);
-    const sign =
-      trxCode.type === 'PAYMENT' ||
-      trxCode.type === 'DEPOSIT' ||
-      trxCode.type === 'REFUND'
-        ? -1
-        : 1;
+    const shiftId = await resolvePostShiftId(
+      this.prisma,
+      folioId,
+      postTransactionDto.userId,
+    );
 
     return this.prisma.$transaction(async (tx) => {
       const transaction = await tx.folioTransaction.create({
@@ -207,6 +178,7 @@ export class FoliosService {
           remark: postTransactionDto.remark,
           userId: postTransactionDto.userId,
           reasonCodeId: postTransactionDto.reasonCodeId,
+          shiftId,
         },
       });
 
@@ -230,6 +202,17 @@ export class FoliosService {
   async voidTransaction(transactionId: string, dto: VoidTransactionDto) {
     const original = await this.prisma.folioTransaction.findUnique({
       where: { id: transactionId },
+      include: {
+        window: {
+          include: {
+            folio: {
+              include: {
+                reservation: { include: { room: true } },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!original) {
@@ -254,6 +237,12 @@ export class FoliosService {
       throw new BadRequestException('Invalid or inactive reason code');
     }
 
+    const shiftId = await resolveCashierShiftId(
+      this.prisma,
+      dto.userId,
+      original.window?.folio?.reservation?.room?.propertyId,
+    );
+
     return this.prisma.$transaction(async (tx) => {
       const correction = await tx.folioTransaction.create({
         data: {
@@ -270,6 +259,7 @@ export class FoliosService {
           remark: dto.remark,
           reasonCodeId: dto.reasonCodeId,
           relatedTrxId: original.id,
+          shiftId,
         },
       });
 

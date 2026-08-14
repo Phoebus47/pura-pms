@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+const MOCK_NOW = new Date().toISOString();
+
 export interface MockData {
   users: any[];
   properties: any[];
@@ -10,6 +12,7 @@ export interface MockData {
   folioWindows: any[];
   transactionCodes: any[];
   folioTransactions: any[];
+  shifts: any[];
 }
 
 export const mockDb: any = {
@@ -23,6 +26,15 @@ export const mockDb: any = {
       role: 'ADMIN',
       isActive: true,
     },
+    {
+      id: 'usr_mock_2',
+      email: 'cashier@pura.com',
+      password: 'cashier123', // NOSONAR: Intentional mock data password for demo
+      firstName: 'Mock',
+      lastName: 'Cashier',
+      role: 'CASHIER',
+      isActive: true,
+    },
   ],
   properties: [
     {
@@ -34,8 +46,8 @@ export const mockDb: any = {
       taxId: '1234567890123',
       currency: 'THB',
       timezone: 'Asia/Bangkok',
-      businessDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
+      businessDate: MOCK_NOW,
+      createdAt: MOCK_NOW,
       _count: { rooms: 15, roomTypes: 3 },
     },
   ],
@@ -214,6 +226,15 @@ export const mockDb: any = {
       hasTax: false,
       hasService: false,
     },
+    {
+      id: 'tc_cash_9000',
+      code: '9000',
+      description: 'Cash Payment',
+      type: 'PAYMENT',
+      group: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+    },
   ],
   folios: [
     {
@@ -324,4 +345,27 @@ export const mockDb: any = {
   nightAudits: [],
   reportArchives: [],
   auditErrors: [],
+  shifts: [
+    {
+      id: 'sh_mock_1',
+      shiftNumber: `SH-${MOCK_NOW.slice(0, 10).replaceAll('-', '')}-mock-1`,
+      userId: 'usr_mock_1',
+      propertyId: 'prop_mock_1',
+      businessDate: MOCK_NOW,
+      startTime: MOCK_NOW,
+      endTime: null,
+      openingCash: 0,
+      closingCash: null,
+      expectedCash: 0,
+      cashVariance: null,
+      status: 'OPEN',
+      closedBy: null,
+      managerApprovedBy: null,
+      managerApprovedAt: null,
+      varianceReason: null,
+      handoverToUserId: null,
+      handoverFromShiftId: null,
+      notes: null,
+    },
+  ],
 };
