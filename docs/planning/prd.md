@@ -206,6 +206,7 @@ See ADRs:
 
 - `docs/adr/001-posting-model-tax-service-split.md`
 - `docs/adr/002-night-audit-idempotency-status-report-archive.md`
+- `docs/adr/003-shift-management-night-audit-gate.md`
 
 #### 4.6 Shift Management
 
