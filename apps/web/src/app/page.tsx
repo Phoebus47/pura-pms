@@ -158,15 +158,15 @@ export default function Dashboard() {
             your property overview.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-col gap-3 items-stretch sm:flex-row sm:flex-wrap sm:items-center">
           <Button
-            className="bg-pura-blue hover:bg-pura-blue-dark min-h-11 rounded-xl shadow-blue-900/10 shadow-lg"
+            className="bg-pura-blue hover:bg-pura-blue-dark min-h-11 rounded-xl shadow-blue-900/10 shadow-lg sm:w-auto w-full"
             onClick={() => router.push('/reservations/new')}
           >
             <Calendar className="h-4 mr-2 w-4" />
             New Reservation
           </Button>
-          <div className="backdrop-blur-xl bg-white/50 border border-white/60 flex gap-2 items-center min-h-11 px-4 py-2.5 rounded-xl shadow-black/5 shadow-lg">
+          <div className="backdrop-blur-xl bg-white/50 border border-white/60 flex gap-2 items-center justify-center min-h-11 px-4 py-2.5 rounded-xl shadow-black/5 shadow-lg sm:w-auto w-full">
             <TrendingUp className="h-5 text-emerald-600 w-5" />
             <span className="font-semibold text-slate-600 text-sm">
               {stats.occupancyRate}% Occupancy

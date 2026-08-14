@@ -1,4 +1,9 @@
-import { navigationItems, type NavigationItem } from './navigation';
+import {
+  moreBottomNavItems,
+  navigationItems,
+  primaryBottomNavItems,
+  type NavigationItem,
+} from './navigation';
 import {
   LayoutDashboard,
   Calendar,
@@ -113,6 +118,38 @@ describe('navigation', () => {
       const names = navigationItems.map((item) => item.name);
       const uniqueNames = new Set(names);
       expect(uniqueNames.size).toBe(names.length);
+    });
+  });
+
+  describe('primaryBottomNavItems', () => {
+    it('should list five primary tabs including Billing', () => {
+      expect(primaryBottomNavItems.map((item) => item.name)).toEqual([
+        'Dashboard',
+        'Reservations',
+        'Guests',
+        'Rooms',
+        'Billing',
+      ]);
+      expect(primaryBottomNavItems.map((item) => item.href)).toEqual([
+        '/',
+        '/reservations',
+        '/guests',
+        '/rooms',
+        '/billing',
+      ]);
+    });
+  });
+
+  describe('moreBottomNavItems', () => {
+    it('should keep Reports and Settings in the overflow menu', () => {
+      expect(moreBottomNavItems.map((item) => item.name)).toEqual([
+        'Reports',
+        'Settings',
+      ]);
+      expect(moreBottomNavItems.map((item) => item.href)).toEqual([
+        '/reports',
+        '/settings',
+      ]);
     });
   });
 

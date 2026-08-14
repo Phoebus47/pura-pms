@@ -10,7 +10,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="backdrop-blur-2xl border-r border-white/20 flex-col h-full hidden md:flex overflow-hidden relative shadow-2xl text-white w-64 z-20">
+    <div className="backdrop-blur-2xl border-r border-white/20 flex-col h-full hidden lg:flex overflow-hidden relative shadow-2xl text-white w-64 z-20">
       <div className="absolute bg-linear-to-b from-pura-blue/90 inset-0 to-pura-blue-dark/90 via-pura-blue/85" />
       <div className="absolute backdrop-blur-xl inset-0" />
 

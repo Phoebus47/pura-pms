@@ -77,7 +77,9 @@ describe('AppLayout', () => {
     const main = screen.getByRole('main');
     expect(main).toBeInTheDocument();
     expect(main).toContainElement(screen.getByText('Test Content'));
-    expect(main).toHaveClass('pb-20');
+    expect(main).toHaveClass('pb-20', 'lg:p-8', 'lg:pb-8');
+    expect(main).not.toHaveClass('md:pb-8');
+    expect(main).not.toHaveClass('md:p-6');
   });
 
   it('should only render children when pathname is /login', () => {
