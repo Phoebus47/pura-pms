@@ -165,6 +165,29 @@
     "setArAccount": "ผูกบัญชีลูกหนี้",
     "setLimit": "บันทึกวงเงิน"
   },
+  "preauth": {
+    "title": "พรีออธบัตร",
+    "subtitle": "บันทึกการโฮลด์ด้วยมือเท่านั้น แคปเจอร์จะโพสต์ชำระ 9001 ไม่ต่อเกตเวย์",
+    "hold": "บันทึกโฮลด์",
+    "list": "รายการโฮลด์",
+    "reservationId": "รหัสการจอง",
+    "amount": "จำนวนเงิน",
+    "last4": "เลขบัตร 4 ตัวท้าย",
+    "expiryMonth": "เดือนหมดอายุ",
+    "expiryYear": "ปีหมดอายุ",
+    "manualRef": "เลขอ้างอิง",
+    "holdSubmit": "โฮลด์",
+    "holdSuccess": "บันทึกพรีออธแล้ว",
+    "empty": "ยังไม่มีโฮลด์บัตร",
+    "increment": "เพิ่มวงเงินโฮลด์",
+    "incrementAmount": "วงเงินโฮลด์ใหม่",
+    "incrementSuccess": "เพิ่มโฮลด์แล้ว",
+    "folioId": "รหัสโฟลิโอ",
+    "capture": "แคปเจอร์",
+    "captureSuccess": "แคปเจอร์เป็นชำระบัตรแล้ว",
+    "release": "ปล่อยโฮลด์",
+    "releaseSuccess": "ปล่อยโฮลด์แล้ว"
+  },
   "reservations": {
     "splitStay": {
       "badge": "พักแยกประเภทห้อง",

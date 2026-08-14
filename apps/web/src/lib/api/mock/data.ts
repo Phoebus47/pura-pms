@@ -18,6 +18,7 @@ export interface MockData {
   arAccounts: any[];
   invoices: any[];
   invoicePayments: any[];
+  cardPreauths: any[];
 }
 
 export const mockDb: any = {
@@ -250,6 +251,15 @@ export const mockDb: any = {
       hasTax: false,
       hasService: false,
     },
+    {
+      id: 'tc_card_9001',
+      code: '9001',
+      description: 'Credit Card Payment',
+      type: 'PAYMENT',
+      group: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+    },
   ],
   folios: [
     {
@@ -400,4 +410,5 @@ export const mockDb: any = {
   arAccounts: [],
   invoices: [],
   invoicePayments: [],
+  cardPreauths: [],
 };

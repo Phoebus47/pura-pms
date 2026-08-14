@@ -12,3 +12,4 @@ export * from './reports';
 export * from './exchange-rates';
 export * from './tax-invoices';
 export * from './ar-accounts';
+export * from './card-preauths';

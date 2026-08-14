@@ -867,6 +867,122 @@ function handleArAccounts(
   }
 }
 
+function handleCardPreauthsGet(path: string, params: URLSearchParams) {
+  if (path === '/card-preauths') {
+    const reservationId = params.get('reservationId');
+    return mockDb.cardPreauths.filter(
+      (row: any) => !reservationId || row.reservationId === reservationId,
+    );
+  }
+  const match = /^\/card-preauths\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  return mockDb.cardPreauths.find((row: any) => row.id === match[1]);
+}
+
+function handleCardPreauthsPost(path: string, body: any) {
+  const captureMatch = /^\/card-preauths\/([a-zA-Z0-9_-]+)\/capture$/.exec(
+    path,
+  );
+  if (captureMatch) {
+    const hold = mockDb.cardPreauths.find(
+      (row: any) => row.id === captureMatch[1],
+    );
+    if (!hold) {
+      throw new APIError(404, 'Not Found', { message: 'Pre-auth not found' });
+    }
+    if (hold.status !== 'HELD' && hold.status !== 'INCREMENTAL') {
+      throw new APIError(409, 'Conflict', {
+        message: 'Pre-authorization cannot be captured',
+      });
+    }
+    const folio = mockDb.folios.find((row: any) => row.id === body.folioId);
+    if (!folio) {
+      throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+    }
+    requireOpenShiftForCashier(body.userId, mockDb.properties[0]?.id);
+    const amount = Number(body.amount ?? hold.amount);
+    folio.balance = Number(folio.balance) - amount;
+    hold.status = 'CAPTURED';
+    hold.capturedAmount = amount;
+    hold.folioId = folio.id;
+    return hold;
+  }
+  const releaseMatch = /^\/card-preauths\/([a-zA-Z0-9_-]+)\/release$/.exec(
+    path,
+  );
+  if (releaseMatch) {
+    const hold = mockDb.cardPreauths.find(
+      (row: any) => row.id === releaseMatch[1],
+    );
+    if (!hold) {
+      throw new APIError(404, 'Not Found', { message: 'Pre-auth not found' });
+    }
+    if (hold.status !== 'HELD' && hold.status !== 'INCREMENTAL') {
+      throw new APIError(409, 'Conflict', {
+        message: 'Pre-authorization cannot be released',
+      });
+    }
+    hold.status = 'RELEASED';
+    return hold;
+  }
+  if (path !== '/card-preauths') return;
+  const reservation = mockDb.reservations.find(
+    (row: any) => row.id === body.reservationId,
+  );
+  if (!reservation) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+  const created = {
+    id: `pa_mock_${Date.now()}`,
+    reservationId: body.reservationId,
+    amount: body.amount,
+    status: 'HELD',
+    last4: body.last4,
+    expiryMonth: body.expiryMonth,
+    expiryYear: body.expiryYear,
+    manualRef: body.manualRef,
+    capturedAmount: null,
+    folioId: null,
+    createdBy: body.createdBy,
+  };
+  mockDb.cardPreauths.push(created);
+  return created;
+}
+
+function handleCardPreauthsPatch(path: string, body: any) {
+  const match = /^\/card-preauths\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const hold = mockDb.cardPreauths.find((row: any) => row.id === match[1]);
+  if (!hold) {
+    throw new APIError(404, 'Not Found', { message: 'Pre-auth not found' });
+  }
+  if (hold.status !== 'HELD' && hold.status !== 'INCREMENTAL') {
+    throw new APIError(409, 'Conflict', {
+      message: 'Pre-authorization cannot be incremented',
+    });
+  }
+  if (Number(body.amount) <= Number(hold.amount)) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Incremental amount must be greater than the current hold',
+    });
+  }
+  hold.amount = body.amount;
+  hold.status = 'INCREMENTAL';
+  return hold;
+}
+
+function handleCardPreauths(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/card-preauths')) return;
+  if (method === 'GET') return handleCardPreauthsGet(path, params);
+  if (method === 'POST') return handleCardPreauthsPost(path, body);
+  if (method === 'PATCH') return handleCardPreauthsPatch(path, body);
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -1715,6 +1831,7 @@ export async function routeMockRequest<T>(
       () => handleExchangeRates(method, path, body, params),
       () => handleTaxInvoices(method, path, body, params),
       () => handleArAccounts(method, path, body, params),
+      () => handleCardPreauths(method, path, body, params),
       () => handleFolios(method, path, body),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
