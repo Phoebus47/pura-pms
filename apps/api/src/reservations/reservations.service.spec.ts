@@ -139,6 +139,52 @@ describe('ReservationsService', () => {
         ConflictException,
       );
     });
+
+    it('should create a day-use reservation with 0 nights', async () => {
+      const checkIn = new Date();
+      checkIn.setDate(checkIn.getDate() + 1);
+      checkIn.setHours(0, 0, 0, 0);
+      const dayUseDto: CreateReservationDto = {
+        ...createDto,
+        checkIn: checkIn.toISOString(),
+        checkOut: checkIn.toISOString(),
+        isDayUse: true,
+        roomRate: 1500,
+      };
+
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.create.mockResolvedValue({
+        id: 'res-day-use',
+        ...dayUseDto,
+        nights: 0,
+      });
+      mockPrismaService.guest.update.mockResolvedValue({});
+
+      await service.create(dayUseDto);
+
+      expect(prisma.reservation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            isDayUse: true,
+            nights: 0,
+            totalAmount: 1500,
+          }),
+        }),
+      );
+    });
+
+    it('should reject day-use reservations that span overnight', async () => {
+      const dayUseDto: CreateReservationDto = {
+        ...createDto,
+        isDayUse: true,
+      };
+
+      await expect(service.create(dayUseDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
   });
 
   describe('findAll', () => {
@@ -247,6 +293,7 @@ describe('ReservationsService', () => {
       checkIn: new Date('2024-01-01'),
       checkOut: new Date('2024-01-05'),
       roomRate: 100,
+      isDayUse: false,
     };
 
     it('should update simple fields without checks', async () => {
@@ -338,6 +385,37 @@ describe('ReservationsService', () => {
       });
 
       expect(prisma.reservation.update).toHaveBeenCalled();
+    });
+
+    it('should reject marking an overnight stay as day-use', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        existingReservation,
+      );
+
+      await expect(service.update('res-1', { isDayUse: true })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should convert a same-day stay to day-use and bill one night rate', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        checkOut: new Date('2024-01-01'),
+      });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({});
+
+      await service.update('res-1', { isDayUse: true });
+
+      expect(prisma.reservation.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            isDayUse: true,
+            nights: 0,
+            totalAmount: 100,
+          }),
+        }),
+      );
     });
   });
 

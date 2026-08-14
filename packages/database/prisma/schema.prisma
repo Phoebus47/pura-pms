@@ -122,6 +122,7 @@ model Reservation {
   paidAmount     Decimal           @default(0) @db.Decimal(12, 2)
   notes          String?
   specialRequest String?
+  isDayUse       Boolean           @default(false)
   roomId         String
   room           Room              @relation(fields: [roomId], references: [id])
   guestId        String
@@ -136,6 +137,7 @@ model Reservation {
   checkedOutAt   DateTime?
   @@index([checkIn, checkOut])
   @@index([status])
+  @@index([isDayUse])
 }
 
 // ==================== BILLING ====================

@@ -120,6 +120,7 @@ export class NightAuditService {
     const reservations = await this.prisma.reservation.findMany({
       where: {
         status: 'CHECKED_IN',
+        isDayUse: false,
         room: {
           propertyId,
         },
@@ -153,6 +154,13 @@ export class NightAuditService {
 
     // 2. Post room charge for each (with idempotency)
     for (const res of reservations) {
+      if (res.isDayUse) {
+        this.logger.log(
+          `Skipping day-use reservation ${res.id} for room posting`,
+        );
+        continue;
+      }
+
       const folio = res.folios[0]; // Simplified: take first folio
       if (!folio) continue;
 

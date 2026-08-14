@@ -173,4 +173,29 @@ describe('DateRangePicker', () => {
     ) as HTMLInputElement;
     expect(checkOutInput.min).toBe('2024-01-15');
   });
+
+  it('should keep check-out on the same day for day-use stays', () => {
+    render(
+      <DateRangePicker
+        checkIn="2024-01-15"
+        checkOut="2024-01-15"
+        sameDayStay
+        onCheckInChange={mockOnCheckInChange}
+        onCheckOutChange={mockOnCheckOutChange}
+      />,
+    );
+
+    const checkOutInput = screen.getByLabelText(
+      'Check-out Date',
+    ) as HTMLInputElement;
+    expect(checkOutInput).toBeDisabled();
+    expect(screen.getByText('Day use')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Check-in Date'), {
+      target: { value: '2024-01-20' },
+    });
+
+    expect(mockOnCheckInChange).toHaveBeenCalledWith('2024-01-20');
+    expect(mockOnCheckOutChange).toHaveBeenCalledWith('2024-01-20');
+  });
 });

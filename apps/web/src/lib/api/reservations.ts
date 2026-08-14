@@ -26,6 +26,7 @@ export interface Reservation {
   notes?: string;
   specialRequest?: string;
   specialRequests?: string;
+  isDayUse?: boolean;
   cancellationReason?: string;
   actualCheckIn?: string;
   actualCheckOut?: string;
@@ -72,6 +73,7 @@ export interface CreateReservationDto {
   notes?: string;
   specialRequest?: string;
   status?: ReservationStatus;
+  isDayUse?: boolean;
 }
 
 export type UpdateReservationDto = Partial<CreateReservationDto>;

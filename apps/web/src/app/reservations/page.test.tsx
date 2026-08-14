@@ -48,6 +48,7 @@ describe('ReservationsPage', () => {
       status: 'CHECKED_IN',
       totalAmount: 3000,
       nights: 2,
+      isDayUse: true,
       guest: {
         id: '2',
         firstName: 'Jane',
@@ -217,6 +218,16 @@ describe('ReservationsPage', () => {
       expect(confirmedElements.length).toBeGreaterThan(0);
       const checkedInElements = screen.getAllByText(/checked in/i);
       expect(checkedInElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should display a day-use badge for day-use reservations', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+
+    render(<ReservationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Day use').length).toBeGreaterThan(0);
     });
   });
 
