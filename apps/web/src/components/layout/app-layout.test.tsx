@@ -74,8 +74,10 @@ describe('AppLayout', () => {
       </AppLayout>,
     );
 
-    const main = screen.getByText('Test Content').closest('main');
+    const main = screen.getByRole('main');
     expect(main).toBeInTheDocument();
+    expect(main).toContainElement(screen.getByText('Test Content'));
+    expect(main).toHaveClass('pb-20');
   });
 
   it('should only render children when pathname is /login', () => {

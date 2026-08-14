@@ -27,7 +27,7 @@ describe('BottomNavigation', () => {
     render(<BottomNavigation />);
 
     const reservationsLink = screen.getByLabelText('Reservations');
-    expect(reservationsLink).toHaveClass('text-[#1e4b8e]');
+    expect(reservationsLink).toHaveClass('text-pura-blue');
   });
 
   it('should be visible only on mobile', () => {
