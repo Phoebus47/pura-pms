@@ -46,6 +46,7 @@ export interface Folio {
   status: FolioStatus;
   balance: number;
   creditLimit?: number | null;
+  arAccountId?: string | null;
   businessDate: string;
   windows: FolioWindow[];
   createdAt: string;
@@ -118,6 +119,15 @@ export const foliosAPI = {
   ): Promise<Folio> {
     return apiClient.patch<Folio>(`/folios/${folioId}/credit-limit`, {
       creditLimit,
+    });
+  },
+
+  async setArAccount(
+    folioId: string,
+    arAccountId: string | null,
+  ): Promise<Folio> {
+    return apiClient.patch<Folio>(`/folios/${folioId}/ar-account`, {
+      arAccountId,
     });
   },
 

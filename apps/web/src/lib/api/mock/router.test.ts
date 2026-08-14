@@ -1183,6 +1183,36 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('AR auto-settlement', () => {
+    it('blocks a charge that would exceed linked AR credit', async () => {
+      const account: any = await routeMockRequest('/ar-accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          companyName: 'Limit Co',
+          creditLimit: 10,
+        }),
+      });
+      const folioId = mockDb.folios[0].id;
+      await routeMockRequest(`/folios/${folioId}/ar-account`, {
+        method: 'PATCH',
+        body: JSON.stringify({ arAccountId: account.id }),
+      });
+      await expect(
+        routeMockRequest(`/folios/${folioId}/transactions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 200,
+            userId: 'usr_mock_1',
+            businessDate: '2026-08-14',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+  });
+
   describe('Folio credit limit', () => {
     it('blocks checkout when the folio is over its credit limit', async () => {
       const folioId = mockDb.folios[0].id;

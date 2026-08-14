@@ -11,3 +11,9 @@ export class SetCreditLimitDto {
   @Min(0)
   creditLimit?: number | null;
 }
+
+export class SetArAccountDto {
+  @IsOptional()
+  @IsString()
+  arAccountId?: string | null;
+}

@@ -21,6 +21,9 @@ const mockPrismaService = {
     count: vi.fn(),
     update: vi.fn(),
   },
+  aRAccount: {
+    findUnique: vi.fn(),
+  },
   folioWindow: {
     findUnique: vi.fn(),
     update: vi.fn(),
@@ -1283,6 +1286,50 @@ describe('FoliosService', () => {
           }),
         }),
       );
+    });
+
+    it('should block a charge that would exceed linked AR credit', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        balance: 0,
+        arAccount: {
+          isActive: true,
+          creditLimit: 100,
+          currentBalance: 0,
+        },
+        reservation: {
+          room: {
+            property: { currency: 'THB', defaultCreditLimit: null },
+            propertyId: 'prop-1',
+          },
+          rateCode: null,
+        },
+      });
+      mockPrismaService.shift.findFirst.mockResolvedValue({
+        id: 'shift-1',
+        status: 'OPEN',
+      });
+      mockPrismaService.packageSplitRule.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.postTransaction('folio-1', {
+          windowNumber: 1,
+          trxCodeId: 'trx-1',
+          amountNet: 1000,
+          userId: 'user-1',
+          businessDate: '2025-01-15',
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
     });
   });
 });

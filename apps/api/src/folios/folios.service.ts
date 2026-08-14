@@ -11,8 +11,19 @@ import { FolioStatus, Prisma } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
 import { computePostingAmounts, standardWindowCreates } from './folio-posting';
-import { persistPostingLines, resolvePostingLines } from './package-split';
-import { isOverCreditLimit, resolveCreditLimit } from './credit-limit';
+import {
+  persistPostingLines,
+  resolvePostingLines,
+  sumBalanceImpact,
+} from './package-split';
+import {
+  AR_ACCOUNT_INACTIVE_MESSAGE,
+  AR_CREDIT_EXCEEDED_MESSAGE,
+  isOverCreditLimit,
+  remainingArCredit,
+  resolveCreditLimit,
+  wouldExceedArCredit,
+} from './credit-limit';
 import {
   convertForeignToBase,
   formatFxReference,
@@ -184,6 +195,8 @@ export class FoliosService {
       code: trxCode.code,
       ...amounts,
     });
+
+    await this.assertArCreditAllowsPost(folioId, sumBalanceImpact(lines));
 
     return this.prisma.$transaction(async (tx) => {
       const posted = await persistPostingLines(tx, {
@@ -357,12 +370,81 @@ export class FoliosService {
     });
   }
 
+  async setArAccount(id: string, arAccountId: string | null | undefined) {
+    const folio = await this.prisma.folio.findUnique({
+      where: { id },
+      include: { reservation: { include: { room: true } } },
+    });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    if (!arAccountId) {
+      return this.prisma.folio.update({
+        where: { id },
+        data: { arAccountId: null },
+      });
+    }
+    const account = await this.prisma.aRAccount.findUnique({
+      where: { id: arAccountId },
+    });
+    if (!account) {
+      throw new NotFoundException(
+        `AR account with ID ${arAccountId} not found`,
+      );
+    }
+    if (!account.isActive) {
+      throw new ConflictException(AR_ACCOUNT_INACTIVE_MESSAGE);
+    }
+    if (account.propertyId !== folio.reservation.room.propertyId) {
+      throw new BadRequestException(
+        'AR account does not belong to this property',
+      );
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: { arAccountId },
+    });
+  }
+
   private async isBalanceOverLimit(
     db: PrismaService | Prisma.TransactionClient,
     folioId: string,
   ): Promise<boolean> {
     const folio = await this.loadFolioCreditContext(db, folioId);
     return folio ? this.folioExceedsLimit(folio) : false;
+  }
+
+  private async assertArCreditAllowsPost(folioId: string, impact: number) {
+    if (impact <= 0) {
+      return;
+    }
+    const folio = await this.prisma.folio.findUnique({
+      where: { id: folioId },
+      select: {
+        balance: true,
+        arAccount: {
+          select: {
+            isActive: true,
+            creditLimit: true,
+            currentBalance: true,
+          },
+        },
+      },
+    });
+    if (!folio?.arAccount) {
+      return;
+    }
+    if (!folio.arAccount.isActive) {
+      throw new ConflictException(AR_ACCOUNT_INACTIVE_MESSAGE);
+    }
+    const remaining = remainingArCredit(
+      folio.arAccount.creditLimit,
+      folio.arAccount.currentBalance,
+    );
+    const projected = Number(folio.balance) + impact;
+    if (wouldExceedArCredit(projected, remaining)) {
+      throw new ConflictException(AR_CREDIT_EXCEEDED_MESSAGE);
+    }
   }
 
   private async loadFolioCreditContext(

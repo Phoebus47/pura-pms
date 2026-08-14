@@ -13,6 +13,7 @@ const mockFoliosService = {
   voidTransaction: vi.fn(),
   checkout: vi.fn(),
   setCreditLimit: vi.fn(),
+  setArAccount: vi.fn(),
 };
 
 describe('FoliosController', () => {
@@ -135,6 +136,22 @@ describe('FoliosController', () => {
       expect(mockFoliosService.setCreditLimit).toHaveBeenCalledWith(
         'folio-1',
         2000,
+      );
+    });
+  });
+
+  describe('setArAccount', () => {
+    it('should patch the folio AR account', async () => {
+      mockFoliosService.setArAccount.mockResolvedValue({
+        id: 'folio-1',
+        arAccountId: 'ar-1',
+      });
+
+      await controller.setArAccount('folio-1', { arAccountId: 'ar-1' });
+
+      expect(mockFoliosService.setArAccount).toHaveBeenCalledWith(
+        'folio-1',
+        'ar-1',
       );
     });
   });

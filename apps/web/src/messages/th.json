@@ -160,6 +160,9 @@
     "checkoutSuccess": "ปิดโฟลิโอแล้ว",
     "creditLimit": "วงเงินเครดิต",
     "creditLimitExceeded": "ยอดโฟลิโอเกินวงเงินเครดิต",
+    "arCreditExceeded": "ยอดโฟลิโอเกินวงเงินลูกหนี้ของบริษัท",
+    "arAccountId": "รหัสบัญชีลูกหนี้",
+    "setArAccount": "ผูกบัญชีลูกหนี้",
     "setLimit": "บันทึกวงเงิน"
   },
   "reservations": {

@@ -20,6 +20,7 @@ export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
   const [limit, setLimit] = useState(
     folio.creditLimit == null ? '' : String(folio.creditLimit),
   );
+  const [arAccountId, setArAccountId] = useState(folio.arAccountId ?? '');
   const [busy, setBusy] = useState(false);
 
   async function handleSaveLimit() {
@@ -33,6 +34,21 @@ export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
       onUpdated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('folios.setLimit'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSaveArAccount() {
+    try {
+      setBusy(true);
+      await foliosAPI.setArAccount(folio.id, arAccountId.trim() || null);
+      toast.success(t('folios.setArAccount'));
+      onUpdated();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : t('folios.setArAccount'),
+      );
     } finally {
       setBusy(false);
     }
@@ -81,6 +97,25 @@ export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
         onClick={() => void handleSaveLimit()}
       >
         {t('folios.setLimit')}
+      </Button>
+      <div className="space-y-2">
+        <Label htmlFor="folioArAccountId">{t('folios.arAccountId')}</Label>
+        <Input
+          id="folioArAccountId"
+          name="arAccountId"
+          className="min-h-11"
+          value={arAccountId}
+          onChange={(event) => setArAccountId(event.target.value)}
+        />
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-11"
+        disabled={busy}
+        onClick={() => void handleSaveArAccount()}
+      >
+        {t('folios.setArAccount')}
       </Button>
       <Button
         type="button"
