@@ -48,6 +48,7 @@ model Property {
   rates       Rate[]
   nightAudits    NightAudit[]
   reportArchives ReportArchive[]
+  shifts         Shift[]
   createdAt      DateTime   @default(now())
 }
 
@@ -271,6 +272,7 @@ model FolioTransaction {
   @@index([userId])
   @@index([isVoid])
   @@index([relatedTrxId])
+  @@index([shiftId])
 }
 
 // Reason Code
@@ -408,19 +410,32 @@ model Payment {
 // ==================== SHIFT MANAGEMENT ====================
 
 model Shift {
-  id           String        @id @default(cuid())
-  shiftNumber  String        @unique
-  userId       String
-  user         User          @relation(fields: [userId], references: [id])
-  startTime    DateTime
-  endTime      DateTime?
-  openingCash  Decimal       @db.Decimal(12, 2)
-  closingCash  Decimal?      @db.Decimal(12, 2)
-  cashVariance Decimal?      @db.Decimal(12, 2)
-  status       ShiftStatus   @default(OPEN)
-  transactions Transaction[] // Legacy: Will be removed after migration
-  folioTransactions FolioTransaction[] // New: Use this instead
-  notes        String?
+  id                  String      @id @default(cuid())
+  shiftNumber         String      @unique
+  userId              String
+  user                User        @relation(fields: [userId], references: [id])
+  propertyId          String
+  property            Property    @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  businessDate        DateTime    @db.Date
+  startTime           DateTime
+  endTime             DateTime?
+  openingCash         Decimal     @db.Decimal(12, 2)
+  closingCash         Decimal?    @db.Decimal(12, 2)
+  expectedCash        Decimal?    @db.Decimal(12, 2)
+  cashVariance        Decimal?    @db.Decimal(12, 2)
+  status              ShiftStatus @default(OPEN)
+  closedBy            String?
+  managerApprovedBy   String?
+  managerApprovedAt   DateTime?
+  varianceReason      String?
+  handoverToUserId    String?
+  handoverFromShiftId String?
+  notes               String?
+  transactions        Transaction[] // Legacy: Will be removed after migration
+  folioTransactions   FolioTransaction[]
+
+  @@index([propertyId, businessDate, status])
+  @@index([userId, status])
 }
 
 // ==================== NIGHT AUDIT ====================

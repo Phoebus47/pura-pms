@@ -142,6 +142,326 @@ function handleNightAuditStatus(path: string) {
   return { ...audit, errors, reports };
 }
 
+function toDateKey(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value.slice(0, 10);
+  return parsed.toISOString().slice(0, 10);
+}
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function resolveCashierUserId(userId?: string): string {
+  if (!userId || userId === 'CURRENT_USER') return 'usr_mock_1';
+  return userId;
+}
+
+function findOpenShift(userId: string, propertyId?: string) {
+  return mockDb.shifts.find(
+    (s: any) =>
+      s.status === 'OPEN' &&
+      s.userId === userId &&
+      (!propertyId || s.propertyId === propertyId),
+  );
+}
+
+function getFolioPropertyId(folioId: string): string | undefined {
+  const folio = mockDb.folios.find((f: any) => f.id === folioId);
+  const reservation = mockDb.reservations.find(
+    (r: any) => r.id === folio?.reservationId,
+  );
+  return reservation?.propertyId;
+}
+
+function requireOpenShiftForCashier(userId: string, propertyId?: string) {
+  if (userId === 'SYSTEM') return null;
+  const shift = findOpenShift(userId, propertyId);
+  if (!shift) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'No open shift for this user and property',
+    });
+  }
+  return shift;
+}
+
+function computeExpectedCash(shift: any): number {
+  const cashCodeIds = new Set(
+    mockDb.transactionCodes
+      .filter((c: any) => c.code === '9000')
+      .map((c: any) => c.id),
+  );
+  const lines = mockDb.folioTransactions.filter(
+    (t: any) => t.shiftId === shift.id && cashCodeIds.has(t.trxCodeId),
+  );
+  let cashIn = 0;
+  let cashOut = 0;
+  for (const line of lines) {
+    const magnitude = Math.abs(Number(line.amountTotal));
+    if (line.sign === -1) cashIn += magnitude;
+    else if (line.sign === 1) cashOut += magnitude;
+  }
+  return round2(Number(shift.openingCash) + cashIn - cashOut);
+}
+
+function enrichShift(shift: any, withLines: boolean) {
+  const expectedCash =
+    shift.status === 'OPEN' ? computeExpectedCash(shift) : shift.expectedCash;
+  const result: any = { ...shift, expectedCash };
+  if (withLines) {
+    const txs = mockDb.folioTransactions.filter(
+      (t: any) => t.shiftId === shift.id,
+    );
+    const cashIds = new Set(
+      mockDb.transactionCodes
+        .filter((c: any) => c.code === '9000')
+        .map((c: any) => c.id),
+    );
+    result.transactionCount = txs.length;
+    result.cashLines = txs.filter((t: any) => cashIds.has(t.trxCodeId));
+  }
+  return result;
+}
+
+function nextShiftNumber(businessDate: string): string {
+  const ymd = toDateKey(businessDate).replaceAll('-', '');
+  return `SH-${ymd}-mock-${mockDb.shifts.length + 1}`;
+}
+
+function createOpenShift(input: {
+  userId: string;
+  propertyId: string;
+  openingCash: number;
+  businessDate: string;
+  handoverFromShiftId?: string | null;
+  notes?: string | null;
+}) {
+  const shift = {
+    id: `sh_mock_${Date.now()}_${mockDb.shifts.length}`,
+    shiftNumber: nextShiftNumber(input.businessDate),
+    userId: input.userId,
+    propertyId: input.propertyId,
+    businessDate: input.businessDate,
+    startTime: new Date().toISOString(),
+    endTime: null,
+    openingCash: Number(input.openingCash),
+    closingCash: null,
+    expectedCash: Number(input.openingCash),
+    cashVariance: null,
+    status: 'OPEN',
+    closedBy: null,
+    managerApprovedBy: null,
+    managerApprovedAt: null,
+    varianceReason: null,
+    handoverToUserId: null,
+    handoverFromShiftId: input.handoverFromShiftId ?? null,
+    notes: input.notes ?? null,
+  };
+  mockDb.shifts.push(shift);
+  return shift;
+}
+
+function closeShiftRecord(
+  shift: any,
+  closingCash: number,
+  userId: string,
+  varianceReason?: string,
+  notes?: string,
+) {
+  if (shift.status !== 'OPEN') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Shift is not OPEN',
+    });
+  }
+  const expectedCash = computeExpectedCash(shift);
+  const variance = round2(Number(closingCash) - expectedCash);
+  if (variance !== 0 && !varianceReason) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'varianceReason is required when cash does not balance',
+    });
+  }
+  shift.expectedCash = expectedCash;
+  shift.closingCash = Number(closingCash);
+  shift.cashVariance = variance;
+  shift.status = variance === 0 ? 'BALANCED' : 'CLOSED';
+  shift.endTime = new Date().toISOString();
+  shift.closedBy = userId;
+  shift.varianceReason = varianceReason || null;
+  if (notes !== undefined) shift.notes = notes;
+  return shift;
+}
+
+function handleShiftsGet(path: string, params: URLSearchParams) {
+  if (path === '/shifts') {
+    const propertyId = params.get('propertyId');
+    const businessDate = params.get('businessDate');
+    let list = mockDb.shifts;
+    if (propertyId) {
+      list = list.filter((s: any) => s.propertyId === propertyId);
+    }
+    if (businessDate) {
+      const key = toDateKey(businessDate);
+      list = list.filter((s: any) => toDateKey(s.businessDate) === key);
+    }
+    return list.map((s: any) => enrichShift(s, false));
+  }
+
+  if (path === '/shifts/current') {
+    const propertyId = params.get('propertyId');
+    const userId = resolveCashierUserId(params.get('userId') || undefined);
+    const shift = mockDb.shifts.find(
+      (s: any) =>
+        s.status === 'OPEN' &&
+        s.userId === userId &&
+        s.propertyId === propertyId,
+    );
+    if (!shift) {
+      throw new APIError(404, 'Not Found', { message: 'No open shift' });
+    }
+    return enrichShift(shift, false);
+  }
+
+  const match = /^\/shifts\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const shift = mockDb.shifts.find((s: any) => s.id === match[1]);
+  if (!shift) {
+    throw new APIError(404, 'Not Found', { message: 'Shift not found' });
+  }
+  return enrichShift(shift, true);
+}
+
+function handleShiftsOpen(body: any) {
+  if (!body?.propertyId || !body?.userId || body.openingCash === undefined) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId, userId, and openingCash are required',
+    });
+  }
+  const userId = resolveCashierUserId(body.userId);
+  if (
+    mockDb.shifts.some((s: any) => s.userId === userId && s.status === 'OPEN')
+  ) {
+    throw new APIError(409, 'Conflict', {
+      message: 'User already has an OPEN shift',
+    });
+  }
+  const property = mockDb.properties.find((p: any) => p.id === body.propertyId);
+  const businessDate =
+    body.businessDate || property?.businessDate || new Date().toISOString();
+  return createOpenShift({
+    userId,
+    propertyId: body.propertyId,
+    openingCash: Number(body.openingCash),
+    businessDate,
+    notes: body.notes ?? null,
+  });
+}
+
+function findShiftOr404(id: string) {
+  const shift = mockDb.shifts.find((s: any) => s.id === id);
+  if (!shift) {
+    throw new APIError(404, 'Not Found', { message: 'Shift not found' });
+  }
+  return shift;
+}
+
+function handleShiftsClose(path: string, body: any) {
+  const match = /^\/shifts\/([a-zA-Z0-9_-]+)\/close$/.exec(path);
+  if (!match) return;
+  if (body?.closingCash === undefined || !body?.userId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'closingCash and userId are required',
+    });
+  }
+  const shift = findShiftOr404(match[1]);
+  return closeShiftRecord(
+    shift,
+    Number(body.closingCash),
+    body.userId,
+    body.varianceReason,
+    body.notes,
+  );
+}
+
+function handleShiftsApprove(path: string, body: any) {
+  const match = /^\/shifts\/([a-zA-Z0-9_-]+)\/approve$/.exec(path);
+  if (!match) return;
+  if (!body?.userId) {
+    throw new APIError(400, 'Bad Request', { message: 'userId is required' });
+  }
+  const shift = findShiftOr404(match[1]);
+  if (shift.status !== 'CLOSED') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Only CLOSED shifts can be approved',
+    });
+  }
+  const approver = mockDb.users.find((u: any) => u.id === body.userId);
+  const isAdmin = approver?.role === 'ADMIN';
+  if (body.userId === shift.userId && !isAdmin) {
+    throw new APIError(403, 'Forbidden', {
+      message: 'Cannot self-approve',
+    });
+  }
+  shift.status = 'BALANCED';
+  shift.managerApprovedBy = body.userId;
+  shift.managerApprovedAt = new Date().toISOString();
+  if (body.notes !== undefined) shift.notes = body.notes;
+  return shift;
+}
+
+function handleShiftsHandover(path: string, body: any) {
+  const match = /^\/shifts\/([a-zA-Z0-9_-]+)\/handover$/.exec(path);
+  if (!match) return;
+  if (!body?.toUserId || body.countedCash === undefined || !body?.userId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'toUserId, countedCash, and userId are required',
+    });
+  }
+  const shift = findShiftOr404(match[1]);
+  const toUserId = resolveCashierUserId(body.toUserId);
+  if (
+    mockDb.shifts.some((s: any) => s.userId === toUserId && s.status === 'OPEN')
+  ) {
+    throw new APIError(409, 'Conflict', {
+      message: 'Target user already has an OPEN shift',
+    });
+  }
+  closeShiftRecord(
+    shift,
+    Number(body.countedCash),
+    body.userId,
+    body.varianceReason || body.notes,
+    body.notes,
+  );
+  shift.handoverToUserId = toUserId;
+  const opened = createOpenShift({
+    userId: toUserId,
+    propertyId: shift.propertyId,
+    openingCash: Number(body.countedCash),
+    businessDate: shift.businessDate,
+    handoverFromShiftId: shift.id,
+    notes: body.notes ?? null,
+  });
+  return { closed: shift, opened };
+}
+
+function handleShifts(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/shifts')) return;
+  if (method === 'GET') return handleShiftsGet(path, params);
+  if (method === 'POST' && path === '/shifts') return handleShiftsOpen(body);
+  if (method === 'POST') {
+    return (
+      handleShiftsClose(path, body) ??
+      handleShiftsApprove(path, body) ??
+      handleShiftsHandover(path, body)
+    );
+  }
+}
+
 function handleNightAuditRun(body: any) {
   if (!body?.propertyId || !body?.businessDate) {
     throw new APIError(400, 'Bad Request', {
@@ -158,6 +478,25 @@ function handleNightAuditRun(body: any) {
       status: 'ALREADY_COMPLETED',
       message: 'Night audit for this date is already completed',
     };
+  }
+  if (existing?.status === 'IN_PROGRESS') {
+    return {
+      status: 'ALREADY_IN_PROGRESS',
+      message: 'Night audit for this date is already in progress',
+    };
+  }
+
+  const hasOpenShift = mockDb.shifts.some((s: any) => {
+    if (s.status !== 'OPEN' || s.propertyId !== body.propertyId) return false;
+    if (body.businessDate && s.businessDate) {
+      return toDateKey(s.businessDate) === toDateKey(body.businessDate);
+    }
+    return true;
+  });
+  if (hasOpenShift) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Cannot start night audit while shifts are OPEN',
+    });
   }
 
   const audit = existing ?? {
@@ -232,6 +571,19 @@ function handleFolioVoid(path: string, body: any) {
     });
   }
 
+  const voidUserId =
+    body?.userId === 'SYSTEM' ? 'SYSTEM' : resolveCashierUserId(body?.userId);
+  const folioIdForVoid = mockDb.folioWindows.find(
+    (w: any) => w.id === original.windowId,
+  )?.folioId;
+  const voidShift =
+    voidUserId === 'SYSTEM'
+      ? null
+      : requireOpenShiftForCashier(
+          voidUserId,
+          folioIdForVoid ? getFolioPropertyId(folioIdForVoid) : undefined,
+        );
+
   const correction = {
     id: `ft_void_${Date.now()}`,
     windowId: original.windowId,
@@ -244,6 +596,8 @@ function handleFolioVoid(path: string, body: any) {
     reference: original.reference || '',
     remark: body.remark || '',
     reasonCodeId: body.reasonCodeId,
+    userId: voidUserId,
+    shiftId: voidShift?.id ?? null,
     createdAt: new Date().toISOString(),
     isVoid: true,
     relatedTrxId: original.id,
@@ -287,6 +641,13 @@ function handleFolioPost(path: string, body: any) {
     throw new APIError(404, 'Not Found', { message: 'Trx Code not found' });
   }
 
+  const postUserId =
+    body?.userId === 'SYSTEM' ? 'SYSTEM' : resolveCashierUserId(body?.userId);
+  const postShift = requireOpenShiftForCashier(
+    postUserId,
+    getFolioPropertyId(folioId),
+  );
+
   const net = Number(body.amountNet);
   const srv = tc.hasService ? net * ((tc.serviceRate as number) / 100) : 0;
   const tax = tc.hasTax ? (net + srv) * ((tc.taxRate as number) / 100) : 0;
@@ -303,7 +664,8 @@ function handleFolioPost(path: string, body: any) {
     amountTotal: total,
     sign,
     reference: body.reference || '',
-    userId: 'usr_mock_1',
+    userId: postUserId,
+    shiftId: postShift?.id ?? null,
     createdAt: new Date().toISOString(),
     isVoid: false,
   };
@@ -579,6 +941,7 @@ export async function routeMockRequest<T>(
       () => handleMetrics(method, path),
       () => handleFinancial(method, path),
       () => handleNightAudit(method, path, body),
+      () => handleShifts(method, path, body, params),
       () => handleFolios(method, path, body),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

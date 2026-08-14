@@ -126,6 +126,7 @@ describe('Financial Module Relations', () => {
       where: { confirmNumber: 'REL-TEST-001' },
     });
     await prisma.guest.deleteMany({ where: { email: 'relation@test.com' } });
+    await prisma.shift.deleteMany({ where: { userId: testUser.id } });
     await prisma.user.deleteMany({ where: { email: 'relationuser@test.com' } });
     await prisma.role.deleteMany({ where: { name: 'Relation Test Role' } });
     await prisma.transactionCode.deleteMany({
@@ -240,6 +241,8 @@ describe('Financial Module Relations', () => {
         data: {
           shiftNumber: `SHIFT-REL-${Date.now()}`,
           userId: testUser.id,
+          propertyId: testProperty.id,
+          businessDate: testProperty.businessDate,
           startTime: new Date(),
           openingCash: 0,
         },
@@ -275,6 +278,52 @@ describe('Financial Module Relations', () => {
 
       // Clean up
       await prisma.folioTransaction.delete({ where: { id: transaction.id } });
+      await prisma.shift.delete({ where: { id: shift.id } });
+    });
+
+    it('should belong to Property with Restrict delete', async () => {
+      const shift = await prisma.shift.create({
+        data: {
+          shiftNumber: `SHIFT-PROP-${Date.now()}`,
+          userId: testUser.id,
+          propertyId: testProperty.id,
+          businessDate: testProperty.businessDate,
+          startTime: new Date(),
+          openingCash: 0,
+        },
+      });
+
+      const propertyWithShifts = await prisma.property.findUnique({
+        where: { id: testProperty.id },
+        include: { shifts: true },
+      });
+
+      expect(propertyWithShifts?.shifts.length).toBeGreaterThan(0);
+      expect(
+        propertyWithShifts?.shifts.some((row) => row.id === shift.id),
+      ).toBe(true);
+
+      const shiftIndexes = await prisma.$queryRaw<Array<{ indexname: string }>>`
+        SELECT indexname FROM pg_indexes
+        WHERE indexname IN (
+          'Shift_propertyId_businessDate_status_idx',
+          'Shift_userId_status_idx',
+          'FolioTransaction_shiftId_idx'
+        )
+      `;
+      const indexNames = shiftIndexes.map((row) => row.indexname);
+      expect(indexNames).toEqual(
+        expect.arrayContaining([
+          'Shift_propertyId_businessDate_status_idx',
+          'Shift_userId_status_idx',
+          'FolioTransaction_shiftId_idx',
+        ]),
+      );
+
+      await expect(
+        prisma.property.delete({ where: { id: testProperty.id } }),
+      ).rejects.toThrow();
+
       await prisma.shift.delete({ where: { id: shift.id } });
     });
   });

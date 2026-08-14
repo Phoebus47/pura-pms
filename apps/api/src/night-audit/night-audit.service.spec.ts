@@ -3,6 +3,7 @@ import { NightAuditService } from './night-audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { FoliosService } from '../folios/folios.service';
 import { getQueueToken } from '@nestjs/bullmq';
+import { BadRequestException } from '@nestjs/common';
 
 const mockPrismaService = {
   reservation: {
@@ -28,6 +29,9 @@ const mockPrismaService = {
   },
   reportArchive: {
     create: vi.fn(),
+  },
+  shift: {
+    count: vi.fn(),
   },
   room: {
     update: vi.fn(),
@@ -73,6 +77,7 @@ describe('NightAuditService', () => {
     it('should create an audit record and queue the job', async () => {
       const businessDate = new Date('2025-01-15');
       mockPrismaService.nightAudit.findUnique.mockResolvedValue(null);
+      mockPrismaService.shift.count.mockResolvedValue(0);
       mockPrismaService.nightAudit.upsert.mockResolvedValue({ id: 'audit-1' });
       mockQueue.add.mockResolvedValue({});
 
@@ -97,10 +102,12 @@ describe('NightAuditService', () => {
       mockPrismaService.nightAudit.findUnique.mockResolvedValue({
         status: 'COMPLETED',
       });
+      mockPrismaService.shift.count.mockResolvedValue(1);
 
       const result = await service.startAudit('prop-1', businessDate);
 
       expect(result.status).toBe('ALREADY_COMPLETED');
+      expect(mockPrismaService.shift.count).not.toHaveBeenCalled();
       expect(mockQueue.add).not.toHaveBeenCalled();
     });
 
@@ -110,12 +117,51 @@ describe('NightAuditService', () => {
         id: 'audit-in-progress',
         status: 'IN_PROGRESS',
       });
+      mockPrismaService.shift.count.mockResolvedValue(1);
 
       const result = await service.startAudit('prop-1', businessDate);
 
       expect(result.status).toBe('ALREADY_IN_PROGRESS');
       expect(result.nightAuditId).toBe('audit-in-progress');
+      expect(mockPrismaService.shift.count).not.toHaveBeenCalled();
       expect(mockQueue.add).not.toHaveBeenCalled();
+    });
+
+    it('should reject start when an OPEN shift exists', async () => {
+      const businessDate = new Date('2025-01-15');
+      mockPrismaService.nightAudit.findUnique.mockResolvedValue(null);
+      mockPrismaService.shift.count.mockResolvedValue(2);
+
+      await expect(service.startAudit('prop-1', businessDate)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.startAudit('prop-1', businessDate)).rejects.toThrow(
+        /open shift/i,
+      );
+      expect(mockPrismaService.nightAudit.upsert).not.toHaveBeenCalled();
+      expect(mockQueue.add).not.toHaveBeenCalled();
+    });
+
+    it('should start when all shifts are CLOSED and keep the jobId', async () => {
+      const businessDate = new Date('2025-01-15');
+      mockPrismaService.nightAudit.findUnique.mockResolvedValue(null);
+      mockPrismaService.shift.count.mockResolvedValue(0);
+      mockPrismaService.nightAudit.upsert.mockResolvedValue({ id: 'audit-1' });
+      mockQueue.add.mockResolvedValue({});
+
+      const result = await service.startAudit('prop-1', businessDate);
+
+      expect(result.status).toBe('STARTED');
+      expect(mockQueue.add).toHaveBeenCalledWith(
+        'process-audit',
+        expect.objectContaining({
+          propertyId: 'prop-1',
+          auditId: 'audit-1',
+        }),
+        expect.objectContaining({
+          jobId: 'night-audit:prop-1:2025-01-15',
+        }),
+      );
     });
   });
 

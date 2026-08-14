@@ -1,5 +1,7 @@
 import { foliosAPI } from './api/folios';
+import { APIError } from './api/client';
 import { toast } from './toast';
+import { t } from './i18n';
 import type { PostTransactionDto } from './api/folios';
 
 interface SubmitFolioTransactionOptions {
@@ -9,6 +11,31 @@ interface SubmitFolioTransactionOptions {
   readonly errorPrefix: string;
   readonly onSuccess: () => void;
   readonly onClose: () => void;
+}
+
+function errorDataMessage(err: APIError): string {
+  if (!err.data || typeof err.data !== 'object' || !('message' in err.data)) {
+    return '';
+  }
+  const message = (err.data as { message?: unknown }).message;
+  return typeof message === 'string' ? message : '';
+}
+
+export function isNoOpenShiftError(err: unknown): boolean {
+  if (!(err instanceof APIError) || err.status !== 400) {
+    return false;
+  }
+  const combined = `${errorDataMessage(err)} ${err.message}`.toLowerCase();
+  return combined.includes('open shift');
+}
+
+export function toastPostingError(err: unknown, errorPrefix: string): void {
+  if (isNoOpenShiftError(err)) {
+    toast.error(t('shifts.noOpenShift'));
+    return;
+  }
+  const suffix = err instanceof Error ? err.message : '';
+  toast.error(`${errorPrefix}: ${suffix}`);
 }
 
 export async function submitFolioTransaction({
@@ -25,6 +52,6 @@ export async function submitFolioTransaction({
     onSuccess();
     onClose();
   } catch (err) {
-    toast.error(`${errorPrefix}: ${(err as Error).message}`);
+    toastPostingError(err, errorPrefix);
   }
 }

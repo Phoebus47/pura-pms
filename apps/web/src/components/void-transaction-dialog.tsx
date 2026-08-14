@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { reasonCodesAPI, type ReasonCode } from '@/lib/api/reason-codes';
 import { foliosAPI } from '@/lib/api/folios';
 import { toast } from '@/lib/toast';
+import { toastPostingError } from '@/lib/posting';
 
 interface VoidTransactionDialogProps {
   readonly isOpen: boolean;
@@ -92,9 +93,7 @@ export function VoidTransactionDialog({
       onSuccess();
       onClose();
     } catch (err) {
-      toast.error(
-        `Failed to void transaction: ${(err as Error).message ?? ''}`,
-      );
+      toastPostingError(err, 'Failed to void transaction');
     } finally {
       setSubmitting(false);
     }

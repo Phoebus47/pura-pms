@@ -4,6 +4,7 @@ import {
   Users,
   Bed,
   CreditCard,
+  Clock,
   FileText,
   Settings,
   type LucideIcon,
@@ -21,6 +22,7 @@ export const navigationItems: NavigationItem[] = [
   { name: 'Guests', href: '/guests', icon: Users },
   { name: 'Rooms', href: '/rooms', icon: Bed },
   { name: 'Billing', href: '/billing', icon: CreditCard },
+  { name: 'Shifts', href: '/shifts', icon: Clock },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
@@ -34,6 +36,7 @@ export const primaryBottomNavItems: NavigationItem[] = [
 ];
 
 export const moreBottomNavItems: NavigationItem[] = [
+  { name: 'Shifts', href: '/shifts', icon: Clock },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
