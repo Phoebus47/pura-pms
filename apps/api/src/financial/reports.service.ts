@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { summarizeFlash } from './reports-flash';
+import {
+  summarizeTrialBalance,
+  type TrialBalanceReport,
+} from './reports-trial-balance';
 
 export interface RevenueBucket {
   net: number;
@@ -12,6 +17,21 @@ export interface DailyRevenueReport {
   businessDate: string;
   propertyId: string;
   summary: Record<string, RevenueBucket>;
+  totalRevenue: number;
+}
+
+export interface DailyFlashReport {
+  businessDate: string;
+  propertyId: string;
+  occupancy: {
+    totalRooms: number;
+    occupiedRooms: number;
+    occupancyRate: number;
+  };
+  arrivals: number;
+  departures: number;
+  stayOvers: number;
+  roomRevenue: number;
   totalRevenue: number;
 }
 
@@ -29,10 +49,7 @@ export class ReportsService {
       `Generating DRR for property ${propertyId} on ${date.toISOString()}`,
     );
 
-    const startDate = new Date(date);
-    startDate.setHours(0, 0, 0, 0);
-
-    // Get all transactions for the day
+    const startDate = this.startOfDay(date);
     const transactions = await this.prisma.folioTransaction.findMany({
       where: {
         businessDate: startDate,
@@ -52,7 +69,6 @@ export class ReportsService {
       },
     });
 
-    // Group by TrxGroup (ROOM, F&B, etc.)
     const summary = transactions.reduce<Record<string, RevenueBucket>>(
       (acc, trx) => {
         const group = trx.trxCode.group;
@@ -74,5 +90,84 @@ export class ReportsService {
       summary,
       totalRevenue: Object.values(summary).reduce((sum, g) => sum + g.total, 0),
     };
+  }
+
+  async getDailyFlash(
+    propertyId: string,
+    date: Date,
+  ): Promise<DailyFlashReport> {
+    this.logger.log(
+      `Generating Daily Flash for property ${propertyId} on ${date.toISOString()}`,
+    );
+    const day = this.startOfDay(date);
+    const next = new Date(day);
+    next.setUTCDate(next.getUTCDate() + 1);
+
+    const [totalRooms, reservations, drr] = await Promise.all([
+      this.prisma.room.count({ where: { propertyId } }),
+      this.prisma.reservation.findMany({
+        where: {
+          room: { propertyId },
+          status: { notIn: ['CANCELLED', 'NO_SHOW'] },
+          OR: [
+            { checkIn: { gte: day, lt: next } },
+            { checkOut: { gte: day, lt: next } },
+            { AND: [{ checkIn: { lt: day } }, { checkOut: { gt: day } }] },
+          ],
+        },
+        select: {
+          id: true,
+          status: true,
+          checkIn: true,
+          checkOut: true,
+          isDayUse: true,
+          roomId: true,
+        },
+      }),
+      this.getDailyRevenueReport(propertyId, date),
+    ]);
+
+    const stats = summarizeFlash(
+      reservations,
+      day,
+      totalRooms,
+      drr.summary.ROOM?.total ?? 0,
+      drr.totalRevenue,
+    );
+
+    return {
+      businessDate: date.toISOString().split('T')[0],
+      propertyId,
+      ...stats,
+    };
+  }
+
+  async getTrialBalance(
+    propertyId: string,
+    date: Date,
+  ): Promise<TrialBalanceReport> {
+    const day = this.startOfDay(date);
+    const lines = await this.prisma.journalLine.findMany({
+      where: {
+        journal: {
+          propertyId,
+          entryDate: day,
+          isPosted: true,
+        },
+      },
+      include: { account: true },
+    });
+    const summary = summarizeTrialBalance(lines);
+    return {
+      businessDate: date.toISOString().split('T')[0],
+      propertyId,
+      ...summary,
+    };
+  }
+
+  private startOfDay(date: Date): Date {
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    return startDate;
   }
 }

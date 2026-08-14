@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FinancialController } from './financial.controller';
 import { FinancialService } from './financial.service';
 import { ReportsService } from './reports.service';
+import { JournalsService } from './journals.service';
 
 const mockFinancialService = {
   findAllTransactionCodes: vi.fn(),
@@ -13,6 +14,14 @@ const mockFinancialService = {
 
 const mockReportsService = {
   getDailyRevenueReport: vi.fn(),
+  getDailyFlash: vi.fn(),
+  getTrialBalance: vi.fn(),
+};
+
+const mockJournalsService = {
+  listAccounts: vi.fn(),
+  findByDate: vi.fn(),
+  postForBusinessDate: vi.fn(),
 };
 
 describe('FinancialController', () => {
@@ -31,6 +40,10 @@ describe('FinancialController', () => {
         {
           provide: ReportsService,
           useValue: mockReportsService,
+        },
+        {
+          provide: JournalsService,
+          useValue: mockJournalsService,
         },
       ],
     }).compile();
@@ -139,6 +152,82 @@ describe('FinancialController', () => {
       expect(mockReportsService.getDailyRevenueReport).toHaveBeenCalledWith(
         'prop-1',
         expect.any(Date),
+      );
+    });
+  });
+
+  describe('getFlash', () => {
+    it('should delegate to reports service with parsed date', async () => {
+      const mockFlash = {
+        businessDate: '2025-01-15',
+        propertyId: 'prop-1',
+        occupancy: { totalRooms: 10, occupiedRooms: 1, occupancyRate: 10 },
+        arrivals: 0,
+        departures: 0,
+        stayOvers: 1,
+        roomRevenue: 0,
+        totalRevenue: 0,
+      };
+      mockReportsService.getDailyFlash.mockResolvedValue(mockFlash);
+
+      const result = await controller.getFlash('prop-1', '2025-01-15');
+
+      expect(result).toEqual(mockFlash);
+      expect(mockReportsService.getDailyFlash).toHaveBeenCalledWith(
+        'prop-1',
+        expect.any(Date),
+      );
+    });
+  });
+
+  describe('getTrialBalance', () => {
+    it('should delegate to reports service', async () => {
+      const mockTb = {
+        businessDate: '2025-01-15',
+        propertyId: 'prop-1',
+        rows: [],
+        totalDebit: 0,
+        totalCredit: 0,
+      };
+      mockReportsService.getTrialBalance.mockResolvedValue(mockTb);
+
+      const result = await controller.getTrialBalance('prop-1', '2025-01-15');
+
+      expect(result).toEqual(mockTb);
+      expect(mockReportsService.getTrialBalance).toHaveBeenCalledWith(
+        'prop-1',
+        expect.any(Date),
+      );
+    });
+  });
+
+  describe('journals', () => {
+    it('should list GL accounts', async () => {
+      const accounts = [{ id: 'gl-1', code: '1100' }];
+      mockJournalsService.listAccounts.mockResolvedValue(accounts);
+
+      const result = await controller.listGlAccounts();
+
+      expect(result).toEqual(accounts);
+    });
+
+    it('should post journals for a business date', async () => {
+      const entry = { id: 'je-1' };
+      mockJournalsService.postForBusinessDate.mockResolvedValue(entry);
+
+      const result = await controller.postJournals({
+        propertyId: 'prop-1',
+        businessDate: '2026-08-14',
+        source: 'MANUAL',
+        postedBy: 'user-1',
+      });
+
+      expect(result).toEqual(entry);
+      expect(mockJournalsService.postForBusinessDate).toHaveBeenCalledWith(
+        'prop-1',
+        '2026-08-14',
+        'MANUAL',
+        'user-1',
       );
     });
   });

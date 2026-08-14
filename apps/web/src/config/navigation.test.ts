@@ -10,8 +10,13 @@ import {
   Users,
   Bed,
   CreditCard,
+  Clock,
   FileText,
   Settings,
+  ArrowLeftRight,
+  Receipt,
+  Landmark,
+  Wallet,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -73,6 +78,13 @@ describe('navigation', () => {
       expect(billingItem?.icon).toBe(CreditCard);
     });
 
+    it('should include Shifts navigation item', () => {
+      const shiftsItem = navigationItems.find((item) => item.name === 'Shifts');
+      expect(shiftsItem).toBeDefined();
+      expect(shiftsItem?.href).toBe('/shifts');
+      expect(shiftsItem?.icon).toBe(Clock);
+    });
+
     it('should include Reports navigation item', () => {
       const reportsItem = navigationItems.find(
         (item) => item.name === 'Reports',
@@ -80,6 +92,42 @@ describe('navigation', () => {
       expect(reportsItem).toBeDefined();
       expect(reportsItem?.href).toBe('/reports');
       expect(reportsItem?.icon).toBe(FileText);
+    });
+
+    it('should include Exchange rates navigation item', () => {
+      const fxItem = navigationItems.find(
+        (item) => item.name === 'Exchange rates',
+      );
+      expect(fxItem).toBeDefined();
+      expect(fxItem?.href).toBe('/exchange-rates');
+      expect(fxItem?.icon).toBe(ArrowLeftRight);
+    });
+
+    it('should include Tax invoices navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Tax invoices',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/tax-invoices');
+      expect(item?.icon).toBe(Receipt);
+    });
+
+    it('should include Accounts receivable navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Accounts receivable',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/ar-accounts');
+      expect(item?.icon).toBe(Landmark);
+    });
+
+    it('should include Card pre-auths navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Card pre-auths',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/card-preauths');
+      expect(item?.icon).toBe(Wallet);
     });
 
     it('should include Settings navigation item', () => {
@@ -98,7 +146,12 @@ describe('navigation', () => {
         'Guests',
         'Rooms',
         'Billing',
+        'Shifts',
         'Reports',
+        'Exchange rates',
+        'Tax invoices',
+        'Accounts receivable',
+        'Card pre-auths',
         'Settings',
       ];
 
@@ -141,13 +194,23 @@ describe('navigation', () => {
   });
 
   describe('moreBottomNavItems', () => {
-    it('should keep Reports and Settings in the overflow menu', () => {
+    it('should keep extra items in the overflow menu', () => {
       expect(moreBottomNavItems.map((item) => item.name)).toEqual([
+        'Shifts',
         'Reports',
+        'Exchange rates',
+        'Tax invoices',
+        'Accounts receivable',
+        'Card pre-auths',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
+        '/shifts',
         '/reports',
+        '/exchange-rates',
+        '/tax-invoices',
+        '/ar-accounts',
+        '/card-preauths',
         '/settings',
       ]);
     });

@@ -1,73 +1,82 @@
-# Current Sprint — Phase 4 Split Stay (PR 1)
+# Current Sprint — Phase 3 Shift Management (PR 1)
 
-**Theme:** Planned room-type segments on one reservation  
-**Goal:** Create / update / display split stays (different room types, one confirmation). Automatic room move at split point is **out of scope**.  
-**Branch:** `cursor/feat-split-stay-6a5d`  
-**Source:** `docs/planning/prd.md` §4.2 + Phase 4; `docs/planning/roadmap.md` Split Stay (room-type slices only)  
-**Depends on:** Day-use (shipped). Do not reopen Room Move.
+**Theme:** Cashier shift open/close, drawer recon, handover  
+**Goal:** Front-desk can open a shift, post folio cash onto that shift, close with counted cash, record variance, get manager approval, and hand over the drawer. Night Audit refuses to start while any shift for that property + businessDate is still `OPEN`.  
+**Branch:** `cursor/feat-shift-management-6a5d`  
+**Base:** `dev`  
+**Source:** `docs/planning/prd.md` §4.6 + §12; `docs/planning/phase-3-closeout.md` P3-PR1  
+**ADR:** `docs/adr/003-shift-management-night-audit-gate.md` (architect contract — follow it if this checklist and the ADR disagree)  
+**Depends on:** Folio posting (WP4) and Night Audit (WP5) — both shipped. Do not reopen Day-use (#33) or Split Stay (#39). Do not mix Phase 4 epics.
 
 ## Working agreements
 
-- **Split stay** = ≥2 planned `ReservationStay` slices on one reservation; ≥2 distinct `roomTypeId`.
-- **No backfill.** Header-only reservations stay as today (`stays` empty).
-- `Reservation.roomId` = **CURRENT** room (`stays[0].roomId` on create; same after replace-on-update).
-- `isDayUse` + `stays` = invalid (400).
-- Nested on existing `POST` / `PATCH /reservations` (`stays?: ReservationStayInputDto[]`). No new REST resource.
-- Inventory = header-only `buildRoomConflictWhere` (`stays: none`) **UNION** `ReservationStay` overlap. Split headers are not counted on `Reservation.roomId` for the full stay.
-- Night Audit PR 1: post **covering stay** rate for `businessDate`. Not a new job.
-- No hardcoded UI copy. New strings in `messages/en.json` + `messages/th.json` (camelCase). Do not build full i18n foundation (locale routing) in this PR.
+- **One epic, one PR.** Conventional Commits (`feat(shifts): …`). Tests co-located. No `any`, no `console.log`. Prisma **^6.19.2** (do not bump to v7).
+- **Schema already has** `Shift` (`openingCash`, `closingCash`, `cashVariance`, `ShiftStatus` `OPEN` / `CLOSED` / `BALANCED`) and `FolioTransaction.shiftId`. There is **no** Shift NestJS module today (grep is zero under `apps/api/src`).
+- **Additive schema only.** Do not delete legacy `Transaction` / `Payment`. Do not drop `Shift.transactions`.
+- Cash drawer expected amount uses seeded trx code **`9000` Cash Payment** (`packages/database/prisma/seed-data.json`). Do not add a new `isCash` flag on `TransactionCode` in this PR.
+- Night Audit stays idempotent (same BullMQ `jobId`, same posting-level skip). The only NA change is a **pre-enqueue OPEN-shift gate after** the existing `COMPLETED` / `IN_PROGRESS` short-circuits (ADR 002 + ADR 003).
+- Night Audit / `userId: 'SYSTEM'` posts **must not** require or attach a shift.
+- A user may have **at most one `OPEN` shift**. A property may have several open shifts (multiple cashiers).
+- Manager approval: `User.role.permissions` includes `'ALL'` (seeded Super Admin). Super Admin **may** self-approve. Do **not** invent a new RBAC module; optional additive permission `'SHIFT_APPROVE'` is allowed. `'SHIFT_APPROVE'` without `'ALL'` cannot self-approve.
+- No hardcoded UI copy. New strings in `apps/web/src/messages/en.json` + `th.json` (e.g. `shifts.*`). Consume via existing `t()` in `apps/web/src/lib/i18n.ts` (same Split Stay pattern). Do not build next-intl locale routing.
 - Tests with the change; >80% on new critical paths.
 
 ## Invariants (do not reopen)
 
-When `stays` is present and non-empty:
+| Rule            | Constraint                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open            | `POST /shifts` creates `status=OPEN`, `startTime=now`, `endTime=null`. Reject if the same `userId` already has an `OPEN` shift (409).                                                                                                                                                                                                                                                                                                                                                             |
+| Identity        | `propertyId` + `businessDate` required. `businessDate` = that property’s `Property.businessDate` unless the DTO sends an explicit date (must match property current date — do not open onto a past audited date).                                                                                                                                                                                                                                                                                 |
+| Posting         | Cashier `FoliosService.postTransaction` / `voidTransaction` (correction row only) set `shiftId` to the caller’s `OPEN` shift for `{ userId, propertyId }`. Property via `folio → reservation → room.propertyId` (same path as DRR). Do **not** require `shift.businessDate ===` post `businessDate`. If none → 400. Skip when `userId === 'SYSTEM'`. Original row’s `shiftId` is never rewritten on void.                                                                                         |
+| Expected cash   | `openingCash + Σ amountTotal(sign=-1) − Σ amountTotal(sign=+1)` of `FolioTransaction` on this `shiftId` where `trxCode.code === '9000'`. `amountTotal` is positive; PAYMENT `sign` is `-1` (cash **in**). Void corrections invert `sign` to `+1` (cash **out**) on the voiding shift. **Do not** filter `isVoid`. **Do not** use `amountTotal * sign` (folio balance direction). Equivalent: `openingCash + Σ (amountTotal * -sign)`. Persist snapshot on close. While `OPEN`, GET computes live. |
+| Variance        | `cashVariance = closingCash - expectedCash` (counted minus expected). Compare at 2 decimal places (`round2`, same as posting). Persist `expectedCash` on close.                                                                                                                                                                                                                                                                                                                                   |
+| Close           | `closingCash` required. `endTime=now`. If `cashVariance === 0` → `BALANCED`. If ≠ 0 → `CLOSED` (awaiting approval). Cannot close twice. Cannot post to `CLOSED`/`BALANCED`.                                                                                                                                                                                                                                                                                                                       |
+| Approve         | Only `CLOSED` with nonzero variance. Sets `managerApprovedBy`, `managerApprovedAt`, `status=BALANCED`. Approver ≠ shift owner → 403, **except** Super Admin (`permissions` includes `'ALL'`) who **may** self-approve (seed `admin@pura.com`). Do **not** count other managers (`User` has no `propertyId`). `'SHIFT_APPROVE'` without `'ALL'` cannot self-approve.                                                                                                                               |
+| Handover        | Close current (same variance rules) then open a new `OPEN` shift for `toUserId` with `openingCash = countedCash`, same `propertyId`/`businessDate`, `handoverFromShiftId` set. Target user must not already have an `OPEN` shift. Nonzero variance on the outgoing shift does not block opening the successor.                                                                                                                                                                                    |
+| Night Audit     | `startAudit` order: (1) `COMPLETED` → `ALREADY_COMPLETED` (no shift check); (2) `IN_PROGRESS` → `ALREADY_IN_PROGRESS` (no shift check); (3) any `OPEN` shift for `{ propertyId, businessDate }` → 400, **do not** upsert/enqueue; (4) else upsert + enqueue. `CLOSED` (unapproved variance) does **not** block NA. `jobId` / posting skip unchanged. See ADR 002 + ADR 003.                                                                                                                       |
+| Immutable money | Folio posts remain append-only. Shift close never updates `FolioTransaction` rows.                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-| Rule           | Constraint                                                     |
-| -------------- | -------------------------------------------------------------- |
-| Count          | `length ≥ 2`                                                   |
-| Types          | ≥ 2 distinct `roomTypeId` (resolved from each `roomId`)        |
-| Adjacent rooms | adjacent segments have different `roomId`                      |
-| Contiguous     | `stays[i].endDate === stays[i+1].startDate` (no gaps/overlaps) |
-| Bounds         | `stays[0].startDate === checkIn`; last `endDate === checkOut`  |
-| First room     | `stays[0].roomId === Reservation.roomId`                       |
-| Segment dates  | each `startDate < endDate`; overnight only (not day-use)       |
+**Status machine**
 
-**PATCH `stays` semantics**
+```
+OPEN ──close variance=0──► BALANCED
+OPEN ──close variance≠0──► CLOSED ──manager approve──► BALANCED
+OPEN ──handover──► (this shift CLOSED or BALANCED) + new OPEN for other user
+```
 
-- omitted → leave existing stays unchanged
-- `length ≥ 2` → **replace** (deleteMany + create); set header `roomId`/`roomRate`/`rateCode` from `stays[0]`; recompute `nights` + `totalAmount`
-- `[]` → delete stays; revert to header-only (header room/dates remain)
-- `isDayUse: true` with any stays → 400
+No reopen. No delete.
 
 ---
 
 ## Already done (do not redo)
 
-- [x] Prisma `ReservationStay` + FKs/indexes + `Room`/`RoomType` reverse relations
-- [x] Migration `20260814164000_add_reservation_stay`
-- [x] `reservation-stay.util.ts`: `splitStayError`, `calculateSplitStayTotal`, `buildStaySegmentConflictWhere`
-- [x] `ReservationStayInputDto` nested on `CreateReservationDto` (inherited by PATCH via `PartialType`)
-- [x] `create()` split path: resolve drafts, validate, `assertRoomsAvailable` (header **and** stay overlap), nested `stays.create`
-- [x] Service specs: create split stay; reject day-use + stays
+- [x] Prisma `Shift` + `ShiftStatus` + `User.shifts` + `FolioTransaction.shiftId` + legacy `Transaction.shiftId`
+- [x] Folio posting / void (`apps/api/src/folios/folios.service.ts`) — **does not set `shiftId` yet**
+- [x] Night Audit WP5 idempotent run/status/archive
+- [x] Seed trx code `9000` Cash Payment
+- [x] Web `t()` helper + `messages/en.json` + `th.json`
+- [x] `/billing`, `/night-audit` pages
 
 ---
 
 ## 1. Step-by-step implementation order (this PR only)
 
-1. **DB-1** `prisma generate` so `ReservationStay` types compile.
-2. **DB-2** Relations test (cascade, unique sequence, header-only empty stays).
-3. **BE-1** Util specs + `findStayCoveringBusinessDate`.
-4. **BE-2** `update()` replace / clear stays + inventory + day-use guard.
-5. **BE-3** `findAll` / `findOne` / `findByConfirmNumber` include ordered `stays`.
-6. **BE-4** Calendar occupancy **per segment** (not header `roomId` for the whole stay).
-7. **BE-5** `GET /rooms/availability` treats stay overlap as occupied.
-8. **BE-6** Night Audit `processRoomPosting`: rate from covering stay.
-9. **FE-1** Types + API client `stays`.
-10. **FE-2** i18n keys for new Split Stay copy.
-11. **FE-3** New-reservation form: add segments; mutually exclusive with day-use.
-12. **FE-4** List + detail badge/timeline.
-13. **FE-5** Calendar: paint each segment on its room/dates.
-14. **QA-1..QA-4** Specs/tests per layer; type-check + lint.
+1. **DB-1** Additive `Shift` fields + `Property.shifts` + `FolioTransaction` `@@index([shiftId])`. Migration. Do not bump Prisma major.
+2. **DB-2** `prisma generate`.
+3. **DB-3** Relations tests (open shift, folio trx → shift, cascade/restrict).
+4. **BE-1** New `shifts` NestJS module: open, current, list, get-by-id (with cash summary).
+5. **BE-2** Close + expected cash + variance + status.
+6. **BE-3** Manager approve.
+7. **BE-4** Handover.
+8. **BE-5** Attach `shiftId` on folio post/void; SYSTEM skip; 400 if no open shift.
+9. **BE-6** Night Audit `startAudit` OPEN-shift gate only.
+10. **BE-7** Register `ShiftsModule` in `AppModule`; JwtAuthGuard on shift routes.
+11. **FE-1** Types + API client + mock router.
+12. **FE-2** i18n keys.
+13. **FE-3** `/shifts` page: open, drawer summary, close, handover, approve.
+14. **FE-4** Nav link (desktop + more-menu; do not steal primary bottom slots).
+15. **FE-5** Billing: surface missing open shift on post failure (toast from messages).
+16. **QA-1..QA-4** Specs per layer; type-check + lint.
 
 ---
 
@@ -75,94 +84,134 @@ When `stays` is present and non-empty:
 
 ### Database
 
-| ID       | Task                                                                                                                                                                                       | Complexity | Status      |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------- |
-| **DB-1** | Run `pnpm --filter database exec prisma generate` (and API generate if separate). Confirm `@pura/database` exports `ReservationStay`.                                                      | Low        | Not started |
-| **DB-2** | `packages/database/prisma/relations.test.ts`: Reservation → stays (ordered, cascade on delete); Room/RoomType reverse; `@@unique([reservationId, sequence])`; header-only has `stays: []`. | Medium     | Not started |
+| ID       | Task                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Files                                                                                                | Complexity | Status      |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------- | ----------- |
+| **DB-1** | Additive fields on `Shift`. Schema: `propertyId` + `businessDate` **required**. Migration must not fail if leftover `Shift` rows exist (`User` has no `propertyId`). Add columns **nullable** → backfill `propertyId` from oldest `Property` → backfill `businessDate` from that property (else `startTime::date`) → `DELETE` rows still missing `propertyId` (no Property in DB) → `SET NOT NULL` + FK Restrict. Add `Property.shifts Shift[]`. Add `@@index([shiftId])` on `FolioTransaction`. Keep `shiftNumber String @unique`. Keep `transactions Transaction[]`. Prisma `^6.19.2`. | `packages/database/prisma/schema.prisma`; new migration under `packages/database/prisma/migrations/` | Medium     | Not started |
+| **DB-2** | `pnpm --filter database exec prisma generate` (and API generate if separate). Confirm client includes new Shift scalars.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | `@pura/database`                                                                                     | Low        | Not started |
+| **DB-3** | Relations: User → shifts; Property → shifts; Shift → folioTransactions; unique one OPEN per user (enforce in service; optional partial unique **not** required if Postgres partial unique is extra — service 409 is enough).                                                                                                                                                                                                                                                                                                                                                             | `packages/database/prisma/relations.test.ts` (or new `shift.test.ts` co-located)                     | Medium     | Not started |
 
-No schema/migration changes expected. No backfill. No seed of historical stays (YAGNI).
+**Additive `Shift` fields (this PR):**
+
+| Field                 | Type                           | Purpose                                                                                                 |
+| --------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `propertyId`          | `String` + `Property` relation | Scope to hotel; NA gate                                                                                 |
+| `businessDate`        | `DateTime @db.Date`            | Cashier date ≠ system timestamp                                                                         |
+| `expectedCash`        | `Decimal? @db.Decimal(12, 2)`  | Snapshot on close; GET computes live while `OPEN`                                                       |
+| `closedBy`            | `String?`                      | User id (string, same pattern as `FolioTransaction.userId`)                                             |
+| `managerApprovedBy`   | `String?`                      | Approver user id                                                                                        |
+| `managerApprovedAt`   | `DateTime?`                    | Approval time                                                                                           |
+| `varianceReason`      | `String?`                      | Cashier note when variance ≠ 0                                                                          |
+| `handoverToUserId`    | `String?`                      | Intended successor                                                                                      |
+| `handoverFromShiftId` | `String?`                      | Prior shift id (no Prisma self-relation required if it keeps the diff small — a plain string is enough) |
+
+Indexes: `@@index([propertyId, businessDate, status])`, `@@index([userId, status])`.
+
+**Do not add:** payment-gateway columns, e-Tax, GL journal links, `creditLimit` on Shift.
 
 ### Backend
 
-| ID       | Task                                                                                                                                                                                                                                                                                                                                                                                                                                               | Files                                       | Complexity | Status      |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------- | ----------- |
-| **BE-1** | Complete util specs: `splitStayError` (all invariant failures + happy path + empty stays = null), `calculateSplitStayTotal`, `buildStaySegmentConflictWhere`. Add `findStayCoveringBusinessDate(stays, businessDate)` → stay where `startDate ≤ businessDate < endDate`, else null. Specs for covering / checkout-day miss / header-only.                                                                                                          | `reservation-stay.util.ts`, `.spec.ts`      | Medium     | Partial     |
-| **BE-2** | `update()`: if `stays` in DTO, validate with `splitStayError`, `assertRoomsAvailable` (exclude self), replace or clear per semantics above. Strip nested `stays` from Prisma `updateData` (not a scalar). Reject day-use + stays. If dates change on an existing split stay and `stays` omitted → 400 (bounds would break) **or** require `stays` in the same PATCH. Prefer: dates+stays must be sent together when reservation already has stays. | `reservations.service.ts`                   | High       | Not started |
-| **BE-3** | Reuse `reservationInclude` (or equivalent) on `findAll`, `findOne`, `findByConfirmNumber`, `update`, `cancel`, `checkIn`, `checkOut`. Stays ordered by `sequence`, include `room` + `roomType`.                                                                                                                                                                                                                                                    | `reservations.service.ts`                   | Low        | Not started |
-| **BE-4** | `getCalendar`: load overlapping header reservations **or** overlapping stays. For each room row, emit occupancy from (a) header-only on `roomId` for `[checkIn, checkOut)`, **or** (b) segments with `stay.roomId === room.id` for `[startDate, endDate)`. Include stay `roomType` / rates on calendar items.                                                                                                                                      | `reservations.service.ts`                   | High       | Not started |
-| **BE-5** | `RoomsService.getAvailability`: room is busy if header overlap **or** `reservationStays` overlap (exclude `CANCELLED`/`NO_SHOW`). Keep day-use occupancy behavior.                                                                                                                                                                                                                                                                                 | `apps/api/src/rooms/rooms.service.ts`       | Medium     | Not started |
-| **BE-6** | `NightAuditService.processRoomPosting`: `include: { stays: { orderBy: sequence } }`. If `stays.length > 0`, post `covering.roomRate`; skip if no covering stay. Else post header `roomRate` (today). Still skip `isDayUse`. Same idempotency key (window + trxCode + businessDate). **No new BullMQ job.**                                                                                                                                         | `night-audit.service.ts`                    | Medium     | Not started |
-| **BE-7** | Service specs: update replace/clear; inventory conflict via stay overlap; findOne includes stays; calendar paints segment on second room only for those dates; availability hides room on later segment; NA posts segment rate not header. Controller: nested `stays` accepted on POST/PATCH (no new routes).                                                                                                                                      | `*.service.spec.ts`, `*.controller.spec.ts` | High       | Partial     |
+Proposed **new** routes (none of these exist today). Mirror existing Nest module layout (`apps/api/src/folios/`, `apps/api/src/night-audit/`).
+
+| Method | Path                   | Behavior                                                                                                                                                              |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/shifts`              | Open. Body: `propertyId`, `userId`, `openingCash`, optional `businessDate`. 201.                                                                                      |
+| `GET`  | `/shifts/current`      | Query `propertyId`, `userId`. Current `OPEN` shift or 404. **Declare this handler before `@Get(':id')`.**                                                             |
+| `GET`  | `/shifts`              | Query `propertyId`, `businessDate`. List for the day (handover report).                                                                                               |
+| `GET`  | `/shifts/:id`          | Shift + expected/counted/variance + cash `FolioTransaction`s (`9000`) + all trx counts. While `OPEN`, expected is live; after close, return persisted `expectedCash`. |
+| `POST` | `/shifts/:id/close`    | Body: `closingCash`, `userId`, optional `varianceReason` / `notes`.                                                                                                   |
+| `POST` | `/shifts/:id/approve`  | Body: `userId` (manager), optional `notes`.                                                                                                                           |
+| `POST` | `/shifts/:id/handover` | Body: `toUserId`, `countedCash` (= closing of current / opening of next), `userId`, optional notes.                                                                   |
+
+| ID       | Task                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Files                                                                                                                                                                                                        | Complexity | Status      |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------- |
+| **BE-1** | Scaffold `ShiftsModule` / controller / service / DTOs. Open: generate globally unique `shiftNumber` including a property fragment (`SH-{YYYYMMDD}-{propertyIdSuffix}-{n}`). Load `Property.businessDate`. 409 if user already `OPEN`. JwtAuthGuard on controller (same as `reservations.controller.ts`). **Controller order:** `@Get('current')` before `@Get(':id')` (see `reservations.controller.ts` `@Get('calendar')`).                                                       | `apps/api/src/shifts/shifts.module.ts`, `shifts.controller.ts`, `shifts.service.ts`, `dto/open-shift.dto.ts`, `dto/close-shift.dto.ts`, `dto/approve-shift.dto.ts`, `dto/handover-shift.dto.ts`, `*.spec.ts` | Medium     | Not started |
+| **BE-2** | Close: compute `expectedCash` per invariant (9000 only, drawer direction `amountTotal * -sign`, no `isVoid` filter); `cashVariance` at 2 decimals; set `CLOSED` vs `BALANCED`; write `closingCash`, `endTime`, `closedBy`, `varianceReason`, persist `expectedCash`. Reject if not `OPEN`. Require `varianceReason` when variance ≠ 0.                                                                                                                                             | `shifts.service.ts`                                                                                                                                                                                          | High       | Not started |
+| **BE-3** | Approve: `CLOSED` → `BALANCED`; persist `managerApprovedBy` / `managerApprovedAt`. 403 if caller lacks `'ALL'` (or `'SHIFT_APPROVE'`). 403 if self-approve unless `'ALL'`. 400 if already `BALANCED` or still `OPEN`.                                                                                                                                                                                                                                                              | `shifts.service.ts`                                                                                                                                                                                          | Medium     | Not started |
+| **BE-4** | Handover: single Prisma `$transaction` — close current (BE-2 rules) + create next shift for `toUserId`. Set `handoverToUserId` / `handoverFromShiftId`.                                                                                                                                                                                                                                                                                                                            | `shifts.service.ts`                                                                                                                                                                                          | High       | Not started |
+| **BE-5** | `postTransaction`: after resolving folio, resolve property via `folio → reservation → room.propertyId` (same path DRR uses). Find `OPEN` shift for `dto.userId` + that `propertyId` (not folio `businessDate`). Set `shiftId`. If `userId === 'SYSTEM'`, leave `shiftId` null. If no open shift → `BadRequestException`. Same for `voidTransaction` **correction row only** (do not rewrite original `shiftId`). Optional DTO `shiftId` is **YAGNI** — always resolve server-side. | `apps/api/src/folios/folios.service.ts`, `apps/api/src/folios/dto/post-transaction.dto.ts` (no new field unless tests need it), `folios.service.spec.ts`                                                     | High       | Not started |
+| **BE-6** | `NightAuditService.startAudit`: keep `COMPLETED` then `IN_PROGRESS` short-circuits **first** (ADR 002). Then `shift.count({ where: { propertyId, businessDate, status: 'OPEN' } })`. If > 0, throw `BadRequestException` **before** upsert/enqueue. Do not change `jobId`, processor, room posting, or date roll. `userId: 'SYSTEM'` posts remain shiftless. Query Prisma; do not inject `ShiftsService`.                                                                          | `apps/api/src/night-audit/night-audit.service.ts`, `night-audit.service.spec.ts` (extend `mockPrismaService` with `shift.count`; COMPLETED path must not require a shift count)                              | Medium     | Not started |
+| **BE-7** | Import `ShiftsModule` in `apps/api/src/app.module.ts`. Export `ShiftsService` only if another module needs it (folios can query Prisma directly — prefer that to avoid a circular `FoliosModule` ↔ `ShiftsModule`).                                                                                                                                                                                                                                                                | `apps/api/src/app.module.ts`, `apps/api/src/shifts/shifts.module.ts`                                                                                                                                         | Low        | Not started |
+| **BE-8** | Controller + service specs: open duplicate 409; close zero vs nonzero variance; approve happy/403 (self-approve only for `'ALL'`); handover two shifts; post attaches `shiftId`; post without shift 400; SYSTEM post null `shiftId`; NA blocked when OPEN; NA allowed when all CLOSED/BALANCED; `COMPLETED` → `ALREADY_COMPLETED` without `shift.count`; `IN_PROGRESS` unchanged.                                                                                                  | `shifts.service.spec.ts`, `shifts.controller.spec.ts`, `folios.service.spec.ts`, `night-audit.service.spec.ts`                                                                                               | High       | Not started |
 
 ### Frontend
 
-| ID       | Task                                                                                                                                                                                                                                                                                                                                                                     | Files                                                                    | Complexity | Status      |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ | ---------- | ----------- |
-| **FE-1** | Add `ReservationStay` + `stays?` on `Reservation` / `CreateReservationDto`. Mock router: persist nested stays on POST/PATCH; list/detail return them.                                                                                                                                                                                                                    | `apps/web/src/lib/api/reservations.ts`, `mock/router.ts`, `mock/data.ts` | Low        | Not started |
-| **FE-2** | New copy only (badge, form labels, validation toasts, segment table headers) in `messages/en.json` + `messages/th.json` under e.g. `reservations.splitStay.*`. Consume via `useTranslations`. Do **not** implement locale routing / next-intl app-wide foundation. If `useTranslations` is not wired, add a thin helper that reads those files so copy is not hardcoded. | `messages/*.json`, new/changed UI                                        | Medium     | Not started |
-| **FE-3** | New reservation form: optional “add stay segment” (room + dates + rate per slice). Day-use checkbox disables segments and vice versa. Client checks: ≥2 segments, contiguous, ≥2 room types. `roomId` = first segment. Availability lookup per segment dates (`roomsAPI` availability). Submit nested `stays`.                                                           | `apps/web/src/app/reservations/new/page.tsx`                             | High       | Not started |
-| **FE-4** | `SplitStayBadge` (pattern: `DayUseBadge`). List: badge when `stays.length ≥ 2`. Detail: read-only segment table (dates, room, type, nights, rate).                                                                                                                                                                                                                       | `components/`, `reservations/page.tsx`, `[id]/page.tsx`                  | Medium     | Not started |
-| **FE-5** | Calendar: occupancy by segment room/dates, not the full stay on header room. Badge on events.                                                                                                                                                                                                                                                                            | `reservations/calendar/page.tsx`                                         | Medium     | Not started |
-| **FE-6** | Co-located tests: types/submit payload; form validation (day-use xor stays; <2 segments); badge/detail/list; calendar segment placement. a11y: labels `htmlFor`, 44px targets.                                                                                                                                                                                           | `*.test.tsx`                                                             | Medium     | Not started |
+| ID       | Task                                                                                                                                                                                                                                                                                                                        | Files                                                                                                                                         | Complexity | Status      |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------- |
+| **FE-1** | `Shift` types + `shiftsAPI` (open/current/list/get/close/approve/handover). Export from `apps/web/src/lib/api/index.ts`. Mock router: in-memory shifts; folio POST fails without open shift for that user.                                                                                                                  | `apps/web/src/lib/api/shifts.ts`, `shifts.test.ts`, `apps/web/src/lib/api/index.ts`, `apps/web/src/lib/api/mock/router.ts`, `mock/data.ts`    | Medium     | Not started |
+| **FE-2** | Copy only: open/close/handover/approve labels, variance, no-open-shift toast, NA blocked reason — `shifts.*` in `messages/en.json` + `th.json`. Use `t()`.                                                                                                                                                                  | `apps/web/src/messages/en.json`, `th.json`, `apps/web/src/lib/i18n.ts` (no API change if `t()` already walks nested keys)                     | Low        | Not started |
+| **FE-3** | Page `/shifts`: current shift card (opening, expected, status); open form (`openingCash`); close form (`closingCash`, `varianceReason`); handover (`toUserId` + counted cash); list of today’s shifts; approve button when `CLOSED` and user is admin. Inputs: `id` + `name`, labels `htmlFor`, 44px targets. Mobile-first. | `apps/web/src/app/shifts/page.tsx`, `page.test.tsx`; optional `apps/web/src/app/shifts/shifts-client.tsx`; `apps/web/src/hooks/use-shifts.ts` | High       | Not started |
+| **FE-4** | Add Shifts to `navigationItems` + `moreBottomNavItems` (not `primaryBottomNavItems`). Update `navigation.test.ts`. Icon: e.g. lucide `Clock` or `Wallet`.                                                                                                                                                                   | `apps/web/src/config/navigation.ts`, `navigation.test.ts`                                                                                     | Low        | Not started |
+| **FE-5** | Billing post: if API 400 no-open-shift, `toast.error(t('shifts.noOpenShift'))`. Do not auto-open a shift from billing (YAGNI). Optional small “Shift: OPEN” chip if `getCurrent` succeeds.                                                                                                                                  | `apps/web/src/app/billing/billing-client.tsx` (and folio post UI), `apps/web/src/components/folio-detail.tsx` if that is the poster           | Medium     | Not started |
+| **FE-6** | Co-located RTL: open/close/variance display; approve disabled for staff; handover; a11y labels. Hook tests if non-trivial.                                                                                                                                                                                                  | `*.test.tsx`, `use-shifts.test.ts`                                                                                                            | Medium     | Not started |
 
 ### QA
 
-| ID       | Task                                                                                                                                                                                                                                                                              | Complexity | Status      |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------- |
-| **QA-1** | Util matrix: empty stays; 1 stay; same type twice; same adjacent room; gap; overlap; bounds mismatch; first room ≠ header; day-use + stays; happy 2-type contiguous. Covering-date helper.                                                                                        | Medium     | Not started |
-| **QA-2** | Service: create conflict (header vs stay overlap); update replace; update `[]` clears; PATCH dates without stays on split reservation; find/calendar/availability. NA: header-only rate; split posts stay B rate on B’s dates; skip checkout day; idempotent; still skip day-use. | High       | Partial     |
-| **QA-3** | DB relations (DB-2). Web RTL as FE-6. Mock API nested stays.                                                                                                                                                                                                                      | Medium     | Not started |
-| **QA-4** | Gate: `pnpm --filter database test`, `pnpm --filter api test`, `pnpm --filter web test`, type-check, lint. No `any`, no `console.log`.                                                                                                                                            | Low        | Not started |
+| ID       | Task                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Complexity | Status      |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------- |
+| **QA-1** | DB: Shift ↔ Property/User/FolioTransaction; new columns present; legacy `Transaction` relation still compiles.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Medium     | Not started |
+| **QA-2** | Service matrix: open; duplicate open; close 0 variance → BALANCED; close ≠0 without reason → 400; close ≠0 with reason → CLOSED; approve → BALANCED; Super Admin self-approve; staff self-approve 403; handover chain; post 9000 updates expected on subsequent GET; void of 9000 reduces expected (correction `sign=+1`); non-9000 (e.g. room charge) does not change expected cash; SYSTEM NA post has null `shiftId`; NA 400 while OPEN (not completed); NA starts when shifts BALANCED/CLOSED; `COMPLETED` → `ALREADY_COMPLETED` **without** calling `shift.count` even if an OPEN shift exists (data bug; retries stay idempotent); `IN_PROGRESS` unchanged; then OPEN gate; then enqueue. | High       | Not started |
+| **QA-3** | Web RTL + mock router. Nav includes `/shifts`. Reports page **unchanged** (still stub).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Medium     | Not started |
+| **QA-4** | Gate: `pnpm --filter database test`, `pnpm --filter api test`, `pnpm --filter web test`, type-check, lint. No `any`, no `console.log`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Low        | Not started |
 
 ---
 
 ## 3. Dependencies
 
 ```
-DB-1 (generate)
-  ├─ DB-2
-  ├─ BE-1 ──► BE-6 (covering stay) ──► QA-2 (NA cases)
-  ├─ BE-2 (update replace) ──► BE-7 / QA-2
-  ├─ BE-3 (include stays) ──► FE-1, FE-4
-  ├─ BE-4 (calendar occupancy) ──► FE-5
-  └─ BE-5 (availability) ──► FE-3 (per-segment room pick)
-FE-1 ──► FE-3, FE-4, FE-5
-FE-2 ──► FE-3, FE-4, FE-5 (copy)
-FE-3 / FE-4 / FE-5 ──► FE-6 / QA-3
+DB-1 (additive schema)
+  ├─ DB-2 generate
+  └─ DB-3 relations
+DB-2 ──► BE-1 (open/list/get)
+BE-1 ──► BE-2 (close) ──► BE-3 (approve)
+BE-2 ──► BE-4 (handover)
+BE-1 ──► BE-5 (folio attach shiftId)
+BE-1 ──► BE-6 (NA gate uses same Shift rows)
+BE-1 ──► BE-7 AppModule
+BE-5 / BE-6 / BE-2 / BE-3 / BE-4 ──► BE-8 / QA-2
+BE-1 ──► FE-1 ──► FE-3, FE-5
+FE-2 ──► FE-3, FE-5 (copy)
+FE-4 nav ──► FE-3 discoverable
+FE-3 / FE-5 / FE-6 ──► QA-3
 QA-4 after all of the above
 ```
 
-**Blocked on DB-1:** any TypeScript that imports `ReservationStay`.  
-**Blocked on BE-3 + FE-1:** list/detail badge.  
-**Blocked on BE-4 + BE-5:** truthful calendar + form availability.  
-**Blocked on BE-1 covering helper:** Night Audit BE-6.
+**Blocked on DB-1:** TypeScript that reads `propertyId` / `businessDate` on `Shift`.  
+**Blocked on BE-1:** Folio attach (needs an OPEN shift to point at) and NA gate.  
+**Blocked on BE-5:** Honest expected cash (otherwise close always variance = −opening or 0).  
+**Do not block on:** `/reports` DRR UI, GL, TaxInvoice, ExchangeRate APIs.
 
 ---
 
 ## 4. Explicit out of scope (this PR)
 
-- Room Move mid-stay (`RoomMove` model, folio transfer, HK dirty/occupied flip at split, key-card re-issue)
-- Automatic room move at split point (roadmap checkbox — **later PR**)
-- Night Audit auto-move job / new BullMQ queue
-- Folio-per-room or extra folio windows because of split
-- No-show / late cancellation auto-charges
-- HK machine / inspection workflow
-- Backfilling `ReservationStay` for existing reservations
-- Changing day-use rules (already shipped)
-- New endpoints (`/reservations/:id/stays`) — nested DTO only
-- Check-in occupying future segment rooms
-- Drag-and-drop calendar editing of segments
+- e-Tax / Revenue Department API / QR generation
+- Payment gateway, credit-card pre-auth, incremental bank holds
+- AP / vendor PO / commissions
+- GL journals, Trial Balance, P&L, bank rec
+- DRR web page, Daily Flash, cashier PDF (DRR **API** already exists — do not rebuild it; do not wire `/reports` here)
+- Currency exchange rates UI
+- Package USALI split
+- Credit limit alerts / auto-settlement
+- Deleting or migrating off legacy `Transaction` / `Payment`
+- Redesigning Night Audit (new jobs, new queues, changing idempotency keys, posting covering-stay logic)
+- Requiring `BALANCED` (approved) before NA — only `OPEN` blocks
+- Full RBAC / new Manager role seed beyond `'ALL'` / optional `'SHIFT_APPROVE'`
+- next-intl app-wide locale routing
+- Phase 4: Room Move, no-show, walk, complimentary, extended stay, tax exemption, VIP lock
+- Reopening Day-use or Split Stay
 
 ---
 
 ## Acceptance criteria (PR 1)
 
-- [ ] Header-only create/update/list/calendar/NA unchanged.
-- [ ] POST with valid `stays` persists segments; `roomId` = first segment; total = sum of segment nights × rates.
-- [ ] Invalid stays / day-use + stays → 400; room overlap (header **or** stay) → 409.
-- [ ] PATCH replace and PATCH `stays: []` behave as specified.
-- [ ] GET detail/list return ordered `stays`.
-- [ ] Calendar and availability occupy each room only on its segment dates.
-- [ ] Night Audit posts covering-stay `roomRate` for split in-house reservations; skips day-use; no double-post.
-- [ ] Web: create split stay, see badge + segment table, calendar shows both rooms; copy from messages, not literals.
-- [ ] Tests + type-check + lint green.
+- [ ] Cashier can open a shift for a property + current `businessDate` with `openingCash`.
+- [ ] Second open for the same user → 409; two different users may both be `OPEN` on one property.
+- [ ] Folio cashier post/void stores `shiftId`; `userId === 'SYSTEM'` (Night Audit room post) leaves `shiftId` null.
+- [ ] Post without an open shift → 400; billing shows i18n toast, not a hardcoded string.
+- [ ] Close computes `expectedCash` from trx code `9000` only using drawer direction (`amountTotal` cash-in for `sign=-1`, cash-out for `sign=+1`; no `isVoid` filter); `cashVariance = closingCash - expectedCash` at 2 decimals; zero → `BALANCED`, nonzero → `CLOSED` and requires `varianceReason`.
+- [ ] Manager with `'ALL'` (or `'SHIFT_APPROVE'`) can approve `CLOSED` → `BALANCED`; staff cannot. Super Admin (`'ALL'`) may self-approve; others cannot.
+- [ ] Handover closes current and opens successor with `openingCash = countedCash` in one transaction.
+- [ ] `POST /night-audit/run`: `COMPLETED` / `IN_PROGRESS` short-circuit first (ADR 002); then 400 while any shift is `OPEN` for that property/date (does not enqueue); posting idempotency unchanged.
+- [ ] Web `/shifts` supports open / close / handover / approve / today’s list; copy from `messages/*.json`; nav link present.
+- [ ] `/reports` still stub; no GL/tax/FX/CC/AP code.
+- [ ] Tests + type-check + lint green. Prisma still ^6.19.2.

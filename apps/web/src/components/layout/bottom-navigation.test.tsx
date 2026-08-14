@@ -23,9 +23,12 @@ describe('BottomNavigation', () => {
     expect(screen.getByLabelText('Billing')).toBeInTheDocument();
   });
 
-  it('should keep Reports and Settings out of the primary bar', () => {
+  it('should keep Shifts, Reports and Settings out of the primary bar', () => {
     render(<BottomNavigation />);
 
+    expect(
+      screen.queryByRole('link', { name: 'Shifts' }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('link', { name: 'Reports' }),
     ).not.toBeInTheDocument();
@@ -52,12 +55,15 @@ describe('BottomNavigation', () => {
     expect(screen.getByLabelText('More')).toHaveClass('text-pura-blue');
   });
 
-  it('should open Reports and Settings from the More menu', async () => {
+  it('should open Shifts, Reports and Settings from the More menu', async () => {
     const user = userEvent.setup();
     render(<BottomNavigation />);
 
     await user.click(screen.getByLabelText('More'));
 
+    expect(
+      screen.getByRole('menuitem', { name: /Shifts/ }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('menuitem', { name: /Reports/ }),
     ).toBeInTheDocument();

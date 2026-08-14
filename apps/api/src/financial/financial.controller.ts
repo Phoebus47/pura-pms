@@ -10,15 +10,18 @@ import {
 } from '@nestjs/common';
 import { FinancialService } from './financial.service';
 import { ReportsService } from './reports.service';
+import { JournalsService } from './journals.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateTransactionCodeDto } from './dto/create-transaction-code.dto';
 import { UpdateTransactionCodeDto } from './dto/update-transaction-code.dto';
+import { PostJournalsDto } from './dto/post-journals.dto';
 
 @Controller('financial')
 export class FinancialController {
   constructor(
     private readonly financialService: FinancialService,
     private readonly reportsService: ReportsService,
+    private readonly journalsService: JournalsService,
   ) {}
 
   @Get('transaction-codes')
@@ -56,6 +59,46 @@ export class FinancialController {
     return this.reportsService.getDailyRevenueReport(
       propertyId,
       new Date(date),
+    );
+  }
+
+  @Get('reports/flash')
+  getFlash(
+    @Query('propertyId') propertyId: string,
+    @Query('date') date: string,
+  ) {
+    return this.reportsService.getDailyFlash(propertyId, new Date(date));
+  }
+
+  @Get('reports/trial-balance')
+  getTrialBalance(
+    @Query('propertyId') propertyId: string,
+    @Query('date') date: string,
+  ) {
+    return this.reportsService.getTrialBalance(propertyId, new Date(date));
+  }
+
+  @Get('gl-accounts')
+  listGlAccounts() {
+    return this.journalsService.listAccounts();
+  }
+
+  @Get('journals')
+  findJournals(
+    @Query('propertyId') propertyId: string,
+    @Query('date') date: string,
+  ) {
+    return this.journalsService.findByDate(propertyId, date);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('journals')
+  postJournals(@Body() dto: PostJournalsDto) {
+    return this.journalsService.postForBusinessDate(
+      dto.propertyId,
+      dto.businessDate,
+      dto.source,
+      dto.postedBy,
     );
   }
 }

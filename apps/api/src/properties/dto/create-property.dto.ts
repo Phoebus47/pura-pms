@@ -4,6 +4,8 @@ import {
   IsEmail,
   IsIn,
   IsNotEmpty,
+  IsNumber,
+  Min,
 } from 'class-validator';
 
 export class CreatePropertyDto {
@@ -35,4 +37,9 @@ export class CreatePropertyDto {
   @IsString()
   @IsOptional()
   timezone?: string;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  defaultCreditLimit?: number;
 }

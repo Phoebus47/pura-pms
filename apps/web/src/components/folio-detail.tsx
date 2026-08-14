@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { PostChargeDialog } from './post-charge-dialog';
 import { PostPaymentDialog } from './post-payment-dialog';
 import { VoidTransactionDialog } from './void-transaction-dialog';
+import { FolioCheckoutBar } from './folio-checkout-bar';
 
 interface FolioDetailProps {
   readonly reservationId: string;
@@ -121,6 +122,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
           </div>
         </div>
       </div>
+
+      {activeFolio && (
+        <FolioCheckoutBar folio={activeFolio} onUpdated={loadFolioData} />
+      )}
 
       {/* Window Selector */}
       <div className="border-b border-slate-200 flex gap-2 pb-px">

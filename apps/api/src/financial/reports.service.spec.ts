@@ -6,6 +6,15 @@ const mockPrismaService = {
   folioTransaction: {
     findMany: vi.fn(),
   },
+  journalLine: {
+    findMany: vi.fn(),
+  },
+  room: {
+    count: vi.fn(),
+  },
+  reservation: {
+    findMany: vi.fn(),
+  },
 };
 
 describe('ReportsService', () => {
@@ -124,6 +133,68 @@ describe('ReportsService', () => {
           include: { trxCode: true },
         }),
       );
+    });
+  });
+
+  describe('getDailyFlash', () => {
+    const testDate = new Date('2025-01-15');
+
+    it('returns occupancy and revenue snapshot', async () => {
+      mockPrismaService.folioTransaction.findMany.mockResolvedValue([
+        {
+          amountNet: 1000,
+          amountTax: 70,
+          amountService: 100,
+          amountTotal: 1170,
+          trxCode: { group: 'ROOM' },
+        },
+      ]);
+      mockPrismaService.room.count.mockResolvedValue(10);
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-1',
+          status: 'CHECKED_IN',
+          checkIn: new Date('2025-01-14'),
+          checkOut: new Date('2025-01-16'),
+          isDayUse: false,
+          roomId: 'rm-1',
+        },
+      ]);
+
+      const result = await service.getDailyFlash('prop-1', testDate);
+
+      expect(result.occupancy.totalRooms).toBe(10);
+      expect(result.occupancy.occupiedRooms).toBe(1);
+      expect(result.stayOvers).toBe(1);
+      expect(result.arrivals).toBe(0);
+      expect(result.roomRevenue).toBe(1170);
+      expect(result.totalRevenue).toBe(1170);
+    });
+  });
+
+  describe('getTrialBalance', () => {
+    it('should sum posted journal lines by account', async () => {
+      mockPrismaService.journalLine.findMany.mockResolvedValue([
+        {
+          debit: 100,
+          credit: 0,
+          account: { code: '1100', name: 'AR' },
+        },
+        {
+          debit: 0,
+          credit: 100,
+          account: { code: '4000-01', name: 'Room' },
+        },
+      ]);
+
+      const result = await service.getTrialBalance(
+        'prop-1',
+        new Date('2025-01-15'),
+      );
+
+      expect(result.totalDebit).toBe(100);
+      expect(result.totalCredit).toBe(100);
+      expect(result.rows).toHaveLength(2);
     });
   });
 });

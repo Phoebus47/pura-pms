@@ -162,6 +162,31 @@ describe('VoidTransactionDialog', () => {
     });
   });
 
+  it('toasts no-open-shift copy when voiding without an OPEN shift', async () => {
+    const user = userEvent.setup();
+    const { APIError } = await import('@/lib/api/client');
+    const { t } = await import('@/lib/i18n');
+    vi.mocked(foliosAPI.voidTransaction).mockRejectedValueOnce(
+      new APIError(400, 'Bad Request', {
+        message: 'No open shift for this user and property',
+      }),
+    );
+
+    render(<VoidTransactionDialog {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(reasonCodesAPI.list).toHaveBeenCalled();
+    });
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByRole('option', { name: /Void transaction/ }));
+    await user.click(screen.getByRole('button', { name: /confirm void/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(t('shifts.noOpenShift'));
+    });
+  });
+
   it('does not load reason codes when dialog is closed (isOpen=false)', () => {
     render(<VoidTransactionDialog {...defaultProps} isOpen={false} />);
     expect(reasonCodesAPI.list).not.toHaveBeenCalled();
