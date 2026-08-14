@@ -114,7 +114,44 @@ describe('Dashboard', () => {
     });
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText(/Room 101|101/)).toBeInTheDocument();
+    expect(screen.getByText(/Room 101/)).toBeInTheDocument();
+  });
+
+  it('should clip each stat card glow inside an aria-hidden overflow-hidden region', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
+
+    const { container } = render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Total Reservations')).toBeInTheDocument();
+    });
+
+    const glowRegions = Array.from(
+      container.querySelectorAll('[aria-hidden="true"]'),
+    ).filter((element) => element.classList.contains('overflow-hidden'));
+
+    expect(glowRegions).toHaveLength(4);
+
+    const glowTokens = [
+      'bg-pura-blue',
+      'bg-pura-orange',
+      'bg-pura-sky',
+      'bg-pura-blue-dark',
+    ];
+
+    for (const region of glowRegions) {
+      expect(region).toHaveClass('overflow-hidden');
+      const orb = region.querySelector('div');
+      if (!orb) {
+        throw new Error('expected a blurred glow orb inside the clip region');
+      }
+      expect(orb).toHaveClass('blur-2xl', 'rounded-full');
+      const usesToken = glowTokens.some((token) =>
+        orb.classList.contains(token),
+      );
+      expect(usesToken).toBe(true);
+    }
   });
 
   it('should navigate to new reservation page when button is clicked', async () => {

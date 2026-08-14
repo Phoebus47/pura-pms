@@ -79,6 +79,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-pura-blue: var(--pura-blue);
+  --color-pura-blue-dark: var(--pura-blue-dark);
+  --color-pura-orange: var(--pura-orange);
+  --color-pura-sky: var(--pura-sky);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

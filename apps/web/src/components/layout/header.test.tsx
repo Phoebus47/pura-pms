@@ -45,11 +45,19 @@ describe('Header', () => {
     expect(notificationsButton).toBeInTheDocument();
   });
 
+  it('should keep the user name in the document on smaller viewports', () => {
+    render(<Header />);
+
+    const userName = screen.getByText('Guest User');
+    expect(userName).toBeInTheDocument();
+    expect(userName.closest('div')).toHaveClass('hidden', 'lg:block');
+  });
+
   it('should render user dropdown menu', async () => {
     const user = userEvent.setup();
     render(<Header />);
 
-    // By default the Zustand store is empty in tests, so it falls back to Guest User
+    // Name stays in the DOM (hidden below lg); click the menu trigger, not visibility.
     const userButton = screen.getByText('Guest User');
     expect(userButton).toBeInTheDocument();
 

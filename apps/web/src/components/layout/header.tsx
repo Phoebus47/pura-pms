@@ -38,10 +38,10 @@ export function Header() {
   const userEmail = user?.email || 'guest@pura.com';
 
   return (
-    <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-16 items-center justify-between px-6 shadow-black/5 shadow-lg sticky top-0 z-20">
-      <div className="flex flex-1 gap-4 items-center">
-        <div className="group max-w-md relative w-full">
-          <Search className="-translate-y-1/2 absolute group-focus-within:text-[#1e4b8e] h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
+    <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-16 items-center justify-between md:px-6 px-4 shadow-black/5 shadow-lg sticky top-0 z-20">
+      <div className="flex flex-1 gap-4 items-center min-w-0">
+        <div className="group max-w-md min-w-0 relative w-full">
+          <Search className="-translate-y-1/2 absolute group-focus-within:text-pura-blue h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
           <Input
             id="global-search"
             name="search"
@@ -60,9 +60,9 @@ export function Header() {
           aria-label="Notifications"
           className="active:scale-95 group hover:bg-muted/80 relative rounded-full transition-all"
         >
-          <Bell className="group-hover:text-[#1e4b8e] h-5 text-muted-foreground transition-colors w-5" />
+          <Bell className="group-hover:text-pura-blue h-5 text-muted-foreground transition-colors w-5" />
           <span
-            className="absolute animate-pulse bg-[#f5a623] h-2 right-2 ring-2 ring-white rounded-full top-2 w-2"
+            className="absolute animate-pulse bg-pura-orange h-2 right-2 ring-2 ring-white rounded-full top-2 w-2"
             aria-hidden="true"
           />
         </Button>
@@ -76,18 +76,18 @@ export function Header() {
               className="active:scale-95 gap-3 group h-auto hover:bg-muted/80 px-2 py-1.5 rounded-full transition-all"
             >
               <div className="relative">
-                <Avatar className="border-2 border-transparent group-hover:border-[#1e4b8e]/20 h-9 transition-all w-9">
+                <Avatar className="border-2 border-transparent group-hover:border-pura-blue/20 h-9 transition-all w-9">
                   <AvatarImage
                     src="/placeholder-avatar.jpg"
                     alt="Super Admin profile picture"
                   />
-                  <AvatarFallback className="bg-linear-to-br font-semibold from-[#1e4b8e] shadow-inner text-white text-xs to-[#153a6e]">
+                  <AvatarFallback className="bg-linear-to-br font-semibold from-pura-blue shadow-inner text-white text-xs to-pura-blue-dark">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute bg-emerald-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
               </div>
-              <div className="hidden md:block text-left">
+              <div className="hidden lg:block text-left">
                 <p className="font-semibold leading-tight text-foreground text-sm">
                   {userName}
                 </p>
@@ -110,10 +110,10 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="mx-2" />
-            <DropdownMenuItem className="cursor-pointer focus:bg-[#1e4b8e]/5 focus:text-[#1e4b8e] font-medium my-0.5 p-2.5 rounded-xl transition-colors">
+            <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-xl transition-colors">
               Profile Settings
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer focus:bg-[#1e4b8e]/5 focus:text-[#1e4b8e] font-medium my-0.5 p-2.5 rounded-xl transition-colors">
+            <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-xl transition-colors">
               Switch Property
             </DropdownMenuItem>
             <DropdownMenuSeparator className="mx-2" />
