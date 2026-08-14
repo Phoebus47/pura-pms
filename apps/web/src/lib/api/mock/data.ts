@@ -15,6 +15,9 @@ export interface MockData {
   shifts: any[];
   taxInvoices: any[];
   journalEntries: any[];
+  arAccounts: any[];
+  invoices: any[];
+  invoicePayments: any[];
 }
 
 export const mockDb: any = {
@@ -238,6 +241,15 @@ export const mockDb: any = {
       hasTax: false,
       hasService: false,
     },
+    {
+      id: 'tc_city_9005',
+      code: '9005',
+      description: 'Direct Bill',
+      type: 'PAYMENT',
+      group: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+    },
   ],
   folios: [
     {
@@ -385,4 +397,7 @@ export const mockDb: any = {
   ],
   taxInvoices: [],
   journalEntries: [],
+  arAccounts: [],
+  invoices: [],
+  invoicePayments: [],
 };

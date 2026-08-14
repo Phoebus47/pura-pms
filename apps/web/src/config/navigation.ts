@@ -9,6 +9,7 @@ import {
   Settings,
   ArrowLeftRight,
   Receipt,
+  Landmark,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export const navigationItems: NavigationItem[] = [
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
   { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
+  { name: 'Accounts receivable', href: '/ar-accounts', icon: Landmark },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -44,5 +46,6 @@ export const moreBottomNavItems: NavigationItem[] = [
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
   { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
+  { name: 'Accounts receivable', href: '/ar-accounts', icon: Landmark },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
