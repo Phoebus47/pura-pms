@@ -53,7 +53,11 @@
     "arrivals": "Arrivals",
     "departures": "Departures",
     "stayOvers": "Stay-overs",
-    "roomRevenue": "Room revenue"
+    "roomRevenue": "Room revenue",
+    "journalsTitle": "GL journals",
+    "postJournals": "Post journals",
+    "journalsPosted": "Journals posted",
+    "journalsEmpty": "No journal entries for this date"
   },
   "fx": {
     "title": "Currency exchange",

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DailyRevenueTable } from './daily-revenue-table';
 import { DailyFlashPanel } from './daily-flash-panel';
+import { JournalsPanel } from './journals-panel';
 
 function toDateInputValue(value: string | undefined): string {
   if (!value) return '';
@@ -37,6 +38,17 @@ export function ReportsClient() {
     queryKey: ['reports', 'drr', property?.id, selectedDate],
     queryFn: () =>
       reportsAPI.getDailyRevenueReport(property?.id as string, selectedDate),
+    enabled: Boolean(property?.id && selectedDate),
+  });
+
+  const {
+    data: journals = [],
+    isLoading: journalsLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['reports', 'journals', property?.id, selectedDate],
+    queryFn: () =>
+      reportsAPI.listJournals(property?.id as string, selectedDate),
     enabled: Boolean(property?.id && selectedDate),
   });
 
@@ -94,6 +106,23 @@ export function ReportsClient() {
               totalRevenue={report?.totalRevenue ?? 0}
             />
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('reports.journalsTitle')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <JournalsPanel
+            propertyId={property?.id}
+            date={selectedDate}
+            journals={journals}
+            loading={journalsLoading}
+            onPosted={() => {
+              void refetch();
+            }}
+          />
         </CardContent>
       </Card>
     </div>
