@@ -110,7 +110,7 @@ Each row is **one PR**. Implementation base: `dev`. Cloud agent branch pattern: 
 - **Depends on:** WP4 posting, WP5 Night Audit (both done).
 - **Unblocks:** Honest cashier recon; later FX cash-in-drawer; optional cashier report.
 - **YAGNI:** e-Tax, payment gateway, AP, GL export, PDF cashier report, deleting `Transaction`.
-- **Plan:** `docs/planning/current-sprint.md` (this sprint).
+- **Plan:** `docs/planning/current-sprint.md` (this sprint). **ADR:** `docs/adr/003-shift-management-night-audit-gate.md`.
 
 ### P3-PR2 — Daily Revenue Report (web)
 
