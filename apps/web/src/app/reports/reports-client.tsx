@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { DailyRevenueTable } from './daily-revenue-table';
 import { DailyFlashPanel } from './daily-flash-panel';
 import { JournalsPanel } from './journals-panel';
+import { TrialBalancePanel } from './trial-balance-panel';
 
 function toDateInputValue(value: string | undefined): string {
   if (!value) return '';
@@ -49,6 +50,13 @@ export function ReportsClient() {
     queryKey: ['reports', 'journals', property?.id, selectedDate],
     queryFn: () =>
       reportsAPI.listJournals(property?.id as string, selectedDate),
+    enabled: Boolean(property?.id && selectedDate),
+  });
+
+  const { data: trialBalance, isLoading: tbLoading } = useQuery({
+    queryKey: ['reports', 'trial-balance', property?.id, selectedDate],
+    queryFn: () =>
+      reportsAPI.getTrialBalance(property?.id as string, selectedDate),
     enabled: Boolean(property?.id && selectedDate),
   });
 
@@ -122,6 +130,19 @@ export function ReportsClient() {
             onPosted={() => {
               void refetch();
             }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('reports.tbTitle')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TrialBalancePanel
+            report={trialBalance}
+            journals={journals}
+            loading={tbLoading}
           />
         </CardContent>
       </Card>

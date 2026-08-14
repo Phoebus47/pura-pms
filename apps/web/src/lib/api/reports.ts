@@ -44,6 +44,21 @@ export interface JournalEntry {
   lines: JournalLine[];
 }
 
+export interface TrialBalanceRow {
+  accountCode: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+}
+
+export interface TrialBalanceReport {
+  businessDate: string;
+  propertyId: string;
+  rows: TrialBalanceRow[];
+  totalDebit: number;
+  totalCredit: number;
+}
+
 function authToken(): string | undefined {
   return getAuthToken() || undefined;
 }
@@ -91,6 +106,17 @@ export const reportsAPI = {
         source: 'MANUAL',
         postedBy: 'usr_mock_1',
       },
+      authToken(),
+    );
+  },
+
+  async getTrialBalance(
+    propertyId: string,
+    date: string,
+  ): Promise<TrialBalanceReport> {
+    const query = new URLSearchParams({ propertyId, date });
+    return apiClient.get<TrialBalanceReport>(
+      `/financial/reports/trial-balance?${query.toString()}`,
       authToken(),
     );
   },

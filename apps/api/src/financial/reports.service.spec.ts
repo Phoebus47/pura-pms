@@ -6,6 +6,9 @@ const mockPrismaService = {
   folioTransaction: {
     findMany: vi.fn(),
   },
+  journalLine: {
+    findMany: vi.fn(),
+  },
   room: {
     count: vi.fn(),
   },
@@ -166,6 +169,32 @@ describe('ReportsService', () => {
       expect(result.arrivals).toBe(0);
       expect(result.roomRevenue).toBe(1170);
       expect(result.totalRevenue).toBe(1170);
+    });
+  });
+
+  describe('getTrialBalance', () => {
+    it('should sum posted journal lines by account', async () => {
+      mockPrismaService.journalLine.findMany.mockResolvedValue([
+        {
+          debit: 100,
+          credit: 0,
+          account: { code: '1100', name: 'AR' },
+        },
+        {
+          debit: 0,
+          credit: 100,
+          account: { code: '4000-01', name: 'Room' },
+        },
+      ]);
+
+      const result = await service.getTrialBalance(
+        'prop-1',
+        new Date('2025-01-15'),
+      );
+
+      expect(result.totalDebit).toBe(100);
+      expect(result.totalCredit).toBe(100);
+      expect(result.rows).toHaveLength(2);
     });
   });
 });

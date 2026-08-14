@@ -15,6 +15,7 @@ const mockFinancialService = {
 const mockReportsService = {
   getDailyRevenueReport: vi.fn(),
   getDailyFlash: vi.fn(),
+  getTrialBalance: vi.fn(),
 };
 
 const mockJournalsService = {
@@ -173,6 +174,27 @@ describe('FinancialController', () => {
 
       expect(result).toEqual(mockFlash);
       expect(mockReportsService.getDailyFlash).toHaveBeenCalledWith(
+        'prop-1',
+        expect.any(Date),
+      );
+    });
+  });
+
+  describe('getTrialBalance', () => {
+    it('should delegate to reports service', async () => {
+      const mockTb = {
+        businessDate: '2025-01-15',
+        propertyId: 'prop-1',
+        rows: [],
+        totalDebit: 0,
+        totalCredit: 0,
+      };
+      mockReportsService.getTrialBalance.mockResolvedValue(mockTb);
+
+      const result = await controller.getTrialBalance('prop-1', '2025-01-15');
+
+      expect(result).toEqual(mockTb);
+      expect(mockReportsService.getTrialBalance).toHaveBeenCalledWith(
         'prop-1',
         expect.any(Date),
       );
