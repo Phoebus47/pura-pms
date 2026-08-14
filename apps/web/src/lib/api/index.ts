@@ -10,3 +10,4 @@ export * from './transaction-codes';
 export * from './shifts';
 export * from './reports';
 export * from './exchange-rates';
+export * from './tax-invoices';

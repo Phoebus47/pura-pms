@@ -8,6 +8,7 @@ import {
   FileText,
   Settings,
   ArrowLeftRight,
+  Receipt,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,6 +27,7 @@ export const navigationItems: NavigationItem[] = [
   { name: 'Shifts', href: '/shifts', icon: Clock },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
+  { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -41,5 +43,6 @@ export const moreBottomNavItems: NavigationItem[] = [
   { name: 'Shifts', href: '/shifts', icon: Clock },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
+  { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

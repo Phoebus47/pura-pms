@@ -399,6 +399,156 @@ function handleExchangeRates(
   if (method === 'PATCH') return handleExchangeRatesPatch(path, body);
 }
 
+function snapshotMockFolioCharges(folioId: string) {
+  const windowIds = new Set(
+    mockDb.folioWindows
+      .filter((window: any) => window.folioId === folioId)
+      .map((window: any) => window.id),
+  );
+  let amountNet = 0;
+  let amountTax = 0;
+  let amountTotal = 0;
+  for (const line of mockDb.folioTransactions) {
+    if (!windowIds.has(line.windowId) || line.isVoid || line.sign !== 1) {
+      continue;
+    }
+    amountNet += Number(line.amountNet);
+    amountTax += Number(line.amountTax);
+    amountTotal += Number(line.amountTotal);
+  }
+  return {
+    amountNet: Math.round(amountNet * 100) / 100,
+    amountTax: Math.round(amountTax * 100) / 100,
+    amountTotal: Math.round(amountTotal * 100) / 100,
+  };
+}
+
+function nextMockInvoiceNumber(propertyId: string, businessDate: string) {
+  const year = String(businessDate).slice(0, 4);
+  const prefix = `TI-${year}-`;
+  const count = mockDb.taxInvoices.filter(
+    (invoice: any) =>
+      invoice.propertyId === propertyId &&
+      String(invoice.invoiceNumber).startsWith(prefix),
+  ).length;
+  return `${prefix}${String(count + 1).padStart(6, '0')}`;
+}
+
+function handleTaxInvoicesGet(path: string, params: URLSearchParams) {
+  if (path === '/tax-invoices') {
+    const propertyId = params.get('propertyId');
+    const businessDate = params.get('businessDate');
+    return mockDb.taxInvoices.filter((invoice: any) => {
+      if (propertyId && invoice.propertyId !== propertyId) return false;
+      if (
+        businessDate &&
+        String(invoice.businessDate).slice(0, 10) !== businessDate.slice(0, 10)
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }
+  const match = /^\/tax-invoices\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const invoice = mockDb.taxInvoices.find((row: any) => row.id === match[1]);
+  if (!invoice) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Tax invoice not found',
+    });
+  }
+  return invoice;
+}
+
+function handleTaxInvoicesPost(path: string, body: any) {
+  const voidMatch = /^\/tax-invoices\/([a-zA-Z0-9_-]+)\/void$/.exec(path);
+  if (voidMatch) {
+    const invoice = mockDb.taxInvoices.find(
+      (row: any) => row.id === voidMatch[1],
+    );
+    if (!invoice) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Tax invoice not found',
+      });
+    }
+    if (invoice.status === 'VOID') {
+      throw new APIError(409, 'Conflict', {
+        message: 'Tax invoice is already void',
+      });
+    }
+    invoice.status = 'VOID';
+    invoice.voidReason = body.reason;
+    invoice.voidedAt = new Date().toISOString();
+    invoice.voidedBy = body.voidedBy;
+    return invoice;
+  }
+  if (path !== '/tax-invoices') return;
+  const folio = mockDb.folios.find((row: any) => row.id === body.folioId);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  const existing = mockDb.taxInvoices.find(
+    (row: any) => row.folioId === body.folioId && row.status !== 'VOID',
+  );
+  if (existing) {
+    throw new APIError(409, 'Conflict', {
+      message: 'An active tax invoice already exists for this folio',
+    });
+  }
+  const property = mockDb.properties[0];
+  const snapshot = snapshotMockFolioCharges(folio.id);
+  const guest = folio.reservation?.guest;
+  const created = {
+    id: `ti_mock_${Date.now()}`,
+    invoiceNumber: nextMockInvoiceNumber(
+      property.id,
+      property.businessDate || new Date().toISOString(),
+    ),
+    propertyId: property.id,
+    folioId: folio.id,
+    reservationId: folio.reservationId,
+    businessDate: property.businessDate,
+    taxId: body.taxId,
+    branchNumber: body.branchNumber || null,
+    buyerName:
+      body.buyerName || (guest ? `${guest.firstName} ${guest.lastName}` : null),
+    ...snapshot,
+    status: 'OPEN',
+    issuedAt: new Date().toISOString(),
+    issuedBy: body.issuedBy,
+    voidReason: null,
+    voidedAt: null,
+    voidedBy: null,
+    property: {
+      id: property.id,
+      name: property.name,
+      address: property.address,
+      taxId: property.taxId,
+    },
+    folio: { id: folio.id, folioNumber: folio.folioNumber },
+    reservation: folio.reservation
+      ? {
+          id: folio.reservationId,
+          confirmNumber: folio.reservation.confirmNumber || 'CONF',
+          guest: folio.reservation.guest,
+        }
+      : null,
+  };
+  mockDb.taxInvoices.push(created);
+  return created;
+}
+
+function handleTaxInvoices(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/tax-invoices')) return;
+  if (method === 'GET') return handleTaxInvoicesGet(path, params);
+  if (method === 'POST') return handleTaxInvoicesPost(path, body);
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -1168,6 +1318,7 @@ export async function routeMockRequest<T>(
       () => handleNightAudit(method, path, body),
       () => handleShifts(method, path, body, params),
       () => handleExchangeRates(method, path, body, params),
+      () => handleTaxInvoices(method, path, body, params),
       () => handleFolios(method, path, body),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

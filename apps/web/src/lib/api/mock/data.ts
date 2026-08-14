@@ -13,6 +13,7 @@ export interface MockData {
   transactionCodes: any[];
   folioTransactions: any[];
   shifts: any[];
+  taxInvoices: any[];
 }
 
 export const mockDb: any = {
@@ -379,4 +380,5 @@ export const mockDb: any = {
       createdAt: MOCK_NOW,
     },
   ],
+  taxInvoices: [],
 };
