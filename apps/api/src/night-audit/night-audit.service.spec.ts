@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NightAuditService } from './night-audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { FoliosService } from '../folios/folios.service';
+import { JournalsService } from '../financial/journals.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { BadRequestException } from '@nestjs/common';
 
@@ -42,6 +43,10 @@ const mockFoliosService = {
   postTransaction: vi.fn(),
 };
 
+const mockJournalsService = {
+  postForBusinessDate: vi.fn(),
+};
+
 const mockQueue = {
   add: vi.fn(),
 };
@@ -60,6 +65,10 @@ describe('NightAuditService', () => {
         {
           provide: FoliosService,
           useValue: mockFoliosService,
+        },
+        {
+          provide: JournalsService,
+          useValue: mockJournalsService,
         },
         {
           provide: getQueueToken('night-audit'),
@@ -431,8 +440,16 @@ describe('NightAuditService', () => {
       mockPrismaService.nightAudit.update.mockResolvedValue({});
       mockPrismaService.property.findUnique.mockResolvedValue({ businessDate });
       mockPrismaService.property.update.mockResolvedValue({});
+      mockJournalsService.postForBusinessDate.mockResolvedValue({ id: 'je-1' });
 
       await service.completeAudit('prop-1', businessDate);
+
+      expect(mockJournalsService.postForBusinessDate).toHaveBeenCalledWith(
+        'prop-1',
+        businessDate,
+        'NIGHT_AUDIT',
+        'SYSTEM',
+      );
 
       expect(mockPrismaService.nightAudit.update).toHaveBeenCalledWith({
         where: {

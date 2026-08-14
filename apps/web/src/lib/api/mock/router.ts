@@ -197,14 +197,53 @@ function handleFinancialGet(path: string, params: URLSearchParams) {
       params.get('date') || new Date().toISOString(),
     );
   }
+  if (path === '/financial/journals') {
+    const propertyId = params.get('propertyId');
+    const date = params.get('date');
+    return mockDb.journalEntries.filter((entry: any) => {
+      if (propertyId && entry.propertyId !== propertyId) return false;
+      if (date && String(entry.entryDate).slice(0, 10) !== date.slice(0, 10)) {
+        return false;
+      }
+      return true;
+    });
+  }
+  if (path === '/financial/gl-accounts') {
+    return [{ id: 'gl_1100', code: '1100', name: 'Accounts Receivable' }];
+  }
+}
+
+function handleFinancialPost(path: string, body: any) {
+  if (path !== '/financial/journals') return;
+  const existing = mockDb.journalEntries.find(
+    (entry: any) =>
+      entry.propertyId === body.propertyId &&
+      String(entry.entryDate).slice(0, 10) ===
+        String(body.businessDate).slice(0, 10) &&
+      entry.source === (body.source || 'MANUAL'),
+  );
+  if (existing) return existing;
+  const created = {
+    id: `je_mock_${Date.now()}`,
+    entryNumber: `JE-${String(body.businessDate).slice(0, 10)}`,
+    propertyId: body.propertyId,
+    entryDate: body.businessDate,
+    source: body.source || 'MANUAL',
+    isPosted: true,
+    lines: [],
+  };
+  mockDb.journalEntries.push(created);
+  return created;
 }
 
 function handleFinancial(
   method: string,
   path: string,
   params: URLSearchParams,
+  body?: any,
 ) {
   if (method === 'GET') return handleFinancialGet(path, params);
+  if (method === 'POST') return handleFinancialPost(path, body);
 }
 
 function handleNightAuditStatus(path: string) {
@@ -1359,7 +1398,7 @@ export async function routeMockRequest<T>(
     const handlers = [
       () => handleAuth(method, path, body),
       () => handleMetrics(method, path),
-      () => handleFinancial(method, path, params),
+      () => handleFinancial(method, path, params, body),
       () => handleNightAudit(method, path, body),
       () => handleShifts(method, path, body, params),
       () => handleExchangeRates(method, path, body, params),

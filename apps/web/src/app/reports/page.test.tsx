@@ -13,6 +13,8 @@ vi.mock('@/lib/api/reports', () => ({
   reportsAPI: {
     getDailyRevenueReport: vi.fn(),
     getDailyFlash: vi.fn(),
+    listJournals: vi.fn(),
+    postJournals: vi.fn(),
   },
 }));
 
@@ -60,6 +62,7 @@ describe('ReportsPage', () => {
     vi.mocked(propertiesAPI.getAll).mockResolvedValue([property] as never);
     vi.mocked(reportsAPI.getDailyRevenueReport).mockResolvedValue(report);
     vi.mocked(reportsAPI.getDailyFlash).mockResolvedValue(flash);
+    vi.mocked(reportsAPI.listJournals).mockResolvedValue([]);
   });
 
   it('renders the daily revenue report', async () => {
@@ -96,6 +99,16 @@ describe('ReportsPage', () => {
         '2026-08-13',
       );
     });
+  });
+
+  it('renders the GL journals panel', async () => {
+    renderPage();
+    expect(
+      await screen.findByText(t('reports.journalsTitle')),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: t('reports.postJournals') }),
+    ).toBeInTheDocument();
   });
 
   it('shows an empty state when there is no revenue', async () => {

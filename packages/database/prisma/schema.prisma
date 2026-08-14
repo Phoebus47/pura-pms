@@ -51,6 +51,7 @@ model Property {
   reportArchives ReportArchive[]
   shifts         Shift[]
   taxInvoices    TaxInvoice[]
+  journalEntries JournalEntry[]
   createdAt      DateTime   @default(now())
 }
 
@@ -534,15 +535,20 @@ model GLAccount {
 model JournalEntry {
   id          String        @id @default(cuid())
   entryNumber String        @unique
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id], onDelete: Restrict)
   entryDate   DateTime      @db.Date
   reference   String?
   description String
-  source      String?
+  source      String
   lines       JournalLine[]
   isPosted    Boolean       @default(false)
   postedBy    String?
   postedAt    DateTime?
   createdAt   DateTime      @default(now())
+
+  @@unique([propertyId, entryDate, source])
+  @@index([propertyId, entryDate])
 }
 
 model JournalLine {

@@ -29,6 +29,21 @@ export interface DailyFlashReport {
   totalRevenue: number;
 }
 
+export interface JournalLine {
+  id: string;
+  debit: number;
+  credit: number;
+  account?: { code: string; name: string };
+}
+
+export interface JournalEntry {
+  id: string;
+  entryNumber: string;
+  source: string;
+  isPosted: boolean;
+  lines: JournalLine[];
+}
+
 function authToken(): string | undefined {
   return getAuthToken() || undefined;
 }
@@ -52,6 +67,30 @@ export const reportsAPI = {
     const query = new URLSearchParams({ propertyId, date });
     return apiClient.get<DailyFlashReport>(
       `/financial/reports/flash?${query.toString()}`,
+      authToken(),
+    );
+  },
+
+  async listJournals(
+    propertyId: string,
+    date: string,
+  ): Promise<JournalEntry[]> {
+    const query = new URLSearchParams({ propertyId, date });
+    return apiClient.get<JournalEntry[]>(
+      `/financial/journals?${query.toString()}`,
+      authToken(),
+    );
+  },
+
+  async postJournals(propertyId: string, date: string): Promise<JournalEntry> {
+    return apiClient.post<JournalEntry>(
+      '/financial/journals',
+      {
+        propertyId,
+        businessDate: date,
+        source: 'MANUAL',
+        postedBy: 'usr_mock_1',
+      },
       authToken(),
     );
   },

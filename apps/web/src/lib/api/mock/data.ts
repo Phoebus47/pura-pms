@@ -14,6 +14,7 @@ export interface MockData {
   folioTransactions: any[];
   shifts: any[];
   taxInvoices: any[];
+  journalEntries: any[];
 }
 
 export const mockDb: any = {
@@ -383,4 +384,5 @@ export const mockDb: any = {
     },
   ],
   taxInvoices: [],
+  journalEntries: [],
 };

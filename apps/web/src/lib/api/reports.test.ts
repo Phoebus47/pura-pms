@@ -5,6 +5,7 @@ import { apiClient } from './client';
 vi.mock('./client', () => ({
   apiClient: {
     get: vi.fn(),
+    post: vi.fn(),
   },
   getAuthToken: vi.fn(() => 'token123'),
 }));
@@ -55,5 +56,24 @@ describe('reportsAPI', () => {
       'token123',
     );
     expect(result).toEqual(flash);
+  });
+
+  it('posts GL journals for a property and date', async () => {
+    const { apiClient } = await import('./client');
+    vi.mocked(apiClient.post).mockResolvedValue({ id: 'je-1' });
+
+    const result = await reportsAPI.postJournals('prop-1', '2026-08-14');
+
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/financial/journals',
+      {
+        propertyId: 'prop-1',
+        businessDate: '2026-08-14',
+        source: 'MANUAL',
+        postedBy: 'usr_mock_1',
+      },
+      'token123',
+    );
+    expect(result).toEqual({ id: 'je-1' });
   });
 });
