@@ -54,26 +54,29 @@ export function StatCard({ stat }: StatCardProps) {
           )}
         />
       </div>
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex gap-3 items-center">
-          <div
+      <div className="relative z-10">
+        <div
+          className={cn(
+            'backdrop-blur-sm border border-white/30 duration-300 group-hover:rotate-6 group-hover:scale-110 group-hover:shadow-xl inline-flex motion-reduce:transform-none p-3.5 rounded-2xl shadow-2xl text-white transition-all',
+            tones.icon,
+          )}
+        >
+          <Icon className="h-6 w-6" />
+        </div>
+        <p className="font-semibold mt-4 text-slate-600 text-sm">{stat.name}</p>
+        <div className="flex gap-3 items-end justify-between mt-2">
+          <p className="font-black sm:text-4xl text-3xl text-pura-blue tracking-tight">
+            {stat.value}
+          </p>
+          <p
             className={cn(
-              'backdrop-blur-sm border border-white/30 duration-300 group-hover:rotate-6 group-hover:scale-110 group-hover:shadow-xl motion-reduce:transform-none p-3.5 rounded-2xl shadow-2xl text-white transition-all',
-              tones.icon,
+              'pb-1 text-right text-xs whitespace-nowrap',
+              getChangeTypeColor(stat.changeType),
             )}
           >
-            <Icon className="h-6 w-6" />
-          </div>
+            {stat.change}
+          </p>
         </div>
-        <div className={cn(getChangeTypeColor(stat.changeType))}>
-          {stat.change}
-        </div>
-      </div>
-      <div className="mt-4 relative z-10">
-        <p className="font-semibold text-slate-600 text-sm">{stat.name}</p>
-        <p className="font-black mt-2 sm:text-4xl text-3xl text-pura-blue tracking-tight">
-          {stat.value}
-        </p>
       </div>
     </div>
   );
