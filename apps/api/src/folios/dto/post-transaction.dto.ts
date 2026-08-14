@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsInt,
   IsDateString,
+  Min,
 } from 'class-validator';
 
 export class PostTransactionDto {
@@ -33,4 +34,13 @@ export class PostTransactionDto {
 
   @IsDateString()
   businessDate: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  foreignAmount?: number;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
 }

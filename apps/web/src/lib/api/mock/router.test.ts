@@ -957,4 +957,113 @@ describe('Mock API Router', () => {
       expect(Array.isArray(response)).toBe(true);
     });
   });
+
+  describe('Exchange rates', () => {
+    it('lists active exchange rates', async () => {
+      const response: any = await routeMockRequest('/exchange-rates', {
+        method: 'GET',
+      });
+      expect(response.length).toBeGreaterThan(0);
+      expect(response[0].targetCurrency).toBe('USD');
+    });
+
+    it('looks up the latest rate on or before the requested date', async () => {
+      mockDb.exchangeRates.push({
+        id: 'fx_old',
+        baseCurrency: 'THB',
+        targetCurrency: 'USD',
+        rate: 30,
+        effectiveDate: '2019-01-01',
+        isActive: true,
+        createdAt: '2019-01-01',
+      });
+      const response: any = await routeMockRequest(
+        '/exchange-rates?baseCurrency=THB&targetCurrency=USD&date=2026-08-14',
+        { method: 'GET' },
+      );
+      expect(response.rate).toBe(35);
+    });
+
+    it('creates an exchange rate and rejects unique conflicts', async () => {
+      const created: any = await routeMockRequest('/exchange-rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          baseCurrency: 'THB',
+          targetCurrency: 'EUR',
+          rate: 38,
+          effectiveDate: '2026-08-14',
+        }),
+      });
+      expect(created.targetCurrency).toBe('EUR');
+      expect(created.rate).toBe(38);
+
+      await expect(
+        routeMockRequest('/exchange-rates', {
+          method: 'POST',
+          body: JSON.stringify({
+            baseCurrency: 'THB',
+            targetCurrency: 'EUR',
+            rate: 39,
+            effectiveDate: '2026-08-14',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('patches rate and isActive', async () => {
+      const response: any = await routeMockRequest(
+        '/exchange-rates/fx_mock_1',
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ rate: 36.5, isActive: false }),
+        },
+      );
+      expect(response.rate).toBe(36.5);
+      expect(response.isActive).toBe(false);
+    });
+
+    it('converts cash 9000 posts using the guest currency rate', async () => {
+      const folioId = mockDb.folios[0].id;
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_cash_9000',
+            amountNet: 0,
+            currency: 'USD',
+            foreignAmount: 100,
+            businessDate: '2026-08-14',
+          }),
+        },
+      );
+      const posted = mockDb.folioTransactions.find(
+        (trx: any) => trx.id === response.id,
+      );
+      expect(posted.amountNet).toBe(3500);
+      expect(posted.reference).toBe('FX USD 100 @ 35.0000');
+    });
+
+    it('ignores currency on non-9000 posts', async () => {
+      const folioId = mockDb.folios[0].id;
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 200,
+            currency: 'USD',
+            foreignAmount: 100,
+          }),
+        },
+      );
+      const posted = mockDb.folioTransactions.find(
+        (trx: any) => trx.id === response.id,
+      );
+      expect(posted.amountNet).toBe(200);
+    });
+  });
 });
