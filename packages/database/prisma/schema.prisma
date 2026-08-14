@@ -139,6 +139,7 @@ model Reservation {
   fixedCharges   FixedCharge[]
   deposits       Deposit[]
   taxInvoices    TaxInvoice[]
+  cardPreauths   CardPreauth[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -625,6 +626,26 @@ model InvoicePayment {
   @@index([invoiceId])
 }
 
+model CardPreauth {
+  id                 String            @id @default(cuid())
+  reservationId      String
+  reservation        Reservation       @relation(fields: [reservationId], references: [id])
+  amount             Decimal           @db.Decimal(12, 2)
+  status             CardPreauthStatus @default(HELD)
+  last4              String
+  expiryMonth        Int
+  expiryYear         Int
+  manualRef          String
+  capturedAmount     Decimal?          @db.Decimal(12, 2)
+  folioId            String?
+  folioTransactionId String?
+  createdBy          String
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([reservationId, status])
+}
+
 // ==================== HOUSEKEEPING ====================
 
 model HousekeepingTask {
@@ -791,4 +812,12 @@ enum TaskStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum CardPreauthStatus {
+  HELD
+  INCREMENTAL
+  CAPTURED
+  RELEASED
+  EXPIRED
 }

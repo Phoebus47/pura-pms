@@ -10,6 +10,7 @@ import {
   ArrowLeftRight,
   Receipt,
   Landmark,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -30,6 +31,7 @@ export const navigationItems: NavigationItem[] = [
   { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
   { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
   { name: 'Accounts receivable', href: '/ar-accounts', icon: Landmark },
+  { name: 'Card pre-auths', href: '/card-preauths', icon: Wallet },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -47,5 +49,6 @@ export const moreBottomNavItems: NavigationItem[] = [
   { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
   { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
   { name: 'Accounts receivable', href: '/ar-accounts', icon: Landmark },
+  { name: 'Card pre-auths', href: '/card-preauths', icon: Wallet },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

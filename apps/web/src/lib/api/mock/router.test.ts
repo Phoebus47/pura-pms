@@ -1229,4 +1229,44 @@ describe('Mock API Router', () => {
       ).rejects.toMatchObject({ status: 409 });
     });
   });
+
+  describe('Card pre-auths', () => {
+    it('holds, increments, and captures as a card payment', async () => {
+      const held: any = await routeMockRequest('/card-preauths', {
+        method: 'POST',
+        body: JSON.stringify({
+          reservationId: mockDb.reservations[0].id,
+          amount: 500,
+          last4: '4242',
+          expiryMonth: 12,
+          expiryYear: 2028,
+          manualRef: 'AUTH-1',
+          createdBy: 'usr_mock_1',
+        }),
+      });
+      expect(held.status).toBe('HELD');
+
+      const increased: any = await routeMockRequest(
+        `/card-preauths/${held.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ amount: 700 }),
+        },
+      );
+      expect(increased.status).toBe('INCREMENTAL');
+      expect(increased.amount).toBe(700);
+
+      const captured: any = await routeMockRequest(
+        `/card-preauths/${held.id}/capture`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            folioId: mockDb.folios[0].id,
+            userId: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(captured.status).toBe('CAPTURED');
+    });
+  });
 });

@@ -165,6 +165,29 @@
     "setArAccount": "Link AR account",
     "setLimit": "Save limit"
   },
+  "preauth": {
+    "title": "Card pre-authorizations",
+    "subtitle": "Manual hold ledger only. Capture posts folio payment 9001. No card gateway.",
+    "hold": "Record hold",
+    "list": "Holds",
+    "reservationId": "Reservation ID",
+    "amount": "Amount",
+    "last4": "Last 4 digits",
+    "expiryMonth": "Expiry month",
+    "expiryYear": "Expiry year",
+    "manualRef": "Manual reference",
+    "holdSubmit": "Hold",
+    "holdSuccess": "Pre-authorization held",
+    "empty": "No card holds yet",
+    "increment": "Increase hold",
+    "incrementAmount": "New hold amount",
+    "incrementSuccess": "Hold increased",
+    "folioId": "Folio ID",
+    "capture": "Capture",
+    "captureSuccess": "Hold captured as card payment",
+    "release": "Release",
+    "releaseSuccess": "Hold released"
+  },
   "reservations": {
     "splitStay": {
       "badge": "Split stay",
