@@ -53,6 +53,26 @@ describe('Header', () => {
     expect(userName.closest('div')).toHaveClass('hidden', 'lg:block');
   });
 
+  it('should keep the search field mounted and reveal it from the mobile control', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    const searchInput = screen.getByLabelText(
+      'Search guests, reservations, rooms',
+    );
+    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveAttribute('id', 'global-search');
+    expect(searchInput.parentElement).toHaveClass('hidden', 'lg:block');
+
+    const openSearch = screen.getByLabelText('Open search');
+    expect(openSearch).toHaveClass('lg:hidden', 'min-h-11', 'min-w-11');
+
+    await user.click(openSearch);
+
+    expect(searchInput.parentElement).toHaveClass('block');
+    expect(searchInput).toHaveFocus();
+  });
+
   it('should render user dropdown menu', async () => {
     const user = userEvent.setup();
     render(<Header />);
