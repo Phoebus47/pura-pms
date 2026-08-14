@@ -71,6 +71,15 @@ describe('Mock API Router', () => {
       expect(response.summary.SPA.total).toBe(1765.5);
       expect(response.totalRevenue).toBeGreaterThan(0);
     });
+
+    it('returns occupancy snapshot for Daily Flash', async () => {
+      const response: any = await routeMockRequest(
+        '/financial/reports/flash?propertyId=prop_mock_1&date=2026-08-14',
+        { method: 'GET' },
+      );
+      expect(response.occupancy.totalRooms).toBeGreaterThan(0);
+      expect(response.stayOvers).toBeGreaterThanOrEqual(0);
+    });
   });
 
   describe('Properties', () => {

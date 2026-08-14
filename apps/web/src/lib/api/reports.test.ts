@@ -34,4 +34,26 @@ describe('reportsAPI', () => {
     );
     expect(result).toEqual(report);
   });
+
+  it('calls GET /financial/reports/flash with property and date', async () => {
+    const flash = {
+      businessDate: '2026-08-14',
+      propertyId: 'prop-1',
+      occupancy: { totalRooms: 10, occupiedRooms: 1, occupancyRate: 10 },
+      arrivals: 0,
+      departures: 0,
+      stayOvers: 1,
+      roomRevenue: 1170,
+      totalRevenue: 1404,
+    };
+    vi.mocked(apiClient.get).mockResolvedValue(flash);
+
+    const result = await reportsAPI.getDailyFlash('prop-1', '2026-08-14');
+
+    expect(apiClient.get).toHaveBeenCalledWith(
+      '/financial/reports/flash?propertyId=prop-1&date=2026-08-14',
+      'token123',
+    );
+    expect(result).toEqual(flash);
+  });
 });

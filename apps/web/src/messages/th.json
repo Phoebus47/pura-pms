@@ -46,7 +46,14 @@
     "total": "รวม",
     "totalRevenue": "รายได้รวม",
     "empty": "ไม่มีรายได้ที่ลงบัญชีในวันนี้",
-    "loading": "กำลังโหลดรายงาน"
+    "loading": "กำลังโหลดรายงาน",
+    "flashTitle": "Daily Flash",
+    "occupancy": "อัตราเข้าพัก",
+    "occupiedRooms": "ห้องที่เข้าพัก",
+    "arrivals": "เข้าวันนี้",
+    "departures": "ออกวันนี้",
+    "stayOvers": "พักต่อ",
+    "roomRevenue": "รายได้ห้องพัก"
   },
   "reservations": {
     "splitStay": {

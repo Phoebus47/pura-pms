@@ -10,13 +10,27 @@ vi.mock('@/lib/api/properties', () => ({
 }));
 
 vi.mock('@/lib/api/reports', () => ({
-  reportsAPI: { getDailyRevenueReport: vi.fn() },
+  reportsAPI: {
+    getDailyRevenueReport: vi.fn(),
+    getDailyFlash: vi.fn(),
+  },
 }));
 
 const property = {
   id: 'prop_mock_1',
   name: 'Demo Hotel',
   businessDate: '2026-08-14T00:00:00.000Z',
+};
+
+const flash = {
+  businessDate: '2026-08-14',
+  propertyId: 'prop_mock_1',
+  occupancy: { totalRooms: 10, occupiedRooms: 1, occupancyRate: 10 },
+  arrivals: 2,
+  departures: 1,
+  stayOvers: 1,
+  roomRevenue: 1170,
+  totalRevenue: 1404,
 };
 
 const report = {
@@ -45,6 +59,7 @@ describe('ReportsPage', () => {
     vi.clearAllMocks();
     vi.mocked(propertiesAPI.getAll).mockResolvedValue([property] as never);
     vi.mocked(reportsAPI.getDailyRevenueReport).mockResolvedValue(report);
+    vi.mocked(reportsAPI.getDailyFlash).mockResolvedValue(flash);
   });
 
   it('renders the daily revenue report', async () => {
@@ -56,7 +71,17 @@ describe('ReportsPage', () => {
     expect(screen.getByText(t('reports.drrTitle'))).toBeInTheDocument();
     expect(await screen.findByText('ROOM')).toBeInTheDocument();
     expect(screen.getByText('SPA')).toBeInTheDocument();
-    expect(screen.getByText('1,404.00')).toBeInTheDocument();
+    expect(screen.getAllByText('1,404.00').length).toBeGreaterThan(0);
+  });
+
+  it('renders the daily flash occupancy snapshot', async () => {
+    renderPage();
+
+    expect(
+      await screen.findByText(t('reports.flashTitle')),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('10%')).toBeInTheDocument();
+    expect(screen.getByText('1 / 10')).toBeInTheDocument();
   });
 
   it('loads DRR for the selected business date', async () => {

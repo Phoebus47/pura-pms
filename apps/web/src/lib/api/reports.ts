@@ -14,6 +14,21 @@ export interface DailyRevenueReport {
   totalRevenue: number;
 }
 
+export interface DailyFlashReport {
+  businessDate: string;
+  propertyId: string;
+  occupancy: {
+    totalRooms: number;
+    occupiedRooms: number;
+    occupancyRate: number;
+  };
+  arrivals: number;
+  departures: number;
+  stayOvers: number;
+  roomRevenue: number;
+  totalRevenue: number;
+}
+
 function authToken(): string | undefined {
   return getAuthToken() || undefined;
 }
@@ -26,6 +41,17 @@ export const reportsAPI = {
     const query = new URLSearchParams({ propertyId, date });
     return apiClient.get<DailyRevenueReport>(
       `/financial/reports/drr?${query.toString()}`,
+      authToken(),
+    );
+  },
+
+  async getDailyFlash(
+    propertyId: string,
+    date: string,
+  ): Promise<DailyFlashReport> {
+    const query = new URLSearchParams({ propertyId, date });
+    return apiClient.get<DailyFlashReport>(
+      `/financial/reports/flash?${query.toString()}`,
       authToken(),
     );
   },

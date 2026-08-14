@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DailyRevenueTable } from './daily-revenue-table';
+import { DailyFlashPanel } from './daily-flash-panel';
 
 function toDateInputValue(value: string | undefined): string {
   if (!value) return '';
@@ -24,6 +25,13 @@ export function ReportsClient() {
   const defaultDate = toDateInputValue(property?.businessDate);
   const [date, setDate] = useState('');
   const selectedDate = date || defaultDate;
+
+  const { data: flash, isLoading: flashLoading } = useQuery({
+    queryKey: ['reports', 'flash', property?.id, selectedDate],
+    queryFn: () =>
+      reportsAPI.getDailyFlash(property?.id as string, selectedDate),
+    enabled: Boolean(property?.id && selectedDate),
+  });
 
   const { data: report, isLoading } = useQuery({
     queryKey: ['reports', 'drr', property?.id, selectedDate],
@@ -61,6 +69,15 @@ export function ReportsClient() {
           {t('reports.property')}: {property.name}
         </p>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('reports.flashTitle')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DailyFlashPanel flash={flash} loading={flashLoading} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
