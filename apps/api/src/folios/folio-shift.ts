@@ -30,21 +30,27 @@ export async function resolvePostShiftId(
   prisma: PrismaService,
   folioId: string,
   userId: string,
-): Promise<{ shiftId: string | null; rateCode: string | null }> {
+): Promise<{
+  shiftId: string | null;
+  rateCode: string | null;
+  propertyCurrency: string;
+}> {
   const folio = await prisma.folio.findUnique({
     where: { id: folioId },
     include: {
-      reservation: { include: { room: true } },
+      reservation: { include: { room: { include: { property: true } } } },
     },
   });
   const rateCode = folio?.reservation?.rateCode ?? null;
+  const propertyCurrency =
+    folio?.reservation?.room?.property?.currency ?? 'THB';
   if (userId === SYSTEM_USER_ID) {
-    return { shiftId: null, rateCode };
+    return { shiftId: null, rateCode, propertyCurrency };
   }
   const shiftId = await resolveCashierShiftId(
     prisma,
     userId,
     folio?.reservation?.room?.propertyId,
   );
-  return { shiftId, rateCode };
+  return { shiftId, rateCode, propertyCurrency };
 }

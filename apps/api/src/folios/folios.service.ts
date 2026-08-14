@@ -11,6 +11,14 @@ import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
 import { computePostingAmounts, standardWindowCreates } from './folio-posting';
 import { persistPostingLines, resolvePostingLines } from './package-split';
+import {
+  convertForeignToBase,
+  formatFxReference,
+  MISSING_FX_RATE_MESSAGE,
+  needsCashFxConversion,
+  requireForeignAmount,
+} from '../exchange-rates/cash-fx';
+import { postingRateQuery } from '../exchange-rates/exchange-rate-query';
 
 @Injectable()
 export class FoliosService {
@@ -155,16 +163,19 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    const amounts = computePostingAmounts(
-      postTransactionDto.amountNet,
-      trxCode,
-    );
-
-    const { shiftId, rateCode } = await resolvePostShiftId(
+    const { shiftId, rateCode, propertyCurrency } = await resolvePostShiftId(
       this.prisma,
       folioId,
       postTransactionDto.userId,
     );
+
+    const { amountNet, reference } = await this.resolveCashFxAmount(
+      trxCode.code,
+      postTransactionDto,
+      propertyCurrency,
+    );
+
+    const amounts = computePostingAmounts(amountNet, trxCode);
 
     const lines = await resolvePostingLines(this.prisma, trxCode, rateCode, {
       trxCodeId: trxCode.id,
@@ -177,7 +188,7 @@ export class FoliosService {
         folioId,
         windowId: window.id,
         businessDate: new Date(postTransactionDto.businessDate),
-        reference: postTransactionDto.reference,
+        reference,
         remark: postTransactionDto.remark,
         userId: postTransactionDto.userId,
         reasonCodeId: postTransactionDto.reasonCodeId,
@@ -185,6 +196,35 @@ export class FoliosService {
         lines,
       }),
     );
+  }
+
+  private async resolveCashFxAmount(
+    trxCode: string,
+    dto: PostTransactionDto,
+    propertyCurrency: string,
+  ): Promise<{ amountNet: number; reference?: string }> {
+    const guestCurrency = dto.currency;
+    if (!needsCashFxConversion(trxCode, guestCurrency, propertyCurrency)) {
+      return { amountNet: dto.amountNet, reference: dto.reference };
+    }
+
+    const foreignAmount = requireForeignAmount(dto.foreignAmount);
+    const rateRow = await this.prisma.exchangeRate.findFirst(
+      postingRateQuery(
+        propertyCurrency,
+        guestCurrency,
+        new Date(dto.businessDate),
+      ),
+    );
+    if (!rateRow) {
+      throw new BadRequestException(MISSING_FX_RATE_MESSAGE);
+    }
+
+    const rate = Number(rateRow.rate);
+    return {
+      amountNet: convertForeignToBase(foreignAmount, rate),
+      reference: formatFxReference(guestCurrency, foreignAmount, rate),
+    };
   }
 
   async voidTransaction(transactionId: string, dto: VoidTransactionDto) {

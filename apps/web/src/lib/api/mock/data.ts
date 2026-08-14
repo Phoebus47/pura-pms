@@ -368,4 +368,15 @@ export const mockDb: any = {
       notes: null,
     },
   ],
+  exchangeRates: [
+    {
+      id: 'fx_mock_1',
+      baseCurrency: 'THB',
+      targetCurrency: 'USD',
+      rate: 35,
+      effectiveDate: '2020-01-01',
+      isActive: true,
+      createdAt: MOCK_NOW,
+    },
+  ],
 };

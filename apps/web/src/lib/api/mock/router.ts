@@ -263,6 +263,142 @@ function getFolioPropertyId(folioId: string): string | undefined {
   return reservation?.propertyId;
 }
 
+function getFolioPropertyCurrency(folioId: string): string {
+  const propertyId = getFolioPropertyId(folioId);
+  const property = mockDb.properties.find((p: any) => p.id === propertyId);
+  return property?.currency || 'THB';
+}
+
+function findExchangeRate(
+  baseCurrency: string,
+  targetCurrency: string,
+  date: string,
+) {
+  const dateKey = toDateKey(date);
+  const matches = mockDb.exchangeRates.filter(
+    (rate: any) =>
+      rate.isActive &&
+      String(rate.baseCurrency).toUpperCase() === baseCurrency.toUpperCase() &&
+      String(rate.targetCurrency).toUpperCase() ===
+        targetCurrency.toUpperCase() &&
+      toDateKey(rate.effectiveDate) <= dateKey,
+  );
+  matches.sort((a: any, b: any) =>
+    toDateKey(b.effectiveDate).localeCompare(toDateKey(a.effectiveDate)),
+  );
+  return matches[0];
+}
+
+function applyCashFxConversion(
+  tc: any,
+  body: any,
+  folioId: string,
+): { net: number; reference: string } {
+  const net = Number(body.amountNet);
+  const reference = body.reference || '';
+  if (tc.code !== '9000') {
+    return { net, reference };
+  }
+  const currency = body.currency as string | undefined;
+  const propertyCurrency = getFolioPropertyCurrency(folioId);
+  if (!currency || currency.toUpperCase() === propertyCurrency.toUpperCase()) {
+    return { net, reference };
+  }
+  if (body.foreignAmount === undefined) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'foreignAmount is required when posting cash in a foreign currency',
+    });
+  }
+  const rateRow = findExchangeRate(
+    propertyCurrency,
+    currency,
+    body.businessDate || new Date().toISOString(),
+  );
+  if (!rateRow) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'No exchange rate found for this currency and business date',
+    });
+  }
+  const rate = Number(rateRow.rate);
+  return {
+    net: round2(Number(body.foreignAmount) * rate),
+    reference: `FX ${currency.toUpperCase()} ${body.foreignAmount} @ ${rate.toFixed(4)}`,
+  };
+}
+
+function handleExchangeRatesGet(path: string, params: URLSearchParams) {
+  if (path !== '/exchange-rates') return;
+  const baseCurrency = params.get('baseCurrency');
+  const targetCurrency = params.get('targetCurrency');
+  const date = params.get('date');
+  if (baseCurrency && targetCurrency && date) {
+    const rate = findExchangeRate(baseCurrency, targetCurrency, date);
+    if (!rate) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Exchange rate not found',
+      });
+    }
+    return rate;
+  }
+  return mockDb.exchangeRates.filter((rate: any) => rate.isActive);
+}
+
+function handleExchangeRatesPost(path: string, body: any) {
+  if (path !== '/exchange-rates') return;
+  const baseCurrency = String(body.baseCurrency || '').toUpperCase();
+  const targetCurrency = String(body.targetCurrency || '').toUpperCase();
+  const effectiveDate = body.effectiveDate;
+  const duplicate = mockDb.exchangeRates.find(
+    (rate: any) =>
+      rate.baseCurrency === baseCurrency &&
+      rate.targetCurrency === targetCurrency &&
+      toDateKey(rate.effectiveDate) === toDateKey(effectiveDate),
+  );
+  if (duplicate) {
+    throw new APIError(409, 'Conflict', {
+      message: 'Exchange rate already exists for this pair and date',
+    });
+  }
+  const created = {
+    id: `fx_mock_${Date.now()}`,
+    baseCurrency,
+    targetCurrency,
+    rate: Number(body.rate),
+    effectiveDate,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  };
+  mockDb.exchangeRates.push(created);
+  return created;
+}
+
+function handleExchangeRatesPatch(path: string, body: any) {
+  const match = /^\/exchange-rates\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const idx = mockDb.exchangeRates.findIndex(
+    (rate: any) => rate.id === match[1],
+  );
+  if (idx === -1) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Exchange rate not found',
+    });
+  }
+  mockDb.exchangeRates[idx] = { ...mockDb.exchangeRates[idx], ...body };
+  return mockDb.exchangeRates[idx];
+}
+
+function handleExchangeRates(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (method === 'GET') return handleExchangeRatesGet(path, params);
+  if (method === 'POST') return handleExchangeRatesPost(path, body);
+  if (method === 'PATCH') return handleExchangeRatesPatch(path, body);
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -737,7 +873,7 @@ function handleFolioPost(path: string, body: any) {
     getFolioPropertyId(folioId),
   );
 
-  const net = Number(body.amountNet);
+  const { net, reference } = applyCashFxConversion(tc, body, folioId);
   const srv = tc.hasService ? net * ((tc.serviceRate as number) / 100) : 0;
   const tax = tc.hasTax ? (net + srv) * ((tc.taxRate as number) / 100) : 0;
   const sign = tc.type === 'CHARGE' ? 1 : -1;
@@ -752,7 +888,7 @@ function handleFolioPost(path: string, body: any) {
     amountTax: tax,
     amountTotal: total,
     sign,
-    reference: body.reference || '',
+    reference,
     userId: postUserId,
     shiftId: postShift?.id ?? null,
     createdAt: new Date().toISOString(),
@@ -1031,6 +1167,7 @@ export async function routeMockRequest<T>(
       () => handleFinancial(method, path, params),
       () => handleNightAudit(method, path, body),
       () => handleShifts(method, path, body, params),
+      () => handleExchangeRates(method, path, body, params),
       () => handleFolios(method, path, body),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

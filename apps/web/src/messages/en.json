@@ -55,6 +55,22 @@
     "stayOvers": "Stay-overs",
     "roomRevenue": "Room revenue"
   },
+  "fx": {
+    "title": "Currency exchange",
+    "subtitle": "Guest currency is the target; property currency is the base. Rate is how many base units per 1 target (for example 1 USD = 35 THB).",
+    "add": "Add exchange rate",
+    "list": "Exchange rates",
+    "baseCurrency": "Base currency",
+    "targetCurrency": "Target currency",
+    "rate": "Rate",
+    "effectiveDate": "Effective date",
+    "submit": "Save rate",
+    "createSuccess": "Exchange rate saved",
+    "updateSuccess": "Exchange rate updated",
+    "empty": "No exchange rates yet",
+    "deactivate": "Deactivate",
+    "activate": "Activate"
+  },
   "reservations": {
     "splitStay": {
       "badge": "Split stay",

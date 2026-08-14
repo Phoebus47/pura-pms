@@ -15,6 +15,7 @@ import { FinancialModule } from './financial/financial.module';
 import { BullModule } from '@nestjs/bullmq';
 import { NightAuditModule } from './night-audit/night-audit.module';
 import { ShiftsModule } from './shifts/shifts.module';
+import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ShiftsModule } from './shifts/shifts.module';
     ReservationsModule,
     FoliosModule,
     FinancialModule,
+    ExchangeRatesModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

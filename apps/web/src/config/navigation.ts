@@ -7,6 +7,7 @@ import {
   Clock,
   FileText,
   Settings,
+  ArrowLeftRight,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -24,6 +25,7 @@ export const navigationItems: NavigationItem[] = [
   { name: 'Billing', href: '/billing', icon: CreditCard },
   { name: 'Shifts', href: '/shifts', icon: Clock },
   { name: 'Reports', href: '/reports', icon: FileText },
+  { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -38,5 +40,6 @@ export const primaryBottomNavItems: NavigationItem[] = [
 export const moreBottomNavItems: NavigationItem[] = [
   { name: 'Shifts', href: '/shifts', icon: Clock },
   { name: 'Reports', href: '/reports', icon: FileText },
+  { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

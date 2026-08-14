@@ -63,6 +63,8 @@ export interface PostTransactionDto {
   userId: string;
   reasonCodeId?: string;
   businessDate: string;
+  foreignAmount?: number;
+  currency?: string;
 }
 
 export interface VoidTransactionDto {

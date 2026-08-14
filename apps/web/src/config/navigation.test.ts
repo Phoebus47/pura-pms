@@ -13,6 +13,7 @@ import {
   Clock,
   FileText,
   Settings,
+  ArrowLeftRight,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -90,6 +91,15 @@ describe('navigation', () => {
       expect(reportsItem?.icon).toBe(FileText);
     });
 
+    it('should include Exchange rates navigation item', () => {
+      const fxItem = navigationItems.find(
+        (item) => item.name === 'Exchange rates',
+      );
+      expect(fxItem).toBeDefined();
+      expect(fxItem?.href).toBe('/exchange-rates');
+      expect(fxItem?.icon).toBe(ArrowLeftRight);
+    });
+
     it('should include Settings navigation item', () => {
       const settingsItem = navigationItems.find(
         (item) => item.name === 'Settings',
@@ -108,6 +118,7 @@ describe('navigation', () => {
         'Billing',
         'Shifts',
         'Reports',
+        'Exchange rates',
         'Settings',
       ];
 
@@ -150,15 +161,17 @@ describe('navigation', () => {
   });
 
   describe('moreBottomNavItems', () => {
-    it('should keep Shifts, Reports and Settings in the overflow menu', () => {
+    it('should keep Shifts, Reports, Exchange rates and Settings in the overflow menu', () => {
       expect(moreBottomNavItems.map((item) => item.name)).toEqual([
         'Shifts',
         'Reports',
+        'Exchange rates',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
         '/shifts',
         '/reports',
+        '/exchange-rates',
         '/settings',
       ]);
     });

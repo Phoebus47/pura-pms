@@ -13,6 +13,7 @@ describe('Mock Data Store', () => {
     expect(mockDb.folioWindows).toBeDefined();
     expect(mockDb.transactionCodes).toBeDefined();
     expect(mockDb.folioTransactions).toBeDefined();
+    expect(mockDb.exchangeRates).toBeDefined();
   });
 
   it('should have initial seed data', () => {
