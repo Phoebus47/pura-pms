@@ -57,7 +57,13 @@
     "journalsTitle": "GL journals",
     "postJournals": "Post journals",
     "journalsPosted": "Journals posted",
-    "journalsEmpty": "No journal entries for this date"
+    "journalsEmpty": "No journal entries for this date",
+    "tbTitle": "Trial Balance",
+    "tbAccount": "Account",
+    "tbDebit": "Debit",
+    "tbCredit": "Credit",
+    "tbEmpty": "No posted journals for this date",
+    "tbDrilldown": "Journal lines"
   },
   "fx": {
     "title": "Currency exchange",

@@ -197,6 +197,15 @@ function handleFinancialGet(path: string, params: URLSearchParams) {
       params.get('date') || new Date().toISOString(),
     );
   }
+  if (path === '/financial/reports/trial-balance') {
+    return {
+      businessDate: (params.get('date') || '').slice(0, 10),
+      propertyId: params.get('propertyId') || 'prop_mock_1',
+      rows: [],
+      totalDebit: 0,
+      totalCredit: 0,
+    };
+  }
   if (path === '/financial/journals') {
     const propertyId = params.get('propertyId');
     const date = params.get('date');

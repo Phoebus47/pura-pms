@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { summarizeFlash } from './reports-flash';
+import {
+  summarizeTrialBalance,
+  type TrialBalanceReport,
+} from './reports-trial-balance';
 
 export interface RevenueBucket {
   net: number;
@@ -135,6 +139,29 @@ export class ReportsService {
       businessDate: date.toISOString().split('T')[0],
       propertyId,
       ...stats,
+    };
+  }
+
+  async getTrialBalance(
+    propertyId: string,
+    date: Date,
+  ): Promise<TrialBalanceReport> {
+    const day = this.startOfDay(date);
+    const lines = await this.prisma.journalLine.findMany({
+      where: {
+        journal: {
+          propertyId,
+          entryDate: day,
+          isPosted: true,
+        },
+      },
+      include: { account: true },
+    });
+    const summary = summarizeTrialBalance(lines);
+    return {
+      businessDate: date.toISOString().split('T')[0],
+      propertyId,
+      ...summary,
     };
   }
 

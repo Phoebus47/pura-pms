@@ -15,6 +15,7 @@ vi.mock('@/lib/api/reports', () => ({
     getDailyFlash: vi.fn(),
     listJournals: vi.fn(),
     postJournals: vi.fn(),
+    getTrialBalance: vi.fn(),
   },
 }));
 
@@ -63,6 +64,13 @@ describe('ReportsPage', () => {
     vi.mocked(reportsAPI.getDailyRevenueReport).mockResolvedValue(report);
     vi.mocked(reportsAPI.getDailyFlash).mockResolvedValue(flash);
     vi.mocked(reportsAPI.listJournals).mockResolvedValue([]);
+    vi.mocked(reportsAPI.getTrialBalance).mockResolvedValue({
+      businessDate: '2026-08-14',
+      propertyId: 'prop_mock_1',
+      rows: [],
+      totalDebit: 0,
+      totalCredit: 0,
+    });
   });
 
   it('renders the daily revenue report', async () => {
@@ -109,6 +117,11 @@ describe('ReportsPage', () => {
     expect(
       screen.getByRole('button', { name: t('reports.postJournals') }),
     ).toBeInTheDocument();
+  });
+
+  it('renders the trial balance panel', async () => {
+    renderPage();
+    expect(await screen.findByText(t('reports.tbTitle'))).toBeInTheDocument();
   });
 
   it('shows an empty state when there is no revenue', async () => {

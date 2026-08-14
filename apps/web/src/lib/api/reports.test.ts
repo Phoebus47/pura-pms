@@ -76,4 +76,23 @@ describe('reportsAPI', () => {
     );
     expect(result).toEqual({ id: 'je-1' });
   });
+
+  it('calls GET /financial/reports/trial-balance', async () => {
+    const tb = {
+      businessDate: '2026-08-14',
+      propertyId: 'prop-1',
+      rows: [],
+      totalDebit: 0,
+      totalCredit: 0,
+    };
+    vi.mocked(apiClient.get).mockResolvedValue(tb);
+
+    const result = await reportsAPI.getTrialBalance('prop-1', '2026-08-14');
+
+    expect(apiClient.get).toHaveBeenCalledWith(
+      '/financial/reports/trial-balance?propertyId=prop-1&date=2026-08-14',
+      'token123',
+    );
+    expect(result).toEqual(tb);
+  });
 });

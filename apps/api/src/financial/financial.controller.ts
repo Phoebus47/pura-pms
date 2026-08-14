@@ -70,6 +70,14 @@ export class FinancialController {
     return this.reportsService.getDailyFlash(propertyId, new Date(date));
   }
 
+  @Get('reports/trial-balance')
+  getTrialBalance(
+    @Query('propertyId') propertyId: string,
+    @Query('date') date: string,
+  ) {
+    return this.reportsService.getTrialBalance(propertyId, new Date(date));
+  }
+
   @Get('gl-accounts')
   listGlAccounts() {
     return this.journalsService.listAccounts();
