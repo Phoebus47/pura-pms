@@ -17,6 +17,7 @@ import { NightAuditModule } from './night-audit/night-audit.module';
 import { ShiftsModule } from './shifts/shifts.module';
 import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
 import { TaxInvoicesModule } from './tax-invoices/tax-invoices.module';
+import { ArAccountsModule } from './ar-accounts/ar-accounts.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TaxInvoicesModule } from './tax-invoices/tax-invoices.module';
     FinancialModule,
     ExchangeRatesModule,
     TaxInvoicesModule,
+    ArAccountsModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

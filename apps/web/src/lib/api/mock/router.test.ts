@@ -1113,6 +1113,76 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('AR accounts', () => {
+    it('creates an account, transfers a folio, and allocates a payment', async () => {
+      const account: any = await routeMockRequest('/ar-accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          companyName: 'Acme Co',
+          creditLimit: 50000,
+          paymentTerms: 30,
+        }),
+      });
+      expect(account.accountNumber).toMatch(/^AR-\d{6}$/);
+
+      const folio = {
+        id: 'fol_mock_ar',
+        reservationId: 'res_mock_1',
+        folioNumber: 'F-AR-1',
+        type: 'GUEST',
+        status: 'OPEN',
+        balance: 250,
+        businessDate: '2026-08-14',
+        isClosed: false,
+      };
+      mockDb.folios.push(folio);
+      mockDb.folioWindows.push({
+        id: 'fw_mock_ar',
+        folioId: folio.id,
+        windowNumber: 1,
+        balance: 250,
+      });
+
+      const invoice: any = await routeMockRequest(
+        `/ar-accounts/${account.id}/transfer`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            folioId: folio.id,
+            userId: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(invoice.invoiceNumber).toMatch(/^AR-\d{4}-\d{6}$/);
+      expect(invoice.amount).toBe(250);
+      expect(folio.status).toBe('POSTED_TO_CITY_LEDGER');
+      expect(account.currentBalance).toBe(250);
+
+      const paid: any = await routeMockRequest(
+        `/ar-invoices/${invoice.id}/payments`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            amount: 50,
+            method: 'BANK_TRANSFER',
+            paidBy: 'usr_mock_1',
+            businessDate: '2026-08-14',
+          }),
+        },
+      );
+      expect(paid.status).toBe('PARTIAL');
+      expect(paid.paidAmount).toBe(50);
+      expect(account.currentBalance).toBe(200);
+
+      const aging: any = await routeMockRequest(
+        `/ar-accounts/${account.id}/aging?asOf=2026-08-14`,
+        { method: 'GET' },
+      );
+      expect(aging.current).toBe(200);
+    });
+  });
+
   describe('Folio credit limit', () => {
     it('blocks checkout when the folio is over its credit limit', async () => {
       const folioId = mockDb.folios[0].id;

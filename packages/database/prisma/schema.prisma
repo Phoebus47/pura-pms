@@ -52,6 +52,7 @@ model Property {
   shifts         Shift[]
   taxInvoices    TaxInvoice[]
   journalEntries JournalEntry[]
+  arAccounts     ARAccount[]
   createdAt      DateTime   @default(now())
 }
 
@@ -187,6 +188,7 @@ model Folio {
   transactions  Transaction[]  // Legacy: Will be replaced by FolioTransaction
   windows       FolioWindow[]
   taxInvoices   TaxInvoice[]
+  invoices      Invoice[]
   createdAt     DateTime      @default(now())
 }
 
@@ -564,7 +566,9 @@ model JournalLine {
 
 model ARAccount {
   id             String    @id @default(cuid())
-  accountNumber  String    @unique
+  propertyId     String
+  property       Property  @relation(fields: [propertyId], references: [id])
+  accountNumber  String
   companyName    String
   contactPerson  String?
   email          String?
@@ -575,19 +579,47 @@ model ARAccount {
   paymentTerms   Int       @default(30)
   isActive       Boolean   @default(true)
   invoices       Invoice[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([propertyId, accountNumber])
+  @@index([propertyId, isActive])
 }
 
 model Invoice {
-  id            String        @id @default(cuid())
-  invoiceNumber String        @unique
+  id            String           @id @default(cuid())
+  invoiceNumber String
+  propertyId    String
   arAccountId   String
-  arAccount     ARAccount     @relation(fields: [arAccountId], references: [id])
-  invoiceDate   DateTime      @db.Date
-  dueDate       DateTime      @db.Date
-  amount        Decimal       @db.Decimal(14, 2)
-  paidAmount    Decimal       @default(0) @db.Decimal(14, 2)
-  status        InvoiceStatus @default(OPEN)
-  createdAt     DateTime      @default(now())
+  arAccount     ARAccount        @relation(fields: [arAccountId], references: [id])
+  folioId       String?
+  folio         Folio?           @relation(fields: [folioId], references: [id])
+  invoiceDate   DateTime         @db.Date
+  dueDate       DateTime         @db.Date
+  amount        Decimal          @db.Decimal(14, 2)
+  paidAmount    Decimal          @default(0) @db.Decimal(14, 2)
+  status        InvoiceStatus    @default(OPEN)
+  payments      InvoicePayment[]
+  createdAt     DateTime         @default(now())
+
+  @@unique([propertyId, invoiceNumber])
+  @@index([propertyId, invoiceDate])
+  @@index([arAccountId, status])
+  @@index([folioId])
+}
+
+model InvoicePayment {
+  id           String   @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id])
+  amount       Decimal  @db.Decimal(14, 2)
+  method       String
+  reference    String?
+  paidBy       String
+  businessDate DateTime @db.Date
+  createdAt    DateTime @default(now())
+
+  @@index([invoiceId])
 }
 
 // ==================== HOUSEKEEPING ====================

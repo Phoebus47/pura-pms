@@ -597,6 +597,276 @@ function handleTaxInvoices(
   if (method === 'POST') return handleTaxInvoicesPost(path, body);
 }
 
+function nextMockArAccountNumber(propertyId: string) {
+  const count = mockDb.arAccounts.filter(
+    (account: any) => account.propertyId === propertyId,
+  ).length;
+  return `AR-${String(count + 1).padStart(6, '0')}`;
+}
+
+function nextMockArInvoiceNumber(propertyId: string, date: string) {
+  const year = String(date).slice(0, 4);
+  const prefix = `AR-${year}-`;
+  const count = mockDb.invoices.filter(
+    (invoice: any) =>
+      invoice.propertyId === propertyId &&
+      String(invoice.invoiceNumber).startsWith(prefix),
+  ).length;
+  return `${prefix}${String(count + 1).padStart(6, '0')}`;
+}
+
+function mockOutstanding(invoice: any) {
+  return (
+    Math.round((Number(invoice.amount) - Number(invoice.paidAmount)) * 100) /
+    100
+  );
+}
+
+function mockAging(accountId: string, asOf: string) {
+  const invoices = mockDb.invoices.filter(
+    (invoice: any) =>
+      invoice.arAccountId === accountId && invoice.status !== 'VOID',
+  );
+  const totals = { current: 0, days30: 0, days60: 0, days90: 0 };
+  for (const invoice of invoices) {
+    const open = mockOutstanding(invoice);
+    if (open <= 0) continue;
+    const due = new Date(
+      `${String(invoice.dueDate).slice(0, 10)}T00:00:00.000Z`,
+    );
+    const asOfDate = new Date(`${asOf.slice(0, 10)}T00:00:00.000Z`);
+    const days = Math.floor((asOfDate.getTime() - due.getTime()) / 86400000);
+    let bucket: keyof typeof totals = 'current';
+    if (days > 60) bucket = 'days90';
+    else if (days > 30) bucket = 'days60';
+    else if (days > 0) bucket = 'days30';
+    totals[bucket] += open;
+  }
+  const account = mockDb.arAccounts.find((row: any) => row.id === accountId);
+  return {
+    arAccountId: accountId,
+    asOf: asOf.slice(0, 10),
+    currentBalance: Number(account?.currentBalance || 0),
+    ...totals,
+  };
+}
+
+function handleArAccountsGet(path: string, params: URLSearchParams) {
+  if (path === '/ar-accounts') {
+    const propertyId = params.get('propertyId');
+    return mockDb.arAccounts.filter(
+      (account: any) => !propertyId || account.propertyId === propertyId,
+    );
+  }
+  const agingMatch = /^\/ar-accounts\/([a-zA-Z0-9_-]+)\/aging$/.exec(path);
+  if (agingMatch) {
+    const asOf = params.get('asOf') || new Date().toISOString();
+    return mockAging(agingMatch[1], asOf);
+  }
+  const statementMatch = /^\/ar-accounts\/([a-zA-Z0-9_-]+)\/statement$/.exec(
+    path,
+  );
+  if (statementMatch) {
+    const account = mockDb.arAccounts.find(
+      (row: any) => row.id === statementMatch[1],
+    );
+    if (!account) {
+      throw new APIError(404, 'Not Found', { message: 'AR account not found' });
+    }
+    const asOf = params.get('asOf') || new Date().toISOString();
+    const aging = mockAging(account.id, asOf);
+    return {
+      accountNumber: account.accountNumber,
+      companyName: account.companyName,
+      asOf: aging.asOf,
+      currentBalance: account.currentBalance,
+      aging: {
+        current: aging.current,
+        days30: aging.days30,
+        days60: aging.days60,
+        days90: aging.days90,
+      },
+      invoices: mockDb.invoices.filter(
+        (invoice: any) =>
+          invoice.arAccountId === account.id && invoice.status !== 'VOID',
+      ),
+    };
+  }
+  const match = /^\/ar-accounts\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const account = mockDb.arAccounts.find((row: any) => row.id === match[1]);
+  if (!account) {
+    throw new APIError(404, 'Not Found', { message: 'AR account not found' });
+  }
+  return account;
+}
+
+function handleArAccountsPost(path: string, body: any) {
+  if (path === '/ar-accounts') {
+    const property =
+      mockDb.properties.find((row: any) => row.id === body.propertyId) ||
+      mockDb.properties[0];
+    const created = {
+      id: `ar_mock_${Date.now()}`,
+      propertyId: body.propertyId,
+      accountNumber:
+        body.accountNumber || nextMockArAccountNumber(body.propertyId),
+      companyName: body.companyName,
+      contactPerson: body.contactPerson || null,
+      email: body.email || null,
+      phone: body.phone || null,
+      address: body.address || null,
+      creditLimit: body.creditLimit,
+      currentBalance: 0,
+      paymentTerms: body.paymentTerms ?? 30,
+      isActive: body.isActive ?? true,
+      property,
+    };
+    mockDb.arAccounts.push(created);
+    return created;
+  }
+  const transferMatch = /^\/ar-accounts\/([a-zA-Z0-9_-]+)\/transfer$/.exec(
+    path,
+  );
+  if (!transferMatch) return;
+  const account = mockDb.arAccounts.find(
+    (row: any) => row.id === transferMatch[1],
+  );
+  if (!account) {
+    throw new APIError(404, 'Not Found', { message: 'AR account not found' });
+  }
+  if (!account.isActive) {
+    throw new APIError(409, 'Conflict', { message: 'AR account is inactive' });
+  }
+  const folio = mockDb.folios.find((row: any) => row.id === body.folioId);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  if (folio.status === 'CLOSED' || folio.status === 'POSTED_TO_CITY_LEDGER') {
+    throw new APIError(409, 'Conflict', {
+      message: 'Folio cannot be transferred to city ledger',
+    });
+  }
+  const existing = mockDb.invoices.find(
+    (row: any) => row.folioId === folio.id && row.status !== 'VOID',
+  );
+  if (existing) {
+    throw new APIError(409, 'Conflict', {
+      message: 'An active city ledger invoice already exists for this folio',
+    });
+  }
+  const amount = Number(folio.balance);
+  if (amount <= 0) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Folio has no balance to transfer',
+    });
+  }
+  requireOpenShiftForCashier(body.userId, account.propertyId);
+  const invoiceDate = String(folio.businessDate || new Date().toISOString());
+  const due = new Date(`${invoiceDate.slice(0, 10)}T00:00:00.000Z`);
+  due.setUTCDate(due.getUTCDate() + Number(account.paymentTerms || 30));
+  const invoice = {
+    id: `inv_mock_${Date.now()}`,
+    invoiceNumber: nextMockArInvoiceNumber(account.propertyId, invoiceDate),
+    propertyId: account.propertyId,
+    arAccountId: account.id,
+    folioId: folio.id,
+    invoiceDate,
+    dueDate: due.toISOString(),
+    amount,
+    paidAmount: 0,
+    status: 'OPEN',
+    arAccount: {
+      id: account.id,
+      accountNumber: account.accountNumber,
+      companyName: account.companyName,
+    },
+    folio: { id: folio.id, folioNumber: folio.folioNumber },
+    payments: [],
+  };
+  mockDb.invoices.push(invoice);
+  account.currentBalance = Number(account.currentBalance) + amount;
+  folio.balance = 0;
+  folio.status = 'POSTED_TO_CITY_LEDGER';
+  folio.isClosed = true;
+  const window = mockDb.folioWindows.find(
+    (row: any) => row.folioId === folio.id && row.windowNumber === 1,
+  );
+  if (window) window.balance = 0;
+  return invoice;
+}
+
+function handleArInvoicesGet(path: string, params: URLSearchParams) {
+  if (path === '/ar-invoices') {
+    const propertyId = params.get('propertyId');
+    const arAccountId = params.get('arAccountId');
+    return mockDb.invoices.filter((invoice: any) => {
+      if (propertyId && invoice.propertyId !== propertyId) return false;
+      if (arAccountId && invoice.arAccountId !== arAccountId) return false;
+      return true;
+    });
+  }
+  const match = /^\/ar-invoices\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const invoice = mockDb.invoices.find((row: any) => row.id === match[1]);
+  if (!invoice) {
+    throw new APIError(404, 'Not Found', { message: 'Invoice not found' });
+  }
+  return invoice;
+}
+
+function handleArInvoicesPost(path: string, body: any) {
+  const match = /^\/ar-invoices\/([a-zA-Z0-9_-]+)\/payments$/.exec(path);
+  if (!match) return;
+  const invoice = mockDb.invoices.find((row: any) => row.id === match[1]);
+  if (!invoice) {
+    throw new APIError(404, 'Not Found', { message: 'Invoice not found' });
+  }
+  if (invoice.status === 'PAID' || invoice.status === 'VOID') {
+    throw new APIError(409, 'Conflict', {
+      message: 'Invoice cannot accept a payment',
+    });
+  }
+  const open = mockOutstanding(invoice);
+  if (Number(body.amount) - open > 0.001) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Payment exceeds the invoice outstanding balance',
+    });
+  }
+  invoice.paidAmount = Number(invoice.paidAmount) + Number(body.amount);
+  invoice.status = mockOutstanding(invoice) <= 0 ? 'PAID' : 'PARTIAL';
+  const account = mockDb.arAccounts.find(
+    (row: any) => row.id === invoice.arAccountId,
+  );
+  if (account) {
+    account.currentBalance =
+      Number(account.currentBalance) - Number(body.amount);
+  }
+  mockDb.invoicePayments.push({
+    id: `pay_mock_${Date.now()}`,
+    invoiceId: invoice.id,
+    ...body,
+  });
+  return invoice;
+}
+
+function handleArAccounts(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path.startsWith('/ar-accounts')) {
+    if (method === 'GET') return handleArAccountsGet(path, params);
+    if (method === 'POST') return handleArAccountsPost(path, body);
+    return;
+  }
+  if (path.startsWith('/ar-invoices')) {
+    if (method === 'GET') return handleArInvoicesGet(path, params);
+    if (method === 'POST') return handleArInvoicesPost(path, body);
+  }
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -1412,6 +1682,7 @@ export async function routeMockRequest<T>(
       () => handleShifts(method, path, body, params),
       () => handleExchangeRates(method, path, body, params),
       () => handleTaxInvoices(method, path, body, params),
+      () => handleArAccounts(method, path, body, params),
       () => handleFolios(method, path, body),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
