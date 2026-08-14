@@ -30,19 +30,21 @@ export async function resolvePostShiftId(
   prisma: PrismaService,
   folioId: string,
   userId: string,
-): Promise<string | null> {
-  if (userId === SYSTEM_USER_ID) {
-    return null;
-  }
+): Promise<{ shiftId: string | null; rateCode: string | null }> {
   const folio = await prisma.folio.findUnique({
     where: { id: folioId },
     include: {
       reservation: { include: { room: true } },
     },
   });
-  return resolveCashierShiftId(
+  const rateCode = folio?.reservation?.rateCode ?? null;
+  if (userId === SYSTEM_USER_ID) {
+    return { shiftId: null, rateCode };
+  }
+  const shiftId = await resolveCashierShiftId(
     prisma,
     userId,
     folio?.reservation?.room?.propertyId,
   );
+  return { shiftId, rateCode };
 }

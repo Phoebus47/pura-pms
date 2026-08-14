@@ -154,7 +154,48 @@ async function main() {
 
   console.log(`✅ Created ${glAccounts.length} GL Accounts`);
 
+  await seedPackageSplitRules();
+
   console.log('✅ Financial Module seeding completed!');
+}
+
+const PKG_BB_RATE_CODE = 'PKG-BB';
+
+async function upsertPackageSplitRule(
+  rateCode: string,
+  trxCodeId: string,
+  percent: number,
+  sortOrder: number,
+): Promise<void> {
+  const existing = await prisma.packageSplitRule.findFirst({
+    where: { rateCode, trxCodeId },
+  });
+  if (existing) {
+    await prisma.packageSplitRule.update({
+      where: { id: existing.id },
+      data: { percent, sortOrder, isActive: true },
+    });
+    return;
+  }
+  await prisma.packageSplitRule.create({
+    data: { rateCode, trxCodeId, percent, sortOrder },
+  });
+}
+
+async function seedPackageSplitRules(): Promise<void> {
+  const room = await prisma.transactionCode.findUnique({
+    where: { code: '1000' },
+  });
+  const fnb = await prisma.transactionCode.findUnique({
+    where: { code: '2000' },
+  });
+  if (!room || !fnb) {
+    return;
+  }
+
+  await upsertPackageSplitRule(PKG_BB_RATE_CODE, room.id, 80, 0);
+  await upsertPackageSplitRule(PKG_BB_RATE_CODE, fnb.id, 20, 1);
+  console.log('✅ Created PKG-BB 80/20 package split rules');
 }
 
 export default async function seedFinancial() {

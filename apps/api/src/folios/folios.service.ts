@@ -10,6 +10,7 @@ import { FolioStatus } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
 import { computePostingAmounts, standardWindowCreates } from './folio-posting';
+import { persistPostingLines, resolvePostingLines } from './package-split';
 
 @Injectable()
 export class FoliosService {
@@ -154,49 +155,36 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    const { amountNet, amountService, amountTax, amountTotal, sign } =
-      computePostingAmounts(postTransactionDto.amountNet, trxCode);
+    const amounts = computePostingAmounts(
+      postTransactionDto.amountNet,
+      trxCode,
+    );
 
-    const shiftId = await resolvePostShiftId(
+    const { shiftId, rateCode } = await resolvePostShiftId(
       this.prisma,
       folioId,
       postTransactionDto.userId,
     );
 
-    return this.prisma.$transaction(async (tx) => {
-      const transaction = await tx.folioTransaction.create({
-        data: {
-          windowId: window.id,
-          trxCodeId: trxCode.id,
-          businessDate: new Date(postTransactionDto.businessDate),
-          amountNet,
-          amountService,
-          amountTax,
-          amountTotal,
-          sign,
-          reference: postTransactionDto.reference,
-          remark: postTransactionDto.remark,
-          userId: postTransactionDto.userId,
-          reasonCodeId: postTransactionDto.reasonCodeId,
-          shiftId,
-        },
-      });
-
-      // Update balances
-      const totalImpact = amountTotal * sign;
-
-      await tx.folioWindow.update({
-        where: { id: window.id },
-        data: { balance: { increment: totalImpact } },
-      });
-
-      await tx.folio.update({
-        where: { id: folioId },
-        data: { balance: { increment: totalImpact } },
-      });
-
-      return transaction;
+    const lines = await resolvePostingLines(this.prisma, trxCode, rateCode, {
+      trxCodeId: trxCode.id,
+      code: trxCode.code,
+      ...amounts,
     });
+
+    return this.prisma.$transaction((tx) =>
+      persistPostingLines(tx, {
+        folioId,
+        windowId: window.id,
+        businessDate: new Date(postTransactionDto.businessDate),
+        reference: postTransactionDto.reference,
+        remark: postTransactionDto.remark,
+        userId: postTransactionDto.userId,
+        reasonCodeId: postTransactionDto.reasonCodeId,
+        shiftId,
+        lines,
+      }),
+    );
   }
 
   async voidTransaction(transactionId: string, dto: VoidTransactionDto) {
