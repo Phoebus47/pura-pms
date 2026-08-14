@@ -1066,4 +1066,50 @@ describe('Mock API Router', () => {
       expect(posted.amountNet).toBe(200);
     });
   });
+
+  describe('Tax invoices', () => {
+    it('issues a snapshot invoice and voids with a reason', async () => {
+      const issued: any = await routeMockRequest('/tax-invoices', {
+        method: 'POST',
+        body: JSON.stringify({
+          folioId: mockDb.folios[0].id,
+          taxId: '1234567890123',
+          issuedBy: 'usr_mock_1',
+        }),
+      });
+      expect(issued.invoiceNumber).toMatch(/^TI-\d{4}-\d{6}$/);
+      expect(issued.amountNet).toBe(2500);
+      expect(issued.amountTotal).toBe(2942.5);
+
+      await expect(
+        routeMockRequest('/tax-invoices', {
+          method: 'POST',
+          body: JSON.stringify({
+            folioId: mockDb.folios[0].id,
+            taxId: '1234567890123',
+            issuedBy: 'usr_mock_1',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+
+      const listed: any = await routeMockRequest(
+        `/tax-invoices?propertyId=${mockDb.properties[0].id}`,
+        { method: 'GET' },
+      );
+      expect(listed.length).toBeGreaterThan(0);
+
+      const voided: any = await routeMockRequest(
+        `/tax-invoices/${issued.id}/void`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            reason: 'Wrong tax id',
+            voidedBy: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(voided.status).toBe('VOID');
+      expect(voided.voidReason).toBe('Wrong tax id');
+    });
+  });
 });

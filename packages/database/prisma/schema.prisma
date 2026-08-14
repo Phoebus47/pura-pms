@@ -49,6 +49,7 @@ model Property {
   nightAudits    NightAudit[]
   reportArchives ReportArchive[]
   shifts         Shift[]
+  taxInvoices    TaxInvoice[]
   createdAt      DateTime   @default(now())
 }
 
@@ -182,6 +183,7 @@ model Folio {
   closedBy      String?
   transactions  Transaction[]  // Legacy: Will be replaced by FolioTransaction
   windows       FolioWindow[]
+  taxInvoices   TaxInvoice[]
   createdAt     DateTime      @default(now())
 }
 
@@ -346,33 +348,40 @@ model ExchangeRate {
   @@unique([baseCurrency, targetCurrency, effectiveDate])
 }
 
-// Tax Invoice
+// Tax Invoice — internal running number. RD e-Tax API is out of scope.
 model TaxInvoice {
-  id            String   @id @default(cuid())
-  invoiceNumber String   @unique // Running Number ต้องเป๊ะ ห้ามข้าม
+  id            String         @id @default(cuid())
+  invoiceNumber String
+  propertyId    String
+  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Restrict)
   folioId       String?
+  folio         Folio?         @relation(fields: [folioId], references: [id], onDelete: SetNull)
   reservationId String?
-  reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  businessDate  DateTime @db.Date
-  
-  // Taxpayer Info
-  taxId         String   // เลขประจำตัวผู้เสียภาษี
-  branchNumber  String? // สาขา
-  
-  // Amounts
-  amountNet     Decimal  @db.Decimal(12, 2)
-  amountTax     Decimal  @db.Decimal(12, 2)
-  amountTotal   Decimal  @db.Decimal(12, 2)
-  
-  // e-Tax Invoice
-  eTaxInvoiceId String? // ID จากกรมสรรพากร (ถ้ามี)
-  qrCode        String? // QR Code สำหรับ e-Tax Invoice
-  
-  // Status
-  status        InvoiceStatus @default(OPEN)
+  reservation   Reservation?   @relation(fields: [reservationId], references: [id])
+  businessDate  DateTime       @db.Date
+
+  taxId         String
+  branchNumber  String?
+  buyerName     String?
+
+  amountNet     Decimal        @db.Decimal(12, 2)
+  amountTax     Decimal        @db.Decimal(12, 2)
+  amountTotal   Decimal        @db.Decimal(12, 2)
+
+  eTaxInvoiceId String?
+  qrCode        String?
+
+  status        InvoiceStatus  @default(OPEN)
   issuedAt      DateTime?
   issuedBy      String?
-  createdAt     DateTime @default(now())
+  voidReason    String?
+  voidedAt      DateTime?
+  voidedBy      String?
+  createdAt     DateTime       @default(now())
+
+  @@unique([propertyId, invoiceNumber])
+  @@index([propertyId, businessDate])
+  @@index([folioId])
 }
 
 // Fixed Charges (Recurring)

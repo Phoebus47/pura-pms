@@ -14,6 +14,7 @@ import {
   FileText,
   Settings,
   ArrowLeftRight,
+  Receipt,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -100,6 +101,15 @@ describe('navigation', () => {
       expect(fxItem?.icon).toBe(ArrowLeftRight);
     });
 
+    it('should include Tax invoices navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Tax invoices',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/tax-invoices');
+      expect(item?.icon).toBe(Receipt);
+    });
+
     it('should include Settings navigation item', () => {
       const settingsItem = navigationItems.find(
         (item) => item.name === 'Settings',
@@ -119,6 +129,7 @@ describe('navigation', () => {
         'Shifts',
         'Reports',
         'Exchange rates',
+        'Tax invoices',
         'Settings',
       ];
 
@@ -161,17 +172,19 @@ describe('navigation', () => {
   });
 
   describe('moreBottomNavItems', () => {
-    it('should keep Shifts, Reports, Exchange rates and Settings in the overflow menu', () => {
+    it('should keep Shifts, Reports, Exchange rates, Tax invoices and Settings in the overflow menu', () => {
       expect(moreBottomNavItems.map((item) => item.name)).toEqual([
         'Shifts',
         'Reports',
         'Exchange rates',
+        'Tax invoices',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
         '/shifts',
         '/reports',
         '/exchange-rates',
+        '/tax-invoices',
         '/settings',
       ]);
     });
