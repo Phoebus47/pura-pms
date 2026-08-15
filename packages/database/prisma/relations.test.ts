@@ -117,6 +117,9 @@ describe('Financial Module Relations', () => {
 
   afterAll(async () => {
     // Clean up test data
+    await prisma.roomMove.deleteMany({
+      where: { reservationId: testReservation.id },
+    });
     await prisma.folioTransaction.deleteMany({
       where: { windowId: testWindow.id },
     });
@@ -425,6 +428,46 @@ describe('Financial Module Relations', () => {
 
       await prisma.room.delete({ where: { id: suiteRoom.id } });
       await prisma.roomType.delete({ where: { id: suiteType.id } });
+    });
+  });
+
+  describe('Reservation → RoomMove', () => {
+    it('should persist move history with from/to rooms', async () => {
+      const destRoom = await prisma.room.create({
+        data: {
+          number: '202',
+          floor: 2,
+          status: RoomStatus.VACANT_CLEAN,
+          roomTypeId: testRoom.roomTypeId,
+          propertyId: testProperty.id,
+        },
+      });
+
+      const move = await prisma.roomMove.create({
+        data: {
+          reservationId: testReservation.id,
+          fromRoomId: testRoom.id,
+          toRoomId: destRoom.id,
+          reason: 'Guest request',
+          movedBy: testUser.id,
+        },
+        include: { fromRoom: true, toRoom: true, reservation: true },
+      });
+
+      expect(move.folioTransferred).toBe(true);
+      expect(move.keyCardReissued).toBe(true);
+      expect(move.fromRoom.id).toBe(testRoom.id);
+      expect(move.toRoom.id).toBe(destRoom.id);
+      expect(move.reservation.id).toBe(testReservation.id);
+
+      const history = await prisma.roomMove.findMany({
+        where: { reservationId: testReservation.id },
+        orderBy: { movedAt: 'desc' },
+      });
+      expect(history).toHaveLength(1);
+
+      await prisma.roomMove.delete({ where: { id: move.id } });
+      await prisma.room.delete({ where: { id: destRoom.id } });
     });
   });
 

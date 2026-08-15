@@ -18,6 +18,7 @@ describe('Mock Data Store', () => {
     expect(mockDb.arAccounts).toBeDefined();
     expect(mockDb.invoices).toBeDefined();
     expect(mockDb.cardPreauths).toBeDefined();
+    expect(mockDb.roomMoves).toBeDefined();
   });
 
   it('should have initial seed data', () => {

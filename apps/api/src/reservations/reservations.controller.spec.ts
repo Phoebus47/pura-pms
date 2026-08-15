@@ -3,6 +3,7 @@ import { ReservationsController } from './reservations.controller';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { MoveRoomDto } from './dto/move-room.dto';
 import { ReservationStatus } from '@pura/database';
 
 const mockReservationsService = {
@@ -15,6 +16,8 @@ const mockReservationsService = {
   checkIn: vi.fn(),
   checkOut: vi.fn(),
   cancel: vi.fn(),
+  moveRoom: vi.fn(),
+  listRoomMoves: vi.fn(),
 };
 
 describe('ReservationsController', () => {
@@ -197,6 +200,30 @@ describe('ReservationsController', () => {
       });
       await controller.checkOut('1');
       expect(mockReservationsService.checkOut).toHaveBeenCalledWith('1');
+    });
+  });
+
+  describe('moveRoom', () => {
+    it('should move a guest to another room', async () => {
+      const dto: MoveRoomDto = {
+        toRoomId: 'room-2',
+        movedBy: 'usr-1',
+        reason: 'Upgrade',
+      };
+      mockReservationsService.moveRoom.mockResolvedValue({
+        id: '1',
+        roomId: 'room-2',
+      });
+      await controller.moveRoom('1', dto);
+      expect(mockReservationsService.moveRoom).toHaveBeenCalledWith('1', dto);
+    });
+  });
+
+  describe('listRoomMoves', () => {
+    it('should list room move history', async () => {
+      mockReservationsService.listRoomMoves.mockResolvedValue([]);
+      await controller.listRoomMoves('1');
+      expect(mockReservationsService.listRoomMoves).toHaveBeenCalledWith('1');
     });
   });
 

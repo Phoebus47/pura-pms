@@ -84,6 +84,8 @@ model Room {
   reservations Reservation[]
   reservationStays ReservationStay[]
   housekeeping HousekeepingTask[]
+  movesFrom    RoomMove[]         @relation("RoomMoveFrom")
+  movesTo      RoomMove[]         @relation("RoomMoveTo")
   @@unique([propertyId, number])
 }
 
@@ -140,6 +142,7 @@ model Reservation {
   deposits       Deposit[]
   taxInvoices    TaxInvoice[]
   cardPreauths   CardPreauth[]
+  roomMoves      RoomMove[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -169,6 +172,23 @@ model ReservationStay {
   @@unique([reservationId, sequence])
   @@index([reservationId, startDate])
   @@index([roomId, startDate, endDate])
+}
+
+model RoomMove {
+  id               String      @id @default(cuid())
+  reservationId    String
+  reservation      Reservation @relation(fields: [reservationId], references: [id])
+  fromRoomId       String
+  fromRoom         Room        @relation("RoomMoveFrom", fields: [fromRoomId], references: [id])
+  toRoomId         String
+  toRoom           Room        @relation("RoomMoveTo", fields: [toRoomId], references: [id])
+  reason           String?
+  movedAt          DateTime    @default(now())
+  movedBy          String
+  keyCardReissued  Boolean     @default(true)
+  folioTransferred Boolean     @default(true)
+
+  @@index([reservationId, movedAt])
 }
 
 // ==================== BILLING ====================

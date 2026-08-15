@@ -278,6 +278,22 @@
       "rate": "Rate",
       "needSecondRoom": "Select a second room of a different type",
       "invalidDates": "Choose a room-change date between check-in and check-out"
+    },
+    "roomMove": {
+      "title": "Room move",
+      "currentRoom": "Current room",
+      "targetRoom": "New room",
+      "placeholder": "Select a vacant room",
+      "reason": "Reason",
+      "submit": "Move room",
+      "history": "Move history",
+      "emptyHistory": "No room moves yet",
+      "success": "Guest moved to the new room",
+      "from": "From",
+      "to": "To",
+      "noRooms": "No vacant rooms available",
+      "keyCard": "Key card reissued",
+      "folio": "Folio transferred"
     }
   }
 }

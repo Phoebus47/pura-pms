@@ -257,6 +257,22 @@ describe('API Client Wrappers', () => {
       );
     });
 
+    it('moveRoom calls post', async () => {
+      await reservationsAPI.moveRoom('r1', {
+        toRoomId: 'room-2',
+        movedBy: 'usr_mock_1',
+      });
+      expect(apiClient.post).toHaveBeenCalledWith(
+        '/reservations/r1/room-move',
+        { toRoomId: 'room-2', movedBy: 'usr_mock_1' },
+      );
+    });
+
+    it('listRoomMoves calls get', async () => {
+      await reservationsAPI.listRoomMoves('r1');
+      expect(apiClient.get).toHaveBeenCalledWith('/reservations/r1/room-moves');
+    });
+
     it('cancel calls patch with reason', async () => {
       await reservationsAPI.cancel('r1', 'reason');
       expect(apiClient.patch).toHaveBeenCalledWith('/reservations/r1/cancel', {

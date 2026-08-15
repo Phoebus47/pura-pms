@@ -8,10 +8,13 @@ import {
   Delete,
   Query,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { MoveRoomDto } from './dto/move-room.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationStatus } from '@pura/database';
 
@@ -62,6 +65,11 @@ export class ReservationsController {
     return this.reservationsService.findByConfirmNumber(confirmNumber);
   }
 
+  @Get(':id/room-moves')
+  listRoomMoves(@Param('id') id: string) {
+    return this.reservationsService.listRoomMoves(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(id);
@@ -73,6 +81,12 @@ export class ReservationsController {
     @Body() updateReservationDto: UpdateReservationDto,
   ) {
     return this.reservationsService.update(id, updateReservationDto);
+  }
+
+  @Post(':id/room-move')
+  @HttpCode(HttpStatus.CREATED)
+  moveRoom(@Param('id') id: string, @Body() dto: MoveRoomDto) {
+    return this.reservationsService.moveRoom(id, dto);
   }
 
   @Patch(':id/check-in')
