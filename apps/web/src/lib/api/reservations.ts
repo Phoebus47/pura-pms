@@ -62,6 +62,32 @@ export interface Reservation {
   };
 }
 
+export interface RoomMove {
+  id: string;
+  reservationId: string;
+  fromRoomId: string;
+  toRoomId: string;
+  reason?: string;
+  movedAt: string;
+  movedBy: string;
+  keyCardReissued: boolean;
+  folioTransferred: boolean;
+  fromRoom?: {
+    id: string;
+    number: string;
+  };
+  toRoom?: {
+    id: string;
+    number: string;
+  };
+}
+
+export interface MoveRoomDto {
+  toRoomId: string;
+  reason?: string;
+  movedBy: string;
+}
+
 export interface CreateReservationDto {
   checkIn: string;
   checkOut: string;
@@ -152,6 +178,14 @@ export const reservationsAPI = {
 
   async checkOut(id: string): Promise<Reservation> {
     return apiClient.post<Reservation>(`/reservations/${id}/check-out`, {});
+  },
+
+  async moveRoom(id: string, data: MoveRoomDto): Promise<Reservation> {
+    return apiClient.post<Reservation>(`/reservations/${id}/room-move`, data);
+  },
+
+  async listRoomMoves(id: string): Promise<RoomMove[]> {
+    return apiClient.get<RoomMove[]>(`/reservations/${id}/room-moves`);
   },
 
   async delete(id: string): Promise<void> {

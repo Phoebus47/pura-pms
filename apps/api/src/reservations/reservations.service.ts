@@ -8,7 +8,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { Prisma, ReservationStatus } from '@pura/database';
+import { MoveRoomDto } from './dto/move-room.dto';
+import { Prisma, ReservationStatus, RoomStatus } from '@pura/database';
 import { FoliosService } from '../folios/folios.service';
 import { mapHeaderReservation, mapStayOccupancy } from './reservation-calendar';
 import {
@@ -26,6 +27,11 @@ import {
   stayDatesError,
   type SplitStayDraft,
 } from './reservation-stay.util';
+import {
+  assertRoomMoveAllowed,
+  occupancyWindowForMove,
+  occupiedStatusForVacant,
+} from './room-move';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -474,6 +480,84 @@ export class ReservationsService {
     });
 
     return updated;
+  }
+
+  async moveRoom(id: string, dto: MoveRoomDto) {
+    const reservation = await this.findOne(id);
+    const toRoom = await this.prisma.room.findUnique({
+      where: { id: dto.toRoomId },
+    });
+    const target = assertRoomMoveAllowed(
+      reservation,
+      reservation.room.propertyId,
+      toRoom,
+      dto.toRoomId,
+    );
+    const window = occupancyWindowForMove(reservation);
+
+    await this.assertRoomsAvailable(
+      [
+        {
+          roomId: dto.toRoomId,
+          startDate: window.startDate,
+          endDate: window.endDate,
+          isDayUse: window.isDayUse,
+        },
+      ],
+      id,
+    );
+
+    const fromRoomId = reservation.roomId;
+    const occupiedStatus = occupiedStatusForVacant(target.status);
+
+    return this.prisma.$transaction(async (tx) => {
+      if (window.stayId) {
+        await tx.reservationStay.update({
+          where: { id: window.stayId },
+          data: {
+            roomId: dto.toRoomId,
+            roomTypeId: target.roomTypeId,
+          },
+        });
+      }
+
+      await tx.room.update({
+        where: { id: fromRoomId },
+        data: { status: RoomStatus.VACANT_DIRTY },
+      });
+      await tx.room.update({
+        where: { id: dto.toRoomId },
+        data: { status: occupiedStatus },
+      });
+      await tx.roomMove.create({
+        data: {
+          reservationId: id,
+          fromRoomId,
+          toRoomId: dto.toRoomId,
+          reason: dto.reason,
+          movedBy: dto.movedBy,
+        },
+      });
+
+      return tx.reservation.update({
+        where: { id },
+        data: { room: { connect: { id: dto.toRoomId } } },
+        include: reservationMutationInclude,
+      });
+    });
+  }
+
+  async listRoomMoves(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.roomMove.findMany({
+      where: { reservationId: id },
+      include: {
+        fromRoom: { select: { id: true, number: true } },
+        toRoom: { select: { id: true, number: true } },
+      },
+      orderBy: { movedAt: 'desc' },
+    });
   }
 
   async getCalendar(

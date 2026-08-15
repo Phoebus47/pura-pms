@@ -1690,8 +1690,109 @@ function updateReservationRoomStatus(res: any, status: string) {
   }
 }
 
+const BLOCKED_MOVE_STATUSES = new Set([
+  'OUT_OF_ORDER',
+  'OUT_OF_SERVICE',
+  'OCCUPIED_CLEAN',
+  'OCCUPIED_DIRTY',
+]);
+
+function applyRoomMove(reservationId: string, body: any) {
+  const idx = mockDb.reservations.findIndex((r: any) => r.id === reservationId);
+  if (idx === -1) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+
+  const reservation = mockDb.reservations[idx];
+  if (reservation.status !== 'CHECKED_IN') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Only checked-in reservations can be moved to another room',
+    });
+  }
+
+  const toRoomId = body?.toRoomId;
+  if (!toRoomId || toRoomId === reservation.roomId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Target room must be different from the current room',
+    });
+  }
+
+  const toRoom = mockDb.rooms.find((room: any) => room.id === toRoomId);
+  if (!toRoom) {
+    throw new APIError(404, 'Not Found', { message: 'Room not found' });
+  }
+  if (BLOCKED_MOVE_STATUSES.has(toRoom.status)) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Target room is not vacant and cannot receive a mid-stay move',
+    });
+  }
+
+  const fromRoomId = reservation.roomId;
+  const fromRoom = mockDb.rooms.find((room: any) => room.id === fromRoomId);
+  if (fromRoom) fromRoom.status = 'VACANT_DIRTY';
+  toRoom.status =
+    toRoom.status === 'VACANT_DIRTY' ? 'OCCUPIED_DIRTY' : 'OCCUPIED_CLEAN';
+
+  reservation.roomId = toRoomId;
+  reservation.room = {
+    id: toRoom.id,
+    number: toRoom.number,
+    roomType: reservation.room?.roomType ?? { name: '' },
+  };
+
+  const stays = Array.isArray(reservation.stays) ? reservation.stays : [];
+  const now = Date.now();
+  const currentStay =
+    stays.find((stay: any) => {
+      const start = new Date(stay.startDate).getTime();
+      const end = new Date(stay.endDate).getTime();
+      return start <= now && now < end;
+    }) ?? stays.find((stay: any) => stay.roomId === fromRoomId);
+  if (currentStay) {
+    currentStay.roomId = toRoomId;
+    currentStay.room = { id: toRoom.id, number: toRoom.number };
+  }
+
+  const move = {
+    id: `move_mock_${Date.now()}`,
+    reservationId,
+    fromRoomId,
+    toRoomId,
+    reason: body?.reason,
+    movedAt: new Date().toISOString(),
+    movedBy: body?.movedBy || 'usr_mock_1',
+    keyCardReissued: true,
+    folioTransferred: true,
+    fromRoom: fromRoom
+      ? { id: fromRoom.id, number: fromRoom.number }
+      : { id: fromRoomId, number: fromRoomId },
+    toRoom: { id: toRoom.id, number: toRoom.number },
+  };
+  mockDb.roomMoves.push(move);
+  return reservation;
+}
+
 function handleReservationsGet(path: string) {
   if (path === '/reservations') return mockDb.reservations;
+  const movesMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-moves$/.exec(
+    path,
+  );
+  if (movesMatch) {
+    const reservation = mockDb.reservations.find(
+      (r: any) => r.id === movesMatch[1],
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Reservation not found',
+      });
+    }
+    return mockDb.roomMoves
+      .filter((move: any) => move.reservationId === movesMatch[1])
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.movedAt).getTime() - new Date(a.movedAt).getTime(),
+      );
+  }
   const match = /^\/reservations\/([a-zA-Z0-9_-]+)$/.exec(path);
   if (match) return mockDb.reservations.find((r: any) => r.id === match[1]);
 }
@@ -1727,6 +1828,10 @@ function handleReservationsPost(path: string, body: any) {
       updateReservationRoomStatus(mockDb.reservations[idx], 'VACANT_DIRTY');
     }
     return mockDb.reservations[idx];
+  }
+  match = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-move$/.exec(path);
+  if (match) {
+    return applyRoomMove(match[1], body);
   }
 }
 
