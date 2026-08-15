@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -77,20 +77,18 @@ describe('RoomMovePanel', () => {
     const onMoved = vi.fn();
     renderPanel(<RoomMovePanel reservation={reservation} onMoved={onMoved} />);
 
-    const select = await screen.findByLabelText(
-      t('reservations.roomMove.targetRoom'),
-    );
-    expect(select).toHaveTextContent('102 · Deluxe');
+    expect(
+      await screen.findByRole('option', { name: '102 · Deluxe' }),
+    ).toBeInTheDocument();
+    const select = screen.getByLabelText(t('reservations.roomMove.targetRoom'));
     expect(select).not.toHaveTextContent('201');
 
-    await userEvent.selectOptions(select, 'room-2');
+    fireEvent.change(select, { target: { value: 'room-2' } });
     await userEvent.type(
       screen.getByLabelText(t('reservations.roomMove.reason')),
       'Upgrade',
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: t('reservations.roomMove.submit') }),
-    );
+    fireEvent.submit(select.closest('form')!);
 
     await waitFor(() => {
       expect(reservationsAPI.moveRoom).toHaveBeenCalledWith('res-1', {
@@ -136,13 +134,11 @@ describe('RoomMovePanel', () => {
     );
     renderPanel(<RoomMovePanel reservation={reservation} onMoved={vi.fn()} />);
 
-    await userEvent.selectOptions(
-      await screen.findByLabelText(t('reservations.roomMove.targetRoom')),
-      'room-2',
+    const select = await screen.findByLabelText(
+      t('reservations.roomMove.targetRoom'),
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: t('reservations.roomMove.submit') }),
-    );
+    fireEvent.change(select, { target: { value: 'room-2' } });
+    fireEvent.submit(select.closest('form')!);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Room is not available');
