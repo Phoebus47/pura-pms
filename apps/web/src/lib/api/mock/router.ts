@@ -81,9 +81,32 @@ function populateFolio(f: any) {
   return { ...f, windows };
 }
 
-function handleFolioGet(path: string) {
+function handleFolioGet(path: string, params?: URLSearchParams) {
   if (path === '/folios/transactions/codes') {
     return mockDb.transactionCodes;
+  }
+
+  if (path === '/folios') {
+    const status = params?.get('status');
+    const propertyId = params?.get('propertyId');
+    return mockDb.folios
+      .filter((folio: any) => !status || folio.status === status)
+      .filter((folio: any) => {
+        if (!propertyId) return true;
+        const reservation = mockDb.reservations.find(
+          (row: any) => row.id === folio.reservationId,
+        );
+        return reservation?.propertyId === propertyId;
+      })
+      .slice(0, 100)
+      .map((folio: any) => ({
+        id: folio.id,
+        folioNumber: folio.folioNumber,
+        status: folio.status,
+        balance: folio.balance,
+        reservationId: folio.reservationId,
+        reservation: folio.reservation,
+      }));
   }
 
   if (path.startsWith('/folios/reservation/')) {
@@ -1553,8 +1576,13 @@ function handleFolioArAccount(path: string, body: any) {
   return folio;
 }
 
-function handleFolios(method: string, path: string, body: any) {
-  if (method === 'GET') return handleFolioGet(path);
+function handleFolios(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (method === 'GET') return handleFolioGet(path, params);
   if (method === 'PATCH') {
     return (
       handleFolioCreditLimit(path, body) ?? handleFolioArAccount(path, body)
@@ -1832,7 +1860,7 @@ export async function routeMockRequest<T>(
       () => handleTaxInvoices(method, path, body, params),
       () => handleArAccounts(method, path, body, params),
       () => handleCardPreauths(method, path, body, params),
-      () => handleFolios(method, path, body),
+      () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
       () => handleReservations(method, path, body),

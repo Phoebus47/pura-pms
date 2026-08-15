@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { moreBottomNavItems, primaryBottomNavItems } from '@/config/navigation';
+import { t } from '@/lib/i18n';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +37,7 @@ export function BottomNavigation() {
                   ? 'text-[#1e4b8e]'
                   : 'text-slate-600 hover:text-[#1e4b8e] active:scale-95',
               )}
-              aria-label={item.name}
+              aria-label={t(item.labelKey)}
             >
               <item.icon
                 className={cn(
@@ -50,7 +51,7 @@ export function BottomNavigation() {
                   isActive && 'font-semibold',
                 )}
               >
-                {item.name}
+                {t(item.labelKey)}
               </span>
             </Link>
           );
@@ -60,7 +61,7 @@ export function BottomNavigation() {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              aria-label="More"
+              aria-label={t('nav.more')}
               className={cn(
                 TAB_CLASS,
                 isMoreActive
@@ -80,7 +81,7 @@ export function BottomNavigation() {
                   isMoreActive && 'font-semibold',
                 )}
               >
-                More
+                {t('nav.more')}
               </span>
             </button>
           </DropdownMenuTrigger>
@@ -89,7 +90,7 @@ export function BottomNavigation() {
               <DropdownMenuItem key={item.href} asChild>
                 <Link href={item.href} className="min-h-11">
                   <item.icon />
-                  {item.name}
+                  {t(item.labelKey)}
                 </Link>
               </DropdownMenuItem>
             ))}

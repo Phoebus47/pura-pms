@@ -17,6 +17,7 @@ import {
   Receipt,
   Landmark,
   Wallet,
+  MoonStar,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -31,8 +32,10 @@ describe('navigation', () => {
         expect(item).toHaveProperty('name');
         expect(item).toHaveProperty('href');
         expect(item).toHaveProperty('icon');
+        expect(item).toHaveProperty('labelKey');
         expect(typeof item.name).toBe('string');
         expect(typeof item.href).toBe('string');
+        expect(typeof item.labelKey).toBe('string');
         expect(item.icon).toBeDefined();
       });
     });
@@ -130,6 +133,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Wallet);
     });
 
+    it('should include Night Audit navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Night Audit',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/night-audit');
+      expect(item?.icon).toBe(MoonStar);
+    });
+
     it('should include Settings navigation item', () => {
       const settingsItem = navigationItems.find(
         (item) => item.name === 'Settings',
@@ -147,6 +159,7 @@ describe('navigation', () => {
         'Rooms',
         'Billing',
         'Shifts',
+        'Night Audit',
         'Reports',
         'Exchange rates',
         'Tax invoices',
@@ -197,6 +210,7 @@ describe('navigation', () => {
     it('should keep extra items in the overflow menu', () => {
       expect(moreBottomNavItems.map((item) => item.name)).toEqual([
         'Shifts',
+        'Night Audit',
         'Reports',
         'Exchange rates',
         'Tax invoices',
@@ -206,6 +220,7 @@ describe('navigation', () => {
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
         '/shifts',
+        '/night-audit',
         '/reports',
         '/exchange-rates',
         '/tax-invoices',
@@ -222,6 +237,7 @@ describe('navigation', () => {
         name: 'Test',
         href: '/test',
         icon: LayoutDashboard,
+        labelKey: 'nav.dashboard',
       };
 
       expect(validItem.name).toBe('Test');

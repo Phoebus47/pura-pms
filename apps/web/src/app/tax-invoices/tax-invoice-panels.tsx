@@ -7,6 +7,9 @@ import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EntitySelect } from '@/components/shared/entity-select';
+import { useOpenFolios } from '@/hooks/use-folios';
+import { folioOptionLabel } from '@/lib/entity-labels';
 import {
   useIssueTaxInvoice,
   useVoidTaxInvoice,
@@ -18,10 +21,12 @@ const buttonClass = 'min-h-11 w-full sm:w-auto';
 
 interface IssueFormProps {
   readonly issuedBy: string;
+  readonly propertyId?: string;
 }
 
-export function IssueTaxInvoiceForm({ issuedBy }: IssueFormProps) {
+export function IssueTaxInvoiceForm({ issuedBy, propertyId }: IssueFormProps) {
   const issueMutation = useIssueTaxInvoice();
+  const { data: folios = [] } = useOpenFolios(propertyId);
   const [folioId, setFolioId] = useState('');
   const [taxId, setTaxId] = useState('');
   const [branchNumber, setBranchNumber] = useState('');
@@ -54,13 +59,16 @@ export function IssueTaxInvoiceForm({ issuedBy }: IssueFormProps) {
       }}
     >
       <div className="space-y-2">
-        <Label htmlFor="folioId">{t('taxInvoice.folioId')}</Label>
-        <Input
+        <EntitySelect
           id="folioId"
           name="folioId"
-          className={fieldClass}
+          label={t('taxInvoice.folioId')}
           value={folioId}
-          onChange={(event) => setFolioId(event.target.value)}
+          onChange={setFolioId}
+          options={folios.map((folio) => ({
+            value: folio.id,
+            label: folioOptionLabel(folio),
+          }))}
           required
         />
       </div>

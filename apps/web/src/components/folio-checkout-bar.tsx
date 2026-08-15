@@ -1,14 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EntitySelect } from '@/components/shared/entity-select';
 import { foliosAPI, type Folio } from '@/lib/api/folios';
+import { propertiesAPI } from '@/lib/api/properties';
 import { APIError } from '@/lib/api/client';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
+import { useArAccounts } from '@/hooks/use-ar-accounts';
+import { arAccountOptionLabel } from '@/lib/entity-labels';
 
 interface FolioCheckoutBarProps {
   readonly folio: Folio;
@@ -17,6 +22,11 @@ interface FolioCheckoutBarProps {
 
 export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
   const userId = useAuthStore((state) => state.user?.id) ?? 'usr_mock_1';
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: () => propertiesAPI.getAll(),
+  });
+  const { data: accounts = [] } = useArAccounts(properties?.[0]?.id);
   const [limit, setLimit] = useState(
     folio.creditLimit == null ? '' : String(folio.creditLimit),
   );
@@ -98,16 +108,17 @@ export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
       >
         {t('folios.setLimit')}
       </Button>
-      <div className="space-y-2">
-        <Label htmlFor="folioArAccountId">{t('folios.arAccountId')}</Label>
-        <Input
-          id="folioArAccountId"
-          name="arAccountId"
-          className="min-h-11"
-          value={arAccountId}
-          onChange={(event) => setArAccountId(event.target.value)}
-        />
-      </div>
+      <EntitySelect
+        id="folioArAccountId"
+        name="arAccountId"
+        label={t('folios.arAccountId')}
+        value={arAccountId}
+        onChange={setArAccountId}
+        options={accounts.map((account) => ({
+          value: account.id,
+          label: arAccountOptionLabel(account),
+        }))}
+      />
       <Button
         type="button"
         variant="outline"

@@ -763,22 +763,24 @@
 
 ### Phase 3: Financial & Audit (Complete ✅)
 
+Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/bank rec, cashier PDF/email, delete legacy `Transaction`.
+
 1. Enhanced Folio System (Windows, Routing, Post-departure, Rebate)
 2. Transaction Codes (Mapping to GL)
 3. Reason Codes (Audit Trail)
 4. Night Audit System (Enhanced with Queue)
 5. Shift Management (Enhanced)
-6. GL/AR/AP modules (USALI Compliant)
-7. Tax Invoice (e-Tax Invoice Ready)
+6. GL journals + Trial Balance + AR (USALI). AP still wait.
+7. Tax Invoice (internal number; e-Tax still wait)
 8. Currency Exchange
-9. Credit Card Pre-authorization
+9. Credit Card Pre-authorization (manual ledger; no gateway)
 10. Package Revenue Breakdown (USALI split)
 11. Credit Limit Alerts & Auto-settlement
 
-### Phase 4: Operations Edge Cases (Current — 🎯 Priority)
+### Phase 4: Operations Edge Cases (Next — do not start Room Move yet)
 
-1. Day-use Reservations
-2. Split Stay
+1. Day-use Reservations — **shipped**
+2. Split Stay — **shipped**
 3. Room Move Mid-stay
 4. No-show / Late Cancellation Auto-charges
 5. Post-departure Charges
@@ -822,5 +824,5 @@
 
 ---
 
-**Last Updated:** February 2026
-**Status:** In Progress — Phase 1-2 Complete, Phase 3 Next
+**Last Updated:** August 2026
+**Status:** Phase 1–3 closeout complete (wait items remain). Phase 4 next except shipped day-use and split stay.

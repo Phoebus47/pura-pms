@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -18,8 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { EntitySelect } from '@/components/shared/entity-select';
 import type { TransactionCode } from '@/lib/api/transaction-codes';
+import { propertiesAPI } from '@/lib/api/properties';
 import { submitFolioTransaction } from '@/lib/posting';
+import { useExchangeRates } from '@/hooks/use-exchange-rates';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
+import { t } from '@/lib/i18n';
+
+const CASH_PAYMENT_CODE = '9000';
 
 interface PostPaymentDialogProps {
   readonly isOpen: boolean;
@@ -38,17 +46,37 @@ export function PostPaymentDialog({
   onSuccess,
   transactionCodes,
 }: PostPaymentDialogProps) {
+  const userId = useAuthStore((state) => state.user?.id) ?? 'CURRENT_USER';
+  const { data: rates = [] } = useExchangeRates();
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: () => propertiesAPI.getAll(),
+  });
+  const propertyCurrency = properties?.[0]?.currency ?? 'THB';
   const [loading, setLoading] = useState(false);
   const [trxCodeId, setTrxCodeId] = useState('');
   const [amountNet, setAmountNet] = useState('');
   const [reference, setReference] = useState('');
+  const [currency, setCurrency] = useState('');
+  const [foreignAmount, setForeignAmount] = useState('');
 
   const paymentCodes = transactionCodes.filter((c) => c.type === 'PAYMENT');
+  const selectedCode = paymentCodes.find((code) => code.id === trxCodeId);
+  const isCash = selectedCode?.code === CASH_PAYMENT_CODE;
+  const guestCurrency = currency || propertyCurrency;
+  const needsFx =
+    isCash && guestCurrency.toUpperCase() !== propertyCurrency.toUpperCase();
   const net = Number.parseFloat(amountNet || '0') || 0;
+  const currencies = [
+    propertyCurrency,
+    ...rates.map((rate) => rate.targetCurrency),
+  ].filter((code, index, all) => all.indexOf(code) === index);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!trxCodeId || !amountNet) return;
+    if (!trxCodeId) return;
+    if (!needsFx && !amountNet) return;
+    if (needsFx && !foreignAmount) return;
 
     try {
       setLoading(true);
@@ -57,13 +85,19 @@ export function PostPaymentDialog({
         payload: {
           windowNumber,
           trxCodeId,
-          amountNet: Number.parseFloat(amountNet),
+          amountNet: Number.parseFloat(amountNet || foreignAmount),
           reference,
-          userId: 'CURRENT_USER', // Replace with actual auth user
+          userId,
           businessDate: new Date().toISOString().slice(0, 10),
+          ...(needsFx
+            ? {
+                currency: guestCurrency,
+                foreignAmount: Number.parseFloat(foreignAmount),
+              }
+            : {}),
         },
-        successMessage: 'Payment posted successfully',
-        errorPrefix: 'Failed to post payment',
+        successMessage: t('folios.paymentSuccess'),
+        errorPrefix: t('folios.paymentError'),
         onSuccess,
         onClose,
       });
@@ -80,15 +114,15 @@ export function PostPaymentDialog({
       >
         <DialogHeader>
           <DialogTitle className="font-bold text-2xl text-emerald-700">
-            Post Payment
+            {t('folios.postPayment')}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="py-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="method">Payment Method</Label>
+            <Label htmlFor="method">{t('folios.paymentMethod')}</Label>
             <Select value={trxCodeId} onValueChange={setTrxCodeId}>
               <SelectTrigger id="method" className="rounded-xl">
-                <SelectValue placeholder="Select method..." />
+                <SelectValue placeholder={t('folios.selectMethod')} />
               </SelectTrigger>
               <SelectContent>
                 {paymentCodes.map((code) => (
@@ -99,8 +133,39 @@ export function PostPaymentDialog({
               </SelectContent>
             </Select>
           </div>
+          {isCash ? (
+            <EntitySelect
+              id="paymentCurrency"
+              name="currency"
+              label={t('folios.currency')}
+              value={guestCurrency}
+              onChange={setCurrency}
+              options={currencies.map((code) => ({
+                value: code,
+                label: code,
+              }))}
+            />
+          ) : null}
+          {needsFx ? (
+            <div className="space-y-2">
+              <Label htmlFor="foreignAmount">{t('folios.foreignAmount')}</Label>
+              <Input
+                id="foreignAmount"
+                name="foreignAmount"
+                type="number"
+                step="0.01"
+                min={0}
+                value={foreignAmount}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForeignAmount(e.target.value)
+                }
+                className="rounded-xl"
+                required
+              />
+            </div>
+          ) : null}
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">{t('folios.amount')}</Label>
             <Input
               id="amount"
               type="number"
@@ -111,24 +176,24 @@ export function PostPaymentDialog({
               }
               placeholder="0.00"
               className="rounded-xl"
-              required
+              required={!needsFx}
             />
           </div>
           <div className="bg-slate-50 border border-slate-200 flex items-center justify-between p-4 rounded-2xl text-sm">
-            <p className="font-semibold text-slate-700">Total</p>
+            <p className="font-semibold text-slate-700">{t('folios.total')}</p>
             <p className="font-bold text-slate-900">
               ฿{net.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reference">Reference / Card Last 4</Label>
+            <Label htmlFor="reference">{t('folios.reference')}</Label>
             <Input
               id="reference"
               value={reference}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setReference(e.target.value)
               }
-              placeholder="e.g. Visa 1234"
+              placeholder={t('folios.referencePlaceholder')}
               className="rounded-xl"
             />
           </div>
@@ -139,14 +204,14 @@ export function PostPaymentDialog({
               onClick={onClose}
               className="rounded-xl"
             >
-              Cancel
+              {t('folios.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={loading}
               className="bg-emerald-600 hover:bg-emerald-700 rounded-xl"
             >
-              {loading ? 'Posting...' : 'Post Payment'}
+              {loading ? t('folios.posting') : t('folios.postPaymentSubmit')}
             </Button>
           </DialogFooter>
         </form>
