@@ -30,6 +30,11 @@ export class NightAuditProcessor extends WorkerHost {
         // Note: businessDate in job data is ISO string
         const dateObj = new Date(businessDate);
 
+        const noShows = await this.nightAuditService.processNoShows(
+          propertyId,
+          dateObj,
+        );
+
         // 2. Room Posting (Idempotent)
         const { roomsPosted, totalRevenue } =
           await this.nightAuditService.processRoomPosting(propertyId, dateObj);
@@ -45,6 +50,8 @@ export class NightAuditProcessor extends WorkerHost {
           {
             roomsPosted,
             totalRevenue,
+            noShowsPosted: noShows.noShowsPosted,
+            noShowRevenue: noShows.noShowRevenue,
           },
         );
 

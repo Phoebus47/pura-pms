@@ -37,6 +37,15 @@ const mockPrismaService = {
     findUnique: vi.fn(),
     update: vi.fn(),
   },
+  transactionCode: {
+    findUnique: vi.fn(),
+  },
+  folioTransaction: {
+    findFirst: vi.fn(),
+  },
+  reasonCode: {
+    findUnique: vi.fn(),
+  },
   $transaction: vi.fn(),
 };
 
@@ -69,6 +78,7 @@ describe('ReservationsService', () => {
     prisma = module.get<PrismaService>(PrismaService);
 
     vi.clearAllMocks();
+    mockFoliosService.findByReservationId.mockResolvedValue([]);
     mockPrismaService.reservationStay.findMany.mockResolvedValue([]);
     mockPrismaService.reservationStay.deleteMany.mockResolvedValue({
       count: 0,
@@ -842,6 +852,136 @@ describe('ReservationsService', () => {
           }),
         }),
       );
+    });
+  });
+
+  describe('markNoShow', () => {
+    const trxCode = {
+      id: 'trx-1006',
+      code: '1006',
+      name: 'No-Show Charge',
+    };
+    const folio = { id: 'folio-1' };
+    const noShowReservation = {
+      id: 'res-1',
+      confirmNumber: 'PURA-1',
+      status: ReservationStatus.CONFIRMED,
+      checkIn: new Date('2026-03-14T14:00:00.000Z'),
+      roomRate: 1500,
+      notes: null,
+      room: {
+        property: { businessDate: new Date('2026-03-15T00:00:00.000Z') },
+      },
+    };
+
+    it('should post first-night charge and set NO_SHOW', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        noShowReservation,
+      );
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue(trxCode);
+      mockFoliosService.findByReservationId.mockResolvedValue([folio]);
+      mockPrismaService.folioTransaction.findFirst.mockResolvedValue(null);
+      mockPrismaService.reasonCode.findUnique.mockResolvedValue({
+        id: 'rc-ns',
+      });
+      mockFoliosService.postTransaction.mockResolvedValue({ id: 'ft-1' });
+      mockPrismaService.reservation.update.mockResolvedValue({
+        ...noShowReservation,
+        status: ReservationStatus.NO_SHOW,
+      });
+
+      const result = await service.markNoShow('res-1', { userId: 'user-1' });
+
+      expect(result.status).toBe(ReservationStatus.NO_SHOW);
+      expect(mockFoliosService.postTransaction).toHaveBeenCalledWith(
+        'folio-1',
+        expect.objectContaining({
+          windowNumber: 1,
+          trxCodeId: 'trx-1006',
+          amountNet: 1500,
+          userId: 'user-1',
+          reasonCodeId: 'rc-ns',
+        }),
+      );
+    });
+
+    it('should create folio when reservation has none', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        noShowReservation,
+      );
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue(trxCode);
+      mockFoliosService.findByReservationId
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([folio]);
+      mockFoliosService.create.mockResolvedValue(folio);
+      mockPrismaService.folioTransaction.findFirst.mockResolvedValue(null);
+      mockPrismaService.reasonCode.findUnique.mockResolvedValue(null);
+      mockFoliosService.postTransaction.mockResolvedValue({ id: 'ft-1' });
+      mockPrismaService.reservation.update.mockResolvedValue({
+        ...noShowReservation,
+        status: ReservationStatus.NO_SHOW,
+      });
+
+      await service.markNoShow('res-1', { userId: 'user-1' });
+
+      expect(mockFoliosService.create).toHaveBeenCalledWith({
+        reservationId: 'res-1',
+        type: 'GUEST',
+      });
+      expect(mockFoliosService.postTransaction).toHaveBeenCalled();
+    });
+
+    it('should skip posting when 1006 already exists', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        noShowReservation,
+      );
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue(trxCode);
+      mockFoliosService.findByReservationId.mockResolvedValue([folio]);
+      mockPrismaService.folioTransaction.findFirst.mockResolvedValue({
+        id: 'ft-existing',
+      });
+      mockPrismaService.reservation.update.mockResolvedValue({
+        ...noShowReservation,
+        status: ReservationStatus.NO_SHOW,
+      });
+
+      await service.markNoShow('res-1', { userId: 'user-1' });
+
+      expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
+      expect(mockPrismaService.reservation.update).toHaveBeenCalled();
+    });
+
+    it('should reject non-CONFIRMED reservations', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...noShowReservation,
+        status: ReservationStatus.CHECKED_IN,
+      });
+
+      await expect(
+        service.markNoShow('res-1', { userId: 'user-1' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject future arrivals', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...noShowReservation,
+        checkIn: new Date('2026-03-20T14:00:00.000Z'),
+      });
+
+      await expect(
+        service.markNoShow('res-1', { userId: 'user-1' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject when transaction code 1006 is missing', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        noShowReservation,
+      );
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.markNoShow('res-1', { userId: 'user-1' }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

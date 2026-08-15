@@ -2,6 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { FoliosService } from '../folios/folios.service';
 import { JournalsService } from '../financial/journals.service';
+import { ReservationsService } from '../reservations/reservations.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Prisma } from '@pura/database';
@@ -9,6 +10,7 @@ import {
   findStayCoveringBusinessDate,
   resolveNightAuditRoomCharge,
 } from '../reservations/reservation-stay.util';
+import { noShowArrivalCutoff } from '../reservations/no-show';
 
 type StartAuditResult =
   | {
@@ -30,6 +32,7 @@ export class NightAuditService {
     private readonly prisma: PrismaService,
     private readonly foliosService: FoliosService,
     private readonly journalsService: JournalsService,
+    private readonly reservationsService: ReservationsService,
     @InjectQueue('night-audit') private readonly nightAuditQueue: Queue,
   ) {}
 
@@ -128,6 +131,38 @@ export class NightAuditService {
     }
 
     return audit;
+  }
+
+  async processNoShows(propertyId: string, businessDate: Date) {
+    const arrivals = await this.prisma.reservation.findMany({
+      where: {
+        status: 'CONFIRMED',
+        checkIn: { lt: noShowArrivalCutoff(businessDate) },
+        room: { propertyId },
+      },
+      select: { id: true },
+    });
+
+    let noShowsPosted = 0;
+    let noShowRevenue = 0;
+
+    for (const arrival of arrivals) {
+      try {
+        const updated = await this.reservationsService.markNoShow(arrival.id, {
+          userId: 'SYSTEM',
+          businessDate: businessDate.toISOString(),
+        });
+        noShowsPosted += 1;
+        noShowRevenue += Number(updated.roomRate);
+      } catch (err) {
+        await this.recordAuditError(propertyId, businessDate, {
+          errorType: 'NO_SHOW',
+          description: `${arrival.id}: ${(err as Error).message}`,
+        });
+      }
+    }
+
+    return { noShowsPosted, noShowRevenue };
   }
 
   async processRoomPosting(propertyId: string, businessDate: Date) {
