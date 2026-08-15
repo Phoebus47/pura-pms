@@ -483,6 +483,16 @@ describe('Mock API Router', () => {
       expect(Array.isArray(response)).toBe(true);
     });
 
+    it('should list open folios for a property', async () => {
+      const propertyId = mockDb.reservations[0].propertyId;
+      const response: any = await routeMockRequest(
+        `/folios?propertyId=${propertyId}&status=OPEN`,
+        { method: 'GET' },
+      );
+      expect(Array.isArray(response)).toBe(true);
+      expect(response[0].folioNumber).toBeDefined();
+    });
+
     it('should post a transaction to a window', async () => {
       const folioId = mockDb.folios[0].id;
       const response: any = await routeMockRequest(

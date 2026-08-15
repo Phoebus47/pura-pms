@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
+import { FindFoliosQueryDto } from './dto/find-folios-query.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
 import { FolioStatus, Prisma } from '@pura/database';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
@@ -77,6 +78,33 @@ export class FoliosService {
         ...window,
       })),
       skipDuplicates: true,
+    });
+  }
+
+  async findMany(query: FindFoliosQueryDto) {
+    return this.prisma.folio.findMany({
+      where: {
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.propertyId
+          ? { reservation: { room: { propertyId: query.propertyId } } }
+          : {}),
+      },
+      select: {
+        id: true,
+        folioNumber: true,
+        status: true,
+        balance: true,
+        reservationId: true,
+        reservation: {
+          select: {
+            confirmNumber: true,
+            guest: { select: { firstName: true, lastName: true } },
+            room: { select: { number: true } },
+          },
+        },
+      },
+      orderBy: { folioNumber: 'asc' },
+      take: 100,
     });
   }
 

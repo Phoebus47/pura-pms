@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FoliosController } from './folios.controller';
 import { FoliosService } from './folios.service';
+import { FolioStatus } from '@pura/database';
 import { CreateFolioDto } from './dto/create-folio.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 
 const mockFoliosService = {
   create: vi.fn(),
+  findMany: vi.fn(),
   findOne: vi.fn(),
   findByReservationId: vi.fn(),
   postTransaction: vi.fn(),
@@ -47,6 +49,22 @@ describe('FoliosController', () => {
       await controller.create(dto);
 
       expect(mockFoliosService.create).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('findMany', () => {
+    it('should list folios by query', async () => {
+      mockFoliosService.findMany.mockResolvedValue([]);
+
+      await controller.findMany({
+        propertyId: 'prop-1',
+        status: FolioStatus.OPEN,
+      });
+
+      expect(mockFoliosService.findMany).toHaveBeenCalledWith({
+        propertyId: 'prop-1',
+        status: FolioStatus.OPEN,
+      });
     });
   });
 

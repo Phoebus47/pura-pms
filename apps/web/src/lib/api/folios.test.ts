@@ -14,6 +14,27 @@ describe('foliosAPI', () => {
     vi.clearAllMocks();
   });
 
+  it('should list open folios for a property', async () => {
+    const mockResponse = [{ id: 'folio-1', folioNumber: 'F000001' }];
+    vi.mocked(apiClient.get).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.list({
+      propertyId: 'prop-1',
+      status: 'OPEN',
+    });
+    expect(apiClient.get).toHaveBeenCalledWith(
+      '/folios?propertyId=prop-1&status=OPEN',
+    );
+    expect(result).toEqual(mockResponse);
+  });
+
+  it('should list folios without filters', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue([]);
+
+    await foliosAPI.list();
+    expect(apiClient.get).toHaveBeenCalledWith('/folios');
+  });
+
   it('should get folio by id', async () => {
     const mockResponse = { id: 'folio-1' };
     vi.mocked(apiClient.get).mockResolvedValue(mockResponse);

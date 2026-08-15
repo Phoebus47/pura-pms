@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import TaxInvoicesPage from './page';
 import { taxInvoicesAPI } from '@/lib/api/tax-invoices';
 import { propertiesAPI } from '@/lib/api/properties';
+import { foliosAPI } from '@/lib/api/folios';
 import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
@@ -30,6 +31,12 @@ vi.mock('@/lib/api/properties', () => ({
   },
 }));
 
+vi.mock('@/lib/api/folios', () => ({
+  foliosAPI: {
+    list: vi.fn(),
+  },
+}));
+
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -48,6 +55,7 @@ describe('TaxInvoicesPage', () => {
       { id: 'prop_1', businessDate: '2026-08-14' },
     ] as never);
     vi.mocked(taxInvoicesAPI.list).mockResolvedValue([]);
+    vi.mocked(foliosAPI.list).mockResolvedValue([]);
   });
 
   it('renders the tax invoice title', async () => {

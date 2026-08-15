@@ -52,6 +52,24 @@ export interface Folio {
   createdAt: string;
 }
 
+export interface FolioListItem {
+  id: string;
+  folioNumber: string;
+  status: FolioStatus;
+  balance: number;
+  reservationId: string;
+  reservation?: {
+    confirmNumber?: string;
+    guest?: { firstName: string; lastName: string };
+    room?: { number: string };
+  };
+}
+
+export interface ListFoliosParams {
+  propertyId?: string;
+  status?: FolioStatus;
+}
+
 export interface CreateFolioDto {
   reservationId: string;
   type?: FolioType;
@@ -77,6 +95,20 @@ export interface VoidTransactionDto {
 }
 
 export const foliosAPI = {
+  async list(filters?: ListFoliosParams): Promise<FolioListItem[]> {
+    const params = new URLSearchParams();
+    if (filters?.propertyId) {
+      params.append('propertyId', filters.propertyId);
+    }
+    if (filters?.status) {
+      params.append('status', filters.status);
+    }
+    const query = params.toString();
+    return apiClient.get<FolioListItem[]>(
+      query ? `/folios?${query}` : '/folios',
+    );
+  },
+
   async getById(id: string): Promise<Folio> {
     return apiClient.get<Folio>(`/folios/${id}`);
   },

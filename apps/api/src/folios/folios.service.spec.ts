@@ -77,6 +77,40 @@ describe('FoliosService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('findMany', () => {
+    it('lists folios for a property and status', async () => {
+      mockPrismaService.folio.findMany.mockResolvedValue([]);
+
+      await service.findMany({
+        propertyId: 'prop-1',
+        status: FolioStatus.OPEN,
+      });
+
+      expect(mockPrismaService.folio.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            status: FolioStatus.OPEN,
+            reservation: { room: { propertyId: 'prop-1' } },
+          },
+          take: 100,
+        }),
+      );
+    });
+
+    it('lists folios without property or status filters', async () => {
+      mockPrismaService.folio.findMany.mockResolvedValue([]);
+
+      await service.findMany({});
+
+      expect(mockPrismaService.folio.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {},
+          take: 100,
+        }),
+      );
+    });
+  });
+
   describe('create', () => {
     it('should create a folio successfully', async () => {
       mockPrismaService.reservation.findUnique.mockResolvedValue({

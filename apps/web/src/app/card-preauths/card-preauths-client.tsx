@@ -1,13 +1,20 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
+import { propertiesAPI } from '@/lib/api/properties';
 import { useCardPreauths } from '@/hooks/use-card-preauths';
 import { CardPreauthList, HoldCardPreauthForm } from './card-preauth-panels';
 
 export function CardPreauthsClient() {
   const userId = useAuthStore((state) => state.user?.id) ?? 'usr_mock_1';
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: () => propertiesAPI.getAll(),
+  });
+  const propertyId = properties?.[0]?.id;
   const { data: holds = [] } = useCardPreauths();
 
   return (
@@ -31,7 +38,11 @@ export function CardPreauthsClient() {
           <CardTitle>{t('preauth.list')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardPreauthList holds={holds} userId={userId} />
+          <CardPreauthList
+            holds={holds}
+            userId={userId}
+            propertyId={propertyId}
+          />
         </CardContent>
       </Card>
     </div>

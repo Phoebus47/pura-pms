@@ -5,6 +5,7 @@ import {
   Bed,
   CreditCard,
   Clock,
+  MoonStar,
   FileText,
   Settings,
   ArrowLeftRight,
@@ -18,37 +19,160 @@ export interface NavigationItem {
   name: string;
   href: string;
   icon: LucideIcon;
+  labelKey: string;
 }
 
 export const navigationItems: NavigationItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Reservations', href: '/reservations', icon: Calendar },
-  { name: 'Guests', href: '/guests', icon: Users },
-  { name: 'Rooms', href: '/rooms', icon: Bed },
-  { name: 'Billing', href: '/billing', icon: CreditCard },
-  { name: 'Shifts', href: '/shifts', icon: Clock },
-  { name: 'Reports', href: '/reports', icon: FileText },
-  { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
-  { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
-  { name: 'Accounts receivable', href: '/ar-accounts', icon: Landmark },
-  { name: 'Card pre-auths', href: '/card-preauths', icon: Wallet },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  {
+    name: 'Dashboard',
+    href: '/',
+    icon: LayoutDashboard,
+    labelKey: 'nav.dashboard',
+  },
+  {
+    name: 'Reservations',
+    href: '/reservations',
+    icon: Calendar,
+    labelKey: 'nav.reservations',
+  },
+  {
+    name: 'Guests',
+    href: '/guests',
+    icon: Users,
+    labelKey: 'nav.guests',
+  },
+  { name: 'Rooms', href: '/rooms', icon: Bed, labelKey: 'nav.rooms' },
+  {
+    name: 'Billing',
+    href: '/billing',
+    icon: CreditCard,
+    labelKey: 'nav.billing',
+  },
+  {
+    name: 'Shifts',
+    href: '/shifts',
+    icon: Clock,
+    labelKey: 'nav.shifts',
+  },
+  {
+    name: 'Night Audit',
+    href: '/night-audit',
+    icon: MoonStar,
+    labelKey: 'nav.nightAudit',
+  },
+  {
+    name: 'Reports',
+    href: '/reports',
+    icon: FileText,
+    labelKey: 'nav.reports',
+  },
+  {
+    name: 'Exchange rates',
+    href: '/exchange-rates',
+    icon: ArrowLeftRight,
+    labelKey: 'nav.exchangeRates',
+  },
+  {
+    name: 'Tax invoices',
+    href: '/tax-invoices',
+    icon: Receipt,
+    labelKey: 'nav.taxInvoices',
+  },
+  {
+    name: 'Accounts receivable',
+    href: '/ar-accounts',
+    icon: Landmark,
+    labelKey: 'nav.arAccounts',
+  },
+  {
+    name: 'Card pre-auths',
+    href: '/card-preauths',
+    icon: Wallet,
+    labelKey: 'nav.cardPreauths',
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    labelKey: 'nav.settings',
+  },
 ];
 
 export const primaryBottomNavItems: NavigationItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Reservations', href: '/reservations', icon: Calendar },
-  { name: 'Guests', href: '/guests', icon: Users },
-  { name: 'Rooms', href: '/rooms', icon: Bed },
-  { name: 'Billing', href: '/billing', icon: CreditCard },
+  {
+    name: 'Dashboard',
+    href: '/',
+    icon: LayoutDashboard,
+    labelKey: 'nav.dashboard',
+  },
+  {
+    name: 'Reservations',
+    href: '/reservations',
+    icon: Calendar,
+    labelKey: 'nav.reservations',
+  },
+  {
+    name: 'Guests',
+    href: '/guests',
+    icon: Users,
+    labelKey: 'nav.guests',
+  },
+  { name: 'Rooms', href: '/rooms', icon: Bed, labelKey: 'nav.rooms' },
+  {
+    name: 'Billing',
+    href: '/billing',
+    icon: CreditCard,
+    labelKey: 'nav.billing',
+  },
 ];
 
 export const moreBottomNavItems: NavigationItem[] = [
-  { name: 'Shifts', href: '/shifts', icon: Clock },
-  { name: 'Reports', href: '/reports', icon: FileText },
-  { name: 'Exchange rates', href: '/exchange-rates', icon: ArrowLeftRight },
-  { name: 'Tax invoices', href: '/tax-invoices', icon: Receipt },
-  { name: 'Accounts receivable', href: '/ar-accounts', icon: Landmark },
-  { name: 'Card pre-auths', href: '/card-preauths', icon: Wallet },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  {
+    name: 'Shifts',
+    href: '/shifts',
+    icon: Clock,
+    labelKey: 'nav.shifts',
+  },
+  {
+    name: 'Night Audit',
+    href: '/night-audit',
+    icon: MoonStar,
+    labelKey: 'nav.nightAudit',
+  },
+  {
+    name: 'Reports',
+    href: '/reports',
+    icon: FileText,
+    labelKey: 'nav.reports',
+  },
+  {
+    name: 'Exchange rates',
+    href: '/exchange-rates',
+    icon: ArrowLeftRight,
+    labelKey: 'nav.exchangeRates',
+  },
+  {
+    name: 'Tax invoices',
+    href: '/tax-invoices',
+    icon: Receipt,
+    labelKey: 'nav.taxInvoices',
+  },
+  {
+    name: 'Accounts receivable',
+    href: '/ar-accounts',
+    icon: Landmark,
+    labelKey: 'nav.arAccounts',
+  },
+  {
+    name: 'Card pre-auths',
+    href: '/card-preauths',
+    icon: Wallet,
+    labelKey: 'nav.cardPreauths',
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    labelKey: 'nav.settings',
+  },
 ];

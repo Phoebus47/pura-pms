@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { navigationItems } from '@/config/navigation';
+import { t } from '@/lib/i18n';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -29,12 +30,12 @@ export function Sidebar() {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {navigationItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className={cn(
                   'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200',
@@ -54,7 +55,7 @@ export function Sidebar() {
                 <span
                   className={cn('font-medium', isActive && 'font-semibold')}
                 >
-                  {item.name}
+                  {t(item.labelKey)}
                 </span>
               </Link>
             );

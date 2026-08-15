@@ -57,7 +57,11 @@ export function ArAccountsClient() {
           <CardTitle>{t('ar.transfer')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <TransferFolioForm userId={userId} />
+          <TransferFolioForm
+            userId={userId}
+            propertyId={propertyId}
+            accounts={accounts}
+          />
         </CardContent>
       </Card>
 

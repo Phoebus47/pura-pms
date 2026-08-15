@@ -1,6 +1,15 @@
-import { Controller, Get, Patch, Post, Body, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { FoliosService } from './folios.service';
 import { CreateFolioDto } from './dto/create-folio.dto';
+import { FindFoliosQueryDto } from './dto/find-folios-query.dto';
 import { PostTransactionDto } from './dto/post-transaction.dto';
 import { VoidTransactionDto } from './dto/void-transaction.dto';
 import {
@@ -18,14 +27,19 @@ export class FoliosController {
     return this.foliosService.create(createFolioDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.foliosService.findOne(id);
+  @Get()
+  findMany(@Query() query: FindFoliosQueryDto) {
+    return this.foliosService.findMany(query);
   }
 
   @Get('reservation/:reservationId')
   findByReservationId(@Param('reservationId') reservationId: string) {
     return this.foliosService.findByReservationId(reservationId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.foliosService.findOne(id);
   }
 
   @Post(':id/transactions')

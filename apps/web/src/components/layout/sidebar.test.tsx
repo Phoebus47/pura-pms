@@ -39,6 +39,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('Guests')).toBeInTheDocument();
     expect(screen.getByText('Rooms')).toBeInTheDocument();
     expect(screen.getByText('Shifts')).toBeInTheDocument();
+    expect(screen.getByText('Night Audit')).toBeInTheDocument();
   });
 
   it('should highlight active navigation item', () => {
@@ -62,5 +63,10 @@ describe('Sidebar', () => {
 
     const sidebar = container.querySelector('div');
     expect(sidebar).toHaveClass('hidden', 'lg:flex');
+  });
+
+  it('should scroll overflow navigation items', () => {
+    const { container } = render(<Sidebar />);
+    expect(container.querySelector('nav')).toHaveClass('overflow-y-auto');
   });
 });
