@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
-import RootLayout from './layout';
+import RootLayout, { viewport } from './layout';
 
 vi.mock('next/font/google', () => ({
   Geist: vi.fn(() => ({
@@ -64,6 +64,10 @@ describe('RootLayout', () => {
     );
 
     expect(screen.getByText('Test Content')).toBeInTheDocument();
+  });
+
+  it('locks the viewport to a light color scheme', () => {
+    expect(viewport.colorScheme).toBe('light');
   });
 
   it('should render AppLayout', () => {
