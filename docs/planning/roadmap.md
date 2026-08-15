@@ -134,13 +134,13 @@
 
 ### Edge Cases (Enterprise)
 
-- [ ] **Day-use Reservations**
-  - [ ] Day-use flag on reservation
-  - [ ] Separate rate structure
-  - [ ] Skip Night Audit posting for day-use
+- [x] **Day-use Reservations**
+  - [x] Day-use flag on reservation
+  - [x] Separate rate structure
+  - [x] Skip Night Audit posting for day-use
 
-- [ ] **Split Stay**
-  - [ ] Multiple room types within single reservation
+- [x] **Split Stay**
+  - [x] Multiple room types within single reservation
   - [ ] Automatic room move at split point
 
 - [ ] **No-show & Late Cancellation**
@@ -149,11 +149,11 @@
   - [ ] Auto-post no-show charge during Night Audit
   - [ ] Late cancellation fee calculation
 
-- [ ] **Room Move Mid-stay**
-  - [ ] RoomMove model
-  - [ ] Auto-transfer folio to new room
-  - [ ] Re-issue key card trigger
-  - [ ] Update housekeeping status (old → Dirty, new → Occupied)
+- [x] **Room Move Mid-stay**
+  - [x] RoomMove model
+  - [x] Auto-transfer folio to new room
+  - [x] Re-issue key card trigger
+  - [x] Update housekeeping status (old → Dirty, new → Occupied)
 
 - [ ] **VIP Room Pre-assignment**
   - [ ] Lock room for VIP, prevent auto-reassignment
@@ -777,11 +777,11 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 10. Package Revenue Breakdown (USALI split)
 11. Credit Limit Alerts & Auto-settlement
 
-### Phase 4: Operations Edge Cases (Next — do not start Room Move yet)
+### Phase 4: Operations Edge Cases (Room Move shipped — remaining items next)
 
 1. Day-use Reservations — **shipped**
 2. Split Stay — **shipped**
-3. Room Move Mid-stay
+3. Room Move Mid-stay — **shipped**
 4. No-show / Late Cancellation Auto-charges
 5. Post-departure Charges
 6. Overbooking Recovery (Walk)
@@ -825,4 +825,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–3 closeout complete (wait items remain). Phase 4 next except shipped day-use and split stay.
+**Status:** Phase 1–3 closeout complete (wait items remain). Phase 4 Room Move shipped; remaining Phase 4 items next.

@@ -230,7 +230,7 @@ Each row is **one PR**. Implementation base: `dev`. Cloud agent branch pattern: 
 
 - Day-use — **shipped** (#33)
 - Split Stay room-type slices — **shipped** (#39). Automatic room move at split point remains later.
-- Room Move mid-stay (`RoomMove`, folio transfer, HK flip, key re-issue)
+- Room Move mid-stay — **this Phase 4 epic** (`RoomMove`, folio follows reservation, HK flip, key re-issue flag)
 - No-show / late cancellation auto-charges
 - Post-departure charges (beyond what WP4 already allows on open folios)
 - Overbooking recovery (Walk)
@@ -273,4 +273,4 @@ Night Audit hook in PR1: `feat(night-audit): reject run while shifts are open` i
 
 Phase 3 closeout **code** is done: P3-PR1 through P3-PR12 are merged (AP, RD e-Tax, and card gateway still open as wait items). FO day-close is usable (Shift + DRR + Night Audit in nav). Typed UUID fields on Tax / AR transfer / Pre-auth are replaced with labeled pickers. Cash payment `9000` can post guest currency + foreign amount.
 
-Do not start Phase 4 Room Move.
+Phase 4 Room Move is a separate epic. Do not reopen Phase 3 wait items here.

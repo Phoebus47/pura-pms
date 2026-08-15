@@ -22,6 +22,11 @@ const mockPrismaService = {
     findMany: vi.fn(),
     deleteMany: vi.fn(),
     createMany: vi.fn(),
+    update: vi.fn(),
+  },
+  roomMove: {
+    create: vi.fn(),
+    findMany: vi.fn(),
   },
   room: {
     findUnique: vi.fn(),
@@ -71,6 +76,9 @@ describe('ReservationsService', () => {
     mockPrismaService.reservationStay.createMany.mockResolvedValue({
       count: 0,
     });
+    mockPrismaService.reservationStay.update.mockResolvedValue({});
+    mockPrismaService.roomMove.create.mockResolvedValue({});
+    mockPrismaService.roomMove.findMany.mockResolvedValue([]);
     mockPrismaService.$transaction.mockImplementation(
       async (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
         callback(mockPrismaService),
@@ -908,6 +916,205 @@ describe('ReservationsService', () => {
       });
       await expect(service.checkOut('res-1')).rejects.toThrow(
         BadRequestException,
+      );
+    });
+  });
+
+  describe('moveRoom', () => {
+    const checkedIn = {
+      id: 'res-1',
+      status: ReservationStatus.CHECKED_IN,
+      roomId: 'room-1',
+      checkIn: new Date('2026-08-14T00:00:00.000Z'),
+      checkOut: new Date('2026-08-18T00:00:00.000Z'),
+      isDayUse: false,
+      stays: [],
+      room: { id: 'room-1', propertyId: 'prop-1' },
+    };
+    const vacantClean = {
+      id: 'room-2',
+      propertyId: 'prop-1',
+      status: 'VACANT_CLEAN',
+      roomTypeId: 'type-1',
+    };
+    const dto = {
+      toRoomId: 'room-2',
+      reason: 'Guest request',
+      movedBy: 'usr-1',
+    };
+
+    it('moves a checked-in guest and records history', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+      mockPrismaService.room.findUnique.mockResolvedValue(vacantClean);
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        roomId: 'room-2',
+      });
+      mockPrismaService.room.update.mockResolvedValue({});
+      mockPrismaService.roomMove.create.mockResolvedValue({ id: 'move-1' });
+
+      const result = await service.moveRoom('res-1', dto);
+
+      expect(result.roomId).toBe('room-2');
+      expect(mockPrismaService.room.update).toHaveBeenCalledWith({
+        where: { id: 'room-1' },
+        data: { status: 'VACANT_DIRTY' },
+      });
+      expect(mockPrismaService.room.update).toHaveBeenCalledWith({
+        where: { id: 'room-2' },
+        data: { status: 'OCCUPIED_CLEAN' },
+      });
+      expect(mockPrismaService.roomMove.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            fromRoomId: 'room-1',
+            toRoomId: 'room-2',
+            movedBy: 'usr-1',
+            reason: 'Guest request',
+          }),
+        }),
+      );
+      expect(mockPrismaService.reservationStay.update).not.toHaveBeenCalled();
+    });
+
+    it('marks a vacant dirty target as occupied dirty', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+      mockPrismaService.room.findUnique.mockResolvedValue({
+        ...vacantClean,
+        status: 'VACANT_DIRTY',
+      });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        roomId: 'room-2',
+      });
+      mockPrismaService.room.update.mockResolvedValue({});
+
+      await service.moveRoom('res-1', dto);
+
+      expect(mockPrismaService.room.update).toHaveBeenCalledWith({
+        where: { id: 'room-2' },
+        data: { status: 'OCCUPIED_DIRTY' },
+      });
+    });
+
+    it('updates the current stay segment room', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...checkedIn,
+        stays: [
+          {
+            id: 'stay-1',
+            startDate: new Date('2026-08-14T00:00:00.000Z'),
+            endDate: new Date('2026-08-18T00:00:00.000Z'),
+            roomId: 'room-1',
+          },
+        ],
+      });
+      mockPrismaService.room.findUnique.mockResolvedValue(vacantClean);
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        roomId: 'room-2',
+      });
+      mockPrismaService.room.update.mockResolvedValue({});
+
+      await service.moveRoom('res-1', dto);
+
+      expect(mockPrismaService.reservationStay.update).toHaveBeenCalledWith({
+        where: { id: 'stay-1' },
+        data: { roomId: 'room-2', roomTypeId: 'type-1' },
+      });
+    });
+
+    it('rejects a reservation that is not checked in', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...checkedIn,
+        status: ReservationStatus.CONFIRMED,
+      });
+
+      await expect(service.moveRoom('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('rejects moving into the same room', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+
+      await expect(
+        service.moveRoom('res-1', { ...dto, toRoomId: 'room-1' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects a missing target room', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+      mockPrismaService.room.findUnique.mockResolvedValue(null);
+
+      await expect(service.moveRoom('res-1', dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('rejects a room on another property', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+      mockPrismaService.room.findUnique.mockResolvedValue({
+        ...vacantClean,
+        propertyId: 'prop-2',
+      });
+
+      await expect(service.moveRoom('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('rejects an occupied target room', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+      mockPrismaService.room.findUnique.mockResolvedValue({
+        ...vacantClean,
+        status: 'OCCUPIED_CLEAN',
+      });
+
+      await expect(service.moveRoom('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('rejects when the target room has a date conflict', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(checkedIn);
+      mockPrismaService.room.findUnique.mockResolvedValue(vacantClean);
+      mockPrismaService.reservation.findMany.mockResolvedValue([{ id: 'x' }]);
+
+      await expect(service.moveRoom('res-1', dto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+  });
+
+  describe('listRoomMoves', () => {
+    it('returns move history for a reservation', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        id: 'res-1',
+      });
+      mockPrismaService.roomMove.findMany.mockResolvedValue([
+        { id: 'move-1', fromRoomId: 'room-1', toRoomId: 'room-2' },
+      ]);
+
+      const result = await service.listRoomMoves('res-1');
+
+      expect(result).toHaveLength(1);
+      expect(mockPrismaService.roomMove.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { reservationId: 'res-1' },
+          orderBy: { movedAt: 'desc' },
+        }),
+      );
+    });
+
+    it('throws when the reservation is missing', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(null);
+
+      await expect(service.listRoomMoves('missing')).rejects.toThrow(
+        NotFoundException,
       );
     });
   });
