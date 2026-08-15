@@ -19,6 +19,7 @@ import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
 import { FolioDetail } from '@/components/folio-detail';
+import { RoomMovePanel } from '@/components/room-move-panel';
 import { cn } from '@/lib/utils';
 
 export default function ReservationDetailPage() {
@@ -421,6 +422,13 @@ export default function ReservationDetailPage() {
               </div>
             </div>
           </div>
+
+          {reservation.status === 'CHECKED_IN' ? (
+            <RoomMovePanel
+              reservation={reservation}
+              onMoved={loadReservation}
+            />
+          ) : null}
 
           {/* Metadata */}
           <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">

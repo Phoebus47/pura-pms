@@ -381,6 +381,49 @@ describe('Mock API Router', () => {
       expect(response.status).toBe('CHECKED_OUT');
     });
 
+    it('should move a checked-in guest to a vacant room', async () => {
+      const resId = mockDb.reservations[0].id;
+      const fromRoomId = mockDb.reservations[0].roomId;
+      const response: any = await routeMockRequest(
+        `/reservations/${resId}/room-move`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            toRoomId: 'rm_mock_1',
+            movedBy: 'usr_mock_1',
+            reason: 'Upgrade',
+          }),
+        },
+      );
+      expect(response.roomId).toBe('rm_mock_1');
+      expect(
+        mockDb.rooms.find((room: any) => room.id === fromRoomId).status,
+      ).toBe('VACANT_DIRTY');
+      expect(
+        mockDb.rooms.find((room: any) => room.id === 'rm_mock_1').status,
+      ).toBe('OCCUPIED_CLEAN');
+
+      const history: any = await routeMockRequest(
+        `/reservations/${resId}/room-moves`,
+        { method: 'GET' },
+      );
+      expect(history).toHaveLength(1);
+      expect(history[0].toRoomId).toBe('rm_mock_1');
+      expect(history[0].folioTransferred).toBe(true);
+    });
+
+    it('should reject a room move when the reservation is not checked in', async () => {
+      await expect(
+        routeMockRequest(`/reservations/res_mock_2/room-move`, {
+          method: 'POST',
+          body: JSON.stringify({
+            toRoomId: 'rm_mock_1',
+            movedBy: 'usr_mock_1',
+          }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
     it('should delete a reservation', async () => {
       const resId = mockDb.reservations[0].id;
       const response: any = await routeMockRequest(`/reservations/${resId}`, {

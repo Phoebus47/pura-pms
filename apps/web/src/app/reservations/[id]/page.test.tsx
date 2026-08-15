@@ -26,6 +26,10 @@ vi.mock('@/components/reservation-status-badge', () => ({
   ),
 }));
 
+vi.mock('@/components/room-move-panel', () => ({
+  RoomMovePanel: () => <div data-testid="room-move-panel" />,
+}));
+
 describe('ReservationDetailPage', () => {
   const mockReservation = {
     id: 'res-1',
@@ -226,6 +230,26 @@ describe('ReservationDetailPage', () => {
 
     await userEvent.click(screen.getByText('Check Out'));
     expect(reservationsAPI.checkOut).toHaveBeenCalledWith('res-1');
+  });
+
+  it('shows the room move panel for a checked-in stay', async () => {
+    (reservationsAPI.getById as any).mockResolvedValue({
+      ...mockReservation,
+      status: 'CHECKED_IN',
+    });
+    render(<ReservationDetailPage />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('room-move-panel')).toBeInTheDocument(),
+    );
+  });
+
+  it('hides the room move panel before check-in', async () => {
+    render(<ReservationDetailPage />);
+    await waitFor(() =>
+      expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
+    );
+    expect(screen.queryByTestId('room-move-panel')).not.toBeInTheDocument();
   });
 
   it('cancels check out', async () => {
