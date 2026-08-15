@@ -44,7 +44,7 @@ describe('BottomNavigation', () => {
     render(<BottomNavigation />);
 
     const reservationsLink = screen.getByLabelText('Reservations');
-    expect(reservationsLink).toHaveClass('text-pura-blue');
+    expect(reservationsLink).toHaveClass('text-[#1e4b8e]');
   });
 
   it('should highlight More when a overflow destination is active', () => {
@@ -52,7 +52,7 @@ describe('BottomNavigation', () => {
 
     render(<BottomNavigation />);
 
-    expect(screen.getByLabelText('More')).toHaveClass('text-pura-blue');
+    expect(screen.getByLabelText('More')).toHaveClass('text-[#1e4b8e]');
   });
 
   it('should open Shifts, Reports and Settings from the More menu', async () => {

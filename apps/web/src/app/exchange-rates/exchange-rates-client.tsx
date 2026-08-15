@@ -130,7 +130,7 @@ function ExchangeRateList({ rates }: { readonly rates: ExchangeRate[] }) {
   }
 
   if (rates.length === 0) {
-    return <p className="text-muted-foreground text-sm">{t('fx.empty')}</p>;
+    return <p className="text-slate-600 text-sm">{t('fx.empty')}</p>;
   }
 
   return (
@@ -168,7 +168,7 @@ export function ExchangeRatesClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('fx.title')}
         </h1>
-        <p className="mt-1 text-muted-foreground text-sm">{t('fx.subtitle')}</p>
+        <p className="mt-1 text-slate-600 text-sm">{t('fx.subtitle')}</p>
       </header>
 
       <Card>

@@ -85,7 +85,7 @@ export function ReportsClient() {
       </header>
 
       {property ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-slate-600 text-sm">
           {t('reports.property')}: {property.name}
         </p>
       ) : null}
@@ -105,9 +105,7 @@ export function ReportsClient() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-muted-foreground text-sm">
-              {t('reports.loading')}
-            </p>
+            <p className="text-slate-600 text-sm">{t('reports.loading')}</p>
           ) : (
             <DailyRevenueTable
               groups={groups}

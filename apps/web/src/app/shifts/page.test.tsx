@@ -94,6 +94,9 @@ describe('ShiftsPage', () => {
     expect(
       await screen.findByRole('heading', { name: t('shifts.title') }),
     ).toBeInTheDocument();
+    expect(
+      await screen.findByText(`${t('shifts.property')}: ${property.name}`),
+    ).toHaveClass('text-slate-600');
   });
 
   it('renders a labeled open form when there is no current shift', async () => {

@@ -55,6 +55,9 @@ describe('TaxInvoicesPage', () => {
     expect(
       await screen.findByRole('heading', { name: t('taxInvoice.title') }),
     ).toBeInTheDocument();
+    expect(screen.getByText(t('taxInvoice.subtitle'))).toHaveClass(
+      'text-slate-600',
+    );
   });
 
   it('renders labeled issue form fields', async () => {
