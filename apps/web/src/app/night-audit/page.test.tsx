@@ -9,6 +9,7 @@ import type {
 import React from 'react';
 import { toast } from 'sonner';
 import { nightAuditAPI } from '@/lib/api/night-audit';
+import { t } from '@/lib/i18n';
 
 import { propertiesAPI } from '@/lib/api/properties';
 
@@ -363,16 +364,14 @@ describe('NightAuditPage', () => {
     };
 
     callbacks.onSuccess?.();
-    expect(toast.success).toHaveBeenCalledWith(
-      'Night Audit started successfully',
-    );
+    expect(toast.success).toHaveBeenCalledWith(t('nightAudit.startSuccess'));
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: ['night-audit-status'],
     });
 
     callbacks.onError?.(new Error('Test mutation error'));
     expect(toast.error).toHaveBeenCalledWith(
-      'Failed to start Night Audit: Test mutation error',
+      `${t('nightAudit.startFailed')}: Test mutation error`,
     );
 
     vi.mocked(nightAuditAPI.start).mockResolvedValue({

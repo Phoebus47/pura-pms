@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ArAccountsPage from './page';
 import { arAccountsAPI } from '@/lib/api/ar-accounts';
 import { propertiesAPI } from '@/lib/api/properties';
+import { foliosAPI } from '@/lib/api/folios';
 import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
@@ -36,6 +37,12 @@ vi.mock('@/lib/api/properties', () => ({
   },
 }));
 
+vi.mock('@/lib/api/folios', () => ({
+  foliosAPI: {
+    list: vi.fn(),
+  },
+}));
+
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -54,6 +61,7 @@ describe('ArAccountsPage', () => {
       { id: 'prop_1', businessDate: '2026-08-14' },
     ] as never);
     vi.mocked(arAccountsAPI.list).mockResolvedValue([]);
+    vi.mocked(foliosAPI.list).mockResolvedValue([]);
   });
 
   it('renders the AR title', async () => {

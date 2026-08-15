@@ -3,7 +3,14 @@
 **Role:** Technical PM  
 **Decision:** Finish remaining Phase 3 before more Phase 4.  
 **Date:** 2026-08-14  
+**Updated:** 2026-08-15  
 **Sources:** `docs/planning/prd.md` §4.6, §4.8–4.14, §12; `docs/planning/archive/task.md` Sprint 6–9 leftovers; live schema + API inventory.
+
+## Status (2026-08-15)
+
+**P3-PR1 through P3-PR12 are merged** to `dev` and `main`. Closeout productization (Night Audit in nav, folio/reservation/AR pickers, cash FX on payment `9000`, day-close i18n) is FO polish of the shipped closeout — not a new epic.
+
+**Still wait (do not implement here):** AP, RD e-Tax API, card gateway (Stripe/Omise/2C2P), P&L/bank rec, cashier PDF/email, delete legacy `Transaction`.
 
 Day-use (#33) and Split Stay PR1 (#39) already shipped on `dev` / `main`. **Do not reopen them.** Do not mix Phase 4 epics (Room Move, no-show, walk, complimentary, extended stay, tax exemption, VIP lock).
 
@@ -11,7 +18,7 @@ Day-use (#33) and Split Stay PR1 (#39) already shipped on `dev` / `main`. **Do n
 
 ## 1. What Phase 3 already shipped (WP1–WP5)
 
-Archive `task.md` marked Phase 3 “COMPLETE (WP1–WP5)”. That is **foundations only**. PRD §12 still has seven unchecked items. Schema-only models are not product.
+Archive `task.md` marked Phase 3 “COMPLETE (WP1–WP5)”. That was **foundations only**. P3-PR1–12 later productized the remaining §12 items (AP / RD e-Tax / card gateway stay wait).
 
 | WP        | What shipped                           | Grounding in code                                                                                                                                                                                                                                                                                          |
 | --------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -264,4 +271,6 @@ Night Audit hook in PR1: `feat(night-audit): reject run while shifts are open` i
 
 ## 8. Definition of “Phase 3 closeout done”
 
-Phase 3 closeout is **done** when P3-PR1 through P3-PR12 are merged (AP, RD e-Tax, and card gateway still open as wait items). Minimum **FO day-close** is already usable after **PR1 + PR2**. Do not start Phase 4 Room Move until at least PR1 is on `dev`/`main`.
+Phase 3 closeout **code** is done: P3-PR1 through P3-PR12 are merged (AP, RD e-Tax, and card gateway still open as wait items). FO day-close is usable (Shift + DRR + Night Audit in nav). Typed UUID fields on Tax / AR transfer / Pre-auth are replaced with labeled pickers. Cash payment `9000` can post guest currency + foreign amount.
+
+Do not start Phase 4 Room Move.

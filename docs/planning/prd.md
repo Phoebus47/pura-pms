@@ -1212,24 +1212,24 @@ graph LR
 - [x] Housekeeping module (Basic)
 - [x] **Mock API for Frontend Demo** (CRUD all modules)
 
-### Phase 3: Financial & Audit (Next — 🎯 Priority)
+### Phase 3: Financial & Audit (Complete — wait items remain)
 
 - [x] Enhanced Folio System (Windows, Routing, Post-departure, Rebate)
 - [x] Transaction Codes (Mapping to GL)
 - [x] Reason Codes (Audit Trail)
 - [x] Night Audit System (Enhanced with Queue)
-- [ ] Shift Management (Enhanced)
-- [ ] GL/AR/AP modules (USALI Compliant)
-- [ ] Tax Invoice (e-Tax Invoice Ready)
-- [ ] Currency Exchange
-- [ ] Credit Card Pre-authorization
-- [ ] Package Revenue Breakdown (USALI split)
-- [ ] Credit Limit Alerts & Auto-settlement
+- [x] Shift Management (Enhanced)
+- [x] GL journals, Trial Balance, and AR (USALI). AP is still wait.
+- [x] Tax Invoice (internal running number; Revenue Department e-Tax is wait)
+- [x] Currency Exchange
+- [x] Credit Card Pre-authorization (manual ledger; no card gateway)
+- [x] Package Revenue Breakdown (USALI split)
+- [x] Credit Limit Alerts & Auto-settlement
 
 ### Phase 4: Operations Edge Cases
 
-- [ ] Day-use Reservations
-- [ ] Split Stay
+- [x] Day-use Reservations
+- [x] Split Stay
 - [ ] Room Move Mid-stay
 - [ ] No-show / Late Cancellation Auto-charges
 - [ ] Post-departure Charges

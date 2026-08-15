@@ -6,6 +6,9 @@ import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EntitySelect } from '@/components/shared/entity-select';
+import { useOpenFolios } from '@/hooks/use-folios';
+import { arAccountOptionLabel, folioOptionLabel } from '@/lib/entity-labels';
 import {
   useCreateArAccount,
   useTransferToCityLedger,
@@ -100,10 +103,17 @@ export function CreateArAccountForm({ propertyId }: CreateFormProps) {
 
 interface TransferFormProps {
   readonly userId: string;
+  readonly propertyId?: string;
+  readonly accounts: ArAccount[];
 }
 
-export function TransferFolioForm({ userId }: TransferFormProps) {
+export function TransferFolioForm({
+  userId,
+  propertyId,
+  accounts,
+}: TransferFormProps) {
   const transferMutation = useTransferToCityLedger();
+  const { data: folios = [] } = useOpenFolios(propertyId);
   const [folioId, setFolioId] = useState('');
   const [arAccountId, setArAccountId] = useState('');
 
@@ -128,28 +138,30 @@ export function TransferFolioForm({ userId }: TransferFormProps) {
         void handleSubmit();
       }}
     >
-      <div className="space-y-2">
-        <Label htmlFor="arFolioId">{t('ar.folioId')}</Label>
-        <Input
-          id="arFolioId"
-          name="folioId"
-          className={fieldClass}
-          value={folioId}
-          onChange={(event) => setFolioId(event.target.value)}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="arAccountId">{t('ar.arAccountId')}</Label>
-        <Input
-          id="arAccountId"
-          name="arAccountId"
-          className={fieldClass}
-          value={arAccountId}
-          onChange={(event) => setArAccountId(event.target.value)}
-          required
-        />
-      </div>
+      <EntitySelect
+        id="arFolioId"
+        name="folioId"
+        label={t('ar.folioId')}
+        value={folioId}
+        onChange={setFolioId}
+        options={folios.map((folio) => ({
+          value: folio.id,
+          label: folioOptionLabel(folio),
+        }))}
+        required
+      />
+      <EntitySelect
+        id="arAccountId"
+        name="arAccountId"
+        label={t('ar.arAccountId')}
+        value={arAccountId}
+        onChange={setArAccountId}
+        options={accounts.map((account) => ({
+          value: account.id,
+          label: arAccountOptionLabel(account),
+        }))}
+        required
+      />
       <Button
         type="submit"
         disabled={transferMutation.isPending}

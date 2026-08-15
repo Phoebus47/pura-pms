@@ -8,9 +8,14 @@ import {
   cleanup,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
 import { PostPaymentDialog } from './post-payment-dialog';
 import { foliosAPI, type FolioTransaction } from '@/lib/api/folios';
+import { exchangeRatesAPI } from '@/lib/api/exchange-rates';
+import { propertiesAPI } from '@/lib/api/properties';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api/folios', () => ({
   foliosAPI: {
@@ -18,12 +23,46 @@ vi.mock('@/lib/api/folios', () => ({
   },
 }));
 
+vi.mock('@/lib/api/exchange-rates', () => ({
+  exchangeRatesAPI: {
+    list: vi.fn(),
+  },
+}));
+
+vi.mock('@/lib/api/properties', () => ({
+  propertiesAPI: {
+    getAll: vi.fn(),
+  },
+}));
+
+function renderDialog(ui: ReactNode) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
+
 describe('PostPaymentDialog', () => {
   const mockTransactionCodes = [
     {
       id: 'code-2',
       code: 'CSH',
       description: 'Cash',
+      type: 'PAYMENT',
+      hasTax: false,
+      hasService: false,
+      serviceRate: null,
+      isSystem: false,
+      active: true,
+      createdAt: '',
+      updatedAt: '',
+    },
+    {
+      id: 'code-9000',
+      code: '9000',
+      description: 'Cash Payment',
       type: 'PAYMENT',
       hasTax: false,
       hasService: false,
@@ -48,12 +87,26 @@ describe('PostPaymentDialog', () => {
     vi.clearAllMocks();
     vi.spyOn(toast, 'success').mockImplementation(() => {});
     vi.spyOn(toast, 'error').mockImplementation(() => {});
+    vi.mocked(exchangeRatesAPI.list).mockResolvedValue([
+      {
+        id: 'fx-1',
+        baseCurrency: 'THB',
+        targetCurrency: 'USD',
+        rate: 35,
+        effectiveDate: '2026-08-14',
+        isActive: true,
+        createdAt: '',
+      },
+    ]);
+    vi.mocked(propertiesAPI.getAll).mockResolvedValue([
+      { id: 'prop-1', currency: 'THB' },
+    ] as never);
   });
 
   it('renders correctly and filters payment codes', () => {
-    render(<PostPaymentDialog {...defaultProps} />);
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
     expect(
-      screen.getByRole('heading', { name: 'Post Payment' }),
+      screen.getByRole('heading', { name: t('folios.postPayment') }),
     ).toBeInTheDocument();
   });
 
@@ -77,16 +130,12 @@ describe('PostPaymentDialog', () => {
       isVoid: false,
     });
 
-    render(<PostPaymentDialog {...defaultProps} />);
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
 
-    // Select TRx Code
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: 'CSH - Cash' }));
+    await user.type(screen.getByLabelText(t('folios.amount')), '200');
 
-    // Enter Amount
-    await user.type(screen.getByLabelText(/amount/i), '200');
-
-    // Submit
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
     fireEvent.submit(form);
@@ -102,9 +151,43 @@ describe('PostPaymentDialog', () => {
           businessDate: expect.any(String),
         }),
       );
-      expect(toast.success).toHaveBeenCalledWith('Payment posted successfully');
+      expect(toast.success).toHaveBeenCalledWith(t('folios.paymentSuccess'));
       expect(defaultProps.onSuccess).toHaveBeenCalled();
       expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('posts cash foreign amount when currency differs from property', async () => {
+    const user = userEvent.setup();
+    vi.mocked(foliosAPI.postTransaction).mockResolvedValue({
+      id: 'trx-fx',
+    } as FolioTransaction);
+
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(
+      screen.getByRole('option', { name: '9000 - Cash Payment' }),
+    );
+    await user.selectOptions(
+      screen.getByLabelText(t('folios.currency')),
+      'USD',
+    );
+    await user.type(screen.getByLabelText(t('folios.foreignAmount')), '100');
+
+    const form = screen.getByRole('dialog').querySelector('form');
+    // @ts-ignore
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(foliosAPI.postTransaction).toHaveBeenCalledWith(
+        'folio-1',
+        expect.objectContaining({
+          trxCodeId: 'code-9000',
+          currency: 'USD',
+          foreignAmount: 100,
+        }),
+      );
     });
   });
 
@@ -112,20 +195,19 @@ describe('PostPaymentDialog', () => {
     const user = userEvent.setup();
     vi.mocked(foliosAPI.postTransaction).mockRejectedValue(new Error('Failed'));
 
-    render(<PostPaymentDialog {...defaultProps} />);
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
 
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: 'CSH - Cash' }));
-    await user.type(screen.getByLabelText(/amount/i), '200');
+    await user.type(screen.getByLabelText(t('folios.amount')), '200');
 
-    // Submit explicitly to bypass Radix UI click event issues
     const form = screen.getByRole('dialog').querySelector('form');
     // @ts-ignore
     fireEvent.submit(form);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to post payment:'),
+        expect.stringContaining(`${t('folios.paymentError')}:`),
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
     });
@@ -133,9 +215,8 @@ describe('PostPaymentDialog', () => {
 
   it('prevents submission if required fields are missing', async () => {
     const user = userEvent.setup();
-    render(<PostPaymentDialog {...defaultProps} />);
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
 
-    // Start with missing amount but valid payment code
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: 'CSH - Cash' }));
 
@@ -144,10 +225,9 @@ describe('PostPaymentDialog', () => {
     fireEvent.submit(form);
     expect(foliosAPI.postTransaction).not.toHaveBeenCalled();
 
-    // Now test missing payment code but valid amount
     cleanup();
-    render(<PostPaymentDialog {...defaultProps} />); // Reset state
-    fireEvent.change(screen.getByLabelText(/amount/i), {
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(t('folios.amount')), {
       target: { value: '200' },
     });
     // @ts-ignore
@@ -157,7 +237,7 @@ describe('PostPaymentDialog', () => {
 
   it('updates reference', async () => {
     const user = userEvent.setup();
-    render(<PostPaymentDialog {...defaultProps} />);
+    renderDialog(<PostPaymentDialog {...defaultProps} />);
 
     await user.type(screen.getByLabelText(/reference/i), 'Visa123');
 
