@@ -195,6 +195,17 @@ export const mockDb: any = {
       serviceRate: 10,
     },
     {
+      id: 'tc_no_show',
+      code: '1006',
+      description: 'No-Show Charge',
+      type: 'CHARGE',
+      group: 'ROOM',
+      hasTax: true,
+      hasService: true,
+      taxRate: 7,
+      serviceRate: 10,
+    },
+    {
       id: 'tc_fnb',
       code: '2000',
       description: 'Restaurant Food',

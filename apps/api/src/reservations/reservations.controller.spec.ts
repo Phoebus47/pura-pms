@@ -18,6 +18,7 @@ const mockReservationsService = {
   cancel: vi.fn(),
   moveRoom: vi.fn(),
   listRoomMoves: vi.fn(),
+  markNoShow: vi.fn(),
 };
 
 describe('ReservationsController', () => {
@@ -224,6 +225,18 @@ describe('ReservationsController', () => {
       mockReservationsService.listRoomMoves.mockResolvedValue([]);
       await controller.listRoomMoves('1');
       expect(mockReservationsService.listRoomMoves).toHaveBeenCalledWith('1');
+    });
+  });
+
+  describe('markNoShow', () => {
+    it('should mark a reservation as no-show', async () => {
+      const dto = { userId: 'user-1', reason: 'Did not arrive' };
+      mockReservationsService.markNoShow.mockResolvedValue({
+        id: '1',
+        status: ReservationStatus.NO_SHOW,
+      });
+      await controller.markNoShow('1', dto);
+      expect(mockReservationsService.markNoShow).toHaveBeenCalledWith('1', dto);
     });
   });
 

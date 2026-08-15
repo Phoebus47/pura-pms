@@ -73,6 +73,18 @@
       "ROOM"
     ],
     [
+      "1006",
+      "No-Show Charge",
+      "ค่าปรับไม่มาเข้าพัก",
+      "CHARGE",
+      "ROOM",
+      true,
+      true,
+      10,
+      "4000-01",
+      "ROOM"
+    ],
+    [
       "2000",
       "Food & Beverage Revenue",
       "รายได้อาหารและเครื่องดื่ม",
@@ -375,6 +387,7 @@
       "DISCOUNT",
       true
     ],
+    ["NS-001", "No-show - Did not arrive", "ไม่มาเข้าพัก", "OTHER", true],
     [
       "ADJ-001",
       "Adjustment - Price Correction",

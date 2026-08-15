@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { MoveRoomDto } from './dto/move-room.dto';
+import { MarkNoShowDto } from './dto/mark-no-show.dto';
 import { Prisma, ReservationStatus, RoomStatus } from '@pura/database';
 import { FoliosService } from '../folios/folios.service';
 import { mapHeaderReservation, mapStayOccupancy } from './reservation-calendar';
@@ -32,6 +33,11 @@ import {
   occupancyWindowForMove,
   occupiedStatusForVacant,
 } from './room-move';
+import {
+  assertCanMarkNoShow,
+  NO_SHOW_TRX_CODE,
+  noShowChargeAmount,
+} from './no-show';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -416,6 +422,72 @@ export class ReservationsService {
         status: ReservationStatus.CANCELLED,
         notes: reason
           ? `${reservation.notes || ''}\nCancelled: ${reason}`.trim()
+          : reservation.notes,
+      },
+      include: reservationMutationInclude,
+    });
+  }
+
+  async markNoShow(id: string, dto: MarkNoShowDto) {
+    const reservation = await this.findOne(id);
+    const asOf = dto.businessDate
+      ? new Date(dto.businessDate)
+      : (reservation.room.property.businessDate ?? new Date());
+    assertCanMarkNoShow(reservation, asOf);
+
+    const trxCode = await this.prisma.transactionCode.findUnique({
+      where: { code: NO_SHOW_TRX_CODE },
+    });
+    if (!trxCode) {
+      throw new BadRequestException(
+        'No-show transaction code 1006 is not configured',
+      );
+    }
+
+    let folios = await this.foliosService.findByReservationId(id);
+    if (folios.length === 0) {
+      await this.foliosService.create({
+        reservationId: id,
+        type: 'GUEST',
+      });
+      folios = await this.foliosService.findByReservationId(id);
+    }
+
+    const folio = folios[0];
+    if (!folio) {
+      throw new BadRequestException('Could not create a folio for no-show');
+    }
+
+    const alreadyPosted = await this.prisma.folioTransaction.findFirst({
+      where: {
+        trxCodeId: trxCode.id,
+        isVoid: false,
+        window: { folio: { reservationId: id } },
+      },
+    });
+
+    if (!alreadyPosted) {
+      const reasonCode = await this.prisma.reasonCode.findUnique({
+        where: { code: 'NS-001' },
+      });
+      await this.foliosService.postTransaction(folio.id, {
+        windowNumber: 1,
+        trxCodeId: trxCode.id,
+        amountNet: noShowChargeAmount(reservation.roomRate),
+        reference: `No-show ${reservation.confirmNumber}`,
+        remark: dto.reason,
+        userId: dto.userId,
+        reasonCodeId: reasonCode?.id,
+        businessDate: asOf.toISOString(),
+      });
+    }
+
+    return this.prisma.reservation.update({
+      where: { id },
+      data: {
+        status: ReservationStatus.NO_SHOW,
+        notes: dto.reason
+          ? `${reservation.notes || ''}\nNo-show: ${dto.reason}`.trim()
           : reservation.notes,
       },
       include: reservationMutationInclude,

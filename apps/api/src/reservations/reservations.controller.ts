@@ -15,6 +15,7 @@ import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { MoveRoomDto } from './dto/move-room.dto';
+import { MarkNoShowDto } from './dto/mark-no-show.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationStatus } from '@pura/database';
 
@@ -97,6 +98,12 @@ export class ReservationsController {
   @Patch(':id/check-out')
   checkOut(@Param('id') id: string) {
     return this.reservationsService.checkOut(id);
+  }
+
+  @Post(':id/no-show')
+  @HttpCode(HttpStatus.CREATED)
+  markNoShow(@Param('id') id: string, @Body() dto: MarkNoShowDto) {
+    return this.reservationsService.markNoShow(id, dto);
   }
 
   @Patch(':id/cancel')

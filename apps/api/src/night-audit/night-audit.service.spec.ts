@@ -3,6 +3,7 @@ import { NightAuditService } from './night-audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { FoliosService } from '../folios/folios.service';
 import { JournalsService } from '../financial/journals.service';
+import { ReservationsService } from '../reservations/reservations.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { BadRequestException } from '@nestjs/common';
 
@@ -47,6 +48,10 @@ const mockJournalsService = {
   postForBusinessDate: vi.fn(),
 };
 
+const mockReservationsService = {
+  markNoShow: vi.fn(),
+};
+
 const mockQueue = {
   add: vi.fn(),
 };
@@ -69,6 +74,10 @@ describe('NightAuditService', () => {
         {
           provide: JournalsService,
           useValue: mockJournalsService,
+        },
+        {
+          provide: ReservationsService,
+          useValue: mockReservationsService,
         },
         {
           provide: getQueueToken('night-audit'),
@@ -169,6 +178,63 @@ describe('NightAuditService', () => {
         }),
         expect.objectContaining({
           jobId: 'night-audit:prop-1:2025-01-15',
+        }),
+      );
+    });
+  });
+
+  describe('processNoShows', () => {
+    const businessDate = new Date('2025-01-15T00:00:00.000Z');
+
+    it('should mark leftover confirmed arrivals and sum revenue', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        { id: 'res-1' },
+        { id: 'res-2' },
+      ]);
+      mockReservationsService.markNoShow
+        .mockResolvedValueOnce({ id: 'res-1', roomRate: 1500 })
+        .mockResolvedValueOnce({ id: 'res-2', roomRate: 2000 });
+
+      const result = await service.processNoShows('prop-1', businessDate);
+
+      expect(result).toEqual({ noShowsPosted: 2, noShowRevenue: 3500 });
+      expect(mockReservationsService.markNoShow).toHaveBeenCalledWith('res-1', {
+        userId: 'SYSTEM',
+        businessDate: businessDate.toISOString(),
+      });
+      expect(mockPrismaService.reservation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: 'CONFIRMED',
+            checkIn: { lt: new Date('2025-01-16T00:00:00.000Z') },
+          }),
+        }),
+      );
+    });
+
+    it('should record per-reservation errors without failing the run', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        { id: 'res-ok' },
+        { id: 'res-bad' },
+      ]);
+      mockReservationsService.markNoShow
+        .mockResolvedValueOnce({ id: 'res-ok', roomRate: 1200 })
+        .mockRejectedValueOnce(new Error('Already posted'));
+      mockPrismaService.nightAudit.findUnique.mockResolvedValue({
+        id: 'audit-1',
+      });
+      mockPrismaService.auditError.create.mockResolvedValue({});
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processNoShows('prop-1', businessDate);
+
+      expect(result).toEqual({ noShowsPosted: 1, noShowRevenue: 1200 });
+      expect(mockPrismaService.auditError.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            errorType: 'NO_SHOW',
+            description: expect.stringContaining('res-bad'),
+          }),
         }),
       );
     });

@@ -3,6 +3,7 @@ import { NightAuditService } from './night-audit.service';
 import { Job } from 'bullmq';
 
 const mockNightAuditService = {
+  processNoShows: vi.fn(),
   processRoomPosting: vi.fn(),
   rollBusinessDate: vi.fn(),
   generateNightAuditReport: vi.fn(),
@@ -15,6 +16,10 @@ describe('NightAuditProcessor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNightAuditService.processNoShows.mockResolvedValue({
+      noShowsPosted: 0,
+      noShowRevenue: 0,
+    });
     processor = new NightAuditProcessor(
       mockNightAuditService as unknown as NightAuditService,
     );
@@ -39,6 +44,10 @@ describe('NightAuditProcessor', () => {
         auditId: string;
       }>;
 
+      mockNightAuditService.processNoShows.mockResolvedValue({
+        noShowsPosted: 1,
+        noShowRevenue: 1500,
+      });
       mockNightAuditService.processRoomPosting.mockResolvedValue({
         roomsPosted: 5,
         totalRevenue: 5000,
@@ -49,6 +58,10 @@ describe('NightAuditProcessor', () => {
       const result = await processor.process(mockJob);
 
       expect(result).toEqual({ status: 'COMPLETED' });
+      expect(mockNightAuditService.processNoShows).toHaveBeenCalledWith(
+        'prop-1',
+        expect.any(Date),
+      );
       expect(mockNightAuditService.processRoomPosting).toHaveBeenCalledWith(
         'prop-1',
         expect.any(Date),
@@ -59,7 +72,12 @@ describe('NightAuditProcessor', () => {
         'prop-1',
         'audit-1',
         expect.any(Date),
-        expect.any(Object),
+        expect.objectContaining({
+          roomsPosted: 5,
+          totalRevenue: 5000,
+          noShowsPosted: 1,
+          noShowRevenue: 1500,
+        }),
       );
       expect(mockNightAuditService.completeAudit).toHaveBeenCalled();
     });

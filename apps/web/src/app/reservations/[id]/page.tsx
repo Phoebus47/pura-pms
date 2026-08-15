@@ -20,6 +20,7 @@ import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
 import { FolioDetail } from '@/components/folio-detail';
 import { RoomMovePanel } from '@/components/room-move-panel';
+import { ReservationNoShowButton } from '@/components/reservation-no-show-button';
 import { cn } from '@/lib/utils';
 
 export default function ReservationDetailPage() {
@@ -172,6 +173,10 @@ export default function ReservationDetailPage() {
               Check In
             </Button>
           )}
+          <ReservationNoShowButton
+            reservation={reservation}
+            onMarked={loadReservation}
+          />
           {canCheckOut && (
             <Button
               onClick={handleCheckOut}

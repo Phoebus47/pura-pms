@@ -294,6 +294,13 @@
       "noRooms": "No vacant rooms available",
       "keyCard": "Key card reissued",
       "folio": "Folio transferred"
+    },
+    "noShow": {
+      "action": "Mark no-show",
+      "confirm": "Mark this reservation as no-show and post one night of room rate?",
+      "success": "Reservation marked no-show",
+      "error": "Failed to mark no-show",
+      "reason": "Reason"
     }
   }
 }

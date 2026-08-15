@@ -146,7 +146,7 @@
 - [ ] **No-show & Late Cancellation**
   - [ ] CancellationPolicy model
   - [ ] Link rate codes to cancellation policies
-  - [ ] Auto-post no-show charge during Night Audit
+  - [x] Auto-post no-show charge during Night Audit
   - [ ] Late cancellation fee calculation
 
 - [x] **Room Move Mid-stay**
