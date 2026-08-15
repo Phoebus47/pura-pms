@@ -31,6 +31,14 @@ describe('Button', () => {
     expect(button).toHaveClass('bg-destructive');
   });
 
+  it('keeps outline button text readable on a light surface', () => {
+    render(<Button variant="outline">Show details</Button>);
+    expect(screen.getByRole('button', { name: 'Show details' })).toHaveClass(
+      'bg-white',
+      'text-[#1e4b8e]',
+    );
+  });
+
   it('should render as child when asChild is true', () => {
     render(
       <Button asChild>

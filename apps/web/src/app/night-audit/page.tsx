@@ -84,14 +84,14 @@ export default function NightAuditPage() {
           <h1 className="font-bold text-(--pura-blue) text-3xl tracking-tight">
             Night Audit
           </h1>
-          <p className="flex gap-2 items-center mt-1 text-muted-foreground">
+          <p className="flex gap-2 items-center mt-1 text-slate-600">
             <Building2 className="size-4" aria-hidden="true" /> {property.name}
           </p>
         </div>
         <div className="bg-background border border-(--pura-blue)/10 flex gap-3 items-center px-4 py-2 rounded-2xl shadow-sm">
           <Clock className="size-5 text-amber-500" aria-hidden="true" />
           <div>
-            <p className="font-semibold text-muted-foreground text-xs uppercase">
+            <p className="font-semibold text-slate-600 text-xs uppercase">
               Business Date
             </p>
             <p className="font-bold text-(--pura-blue) text-lg">
@@ -126,19 +126,17 @@ export default function NightAuditPage() {
           <CardContent className="pt-6">
             <div className="gap-6 grid grid-cols-2 mb-8 md:grid-cols-4">
               <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">Rooms Posted</p>
+                <p className="text-slate-600 text-sm">Rooms Posted</p>
                 <p className="font-bold text-2xl">{status?.roomsPosted || 0}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">
-                  Revenue Captured
-                </p>
+                <p className="text-slate-600 text-sm">Revenue Captured</p>
                 <p className="font-bold text-2xl text-green-600">
                   ฿{Number(status?.revenuePosted || 0).toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">Started At</p>
+                <p className="text-slate-600 text-sm">Started At</p>
                 <p className="font-medium text-sm">
                   {status?.startedAt
                     ? new Date(status.startedAt).toLocaleTimeString()
@@ -146,7 +144,7 @@ export default function NightAuditPage() {
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">Completed At</p>
+                <p className="text-slate-600 text-sm">Completed At</p>
                 <p className="font-medium text-sm">
                   {status?.completedAt
                     ? new Date(status.completedAt).toLocaleTimeString()
@@ -292,7 +290,7 @@ export default function NightAuditPage() {
                 ))}
               </ul>
             ) : (
-              <div className="italic p-8 text-center text-muted-foreground text-sm">
+              <div className="italic p-8 text-center text-slate-600 text-sm">
                 No reports generated yet for this run
               </div>
             )}

@@ -33,8 +33,8 @@ export function BottomNavigation() {
               className={cn(
                 TAB_CLASS,
                 isActive
-                  ? 'text-pura-blue'
-                  : 'text-slate-600 hover:text-pura-blue active:scale-95',
+                  ? 'text-[#1e4b8e]'
+                  : 'text-slate-600 hover:text-[#1e4b8e] active:scale-95',
               )}
               aria-label={item.name}
             >
@@ -64,8 +64,8 @@ export function BottomNavigation() {
               className={cn(
                 TAB_CLASS,
                 isMoreActive
-                  ? 'text-pura-blue'
-                  : 'text-slate-600 hover:text-pura-blue active:scale-95',
+                  ? 'text-[#1e4b8e]'
+                  : 'text-slate-600 hover:text-[#1e4b8e] active:scale-95',
               )}
             >
               <MoreHorizontal

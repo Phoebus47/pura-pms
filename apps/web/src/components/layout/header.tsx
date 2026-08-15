@@ -119,7 +119,7 @@ export function Header() {
                 <p className="font-semibold leading-tight text-foreground text-sm">
                   {userName}
                 </p>
-                <p className="font-medium text-[11px] text-muted-foreground">
+                <p className="font-medium text-[11px] text-slate-600">
                   {userRole}
                 </p>
               </div>
@@ -132,7 +132,7 @@ export function Header() {
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
                 <p className="font-semibold leading-none text-sm">{userName}</p>
-                <p className="leading-none text-muted-foreground text-xs">
+                <p className="leading-none text-slate-600 text-xs">
                   {userEmail}
                 </p>
               </div>

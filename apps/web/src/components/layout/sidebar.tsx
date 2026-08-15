@@ -39,8 +39,8 @@ export function Sidebar() {
                 className={cn(
                   'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-white/95 text-pura-blue shadow-xl shadow-black/20 backdrop-blur-xl'
-                    : 'text-white/90 hover:bg-white/15 hover:text-white hover:shadow-lg hover:shadow-white/10 active:scale-95 backdrop-blur-sm',
+                    ? 'bg-white/95 text-[#1e4b8e] shadow-xl shadow-black/20 backdrop-blur-xl'
+                    : 'text-white hover:bg-white/15 hover:text-white hover:shadow-lg hover:shadow-white/10 active:scale-95 backdrop-blur-sm',
                 )}
               >
                 <item.icon
@@ -63,8 +63,8 @@ export function Sidebar() {
 
         <div className="border-t border-white/20 p-4">
           <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-4 rounded-2xl shadow-lg text-center">
-            <p className="font-semibold text-white/90 text-xs">PURA PMS</p>
-            <p className="mt-1 text-[10px] text-white/60">
+            <p className="font-semibold text-white text-xs">PURA PMS</p>
+            <p className="mt-1 text-[10px] text-white/80">
               v1.0.0 • Enterprise
             </p>
           </div>
