@@ -18,9 +18,7 @@ export function DailyRevenueTable({
   totalRevenue,
 }: DailyRevenueTableProps) {
   if (groups.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.empty')}</p>
-    );
+    return <p className="text-slate-600 text-sm">{t('reports.empty')}</p>;
   }
 
   return (

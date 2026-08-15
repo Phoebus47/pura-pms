@@ -16,9 +16,7 @@ export function CardPreauthsClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('preauth.title')}
         </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t('preauth.subtitle')}
-        </p>
+        <p className="mt-1 text-slate-600 text-sm">{t('preauth.subtitle')}</p>
       </header>
       <Card>
         <CardHeader>

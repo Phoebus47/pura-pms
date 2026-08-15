@@ -28,14 +28,10 @@ export function TrialBalancePanel({
   );
 
   if (loading) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.loading')}</p>
-    );
+    return <p className="text-slate-600 text-sm">{t('reports.loading')}</p>;
   }
   if (!report || report.rows.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.tbEmpty')}</p>
-    );
+    return <p className="text-slate-600 text-sm">{t('reports.tbEmpty')}</p>;
   }
 
   return (
@@ -84,7 +80,7 @@ export function TrialBalancePanel({
             {t('reports.tbDrilldown')}: {selectedCode}
           </h3>
           {drillLines.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-slate-600 text-sm">
               {t('reports.journalsEmpty')}
             </p>
           ) : (
