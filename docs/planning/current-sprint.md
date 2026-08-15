@@ -1,51 +1,38 @@
-# Current Sprint — Phase 4 Room Move Mid-stay
+# Current Sprint — Phase 4 No-show (usable slice)
 
-**Theme:** Move a checked-in guest to another room without rewriting folio money  
-**Goal:** Front desk can move a `CHECKED_IN` stay to a vacant room on the same property, flip housekeeping status, record history, and flag key-card reissue. Folio stays on the reservation (no posted-row edits).  
-**Branch:** `cursor/feat-room-move-6a5d`  
+**Theme:** Charge a confirmed arrival that never checked in  
+**Goal:** Front desk can mark no-show; Night Audit auto-marks leftover confirmed arrivals and posts one night of room rate. Folio money stays append-only.  
+**Branch:** `cursor/feat-no-show-6a5d`  
 **Base:** `dev`  
-**Source:** `docs/planning/prd.md` § Room Move Process + §12  
-**Depends on:** Day-use (#33) and Split Stay (#39) — both shipped. Do not reopen them. Do not mix other Phase 4 epics.
+**Source:** `docs/planning/prd.md` § No-show & Cancellation Policy + §12  
+**Depends on:** Folio posting + Night Audit. Do not reopen Room Move, Day-use, or Split Stay.
 
 ## Working agreements
 
-- **One epic, one PR.** Conventional Commits (`feat(reservations): …`). Tests co-located. No `any`, no `console.log`. Prisma **^6.19.2**.
-- Additive `RoomMove` only. Do not mutate `FolioTransaction` rows. Updating `reservation.roomId` is the folio transfer.
-- Key card is a boolean trigger (`keyCardReissued`). No encoder / hardware (Phase 5).
-- Housekeeping uses `Room.status` only (same as check-in/out). No `HousekeepingTask` in this PR.
-- Split-stay automatic room change at the split date stays later.
-- No hardcoded UI copy. New strings in `apps/web/src/messages/en.json` + `th.json` via `t()`.
+- **One epic, one PR.** Conventional Commits (`feat(reservations): …` / `feat(night-audit): …` only if NA hook lives in the same PR). Prisma **^6.19.2**.
+- **Usable first.** One-night `roomRate` charge. No `CancellationPolicy` model. No late-cancel timeline. No waitlist.
+- Seed trx code **`1006` No-Show Charge** (`ROOM` / `CHARGE`). Do not change Night Audit’s room-charge lookup.
+- Night Audit still posts room revenue only for `CHECKED_IN`. `NO_SHOW` is already excluded from occupancy conflicts.
+- No hardcoded UI copy. New strings in `en.json` + `th.json` via `t()`. New UI uses design tokens (no new hex).
+- Tests with the change. Do not mutate posted `FolioTransaction` rows.
 
 ## Invariants
 
-| Rule    | Constraint                                                                                                                                      |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status  | Only `CHECKED_IN` reservations can move. Else 400.                                                                                              |
-| Target  | `toRoomId !== fromRoomId`. Same `propertyId`. Else 400.                                                                                         |
-| Vacancy | Reject `OUT_OF_ORDER`, `OUT_OF_SERVICE`, `OCCUPIED_*`. Allow `VACANT_CLEAN` and `VACANT_DIRTY`.                                                 |
-| Dates   | Reuse reservation availability with `excludeReservationId`. Window = current stay covering now, else stay matching `roomId`, else header dates. |
-| Rooms   | Old room → `VACANT_DIRTY`. New room → `OCCUPIED_CLEAN` or `OCCUPIED_DIRTY` if it was vacant dirty.                                              |
-| Stay    | If a current `ReservationStay` exists, update that stay’s `roomId` + `roomTypeId` only.                                                         |
-| History | Insert `RoomMove` with `folioTransferred=true` and `keyCardReissued=true`.                                                                      |
-| Money   | Do not rewrite or delete folio transactions.                                                                                                    |
-
-## Already done (do not redo)
-
-- [x] Check-in / check-out room status flips
-- [x] Folio on reservation (not room)
-- [x] Split Stay segments (`ReservationStay`)
-- [x] Labeled `EntitySelect` + `t()` i18n helper
-
-## This PR
-
-1. **DB** `RoomMove` + relations + migration + generate (Prisma 6).
-2. **API** `POST /reservations/:id/room-move` (201) and `GET /reservations/:id/room-moves`.
-3. **Web** `RoomMovePanel` on reservation detail when `CHECKED_IN`; mock router; i18n.
-4. **Docs** PRD §12, roadmap, this sprint. Leave Phase 3 wait items alone.
+| Rule        | Constraint                                                                                                                                    |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status      | Only `CONFIRMED` can become `NO_SHOW`. Else 400.                                                                                              |
+| Arrival     | `checkIn` calendar date must be ≤ as-of date (property `businessDate` or Night Audit date). Else 400.                                         |
+| Amount      | One night: `Number(roomRate)`. Day-use uses the same header rate.                                                                             |
+| Folio       | Create a guest folio if none exists (same as check-in). Post window 1.                                                                        |
+| Code        | Trx code `1006`. Idempotent: skip post if a non-void `1006` already exists on the reservation. Then set status.                               |
+| Actor       | Manual `userId` from the cashier. Night Audit uses `userId: 'SYSTEM'` (no open shift required).                                               |
+| Night Audit | Before room posting, mark `CONFIRMED` arrivals with `checkIn ≤ businessDate`. Per-reservation errors are recorded; do not fail the whole run. |
+| Money       | Append-only post. Never rewrite folio rows.                                                                                                   |
 
 ## Out of scope
 
-- Automatic split-stay room change at the split date
-- VIP lock, walk, no-show, complimentary, extended stay, tax exemption
-- Key encoder / hardware bridge
-- AP, RD e-Tax, card gateway, P&L / bank rec
+- `CancellationPolicy` model and rate-code linkage
+- Late cancellation fee tiers
+- Auto-charge from deposit ledger
+- Waitlist notify / walk / complimentary / tax exemption
+- Rewriting reservation detail hardcoded English

@@ -424,6 +424,38 @@ describe('Mock API Router', () => {
       ).rejects.toThrow(APIError);
     });
 
+    it('should mark a confirmed past arrival as no-show', async () => {
+      mockDb.reservations[1].checkIn = new Date(
+        Date.now() - 86400000,
+      ).toISOString();
+      const response: any = await routeMockRequest(
+        `/reservations/res_mock_2/no-show`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ userId: 'usr_mock_1' }),
+        },
+      );
+      expect(response.status).toBe('NO_SHOW');
+    });
+
+    it('should reject no-show before the arrival date', async () => {
+      await expect(
+        routeMockRequest(`/reservations/res_mock_2/no-show`, {
+          method: 'POST',
+          body: JSON.stringify({ userId: 'usr_mock_1' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('should reject no-show when the reservation is not confirmed', async () => {
+      await expect(
+        routeMockRequest(`/reservations/res_mock_1/no-show`, {
+          method: 'POST',
+          body: JSON.stringify({ userId: 'usr_mock_1' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
     it('should delete a reservation', async () => {
       const resId = mockDb.reservations[0].id;
       const response: any = await routeMockRequest(`/reservations/${resId}`, {

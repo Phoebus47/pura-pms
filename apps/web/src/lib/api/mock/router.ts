@@ -1697,6 +1697,85 @@ const BLOCKED_MOVE_STATUSES = new Set([
   'OCCUPIED_DIRTY',
 ]);
 
+function calendarDate(value: string | Date): string {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
+function hasNoShowCharge(reservationId: string, trxCodeId: string): boolean {
+  const folio = mockDb.folios.find(
+    (row: any) => row.reservationId === reservationId,
+  );
+  if (!folio) return false;
+  const windowIds = new Set(
+    mockDb.folioWindows
+      .filter((window: any) => window.folioId === folio.id)
+      .map((window: any) => window.id),
+  );
+  return mockDb.folioTransactions.some(
+    (txn: any) =>
+      txn.trxCodeId === trxCodeId && !txn.isVoid && windowIds.has(txn.windowId),
+  );
+}
+
+function postMockNoShowCharge(reservation: any, body: any) {
+  const trxCode = mockDb.transactionCodes.find((c: any) => c.code === '1006');
+  const folio = mockDb.folios.find(
+    (row: any) => row.reservationId === reservation.id,
+  );
+  if (!trxCode || !folio || hasNoShowCharge(reservation.id, trxCode.id)) {
+    return;
+  }
+  const window = mockDb.folioWindows.find(
+    (row: any) => row.folioId === folio.id && row.windowNumber === 1,
+  );
+  if (!window) return;
+  const amount = Number(reservation.roomRate) || 0;
+  mockDb.folioTransactions.push({
+    id: `ft_noshow_${Date.now()}`,
+    windowId: window.id,
+    trxCodeId: trxCode.id,
+    amountNet: amount,
+    amountService: 0,
+    amountTax: 0,
+    amountTotal: amount,
+    sign: 1,
+    reference: `No-show ${reservation.confirmNumber}`,
+    remark: body?.reason,
+    userId: body?.userId || 'usr_mock_1',
+    createdAt: new Date().toISOString(),
+    isVoid: false,
+  });
+}
+
+function applyNoShow(reservationId: string, body: any) {
+  const idx = mockDb.reservations.findIndex((r: any) => r.id === reservationId);
+  if (idx === -1) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+
+  const reservation = mockDb.reservations[idx];
+  if (reservation.status !== 'CONFIRMED') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Only confirmed reservations can be marked no-show',
+    });
+  }
+
+  const asOf = body?.businessDate ? new Date(body.businessDate) : new Date();
+  if (calendarDate(reservation.checkIn) > calendarDate(asOf)) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Cannot mark no-show before the arrival date',
+    });
+  }
+
+  reservation.status = 'NO_SHOW';
+  if (body?.reason) {
+    reservation.notes =
+      `${reservation.notes || ''}\nNo-show: ${body.reason}`.trim();
+  }
+  postMockNoShowCharge(reservation, body);
+  return reservation;
+}
+
 function applyRoomMove(reservationId: string, body: any) {
   const idx = mockDb.reservations.findIndex((r: any) => r.id === reservationId);
   if (idx === -1) {
@@ -1832,6 +1911,10 @@ function handleReservationsPost(path: string, body: any) {
   match = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-move$/.exec(path);
   if (match) {
     return applyRoomMove(match[1], body);
+  }
+  match = /^\/reservations\/([a-zA-Z0-9_-]+)\/no-show$/.exec(path);
+  if (match) {
+    return applyNoShow(match[1], body);
   }
 }
 

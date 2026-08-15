@@ -30,6 +30,10 @@ vi.mock('@/components/room-move-panel', () => ({
   RoomMovePanel: () => <div data-testid="room-move-panel" />,
 }));
 
+vi.mock('@/components/reservation-no-show-button', () => ({
+  ReservationNoShowButton: () => <div data-testid="no-show-button" />,
+}));
+
 describe('ReservationDetailPage', () => {
   const mockReservation = {
     id: 'res-1',

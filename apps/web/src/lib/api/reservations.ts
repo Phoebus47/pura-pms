@@ -88,6 +88,12 @@ export interface MoveRoomDto {
   movedBy: string;
 }
 
+export interface MarkNoShowDto {
+  userId: string;
+  reason?: string;
+  businessDate?: string;
+}
+
 export interface CreateReservationDto {
   checkIn: string;
   checkOut: string;
@@ -186,6 +192,10 @@ export const reservationsAPI = {
 
   async listRoomMoves(id: string): Promise<RoomMove[]> {
     return apiClient.get<RoomMove[]>(`/reservations/${id}/room-moves`);
+  },
+
+  async markNoShow(id: string, data: MarkNoShowDto): Promise<Reservation> {
+    return apiClient.post<Reservation>(`/reservations/${id}/no-show`, data);
   },
 
   async delete(id: string): Promise<void> {

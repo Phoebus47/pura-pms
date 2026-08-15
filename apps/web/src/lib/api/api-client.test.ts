@@ -273,6 +273,13 @@ describe('API Client Wrappers', () => {
       expect(apiClient.get).toHaveBeenCalledWith('/reservations/r1/room-moves');
     });
 
+    it('markNoShow calls post', async () => {
+      await reservationsAPI.markNoShow('r1', { userId: 'usr_mock_1' });
+      expect(apiClient.post).toHaveBeenCalledWith('/reservations/r1/no-show', {
+        userId: 'usr_mock_1',
+      });
+    });
+
     it('cancel calls patch with reason', async () => {
       await reservationsAPI.cancel('r1', 'reason');
       expect(apiClient.patch).toHaveBeenCalledWith('/reservations/r1/cancel', {
