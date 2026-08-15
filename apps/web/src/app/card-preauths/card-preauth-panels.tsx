@@ -6,6 +6,11 @@ import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useQuery } from '@tanstack/react-query';
+import { EntitySelect } from '@/components/shared/entity-select';
+import { useOpenFolios } from '@/hooks/use-folios';
+import { folioOptionLabel, reservationOptionLabel } from '@/lib/entity-labels';
+import { reservationsAPI } from '@/lib/api/reservations';
 import {
   useCaptureCardPreauth,
   useCreateCardPreauth,
@@ -22,6 +27,10 @@ interface HoldFormProps {
 
 export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
   const createMutation = useCreateCardPreauth();
+  const { data: reservations = [] } = useQuery({
+    queryKey: ['reservations'],
+    queryFn: () => reservationsAPI.getAll(),
+  });
   const [reservationId, setReservationId] = useState('');
   const [amount, setAmount] = useState('');
   const [last4, setLast4] = useState('');
@@ -58,19 +67,18 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
         void handleSubmit();
       }}
     >
-      <div className="space-y-2">
-        <Label htmlFor="preauthReservationId">
-          {t('preauth.reservationId')}
-        </Label>
-        <Input
-          id="preauthReservationId"
-          name="reservationId"
-          className={fieldClass}
-          value={reservationId}
-          onChange={(event) => setReservationId(event.target.value)}
-          required
-        />
-      </div>
+      <EntitySelect
+        id="preauthReservationId"
+        name="reservationId"
+        label={t('preauth.reservationId')}
+        value={reservationId}
+        onChange={setReservationId}
+        options={reservations.map((reservation) => ({
+          value: reservation.id,
+          label: reservationOptionLabel(reservation),
+        }))}
+        required
+      />
       <div className="space-y-2">
         <Label htmlFor="preauthAmount">{t('preauth.amount')}</Label>
         <Input
@@ -149,12 +157,14 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
 interface ListProps {
   readonly holds: CardPreauth[];
   readonly userId: string;
+  readonly propertyId?: string;
 }
 
-export function CardPreauthList({ holds, userId }: ListProps) {
+export function CardPreauthList({ holds, userId, propertyId }: ListProps) {
   const incrementMutation = useIncrementCardPreauth();
   const captureMutation = useCaptureCardPreauth();
   const releaseMutation = useReleaseCardPreauth();
+  const { data: folios = [] } = useOpenFolios(propertyId);
   const [amountById, setAmountById] = useState<Record<string, string>>({});
   const [folioById, setFolioById] = useState<Record<string, string>>({});
 
@@ -212,18 +222,22 @@ export function CardPreauthList({ holds, userId }: ListProps) {
                 >
                   {t('preauth.increment')}
                 </Button>
-                <Input
+                <EntitySelect
                   id={`folio-${hold.id}`}
                   name={`folio-${hold.id}`}
-                  className="min-h-11"
-                  aria-label={t('preauth.folioId')}
+                  label={t('preauth.folioId')}
                   value={folioById[hold.id] ?? ''}
-                  onChange={(event) =>
+                  onChange={(value) =>
                     setFolioById((current) => ({
                       ...current,
-                      [hold.id]: event.target.value,
+                      [hold.id]: value,
                     }))
                   }
+                  options={folios.map((folio) => ({
+                    value: folio.id,
+                    label: folioOptionLabel(folio),
+                  }))}
+                  required
                 />
                 <Button
                   type="button"

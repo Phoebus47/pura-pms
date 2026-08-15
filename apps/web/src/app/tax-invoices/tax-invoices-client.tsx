@@ -33,7 +33,7 @@ export function TaxInvoicesClient() {
           <CardTitle>{t('taxInvoice.issue')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <IssueTaxInvoiceForm issuedBy={userId} />
+          <IssueTaxInvoiceForm issuedBy={userId} propertyId={propertyId} />
         </CardContent>
       </Card>
 

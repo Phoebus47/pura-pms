@@ -65,6 +65,9 @@ describe('BottomNavigation', () => {
       screen.getByRole('menuitem', { name: /Shifts/ }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole('menuitem', { name: /Night Audit/ }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole('menuitem', { name: /Reports/ }),
     ).toBeInTheDocument();
     expect(

@@ -24,11 +24,11 @@ import {
   Building2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { t } from '@/lib/i18n';
 
 export default function NightAuditPage() {
   const queryClient = useQueryClient();
 
-  // 1. Get Property (assuming first one for now)
   const { data: properties } = useQuery({
     queryKey: ['properties'],
     queryFn: () => propertiesAPI.getAll(),
@@ -38,7 +38,6 @@ export default function NightAuditPage() {
   const propertyId = property?.id;
   const businessDate = property?.businessDate;
 
-  // 2. Get Audit Status
   const { data: status } = useQuery<NightAuditStatus>({
     queryKey: ['night-audit-status', propertyId, businessDate],
     queryFn: () =>
@@ -50,21 +49,20 @@ export default function NightAuditPage() {
     },
   });
 
-  // 3. Trigger Audit Mutation
   const startMutation = useMutation({
     mutationFn: () =>
       nightAuditAPI.start(propertyId as string, businessDate as string),
     onSuccess: () => {
-      toast.success('Night Audit started successfully');
+      toast.success(t('nightAudit.startSuccess'));
       queryClient.invalidateQueries({ queryKey: ['night-audit-status'] });
     },
     onError: (error: Error) => {
-      toast.error(`Failed to start Night Audit: ${error.message}`);
+      toast.error(`${t('nightAudit.startFailed')}: ${error.message}`);
     },
   });
 
   if (!property) {
-    return <div className="p-8">Loading property settings...</div>;
+    return <div className="p-8">{t('nightAudit.loading')}</div>;
   }
 
   const isCompleted = status?.status === 'COMPLETED';
@@ -77,12 +75,16 @@ export default function NightAuditPage() {
   else if (isInProgress) badgeVariant = 'secondary';
   else if (isFailed) badgeVariant = 'destructive';
 
+  const businessDateLabel = new Date(
+    property.businessDate,
+  ).toLocaleDateString();
+
   return (
     <div className="container max-w-4xl mx-auto p-6">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-bold text-(--pura-blue) text-3xl tracking-tight">
-            Night Audit
+            {t('nightAudit.title')}
           </h1>
           <p className="flex gap-2 items-center mt-1 text-slate-600">
             <Building2 className="size-4" aria-hidden="true" /> {property.name}
@@ -92,27 +94,25 @@ export default function NightAuditPage() {
           <Clock className="size-5 text-amber-500" aria-hidden="true" />
           <div>
             <p className="font-semibold text-slate-600 text-xs uppercase">
-              Business Date
+              {t('nightAudit.businessDate')}
             </p>
             <p className="font-bold text-(--pura-blue) text-lg">
-              {new Date(property.businessDate).toLocaleDateString()}
+              {businessDateLabel}
             </p>
           </div>
         </div>
       </div>
 
       <div className="gap-6 grid md:grid-cols-2">
-        {/* Main Status Card */}
         <Card className="border-(--pura-blue)/5 border-2 md:col-span-2 overflow-hidden rounded-3xl shadow-xl">
           <CardHeader className="bg-(--pura-blue)/5 border-(--pura-blue)/10 border-b">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-(--pura-blue)">
-                  Current Run Status
+                  {t('nightAudit.currentStatus')}
                 </CardTitle>
                 <CardDescription>
-                  Tracking the process for{' '}
-                  {new Date(property.businessDate).toLocaleDateString()}
+                  {t('nightAudit.tracking')} {businessDateLabel}
                 </CardDescription>
               </div>
               <Badge
@@ -126,17 +126,23 @@ export default function NightAuditPage() {
           <CardContent className="pt-6">
             <div className="gap-6 grid grid-cols-2 mb-8 md:grid-cols-4">
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">Rooms Posted</p>
+                <p className="text-slate-600 text-sm">
+                  {t('nightAudit.roomsPosted')}
+                </p>
                 <p className="font-bold text-2xl">{status?.roomsPosted || 0}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">Revenue Captured</p>
+                <p className="text-slate-600 text-sm">
+                  {t('nightAudit.revenueCaptured')}
+                </p>
                 <p className="font-bold text-2xl text-green-600">
                   ฿{Number(status?.revenuePosted || 0).toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">Started At</p>
+                <p className="text-slate-600 text-sm">
+                  {t('nightAudit.startedAt')}
+                </p>
                 <p className="font-medium text-sm">
                   {status?.startedAt
                     ? new Date(status.startedAt).toLocaleTimeString()
@@ -144,7 +150,9 @@ export default function NightAuditPage() {
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">Completed At</p>
+                <p className="text-slate-600 text-sm">
+                  {t('nightAudit.completedAt')}
+                </p>
                 <p className="font-medium text-sm">
                   {status?.completedAt
                     ? new Date(status.completedAt).toLocaleTimeString()
@@ -158,7 +166,7 @@ export default function NightAuditPage() {
                 <div className="flex justify-between mb-1 text-sm">
                   <span className="flex font-medium gap-2 items-center">
                     <RefreshCcw className="animate-spin size-4 text-(--pura-blue)" />
-                    Processing...
+                    {t('nightAudit.processing')}
                   </span>
                 </div>
                 <div className="bg-slate-100 h-2.5 overflow-hidden rounded-full w-full">
@@ -175,10 +183,10 @@ export default function NightAuditPage() {
                 <CheckCircle2 className="mt-0.5 size-5 text-green-600" />
                 <div>
                   <p className="font-bold text-green-800">
-                    Night Audit Completed Successfully
+                    {t('nightAudit.completedTitle')}
                   </p>
                   <p className="text-green-700 text-sm">
-                    The business date has been rolled and reports are archived.
+                    {t('nightAudit.completedBody')}
                   </p>
                 </div>
               </div>
@@ -188,9 +196,11 @@ export default function NightAuditPage() {
               <div className="bg-red-50 border border-red-200 flex gap-3 items-start mb-6 p-4 rounded-2xl">
                 <AlertCircle className="mt-0.5 size-5 text-red-600" />
                 <div>
-                  <p className="font-bold text-red-800">Night Audit Failed</p>
+                  <p className="font-bold text-red-800">
+                    {t('nightAudit.failedTitle')}
+                  </p>
                   <p className="text-red-700 text-sm">
-                    Please review the errors below and try again.
+                    {t('nightAudit.failedBody')}
                   </p>
                 </div>
               </div>
@@ -205,7 +215,9 @@ export default function NightAuditPage() {
                 disabled={startMutation.isPending}
               >
                 <Play className="fill-current size-5" />
-                {startMutation.isPending ? 'Starting...' : 'Run Night Audit'}
+                {startMutation.isPending
+                  ? t('nightAudit.starting')
+                  : t('nightAudit.run')}
               </Button>
             )}
             {isInProgress && (
@@ -214,7 +226,8 @@ export default function NightAuditPage() {
                 disabled
                 className="gap-2 h-14 opacity-70 px-12 rounded-2xl"
               >
-                <RefreshCcw className="animate-spin size-5" /> Audit in Progress
+                <RefreshCcw className="animate-spin size-5" />{' '}
+                {t('nightAudit.inProgress')}
               </Button>
             )}
             {isCompleted && (
@@ -224,18 +237,18 @@ export default function NightAuditPage() {
                 disabled
                 className="border-green-500 gap-2 h-14 px-12 rounded-2xl text-green-600"
               >
-                <CheckCircle2 className="size-5" /> Completed for Today
+                <CheckCircle2 className="size-5" />{' '}
+                {t('nightAudit.completedToday')}
               </Button>
             )}
           </CardFooter>
         </Card>
 
-        {/* Errors Section */}
         {status?.errors && status.errors.length > 0 && (
           <Card className="border-red-100 overflow-hidden rounded-3xl shadow-lg">
             <CardHeader className="bg-red-50/50">
               <CardTitle className="flex gap-2 items-center text-red-800">
-                <AlertCircle className="size-5" /> Audit Errors
+                <AlertCircle className="size-5" /> {t('nightAudit.errors')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -258,11 +271,10 @@ export default function NightAuditPage() {
           </Card>
         )}
 
-        {/* Reports Section */}
         <Card className="border-(--pura-blue)/5 overflow-hidden rounded-3xl shadow-lg">
           <CardHeader className="bg-(--pura-blue)/5">
             <CardTitle className="flex gap-2 items-center text-(--pura-blue)">
-              <FileText className="size-5" /> Archived Reports
+              <FileText className="size-5" /> {t('nightAudit.reports')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -284,14 +296,14 @@ export default function NightAuditPage() {
                       size="sm"
                       className="rounded-lg text-(--pura-blue)"
                     >
-                      View
+                      {t('nightAudit.view')}
                     </Button>
                   </li>
                 ))}
               </ul>
             ) : (
               <div className="italic p-8 text-center text-slate-600 text-sm">
-                No reports generated yet for this run
+                {t('nightAudit.noReports')}
               </div>
             )}
           </CardContent>
