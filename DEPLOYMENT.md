@@ -25,9 +25,10 @@ NODE_ENV=production
 
 ```bash
 # Database Connection (Supabase PostgreSQL)
-# Recommended on Render: use Supabase Pooler (PgBouncer) URL when available.
-# Example (transaction pooler): postgresql://...@aws-0-...pooler.supabase.com:6543/postgres?pgbouncer=true
-DATABASE_URL=postgresql://user:password@host:6543/database?pgbouncer=true
+# Recommended on Render: IPv4 Session pooler (port 5432). Copy the host from
+# Supabase Dashboard → Connect; after pause/restore it may change aws-0 → aws-1.
+# Example: postgresql://postgres.PROJECT_REF:PASSWORD@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
 
 # JWT Secret - ใช้สำหรับ sign/verify JWT tokens (ต้องเป็น random string ที่แข็งแรง)
 # สร้างด้วย: openssl rand -base64 32
@@ -58,7 +59,7 @@ Supabase Free pauses a project after about **7 days without database queries**.
 Render Free web services **sleep after ~15 minutes idle** (cold start on the next request).
 Neither requires a paid upgrade if you:
 
-1. Keep `DATABASE_URL` on **Supabase** (Session pooler, Singapore / `ap-southeast-1`).
+1. Keep `DATABASE_URL` on **Supabase** (Session pooler, Mumbai / `ap-south-1`).
    Do **not** use Render Postgres Free as the long-term DB — it expires after 30 days.
 2. Keep Redis on **Render Key Value Free** (`REDIS_HOST` / `REDIS_PORT`).
 3. Keep the API on **Render Web Service Free**.
@@ -71,12 +72,18 @@ Optional repo variable `API_HEALTH_URL` overrides the default
 Recommended `DATABASE_URL` for Render (IPv4 Session pooler):
 
 ```bash
-# Replace PASSWORD. Project ref comes from the Supabase dashboard URL.
-DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+# Copy host + user from Supabase Dashboard → Connect → Session pooler.
+# Current production project is ap-south-1 (Mumbai). Direct db.* is IPv6-only.
+DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
-Direct `db.PROJECT_REF.supabase.co:5432` also works if the password is set, but
-the Session pooler is more reliable from Render.
+Do not reuse an old `aws-0-...pooler.supabase.com` URL after the project is
+resumed — Supavisor may register the tenant on `aws-1-...` instead.
+Direct `db.PROJECT_REF.supabase.co:5432` is IPv6-only and fails from many
+IPv4-only hosts (including this Render region).
+
+Production project: **Pura's Project** (`afixfypdlmqlletyljmv`). Redis stays on
+Render Key Value Free.
 
 ## Deployment Steps
 
@@ -113,6 +120,11 @@ the Session pooler is more reliable from Render.
 
 ### 3. Database Setup (Supabase)
 
+API ใช้ role แยก (`pura_api`) ไม่ใช่ `postgres` แต่ `prisma migrate deploy`
+ต้องรันด้วย **owner ของตาราง** (`postgres`) เพราะ `ALTER TABLE` ต้องมีสิทธิ์ owner
+หลังสร้างตารางใหม่ให้ `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pura_api`
+(ถ้า `ALTER DEFAULT PRIVILEGES` ถูกตั้งไว้แล้วจะได้สิทธิ์อัตโนมัติ)
+
 1. **สร้าง PostgreSQL Database บน Supabase**
 2. **Copy Connection String** → ใส่ใน `DATABASE_URL` ของ Render
 3. **Run Migration**:
@@ -144,9 +156,10 @@ the Session pooler is more reliable from Render.
 
 - ตรวจสอบ `DATABASE_URL` ว่าถูกต้อง (โปรเจกต์เดียวกับใน Supabase Dashboard)
 - ตรวจสอบว่า Supabase database เปิดให้เชื่อมต่อจากภายนอกได้
-- `FATAL: tenant/user postgres.<ref> not found` แปลว่าโปรเจกต์ **pause** หรือ **ref ผิด**
-  ไม่ใช่บั๊ก start command — Resume ที่ Supabase แล้วรอจนสถานะ Healthy
-- หลัง Resume ให้ API มี retry ตอนบูต; ถ้ายังล้ม ให้ redeploy บน Render
+- `FATAL: tenant/user postgres.<ref> not found` แปลว่าโปรเจกต์ **pause**, **ref ผิด**,
+  หรือ **pooler host เก่า** (`aws-0` หลัง restore ที่ย้ายไป `aws-1`)
+  ไม่ใช่บั๊ก start command — Resume ที่ Supabase แล้วคัด Session pooler URL ใหม่จาก Dashboard
+- หลัง Resume ให้ API มี retry ตอนบูต; ถ้ายังล้ม ให้อัปเดต `DATABASE_URL` แล้ว redeploy บน Render
 
 ### Build Error
 
