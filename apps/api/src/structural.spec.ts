@@ -213,7 +213,7 @@ describe('Structural Tests', () => {
     it('should explicitly instantiate all controllers', () => {
       const mockService = {} as never;
 
-      expect(new AppController(mockService)).toBeDefined();
+      expect(new AppController(mockService, mockService)).toBeDefined();
       expect(new AuthController(mockService)).toBeDefined();
       expect(new GuestsController(mockService)).toBeDefined();
       expect(new PropertiesController(mockService)).toBeDefined();
@@ -316,7 +316,10 @@ describe('Structural Tests', () => {
     });
 
     it('should instantiate controller with undefined service argument', () => {
-      const controller = new AppController(undefined as unknown as never);
+      const controller = new AppController(
+        undefined as unknown as never,
+        undefined as unknown as never,
+      );
       expect(controller).toBeDefined();
     });
   });
