@@ -95,6 +95,11 @@ Render Postgres Free long-term (30-day expiry).
 
 ### 3. Database Setup (Supabase)
 
+API ใช้ role แยก (`pura_api`) ไม่ใช่ `postgres` แต่ `prisma migrate deploy`
+ต้องรันด้วย **owner ของตาราง** (`postgres`) เพราะ `ALTER TABLE` ต้องมีสิทธิ์ owner
+หลังสร้างตารางใหม่ให้ `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pura_api`
+(ถ้า `ALTER DEFAULT PRIVILEGES` ถูกตั้งไว้แล้วจะได้สิทธิ์อัตโนมัติ)
+
 1. **สร้าง PostgreSQL Database บน Supabase**
 2. **Copy Connection String** → ใส่ใน `DATABASE_URL` ของ Render
 3. **Run Migration**:
