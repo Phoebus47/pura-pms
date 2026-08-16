@@ -1,0 +1,31 @@
+name: Keep free-tier services alive
+
+on:
+  schedule:
+    # Twice a day is enough to prevent Supabase free-plan pause (7 days).
+    # Render free web services still sleep after idle; this ping also wakes them.
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-api:
+    name: Ping API health
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: GET /health until the free instance is awake
+        env:
+          API_HEALTH_URL: ${{ vars.API_HEALTH_URL }}
+        run: |
+          url="${API_HEALTH_URL:-https://pura-pms-api.onrender.com/health}"
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS --max-time 120 "$url"; then
+              echo
+              echo "health ok on attempt ${attempt}"
+              exit 0
+            fi
+            echo "attempt ${attempt} failed; waiting for Render cold start"
+            sleep 20
+          done
+          echo "health check failed after retries"
+          exit 1
