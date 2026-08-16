@@ -45,7 +45,7 @@ CORS_ORIGIN=https://your-app.vercel.app,https://your-preview.vercel.app
 # Node Environment
 NODE_ENV=production
 
-# Redis (BullMQ / Night Audit) — Render Key Value on the same private network
+# Redis (BullMQ / Night Audit) — Render Key Value free instance on the same region
 REDIS_HOST=red-xxxxxxxxxxxxxxxxxxxx
 REDIS_PORT=6379
 
@@ -53,12 +53,37 @@ REDIS_PORT=6379
 SENTRY_DSN=your-sentry-dsn-here
 ```
 
-Production API (`pura-pms-api`) uses **Pura's Project** (`afixfypdlmqlletyljmv`,
-region `ap-south-1` / Mumbai). Direct `db.<ref>.supabase.co` is IPv6-only;
-Render must use the IPv4 Session pooler host from Dashboard → Connect
-(currently `aws-1-ap-south-1.pooler.supabase.com`, not `aws-0-...`).
-Redis stays on Render Key Value Free. Do not point `DATABASE_URL` at
-Render Postgres Free long-term (30-day expiry).
+### Free-tier keep-alive (no paid plans)
+
+Supabase Free pauses a project after about **7 days without database queries**.
+Render Free web services **sleep after ~15 minutes idle** (cold start on the next request).
+Neither requires a paid upgrade if you:
+
+1. Keep `DATABASE_URL` on **Supabase** (Session pooler, Mumbai / `ap-south-1`).
+   Do **not** use Render Postgres Free as the long-term DB — it expires after 30 days.
+2. Keep Redis on **Render Key Value Free** (`REDIS_HOST` / `REDIS_PORT`).
+3. Keep the API on **Render Web Service Free**.
+4. Leave GitHub Action `Keep free-tier services alive` enabled on `main`.
+   It `GET`s `/health` twice a day so Supabase sees real SQL (`SELECT 1`) and Render wakes.
+
+Optional repo variable `API_HEALTH_URL` overrides the default
+`https://pura-pms-api.onrender.com/health`.
+
+Recommended `DATABASE_URL` for Render (IPv4 Session pooler):
+
+```bash
+# Copy host + user from Supabase Dashboard → Connect → Session pooler.
+# Current production project is ap-south-1 (Mumbai). Direct db.* is IPv6-only.
+DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
+```
+
+Do not reuse an old `aws-0-...pooler.supabase.com` URL after the project is
+resumed — Supavisor may register the tenant on `aws-1-...` instead.
+Direct `db.PROJECT_REF.supabase.co:5432` is IPv6-only and fails from many
+IPv4-only hosts (including this Render region).
+
+Production project: **Pura's Project** (`afixfypdlmqlletyljmv`). Redis stays on
+Render Key Value Free.
 
 ## Deployment Steps
 
