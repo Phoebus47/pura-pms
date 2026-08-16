@@ -44,9 +44,39 @@ CORS_ORIGIN=https://your-app.vercel.app,https://your-preview.vercel.app
 # Node Environment
 NODE_ENV=production
 
+# Redis (BullMQ / Night Audit) — Render Key Value free instance on the same region
+REDIS_HOST=red-xxxxxxxxxxxxxxxxxxxx
+REDIS_PORT=6379
+
 # Sentry Error Tracking (Optional - Server-side)
 SENTRY_DSN=your-sentry-dsn-here
 ```
+
+### Free-tier keep-alive (no paid plans)
+
+Supabase Free pauses a project after about **7 days without database queries**.
+Render Free web services **sleep after ~15 minutes idle** (cold start on the next request).
+Neither requires a paid upgrade if you:
+
+1. Keep `DATABASE_URL` on **Supabase** (Session pooler, Singapore / `ap-southeast-1`).
+   Do **not** use Render Postgres Free as the long-term DB — it expires after 30 days.
+2. Keep Redis on **Render Key Value Free** (`REDIS_HOST` / `REDIS_PORT`).
+3. Keep the API on **Render Web Service Free**.
+4. Leave GitHub Action `Keep free-tier services alive` enabled on `main`.
+   It `GET`s `/health` twice a day so Supabase sees real SQL (`SELECT 1`) and Render wakes.
+
+Optional repo variable `API_HEALTH_URL` overrides the default
+`https://pura-pms-api.onrender.com/health`.
+
+Recommended `DATABASE_URL` for Render (IPv4 Session pooler):
+
+```bash
+# Replace PASSWORD. Project ref comes from the Supabase dashboard URL.
+DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+```
+
+Direct `db.PROJECT_REF.supabase.co:5432` also works if the password is set, but
+the Session pooler is more reliable from Render.
 
 ## Deployment Steps
 
@@ -112,8 +142,11 @@ SENTRY_DSN=your-sentry-dsn-here
 
 ### Database Connection Error
 
-- ตรวจสอบ `DATABASE_URL` ว่าถูกต้อง
+- ตรวจสอบ `DATABASE_URL` ว่าถูกต้อง (โปรเจกต์เดียวกับใน Supabase Dashboard)
 - ตรวจสอบว่า Supabase database เปิดให้เชื่อมต่อจากภายนอกได้
+- `FATAL: tenant/user postgres.<ref> not found` แปลว่าโปรเจกต์ **pause** หรือ **ref ผิด**
+  ไม่ใช่บั๊ก start command — Resume ที่ Supabase แล้วรอจนสถานะ Healthy
+- หลัง Resume ให้ API มี retry ตอนบูต; ถ้ายังล้ม ให้ redeploy บน Render
 
 ### Build Error
 
