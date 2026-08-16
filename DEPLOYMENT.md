@@ -131,3 +131,10 @@ SENTRY_DSN=your-sentry-dsn-here
   - Render ใช้ cached node_modules ที่ไม่มี dependencies ใหม่
   - **วิธีแก้**: ล้าง Build Cache ใน Render Dashboard → Service → Settings → "Clear build cache"
   - หรือใช้ Build Command ที่ลบ node_modules ก่อน: `rm -rf node_modules && pnpm install --frozen-lockfile && pnpm --filter @pura/database build && pnpm --filter api build`
+
+### Start Command / `Cannot find module .../dist/main`
+
+- API production build ต้อง emit `apps/api/dist/main.js`
+- `tsconfig.build.json` ต้อง `rootDir: ./src` และ include เฉพาะ `src/**/*.ts` (อย่าให้ `vitest.config.ts` ดึง rootDir ขึ้นไปที่โฟลเดอร์แพ็กเกจ)
+- Start Command: `cd apps/api && pnpm start:prod` (`node dist/main.js`)
+- ถ้า deploy เก่ายัง emit ที่ `dist/src/main.js` ให้แก้ Start Command ชั่วคราวเป็น `cd apps/api && node dist/src/main.js` แล้ว redeploy หลัง merge แพตช์นี้
