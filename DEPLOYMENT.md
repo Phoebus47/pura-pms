@@ -25,9 +25,10 @@ NODE_ENV=production
 
 ```bash
 # Database Connection (Supabase PostgreSQL)
-# Recommended on Render: use Supabase Pooler (PgBouncer) URL when available.
-# Example (transaction pooler): postgresql://...@aws-0-...pooler.supabase.com:6543/postgres?pgbouncer=true
-DATABASE_URL=postgresql://user:password@host:6543/database?pgbouncer=true
+# Recommended on Render: IPv4 Session pooler (port 5432). Copy the host from
+# Supabase Dashboard → Connect; after pause/restore it may change aws-0 → aws-1.
+# Example: postgresql://postgres.PROJECT_REF:PASSWORD@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
 
 # JWT Secret - ใช้สำหรับ sign/verify JWT tokens (ต้องเป็น random string ที่แข็งแรง)
 # สร้างด้วย: openssl rand -base64 32
@@ -44,9 +45,20 @@ CORS_ORIGIN=https://your-app.vercel.app,https://your-preview.vercel.app
 # Node Environment
 NODE_ENV=production
 
+# Redis (BullMQ / Night Audit) — Render Key Value on the same private network
+REDIS_HOST=red-xxxxxxxxxxxxxxxxxxxx
+REDIS_PORT=6379
+
 # Sentry Error Tracking (Optional - Server-side)
 SENTRY_DSN=your-sentry-dsn-here
 ```
+
+Production API (`pura-pms-api`) uses **Pura's Project** (`afixfypdlmqlletyljmv`,
+region `ap-south-1` / Mumbai). Direct `db.<ref>.supabase.co` is IPv6-only;
+Render must use the IPv4 Session pooler host from Dashboard → Connect
+(currently `aws-1-ap-south-1.pooler.supabase.com`, not `aws-0-...`).
+Redis stays on Render Key Value Free. Do not point `DATABASE_URL` at
+Render Postgres Free long-term (30-day expiry).
 
 ## Deployment Steps
 
@@ -83,6 +95,11 @@ SENTRY_DSN=your-sentry-dsn-here
 
 ### 3. Database Setup (Supabase)
 
+API ใช้ role แยก (`pura_api`) ไม่ใช่ `postgres` แต่ `prisma migrate deploy`
+ต้องรันด้วย **owner ของตาราง** (`postgres`) เพราะ `ALTER TABLE` ต้องมีสิทธิ์ owner
+หลังสร้างตารางใหม่ให้ `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pura_api`
+(ถ้า `ALTER DEFAULT PRIVILEGES` ถูกตั้งไว้แล้วจะได้สิทธิ์อัตโนมัติ)
+
 1. **สร้าง PostgreSQL Database บน Supabase**
 2. **Copy Connection String** → ใส่ใน `DATABASE_URL` ของ Render
 3. **Run Migration**:
@@ -112,8 +129,12 @@ SENTRY_DSN=your-sentry-dsn-here
 
 ### Database Connection Error
 
-- ตรวจสอบ `DATABASE_URL` ว่าถูกต้อง
+- ตรวจสอบ `DATABASE_URL` ว่าถูกต้อง (โปรเจกต์เดียวกับใน Supabase Dashboard)
 - ตรวจสอบว่า Supabase database เปิดให้เชื่อมต่อจากภายนอกได้
+- `FATAL: tenant/user postgres.<ref> not found` แปลว่าโปรเจกต์ **pause**, **ref ผิด**,
+  หรือ **pooler host เก่า** (`aws-0` หลัง restore ที่ย้ายไป `aws-1`)
+  ไม่ใช่บั๊ก start command — Resume ที่ Supabase แล้วคัด Session pooler URL ใหม่จาก Dashboard
+- หลัง Resume ให้ API มี retry ตอนบูต; ถ้ายังล้ม ให้อัปเดต `DATABASE_URL` แล้ว redeploy บน Render
 
 ### Build Error
 
