@@ -1,43 +1,34 @@
-# Current Sprint — Phase 4 Complimentary / House Use Rooms
+# Current Sprint — Phase 4 Extended Stay Billing
 
-**Theme:** Owner, staff, press, and barter stays occupy a room without posting room revenue
-**Goal:** Front desk can book complimentary or house-use reservations that count toward occupancy, stay at rate 0 (COMP / HOUSE), and record who approved them — without inventing a new ledger or reversing posted charges.
-**Branch:** `cursor/feat-comp-house-use-6a5d`
-**Base:** `dev`
-**Source:** `docs/planning/prd.md` §4.3 + §4.15 + §12; `docs/planning/reports-master-list.md` §2.5
-**Depends on:** Reservation create/update, Night Audit room posting skip (same pattern as day-use). Do not reopen Walk, Day-use, Split Stay, No-show, Room Move, or Post-departure.
+**Status:** In progress  
+**Branch:** `cursor/feat-extended-stay-6a5d`  
+**Depends on:** Complimentary / House Use (`cursor/feat-comp-house-use-6a5d`, PR #81)
 
-## Working agreements
+## Goal
 
-- **One epic, one PR.** Conventional Commits (`feat(reservations): …`, `feat(night-audit): …`). Prisma **^6.19.2**.
-- **Occupancy, not revenue.** COMP / HOUSE stays still occupy the assigned room. Night Audit does **not** post a ROOM charge. Guest `totalRevenue` increments by 0.
-- Additive schema only: `StayPurpose` enum + authority fields on `Reservation`. No new ledger tables.
-- Stay purpose may change only while the reservation is `TENTATIVE` or `CONFIRMED`.
-- No hardcoded UI copy. New strings in `en.json` + `th.json` via `t()`.
-- Tests with the change.
+Weekly and monthly billing cycles for long-term guests: cycle-rate room posting at cycle end, auto interim folio close/open, and `ReportArchive` (`INTERIM_FOLIO`).
 
-## What ships
+## Schema
 
-1. Schema: `StayPurpose` (`STANDARD | COMPLIMENTARY | HOUSE_USE`), `approvedBy`, `stayPurposeNote`, `department`, index on `stayPurpose`.
-2. Create/update: COMP and HOUSE force `roomRate` / `totalAmount` (and stay rates) to 0; default `rateCode` to `COMP` / `HOUSE` when unset. Complimentary requires `approvedBy`. House use requires `approvedBy` and `department`.
-3. Night Audit `processRoomPosting` skips non-revenue stays the same way it skips day-use (`stayPurpose: STANDARD` in the query).
-4. `GET /reservations?stayPurpose=` for the Complimentary & House Use list.
-5. Web: stay-type select + authority fields on new reservation; badges on list/detail; detail shows authority / purpose / department; reports panel lists COMP / HOUSE stays overlapping the selected business date.
+- `BillingCycle` enum: `NIGHTLY | WEEKLY | MONTHLY` (default `NIGHTLY`)
+- `Reservation.billingCycle`, `Reservation.lastInterimBillingDate`
+- `Folio.isInterim`
+- Migration: `20260817075000_add_extended_stay_billing`
 
-## Invariants
+## API
 
-| Rule           | Constraint                                                                                        |
-| -------------- | ------------------------------------------------------------------------------------------------- |
-| Amount guard   | COMP / HOUSE always persist `roomRate = 0` and `totalAmount = 0`.                                 |
-| Authority      | Complimentary requires `approvedBy`. House use requires `approvedBy` and `department`.            |
-| Lifecycle      | `stayPurpose` can change only on `TENTATIVE` or `CONFIRMED`.                                      |
-| Occupancy      | Rooms stay blocked; Daily Flash occupancy still counts these stays.                               |
-| Posted charges | Do not void or reverse already posted ROOM charges. Only prevent future Night Audit room posting. |
-| Money          | No GL/AR/AP posting for the complimentary value. Lost revenue on the report uses rack `baseRate`. |
+1. Create/update: `billingCycle` on reservation DTO; `roomRate` is the **cycle rate** for weekly/monthly; `totalAmount` via `calculateExtendedStayTotal`. Not allowed with day-use or split stays.
+2. Night Audit `processRoomPosting`: skip non-cycle-end days for `WEEKLY`/`MONTHLY`; post lump `roomRate` on cycle end.
+3. Night Audit `processInterimFolios`: close open folio (`closeAsInterim`), create new folio, archive `INTERIM_FOLIO`, set `lastInterimBillingDate`.
+4. `FoliosService.closeAsInterim()` — closes without credit-limit check, sets `isInterim: true`.
 
-## Out of scope
+## Web
 
-- Accounts payable / GL posting of complimentary value
-- Changing stay purpose after check-in
-- VIP room lock / tax exemption (later Phase 4 items)
-- Reversing room charges already posted before a stay was marked COMP / HOUSE
+- Billing cycle select on new reservation (disabled for day-use / split stay)
+- `BillingCycleBadge` on list/detail
+- Interim label on folio tabs
+- i18n `reservations.billingCycle.*`, `folios.interimLabel`
+
+## Deploy
+
+Run `prisma migrate deploy` (or Supabase `apply_migration`) for `20260817075000_add_extended_stay_billing` after merge.

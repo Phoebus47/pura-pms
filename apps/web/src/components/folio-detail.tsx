@@ -11,6 +11,7 @@ import { PostChargeDialog } from './post-charge-dialog';
 import { PostPaymentDialog } from './post-payment-dialog';
 import { VoidTransactionDialog } from './void-transaction-dialog';
 import { FolioCheckoutBar } from './folio-checkout-bar';
+import { t } from '@/lib/i18n';
 
 interface FolioDetailProps {
   readonly reservationId: string;
@@ -100,6 +101,11 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
               )}
             >
               Folio {folio.folioNumber} ({folio.type})
+              {folio.isInterim ? (
+                <span className="ml-1 text-indigo-200">
+                  · {t('folios.interimLabel')}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>

@@ -1399,6 +1399,36 @@ describe('FoliosService', () => {
     });
   });
 
+  describe('closeAsInterim', () => {
+    it('should close an open folio as interim without checking credit limit', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        status: FolioStatus.OPEN,
+        isClosed: false,
+      });
+      const closed = {
+        id: 'folio-1',
+        status: FolioStatus.CLOSED,
+        isInterim: true,
+      };
+      mockPrismaService.folio.update.mockResolvedValue(closed);
+
+      const result = await service.closeAsInterim('folio-1');
+
+      expect(result).toEqual(closed);
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith({
+        where: { id: 'folio-1' },
+        data: {
+          status: FolioStatus.CLOSED,
+          isClosed: true,
+          isInterim: true,
+          closedAt: expect.any(Date),
+          closedBy: 'SYSTEM',
+        },
+      });
+    });
+  });
+
   describe('reopen', () => {
     it('should reopen a closed folio', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({

@@ -15,6 +15,7 @@ import {
   Prisma,
   ReservationStatus,
   RoomStatus,
+  BillingCycle,
   StayPurpose,
 } from '@pura/database';
 import { FoliosService } from '../folios/folios.service';
@@ -52,6 +53,11 @@ import {
   isNonRevenueStay,
   zeroNonRevenueAmount,
 } from './stay-purpose';
+import {
+  calculateExtendedStayTotal,
+  isExtendedBillingCycle,
+} from './billing-cycle';
+import { assertBillingCycleCompatible } from './billing-cycle-guards';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -69,6 +75,8 @@ export class ReservationsService {
     const isDayUse = createReservationDto.isDayUse === true;
     const stayPurpose =
       createReservationDto.stayPurpose ?? StayPurpose.STANDARD;
+    const billingCycle =
+      createReservationDto.billingCycle ?? BillingCycle.NIGHTLY;
     assertStayPurposeFields({
       stayPurpose,
       approvedBy: createReservationDto.approvedBy,
@@ -85,6 +93,8 @@ export class ReservationsService {
     }
 
     const nights = calculateNights(checkIn, checkOut, isDayUse);
+    const staysInput = createReservationDto.stays ?? [];
+    assertBillingCycleCompatible(billingCycle, isDayUse, staysInput.length);
 
     const room = await this.prisma.room.findUnique({
       where: { id: createReservationDto.roomId },
@@ -166,12 +176,20 @@ export class ReservationsService {
       pricedStays.length > 0
         ? (createReservationDto.totalAmount ??
             calculateSplitStayTotal(pricedStays))
-        : calculateStayTotal(
-            nights,
-            Number(createReservationDto.roomRate),
-            isDayUse,
-            createReservationDto.totalAmount,
-          ),
+        : isExtendedBillingCycle(billingCycle)
+          ? (createReservationDto.totalAmount ??
+            calculateExtendedStayTotal(
+              nights,
+              Number(createReservationDto.roomRate),
+              billingCycle,
+              isDayUse,
+            ))
+          : calculateStayTotal(
+              nights,
+              Number(createReservationDto.roomRate),
+              isDayUse,
+              createReservationDto.totalAmount,
+            ),
     );
     const rateCode =
       defaultRateCodeForPurpose(stayPurpose, createReservationDto.rateCode) ??
@@ -207,6 +225,7 @@ export class ReservationsService {
         approvedBy: createReservationDto.approvedBy,
         stayPurposeNote: createReservationDto.stayPurposeNote,
         department: createReservationDto.department,
+        billingCycle: isDayUse ? BillingCycle.NIGHTLY : billingCycle,
         roomId: createReservationDto.roomId,
         guestId: createReservationDto.guestId,
         stays:
@@ -394,6 +413,16 @@ export class ReservationsService {
       }
     }
 
+    const billingCycle =
+      updateReservationDto.billingCycle ??
+      reservation.billingCycle ??
+      BillingCycle.NIGHTLY;
+    assertBillingCycleCompatible(
+      billingCycle,
+      isDayUse,
+      staysInput !== undefined ? pricedStays.length : existingStays.length,
+    );
+
     const datesError = stayDatesError(checkIn, checkOut, isDayUse);
     if (stayDatesChanged && datesError) {
       throw new BadRequestException(datesError);
@@ -429,8 +458,16 @@ export class ReservationsService {
       pricedStays.length > 0
         ? (updateReservationDto.totalAmount ??
           calculateSplitStayTotal(pricedStays))
-        : stayDatesChanged
-          ? calculateStayTotal(nights, Number(roomRate), isDayUse)
+        : stayDatesChanged || updateReservationDto.billingCycle !== undefined
+          ? isExtendedBillingCycle(billingCycle)
+            ? (updateReservationDto.totalAmount ??
+              calculateExtendedStayTotal(
+                nights,
+                Number(roomRate),
+                billingCycle,
+                isDayUse,
+              ))
+            : calculateStayTotal(nights, Number(roomRate), isDayUse)
           : undefined;
 
     const updateData: Prisma.ReservationUpdateInput = {
@@ -461,11 +498,18 @@ export class ReservationsService {
 
     if (staysInput !== undefined && pricedStays.length === 0) {
       updateData.nights = nights;
-      updateData.totalAmount = calculateStayTotal(
-        nights,
-        Number(roomRate),
-        isDayUse,
-      );
+      updateData.totalAmount = isExtendedBillingCycle(billingCycle)
+        ? calculateExtendedStayTotal(
+            nights,
+            Number(roomRate),
+            billingCycle,
+            isDayUse,
+          )
+        : calculateStayTotal(nights, Number(roomRate), isDayUse);
+    }
+
+    if (updateReservationDto.billingCycle !== undefined || stayDatesChanged) {
+      updateData.billingCycle = isDayUse ? BillingCycle.NIGHTLY : billingCycle;
     }
 
     if (isNonRevenueStay(stayPurpose)) {

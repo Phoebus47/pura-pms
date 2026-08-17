@@ -167,9 +167,9 @@
   - [ ] Reopen folio after checkout
   - [ ] Post to city ledger if no card auth
 
-- [ ] **Extended Stay Billing**
-  - [ ] Weekly/monthly billing cycles
-  - [ ] Auto-generate interim folio
+- [x] **Extended Stay Billing**
+  - [x] Weekly/monthly billing cycles
+  - [x] Auto-generate interim folio
 
 - [ ] **Tax Exemption**
   - [ ] Flag reservation for VAT exemption
@@ -786,7 +786,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 5. Post-departure Charges — **shipped** (reopen closed folio; settle via existing card-preauth capture or AR transfer)
 6. Overbooking Recovery (Walk) — **shipped** (`PartnerHotel` directory, `Walk` record, no AP posting)
 7. Complimentary / House Use Rooms — **shipped** (`StayPurpose` COMP/HOUSE, rate 0, Night Audit skip, authority tracking)
-8. Extended Stay Billing (weekly/monthly)
+8. Extended Stay Billing (weekly/monthly) — **shipped** (`BillingCycle`, cycle-end NA posting, interim folio + archive)
 9. Tax Exemption Handling
 10. VIP Room Pre-assignment & Lock
 

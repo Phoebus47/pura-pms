@@ -270,7 +270,8 @@
     "paymentSuccess": "Payment posted successfully",
     "paymentError": "Failed to post payment",
     "currency": "Currency",
-    "foreignAmount": "Foreign amount"
+    "foreignAmount": "Foreign amount",
+    "interimLabel": "Interim"
   },
   "preauth": {
     "title": "Card pre-authorizations",
@@ -361,6 +362,15 @@
       "badgeHouse": "House use",
       "authorityRequired": "Enter who approved this complimentary or house-use stay",
       "departmentRequired": "Enter the department for a house-use stay"
+    },
+    "billingCycle": {
+      "label": "Billing cycle",
+      "nightly": "Nightly",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "hint": "Weekly and monthly cycles post room charges at cycle end and auto-close an interim folio.",
+      "badgeWeekly": "Weekly billing",
+      "badgeMonthly": "Monthly billing"
     }
   }
 }

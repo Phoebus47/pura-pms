@@ -46,6 +46,7 @@ export interface Folio {
   status: FolioStatus;
   balance: number;
   creditLimit?: number | null;
+  isInterim?: boolean;
   arAccountId?: string | null;
   businessDate: string;
   windows: FolioWindow[];

@@ -137,7 +137,9 @@ model Reservation {
   approvedBy      String?
   stayPurposeNote String?
   department      String?
-  roomId         String
+  billingCycle    BillingCycle      @default(NIGHTLY)
+  lastInterimBillingDate DateTime?   @db.Date
+  roomId          String
   room           Room              @relation(fields: [roomId], references: [id])
   guestId        String
   guest          Guest             @relation(fields: [guestId], references: [id])
@@ -157,6 +159,7 @@ model Reservation {
   @@index([status])
   @@index([isDayUse])
   @@index([stayPurpose])
+  @@index([billingCycle])
 }
 
 model ReservationStay {
@@ -245,6 +248,7 @@ model Folio {
   balance       Decimal       @default(0) @db.Decimal(12, 2)
   creditLimit   Decimal?      @db.Decimal(12, 2)
   isClosed      Boolean       @default(false) // Deprecated: Use status instead
+  isInterim     Boolean       @default(false)
   status        FolioStatus?  @default(OPEN)
   businessDate  DateTime?     @db.Date
   closedAt      DateTime?
@@ -788,6 +792,12 @@ enum StayPurpose {
   STANDARD
   COMPLIMENTARY
   HOUSE_USE
+}
+
+enum BillingCycle {
+  NIGHTLY
+  WEEKLY
+  MONTHLY
 }
 
 enum FolioType {

@@ -270,7 +270,8 @@
     "paymentSuccess": "บันทึกการชำระแล้ว",
     "paymentError": "บันทึกการชำระไม่สำเร็จ",
     "currency": "สกุลเงิน",
-    "foreignAmount": "จำนวนเงินสกุลต่างประเทศ"
+    "foreignAmount": "จำนวนเงินสกุลต่างประเทศ",
+    "interimLabel": "Interim"
   },
   "preauth": {
     "title": "พรีออธบัตร",
@@ -361,6 +362,15 @@
       "badgeHouse": "ห้องใช้ภายใน",
       "authorityRequired": "ระบุผู้อนุมัติสำหรับห้องฟรีหรือห้องใช้ภายใน",
       "departmentRequired": "ระบุแผนกสำหรับห้องใช้ภายใน"
+    },
+    "billingCycle": {
+      "label": "รอบบิล",
+      "nightly": "รายคืน",
+      "weekly": "รายสัปดาห์",
+      "monthly": "รายเดือน",
+      "hint": "รอบรายสัปดาห์/รายเดือนจะลงค่าห้องเมื่อครบรอบและปิด interim folio อัตโนมัติ",
+      "badgeWeekly": "บิลรายสัปดาห์",
+      "badgeMonthly": "บิลรายเดือน"
     }
   }
 }

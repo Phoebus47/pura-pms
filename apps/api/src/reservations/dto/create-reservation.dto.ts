@@ -11,7 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ReservationStatus, StayPurpose } from '@pura/database';
+import { BillingCycle, ReservationStatus, StayPurpose } from '@pura/database';
 import { ReservationStayInputDto } from './reservation-stay.dto';
 
 export class CreateReservationDto {
@@ -90,6 +90,10 @@ export class CreateReservationDto {
   @IsString()
   @IsOptional()
   department?: string;
+
+  @IsEnum(BillingCycle)
+  @IsOptional()
+  billingCycle?: BillingCycle;
 
   @IsOptional()
   @IsArray()

@@ -2074,6 +2074,7 @@ function handleReservationsPost(path: string, body: any) {
       status: 'CONFIRMED',
       createdAt: new Date().toISOString(),
       stays: Array.isArray(body?.stays) ? body.stays : [],
+      billingCycle: body?.billingCycle || 'NIGHTLY',
       roomRate: nonRevenue ? 0 : body?.roomRate,
       totalAmount: nonRevenue ? 0 : body?.totalAmount,
       rateCode:

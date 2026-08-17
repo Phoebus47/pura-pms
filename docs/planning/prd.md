@@ -1235,7 +1235,7 @@ graph LR
 - [x] Post-departure Charges
 - [x] Overbooking Recovery (Walk)
 - [x] Complimentary / House Use Rooms
-- [ ] Extended Stay Billing (weekly/monthly)
+- [x] Extended Stay Billing (weekly/monthly)
 - [ ] Tax Exemption Handling
 - [ ] VIP Room Pre-assignment & Lock
 

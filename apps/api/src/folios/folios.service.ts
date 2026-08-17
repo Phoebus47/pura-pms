@@ -390,6 +390,34 @@ export class FoliosService {
   }
 
   /**
+   * Closes an open folio at an extended-stay billing cycle boundary without
+   * enforcing the credit limit. The folio is marked interim so staff can
+   * reopen it for post-departure charges if needed.
+   */
+  async closeAsInterim(id: string) {
+    const folio = await this.prisma.folio.findUnique({
+      where: { id },
+      select: { id: true, status: true, isClosed: true },
+    });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    if (folio.isClosed || folio.status === FolioStatus.CLOSED) {
+      throw new ConflictException('Folio is already closed');
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: {
+        status: FolioStatus.CLOSED,
+        isClosed: true,
+        isInterim: true,
+        closedAt: new Date(),
+        closedBy: 'SYSTEM',
+      },
+    });
+  }
+
+  /**
    * Reopens a closed folio for a post-departure charge (minibar, damage,
    * etc.). Settlement is handled by the existing card-preauth capture or
    * AR transfer endpoints once the charge is posted; call `checkout` again

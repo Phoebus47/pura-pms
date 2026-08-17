@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { DayUseBadge } from '@/components/day-use-badge';
 import { StayPurposeBadge } from '@/components/stay-purpose-badge';
+import { BillingCycleBadge } from '@/components/billing-cycle-badge';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
@@ -160,6 +161,7 @@ export default function ReservationDetailPage() {
               <ReservationStatusBadge status={reservation.status} />
               {reservation.isDayUse ? <DayUseBadge /> : null}
               <StayPurposeBadge stayPurpose={reservation.stayPurpose} />
+              <BillingCycleBadge billingCycle={reservation.billingCycle} />
               {isSplitStay(reservation) ? <SplitStayBadge /> : null}
             </div>
           </div>

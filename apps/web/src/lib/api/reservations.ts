@@ -4,6 +4,8 @@ import type { ReservationStay, ReservationStayInput } from '@/lib/split-stay';
 
 export type StayPurpose = 'STANDARD' | 'COMPLIMENTARY' | 'HOUSE_USE';
 
+export type BillingCycle = 'NIGHTLY' | 'WEEKLY' | 'MONTHLY';
+
 export type ReservationStatus =
   | 'TENTATIVE'
   | 'CONFIRMED'
@@ -36,6 +38,8 @@ export interface Reservation {
   approvedBy?: string;
   stayPurposeNote?: string;
   department?: string;
+  billingCycle?: BillingCycle;
+  lastInterimBillingDate?: string;
   stays?: ReservationStay[];
   cancellationReason?: string;
   actualCheckIn?: string;
@@ -146,6 +150,7 @@ export interface CreateReservationDto {
   approvedBy?: string;
   stayPurposeNote?: string;
   department?: string;
+  billingCycle?: BillingCycle;
   stays?: ReservationStayInput[];
 }
 
