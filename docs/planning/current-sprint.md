@@ -1,41 +1,40 @@
-# Current Sprint — Phase 4 Post-departure Charges (usable slice)
+# Current Sprint — Phase 4 Overbooking Recovery (Walk)
 
-**Theme:** Charges discovered after a guest has already checked out and the folio was closed
-**Goal:** Front desk can reopen a closed folio, post the charge (minibar, damage) with existing tooling, then settle it via an existing card pre-auth, transfer to city ledger (AR), or leave it open pending collection — then close the folio again.
-**Branch:** `cursor/feat-post-departure-charges-6a5d`
+**Theme:** A confirmed guest arrives and the property has no room — walk them to a partner hotel
+**Goal:** Front desk can walk a confirmed reservation to a partner hotel, recording the cost paid to that hotel and the compensation given to the guest, without inventing a new AP/vendor-payable ledger.
+**Branch:** `cursor/feat-overbooking-walk-6a5d`
 **Base:** `dev`
-**Source:** `docs/planning/prd.md` § Post-departure Charges + §12
-**Depends on:** Folio posting (WP4), Card Pre-authorization (P3-PR9), AR / city ledger (P3-PR6). Do not reopen Room Move, Day-use, Split Stay, or No-show.
+**Source:** `docs/planning/prd.md` §4.2 Overbooking recovery + §12
+**Depends on:** Reservation lifecycle (CONFIRMED → terminal status), same pattern as No-show. Do not reopen Room Move, Day-use, Split Stay, No-show, or Post-departure Charges.
 
 ## Working agreements
 
-- **One epic, one PR.** Conventional Commits (`feat(folios): …`). Prisma **^6.19.2**.
-- **Usable first, no new ledger.** Reuse existing settlement rails — `POST /card-preauths/:id/capture` and `POST /ar-accounts/:id/transfer` already work on any folio balance and are untouched by this sprint. The only real gap is that a **closed folio has no way back to `OPEN`**, and `postTransaction` never checked folio status at all (a cashier could already silently post into a closed folio, which breaks the "closed folio is immutable" invariant this project relies on for audit).
-- No new `TransactionCode`. Seed already has `3005` (Minibar) and `3007` (Miscellaneous) for this use case.
+- **One epic, one PR.** Conventional Commits (`feat(reservations): …`, `feat(partner-hotels): …`). Prisma **^6.19.2**.
+- **Usable first, no new ledger.** `cost` (paid to the partner hotel) and `compensationAmount` (given to the guest) are recorded on the `Walk` row for reporting only — this sprint does **not** post them through GL/AR/AP. Accounts payable to partner hotels is an explicit "wait" item in `phase-3-closeout.md`.
+- New minimal directory model `PartnerHotel` (property-scoped, active/inactive) — mirrors `RoomType`'s CRUD shape, not `ARAccount`'s AR machinery.
+- New reservation status `WALKED` (schema enum), mirrors how `NO_SHOW` is a terminal status reached only from `CONFIRMED`.
 - No hardcoded UI copy. New strings in `en.json` + `th.json` via `t()`.
-- Tests with the change. Do not mutate posted `FolioTransaction` rows.
+- Tests with the change.
 
 ## What ships
 
-1. `FoliosService.postTransaction` now requires the folio to be `OPEN` (via the folio already loaded for shift resolution — no extra query). Any other status (`CLOSED`, `POSTED_TO_CITY_LEDGER`, `TRANSFERRED`) is rejected with 409.
-2. New `POST /folios/:id/reopen` — the only way to move a folio from `CLOSED` back to `OPEN`. Rejects folios that are not exactly `CLOSED` (an AR-transferred folio already has an invoice; reopening it is out of scope here).
-3. Web: a "Reopen for post-departure charge" action on the folio checkout bar, visible only when the folio is `CLOSED`. After reopening, the existing Post Charge / Post Payment dialogs and the AR-accounts / card-preauths admin pages already work end to end.
-4. Mock API (`apps/web/src/lib/api/mock/router.ts`) mirrors both the new guard and the new endpoint so the frontend demo behaves like the real API.
+1. Schema: `ReservationStatus.WALKED`, `PartnerHotel` model, `Walk` model (`cost`, `compensationAmount`, `compensationNotes`, `reason`, `walkedBy`, `walkedAt`).
+2. `POST /reservations/:id/walk` — only `CONFIRMED` reservations; validates the partner hotel belongs to the same property and is active; sets `status: WALKED`; records the `Walk` row. `GET /reservations/:id/walks` for history.
+3. `partner-hotels` module — plain CRUD (`create`, `findAll` by `propertyId`, `findOne`, `update`) guarded by `JwtAuthGuard`, matching `room-types`.
+4. Web: `/partner-hotels` admin page (create + activate/deactivate list) and a `WalkPanel` on the reservation detail page, visible only when the reservation is `CONFIRMED`.
 
 ## Invariants
 
-| Rule                | Constraint                                                                                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Post guard          | `postTransaction` throws 409 unless the folio's current status is `OPEN`.                                                                            |
-| Reopen precondition | `reopen` throws 409 unless the folio's current status is exactly `CLOSED`.                                                                           |
-| Reopen effect       | Sets `status: OPEN`, `isClosed: false`, `closedAt: null`, `closedBy: null`. No new schema field.                                                     |
-| Settlement          | Handled entirely by existing endpoints (`card-preauths capture`, `ar-accounts transfer`, `folios checkout`). No new settlement logic in this sprint. |
-| Money               | Append-only post via the unmodified `persistPostingLines` path. Never rewrite folio rows.                                                            |
+| Rule         | Constraint                                                                                                     |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| Walk guard   | Only a `CONFIRMED` reservation can be walked. `CHECKED_IN` guests already have a room — use Room Move instead. |
+| Hotel guard  | The partner hotel must belong to the same property as the reservation and be `isActive`.                       |
+| Amount guard | `cost` and `compensationAmount` must be `>= 0`.                                                                |
+| Money        | No folio posting, no GL/AR/AP entry. `cost`/`compensationAmount` are reporting fields only.                    |
 
 ## Out of scope
 
-- A single combined "post-departure" endpoint that posts the charge and settles it atomically
-- Reopening `POSTED_TO_CITY_LEDGER` / `TRANSFERRED` folios
-- New `PostDeparture`/city-ledger models — reuse `Invoice` + `ARAccount` already shipped in P3-PR6
-- Card gateway capture (still manual ledger, per P3-PR9)
-- Rewriting reservation/folio hardcoded English elsewhere in the app
+- Accounts payable / vendor commission tracking for partner hotels (wait item)
+- Auto-selecting or recommending a partner hotel
+- Notifying the guest (email/SMS) about the walk
+- Waitlist / auto re-accommodation once a room frees up

@@ -20,6 +20,8 @@ export interface MockData {
   invoicePayments: any[];
   cardPreauths: any[];
   roomMoves: any[];
+  partnerHotels: any[];
+  walks: any[];
 }
 
 export const mockDb: any = {
@@ -424,4 +426,6 @@ export const mockDb: any = {
   invoicePayments: [],
   cardPreauths: [],
   roomMoves: [],
+  partnerHotels: [],
+  walks: [],
 };

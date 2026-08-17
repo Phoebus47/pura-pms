@@ -8,7 +8,8 @@ export type ReservationStatus =
   | 'CHECKED_IN'
   | 'CHECKED_OUT'
   | 'CANCELLED'
-  | 'NO_SHOW';
+  | 'NO_SHOW'
+  | 'WALKED';
 
 export interface Reservation {
   id: string;
@@ -92,6 +93,32 @@ export interface MarkNoShowDto {
   userId: string;
   reason?: string;
   businessDate?: string;
+}
+
+export interface Walk {
+  id: string;
+  reservationId: string;
+  partnerHotelId: string;
+  reason?: string;
+  cost: number;
+  compensationAmount: number;
+  compensationNotes?: string;
+  walkedAt: string;
+  walkedBy: string;
+  partnerHotel?: {
+    id: string;
+    name: string;
+    phone?: string;
+  };
+}
+
+export interface WalkReservationDto {
+  partnerHotelId: string;
+  cost: number;
+  compensationAmount?: number;
+  compensationNotes?: string;
+  reason?: string;
+  walkedBy: string;
 }
 
 export interface CreateReservationDto {
@@ -196,6 +223,14 @@ export const reservationsAPI = {
 
   async markNoShow(id: string, data: MarkNoShowDto): Promise<Reservation> {
     return apiClient.post<Reservation>(`/reservations/${id}/no-show`, data);
+  },
+
+  async walk(id: string, data: WalkReservationDto): Promise<Reservation> {
+    return apiClient.post<Reservation>(`/reservations/${id}/walk`, data);
+  },
+
+  async listWalks(id: string): Promise<Walk[]> {
+    return apiClient.get<Walk[]>(`/reservations/${id}/walks`);
   },
 
   async delete(id: string): Promise<void> {

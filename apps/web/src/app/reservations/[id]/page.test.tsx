@@ -30,6 +30,10 @@ vi.mock('@/components/room-move-panel', () => ({
   RoomMovePanel: () => <div data-testid="room-move-panel" />,
 }));
 
+vi.mock('@/components/walk-panel', () => ({
+  WalkPanel: () => <div data-testid="walk-panel" />,
+}));
+
 vi.mock('@/components/reservation-no-show-button', () => ({
   ReservationNoShowButton: () => <div data-testid="no-show-button" />,
 }));
@@ -254,6 +258,26 @@ describe('ReservationDetailPage', () => {
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
     );
     expect(screen.queryByTestId('room-move-panel')).not.toBeInTheDocument();
+  });
+
+  it('shows the walk panel for a confirmed reservation', async () => {
+    render(<ReservationDetailPage />);
+    await waitFor(() =>
+      expect(screen.getByTestId('walk-panel')).toBeInTheDocument(),
+    );
+  });
+
+  it('hides the walk panel after check-in', async () => {
+    (reservationsAPI.getById as any).mockResolvedValue({
+      ...mockReservation,
+      status: 'CHECKED_IN',
+    });
+    render(<ReservationDetailPage />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('room-move-panel')).toBeInTheDocument(),
+    );
+    expect(screen.queryByTestId('walk-panel')).not.toBeInTheDocument();
   });
 
   it('cancels check out', async () => {

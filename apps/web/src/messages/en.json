@@ -17,6 +17,7 @@
     "taxInvoices": "Tax invoices",
     "arAccounts": "Accounts receivable",
     "cardPreauths": "Card pre-auths",
+    "partnerHotels": "Partner hotels",
     "settings": "Settings",
     "more": "More"
   },
@@ -216,6 +217,23 @@
     "asOf": "As of",
     "selectAccount": "Select an account to view invoices"
   },
+  "partnerHotels": {
+    "title": "Partner hotels",
+    "subtitle": "Directory of hotels guests are walked to for overbooking recovery.",
+    "create": "Add partner hotel",
+    "list": "Partner hotel directory",
+    "name": "Hotel name",
+    "phone": "Phone",
+    "address": "Address",
+    "createSubmit": "Save hotel",
+    "createSuccess": "Partner hotel saved",
+    "empty": "No partner hotels yet",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "activated": "Partner hotel activated",
+    "deactivated": "Partner hotel deactivated",
+    "updateFailed": "Failed to update partner hotel"
+  },
   "folios": {
     "checkout": "Check out folio",
     "checkoutSuccess": "Folio closed",
@@ -304,6 +322,20 @@
       "success": "Reservation marked no-show",
       "error": "Failed to mark no-show",
       "reason": "Reason"
+    },
+    "walk": {
+      "title": "Walk to partner hotel",
+      "partnerHotel": "Partner hotel",
+      "placeholder": "Select a partner hotel",
+      "noHotels": "No active partner hotels configured",
+      "cost": "Cost",
+      "compensation": "Compensation amount",
+      "compensationNotes": "Compensation notes",
+      "reason": "Reason",
+      "submit": "Walk guest",
+      "success": "Guest walked to the partner hotel",
+      "history": "Walk history",
+      "emptyHistory": "No walks recorded yet"
     }
   }
 }

@@ -12,6 +12,7 @@ import {
   Receipt,
   Landmark,
   Wallet,
+  Building2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -91,6 +92,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.cardPreauths',
   },
   {
+    name: 'Partner hotels',
+    href: '/partner-hotels',
+    icon: Building2,
+    labelKey: 'nav.partnerHotels',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -168,6 +175,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/card-preauths',
     icon: Wallet,
     labelKey: 'nav.cardPreauths',
+  },
+  {
+    name: 'Partner hotels',
+    href: '/partner-hotels',
+    icon: Building2,
+    labelKey: 'nav.partnerHotels',
   },
   {
     name: 'Settings',

@@ -19,6 +19,7 @@ import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
 import { TaxInvoicesModule } from './tax-invoices/tax-invoices.module';
 import { ArAccountsModule } from './ar-accounts/ar-accounts.module';
 import { CardPreauthsModule } from './card-preauths/card-preauths.module';
+import { PartnerHotelsModule } from './partner-hotels/partner-hotels.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CardPreauthsModule } from './card-preauths/card-preauths.module';
     TaxInvoicesModule,
     ArAccountsModule,
     CardPreauthsModule,
+    PartnerHotelsModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

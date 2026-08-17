@@ -1233,7 +1233,7 @@ graph LR
 - [x] Room Move Mid-stay
 - [x] No-show / Late Cancellation Auto-charges
 - [x] Post-departure Charges
-- [ ] Overbooking Recovery (Walk)
+- [x] Overbooking Recovery (Walk)
 - [ ] Complimentary / House Use Rooms
 - [ ] Extended Stay Billing (weekly/monthly)
 - [ ] Tax Exemption Handling
