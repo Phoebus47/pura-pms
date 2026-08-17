@@ -782,8 +782,8 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 1. Day-use Reservations — **shipped**
 2. Split Stay — **shipped**
 3. Room Move Mid-stay — **shipped**
-4. No-show / Late Cancellation Auto-charges
-5. Post-departure Charges
+4. No-show / Late Cancellation Auto-charges — **shipped**
+5. Post-departure Charges — **shipped** (reopen closed folio; settle via existing card-preauth capture or AR transfer)
 6. Overbooking Recovery (Walk)
 7. Complimentary / House Use Rooms
 8. Extended Stay Billing (weekly/monthly)
