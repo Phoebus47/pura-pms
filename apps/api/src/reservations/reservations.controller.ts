@@ -39,6 +39,7 @@ export class ReservationsController {
     @Query('guestId') guestId?: string,
     @Query('stayPurpose') stayPurpose?: StayPurpose,
     @Query('taxExempt') taxExempt?: string,
+    @Query('isRoomLocked') isRoomLocked?: string,
   ) {
     return this.reservationsService.findAll(
       propertyId,
@@ -48,6 +49,11 @@ export class ReservationsController {
       guestId,
       stayPurpose,
       taxExempt === 'true' ? true : taxExempt === 'false' ? false : undefined,
+      isRoomLocked === 'true'
+        ? true
+        : isRoomLocked === 'false'
+          ? false
+          : undefined,
     );
   }
 

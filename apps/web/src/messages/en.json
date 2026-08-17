@@ -385,6 +385,15 @@
       "other": "Other",
       "badge": "Tax exempt",
       "fieldsRequired": "Enter exemption reason, document reference, and who approved"
+    },
+    "roomLock": {
+      "label": "Room lock",
+      "checkbox": "Lock this room assignment",
+      "hint": "Pre-assign and protect the room from reassignment or mid-stay moves until unlocked.",
+      "note": "Lock note",
+      "badge": "Room locked",
+      "noteRequired": "Enter a note explaining why this VIP room is locked",
+      "moveBlocked": "Unlock the room assignment before moving the guest"
     }
   }
 }

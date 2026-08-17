@@ -2028,6 +2028,14 @@ function handleReservationsGet(path: string, params?: URLSearchParams) {
           reservation.taxExempt === flag,
       );
     }
+    const isRoomLocked = params?.get('isRoomLocked');
+    if (isRoomLocked === 'true' || isRoomLocked === 'false') {
+      const flag = isRoomLocked === 'true';
+      results = results.filter(
+        (reservation: { isRoomLocked?: boolean }) =>
+          reservation.isRoomLocked === flag,
+      );
+    }
     return results;
   }
   const movesMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-moves$/.exec(
@@ -2085,13 +2093,15 @@ function handleReservationsPost(path: string, body: any) {
       stays: Array.isArray(body?.stays) ? body.stays : [],
       billingCycle: body?.billingCycle || 'NIGHTLY',
       taxExempt: body?.taxExempt === true,
-      taxExemptReason: body?.taxExempt ? body?.taxExemptReason : undefined,
       taxExemptDocumentRef: body?.taxExempt
         ? body?.taxExemptDocumentRef
         : undefined,
       taxExemptApprovedBy: body?.taxExempt
         ? body?.taxExemptApprovedBy
         : undefined,
+      taxExemptReason: body?.taxExempt ? body?.taxExemptReason : undefined,
+      isRoomLocked: body?.isRoomLocked === true,
+      roomLockNote: body?.isRoomLocked ? body?.roomLockNote : undefined,
       roomRate: nonRevenue ? 0 : body?.roomRate,
       totalAmount: nonRevenue ? 0 : body?.totalAmount,
       rateCode:

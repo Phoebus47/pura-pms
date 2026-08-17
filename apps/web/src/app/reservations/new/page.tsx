@@ -38,6 +38,8 @@ import {
 } from '@/lib/billing-cycle';
 import { TaxExemptBadge } from '@/components/tax-exempt-badge';
 import { TaxExemptFields } from '@/components/tax-exempt-fields';
+import { RoomLockFields } from '@/components/room-lock-fields';
+import { RoomLockBadge } from '@/components/room-lock-badge';
 import type { TaxExemptReason } from '@/lib/tax-exemption';
 
 type Step = 1 | 2 | 3 | 4;
@@ -71,6 +73,8 @@ export default function NewReservationPage() {
     useState<TaxExemptReason>('DIPLOMATIC');
   const [taxExemptDocumentRef, setTaxExemptDocumentRef] = useState('');
   const [taxExemptApprovedBy, setTaxExemptApprovedBy] = useState('');
+  const [isRoomLocked, setIsRoomLocked] = useState(false);
+  const [roomLockNote, setRoomLockNote] = useState('');
   const [isSplitStay, setIsSplitStay] = useState(false);
   const [splitDate, setSplitDate] = useState('');
   const [secondRoom, setSecondRoom] = useState<Room | null>(null);
@@ -109,6 +113,14 @@ export default function NewReservationPage() {
       return;
     }
     setSecondRoom(null);
+  }
+
+  function handleRoomLockChange(checked: boolean) {
+    setIsRoomLocked(checked);
+    if (checked) {
+      setIsSplitStay(false);
+      setSecondRoom(null);
+    }
   }
 
   function handleBillingCycleChange(value: BillingCycle) {
@@ -188,6 +200,10 @@ export default function NewReservationPage() {
       toast.warning(t('reservations.taxExempt.fieldsRequired'));
       return;
     }
+    if (isRoomLocked && !roomLockNote.trim()) {
+      toast.warning(t('reservations.roomLock.noteRequired'));
+      return;
+    }
     setSubmitting(true);
     try {
       const firstRate = Number(selectedRoom!.roomType?.baseRate || 0);
@@ -238,6 +254,8 @@ export default function NewReservationPage() {
           ? taxExemptDocumentRef.trim()
           : undefined,
         taxExemptApprovedBy: taxExempt ? taxExemptApprovedBy.trim() : undefined,
+        isRoomLocked,
+        roomLockNote: isRoomLocked ? roomLockNote.trim() : undefined,
         stays,
       };
 
@@ -449,9 +467,19 @@ export default function NewReservationPage() {
               onTaxExemptApprovedByChange={setTaxExemptApprovedBy}
             />
 
+            <RoomLockFields
+              isRoomLocked={isRoomLocked}
+              onIsRoomLockedChange={handleRoomLockChange}
+              roomLockNote={roomLockNote}
+              onRoomLockNoteChange={setRoomLockNote}
+              disabled={isSplitStay}
+            />
+
             <SplitStayOptions
               enabled={isSplitStay}
-              disabled={isDayUse || isExtendedBillingCycle(billingCycle)}
+              disabled={
+                isDayUse || isExtendedBillingCycle(billingCycle) || isRoomLocked
+              }
               splitDate={splitDate}
               minDate={splitMinDate}
               maxDate={splitMaxDate}
@@ -701,6 +729,14 @@ export default function NewReservationPage() {
                       <TaxExemptBadge taxExempt />
                     </div>
                   ) : null}
+                  {isRoomLocked ? (
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">
+                        {t('reservations.roomLock.label')}:
+                      </span>
+                      <RoomLockBadge isRoomLocked />
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -726,6 +762,14 @@ export default function NewReservationPage() {
                 taxExemptApprovedBy={taxExemptApprovedBy}
                 onTaxExemptApprovedByChange={setTaxExemptApprovedBy}
                 showDetails
+              />
+
+              <RoomLockFields
+                isRoomLocked={isRoomLocked}
+                onIsRoomLockedChange={setIsRoomLocked}
+                roomLockNote={roomLockNote}
+                onRoomLockNoteChange={setRoomLockNote}
+                showNote
               />
 
               <div>

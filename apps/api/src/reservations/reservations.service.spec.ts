@@ -319,6 +319,32 @@ describe('ReservationsService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('should create a VIP room-locked reservation', async () => {
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.create.mockResolvedValue({
+        id: 'res-vip',
+        isRoomLocked: true,
+      });
+      mockPrismaService.guest.update.mockResolvedValue({});
+
+      await service.create({
+        ...createDto,
+        isRoomLocked: true,
+        roomLockNote: 'Ambassador suite',
+      });
+
+      expect(prisma.reservation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            isRoomLocked: true,
+            roomLockNote: 'Ambassador suite',
+          }),
+        }),
+      );
+    });
+
     it('should reject complimentary reservations without authority', async () => {
       await expect(
         service.create({
@@ -1313,6 +1339,18 @@ describe('ReservationsService', () => {
         }),
       );
       expect(mockPrismaService.reservationStay.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects room moves when the assignment is locked', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...checkedIn,
+        isRoomLocked: true,
+      });
+
+      await expect(service.moveRoom('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockPrismaService.room.update).not.toHaveBeenCalled();
     });
 
     it('marks a vacant dirty target as occupied dirty', async () => {
