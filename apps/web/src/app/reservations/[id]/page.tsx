@@ -115,7 +115,7 @@ export default function ReservationDetailPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading reservation...</p>
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function ReservationDetailPage() {
 
   if (error || !reservation) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">
           Error loading reservation
         </h3>
@@ -145,16 +145,12 @@ export default function ReservationDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex gap-4 items-center">
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-            className="rounded-xl"
-          >
+          <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="h-4 mr-2 w-4" />
             Back
           </Button>
           <div>
-            <h1 className="font-bold text-[#1e4b8e] text-3xl">
+            <h1 className="font-bold text-3xl text-pura-blue">
               {reservation.confirmNumber}
             </h1>
             <div className="flex gap-2 items-center mt-1">
@@ -168,7 +164,7 @@ export default function ReservationDetailPage() {
           {canCheckIn && (
             <Button
               onClick={handleCheckIn}
-              className="bg-emerald-600 hover:bg-emerald-700 rounded-xl"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               <CheckCircle className="h-4 mr-2 w-4" />
               Check In
@@ -181,7 +177,7 @@ export default function ReservationDetailPage() {
           {canCheckOut && (
             <Button
               onClick={handleCheckOut}
-              className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
+              className="bg-pura-blue hover:bg-pura-blue-dark"
             >
               <CheckCircle className="h-4 mr-2 w-4" />
               Check Out
@@ -191,7 +187,7 @@ export default function ReservationDetailPage() {
             <Button
               variant="outline"
               onClick={handleCancel}
-              className="hover:bg-orange-50 rounded-xl text-orange-600"
+              className="hover:bg-orange-50 text-orange-600"
             >
               <XCircle className="h-4 mr-2 w-4" />
               Cancel
@@ -200,7 +196,6 @@ export default function ReservationDetailPage() {
           <Button
             variant="outline"
             onClick={() => router.push(`/reservations/${reservationId}/edit`)}
-            className="rounded-xl"
           >
             <Edit className="h-4 mr-2 w-4" />
             Edit
@@ -208,7 +203,7 @@ export default function ReservationDetailPage() {
           <Button
             variant="outline"
             onClick={handleDelete}
-            className="hover:bg-red-50 rounded-xl text-red-600"
+            className="hover:bg-red-50 text-red-600"
           >
             <Trash2 className="h-4 mr-2 w-4" />
             Delete
@@ -223,7 +218,7 @@ export default function ReservationDetailPage() {
           className={cn(
             'px-4 py-3 text-sm font-bold transition-all border-b-2',
             activeTab === 'details'
-              ? 'border-[#1e4b8e] text-[#1e4b8e]'
+              ? 'border-pura-blue text-pura-blue'
               : 'border-transparent text-slate-400 hover:text-slate-600',
           )}
         >
@@ -234,7 +229,7 @@ export default function ReservationDetailPage() {
           className={cn(
             'px-4 py-3 text-sm font-bold transition-all border-b-2',
             activeTab === 'billing'
-              ? 'border-[#1e4b8e] text-[#1e4b8e]'
+              ? 'border-pura-blue text-pura-blue'
               : 'border-transparent text-slate-400 hover:text-slate-600',
           )}
         >
@@ -247,8 +242,8 @@ export default function ReservationDetailPage() {
           {/* Reservation Information */}
           <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
             {/* Main Info Card */}
-            <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
-              <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
+            <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
+              <h2 className="font-bold mb-6 text-pura-blue text-xl">
                 Reservation Details
               </h2>
 
@@ -257,7 +252,7 @@ export default function ReservationDetailPage() {
                   <p className="font-semibold text-slate-600 text-sm">
                     Confirmation Number
                   </p>
-                  <p className="font-mono font-semibold mt-1 text-[#1e4b8e] text-lg">
+                  <p className="font-mono font-semibold mt-1 text-lg text-pura-blue">
                     {reservation.confirmNumber}
                   </p>
                 </div>
@@ -354,7 +349,7 @@ export default function ReservationDetailPage() {
               )}
 
               {reservation.cancellationReason && (
-                <div className="-m-6 bg-red-50/50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-3xl">
+                <div className="-m-6 bg-red-50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-xl">
                   <p className="font-semibold text-red-600 text-sm">
                     Cancellation Reason
                   </p>
@@ -366,8 +361,8 @@ export default function ReservationDetailPage() {
             </div>
 
             {/* Pricing Card */}
-            <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-              <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">Pricing</h2>
+            <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+              <h2 className="font-bold mb-6 text-pura-blue text-xl">Pricing</h2>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -398,7 +393,7 @@ export default function ReservationDetailPage() {
                     <span className="font-semibold text-lg text-slate-700">
                       Total Amount
                     </span>
-                    <span className="font-bold text-[#1e4b8e] text-2xl">
+                    <span className="font-bold text-2xl text-pura-blue">
                       ฿{Number(reservation.totalAmount).toLocaleString()}
                     </span>
                   </div>
@@ -441,8 +436,8 @@ export default function ReservationDetailPage() {
           ) : null}
 
           {/* Metadata */}
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-            <h2 className="font-bold mb-4 text-[#1e4b8e] text-xl">Metadata</h2>
+          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+            <h2 className="font-bold mb-4 text-pura-blue text-xl">Metadata</h2>
             <div className="gap-4 grid grid-cols-2 text-sm">
               <div>
                 <span className="text-slate-600">Created:</span>{' '}
@@ -465,7 +460,7 @@ export default function ReservationDetailPage() {
             <Button
               asChild
               variant="outline"
-              className="border-[#1e4b8e] rounded-xl text-[#1e4b8e]"
+              className="border-pura-blue text-pura-blue"
             >
               <Link href={`/billing?reservationId=${reservationId}`}>
                 Open billing dashboard

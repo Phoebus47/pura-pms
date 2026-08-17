@@ -20,7 +20,7 @@ export function TaxInvoicesClient() {
   return (
     <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
       <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
+        <h1 className="font-bold text-3xl text-pura-blue">
           {t('taxInvoice.title')}
         </h1>
         <p className="mt-1 text-slate-600 text-sm">

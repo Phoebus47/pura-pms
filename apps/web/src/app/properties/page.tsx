@@ -51,7 +51,7 @@ export default function PropertiesPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading properties...</p>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function PropertiesPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">Error loading properties</h3>
         <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadProperties} className="mt-4">
@@ -77,15 +77,12 @@ export default function PropertiesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-bold text-[#1e4b8e] text-3xl">Properties</h1>
+            <h1 className="font-bold text-3xl text-pura-blue">Properties</h1>
             <p className="mt-1 text-slate-600">
               Manage your hotel properties and locations
             </p>
           </div>
-          <Button
-            onClick={handleCreate}
-            className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
-          >
+          <Button onClick={handleCreate}>
             <Plus className="h-4 mr-2 w-4" />
             Add Property
           </Button>
@@ -93,7 +90,7 @@ export default function PropertiesPage() {
 
         {/* Properties Grid */}
         {properties.length === 0 ? (
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 py-12 rounded-3xl text-center">
+          <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
             <Building2 className="h-16 mx-auto text-slate-300 w-16" />
             <h3 className="font-semibold mt-4 text-lg text-slate-700">
               No properties yet
@@ -101,10 +98,7 @@ export default function PropertiesPage() {
             <p className="mt-2 text-slate-500">
               Get started by adding your first property
             </p>
-            <Button
-              onClick={handleCreate}
-              className="bg-[#1e4b8e] hover:bg-[#153a6e] mt-6 rounded-xl"
-            >
+            <Button onClick={handleCreate} className="mt-6">
               <Plus className="h-4 mr-2 w-4" />
               Add Property
             </Button>
@@ -114,13 +108,13 @@ export default function PropertiesPage() {
             {properties.map((property) => (
               <div
                 key={property.id}
-                className="backdrop-blur-2xl bg-white/40 border border-white/50 duration-300 group hover:-translate-y-2 hover:bg-white/50 hover:border-white/70 hover:shadow-2xl hover:shadow-black/10 overflow-hidden p-6 relative rounded-3xl shadow-black/5 shadow-xl transition-all"
+                className="bg-white border border-slate-200 group hover:border-slate-300 overflow-hidden p-6 relative rounded-xl shadow-sm transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex gap-3 items-center">
-                      <div className="bg-[#1e4b8e]/10 p-3 rounded-2xl">
-                        <Building2 className="h-6 text-[#1e4b8e] w-6" />
+                      <div className="bg-pura-blue/10 p-3 rounded-lg">
+                        <Building2 className="h-6 text-pura-blue w-6" />
                       </div>
                       <div>
                         <h3 className="font-bold text-lg text-slate-800">
@@ -142,13 +136,13 @@ export default function PropertiesPage() {
                       {property._count && (
                         <>
                           <div className="text-center">
-                            <div className="font-bold text-[#1e4b8e] text-2xl">
+                            <div className="font-bold text-2xl text-pura-blue">
                               {property._count.rooms}
                             </div>
                             <div className="text-slate-500 text-xs">Rooms</div>
                           </div>
                           <div className="text-center">
-                            <div className="font-bold text-[#f5a623] text-2xl">
+                            <div className="font-bold text-2xl text-pura-orange">
                               {property._count.roomTypes}
                             </div>
                             <div className="text-slate-500 text-xs">Types</div>
@@ -164,7 +158,7 @@ export default function PropertiesPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 rounded-xl"
+                    className="flex-1"
                     onClick={() => {
                       router.push(`/properties/${property.id}`);
                     }}
@@ -174,7 +168,7 @@ export default function PropertiesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hover:bg-blue-50 hover:text-blue-600 rounded-xl"
+                    className="hover:bg-blue-50 hover:text-blue-600"
                     onClick={() => handleEdit(property)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -182,7 +176,7 @@ export default function PropertiesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hover:bg-red-50 hover:text-red-600 rounded-xl"
+                    className="hover:bg-red-50 hover:text-red-600"
                     onClick={() => handleDelete(property.id, property.name)}
                   >
                     <Trash2 className="h-4 w-4" />

@@ -23,7 +23,7 @@ export function BottomNavigation() {
   );
 
   return (
-    <nav className="backdrop-blur-xl bg-white/95 border-slate-200 border-t bottom-0 fixed left-0 lg:hidden pb-[env(safe-area-inset-bottom)] right-0 shadow-black/5 shadow-lg z-50">
+    <nav className="bg-white border-slate-200 border-t bottom-0 fixed left-0 lg:hidden pb-[env(safe-area-inset-bottom)] right-0 z-50">
       <div className="flex h-16 items-center justify-around">
         {primaryBottomNavItems.map((item) => {
           const isActive = pathname === item.href;
@@ -34,17 +34,12 @@ export function BottomNavigation() {
               className={cn(
                 TAB_CLASS,
                 isActive
-                  ? 'text-[#1e4b8e]'
-                  : 'text-slate-600 hover:text-[#1e4b8e] active:scale-95',
+                  ? 'text-pura-blue'
+                  : 'text-slate-600 hover:text-pura-blue',
               )}
               aria-label={t(item.labelKey)}
             >
-              <item.icon
-                className={cn(
-                  'h-5 w-5 transition-transform',
-                  isActive && 'scale-110',
-                )}
-              />
+              <item.icon className="h-5 w-5" />
               <span
                 className={cn(
                   'max-w-full text-[10px] font-medium truncate',
@@ -65,16 +60,11 @@ export function BottomNavigation() {
               className={cn(
                 TAB_CLASS,
                 isMoreActive
-                  ? 'text-[#1e4b8e]'
-                  : 'text-slate-600 hover:text-[#1e4b8e] active:scale-95',
+                  ? 'text-pura-blue'
+                  : 'text-slate-600 hover:text-pura-blue',
               )}
             >
-              <MoreHorizontal
-                className={cn(
-                  'h-5 w-5 transition-transform',
-                  isMoreActive && 'scale-110',
-                )}
-              />
+              <MoreHorizontal className="h-5 w-5" />
               <span
                 className={cn(
                   'max-w-full text-[10px] font-medium truncate',
