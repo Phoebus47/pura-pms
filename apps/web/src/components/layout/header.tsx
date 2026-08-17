@@ -48,7 +48,7 @@ export function Header() {
   }, [isSearchOpen]);
 
   return (
-    <header className="backdrop-blur-2xl bg-white/30 border-b border-white/40 flex h-14 items-center justify-between lg:h-16 lg:px-6 px-3 shadow-black/5 shadow-lg sticky top-0 z-20">
+    <header className="bg-white border-b border-slate-200 flex h-14 items-center justify-between lg:h-16 lg:px-6 px-3 sticky top-0 z-20">
       <div className="flex flex-1 gap-2 items-center lg:gap-4 min-w-0">
         <Button
           type="button"
@@ -76,7 +76,7 @@ export function Header() {
             type="search"
             placeholder="Search guests, reservations, rooms..."
             aria-label="Search guests, reservations, rooms"
-            className="backdrop-blur-xl bg-white/60 border border-white/60 hover:bg-white/70 hover:shadow-xl pl-10 pr-4 py-2.5 rounded-2xl shadow-black/5 shadow-lg text-sm transition-all w-full"
+            className="pl-10 pr-4 py-2.5 rounded-lg text-sm w-full"
           />
         </div>
       </div>
@@ -86,30 +86,30 @@ export function Header() {
           variant="ghost"
           size="icon"
           aria-label="Notifications"
-          className="active:scale-95 group hover:bg-muted/80 min-h-11 min-w-11 relative rounded-full transition-all"
+          className="group hover:bg-muted min-h-11 min-w-11 relative rounded-full"
         >
           <Bell className="group-hover:text-pura-blue h-5 text-muted-foreground transition-colors w-5" />
           <span
-            className="absolute animate-pulse bg-pura-orange h-2 right-2 ring-2 ring-white rounded-full top-2 w-2"
+            className="absolute bg-pura-orange h-2 right-2 ring-2 ring-white rounded-full top-2 w-2"
             aria-hidden="true"
           />
         </Button>
 
-        <div className="bg-border/60 h-8 mx-1 w-px" />
+        <div className="bg-slate-200 h-8 mx-1 w-px" />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="active:scale-95 gap-3 group h-auto hover:bg-muted/80 px-2 py-1.5 rounded-full transition-all"
+              className="gap-3 group h-auto hover:bg-muted px-2 py-1.5 rounded-full"
             >
               <div className="relative">
-                <Avatar className="border-2 border-transparent group-hover:border-pura-blue/20 h-9 transition-all w-9">
+                <Avatar className="border-2 border-transparent group-hover:border-pura-blue/20 h-9 transition-colors w-9">
                   <AvatarImage
                     src="/placeholder-avatar.jpg"
                     alt="Super Admin profile picture"
                   />
-                  <AvatarFallback className="bg-linear-to-br font-semibold from-pura-blue shadow-inner text-white text-xs to-pura-blue-dark">
+                  <AvatarFallback className="bg-pura-blue font-semibold text-white text-xs">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
@@ -125,10 +125,7 @@ export function Header() {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="border-border/50 p-2 rounded-2xl shadow-2xl w-60"
-          >
+          <DropdownMenuContent align="end" className="p-2 w-60">
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
                 <p className="font-semibold leading-none text-sm">{userName}</p>
@@ -138,16 +135,16 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="mx-2" />
-            <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-xl transition-colors">
+            <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-md transition-colors">
               Profile Settings
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-xl transition-colors">
+            <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-md transition-colors">
               Switch Property
             </DropdownMenuItem>
             <DropdownMenuSeparator className="mx-2" />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-xl text-red-600"
+              className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-md text-red-600"
             >
               Log out
             </DropdownMenuItem>
