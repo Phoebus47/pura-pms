@@ -67,6 +67,7 @@ describe('Sidebar', () => {
 
   it('should scroll overflow navigation items', () => {
     const { container } = render(<Sidebar />);
-    expect(container.querySelector('nav')).toHaveClass('overflow-y-auto');
+    const nav = container.querySelector('nav');
+    expect(nav).toHaveClass('overflow-y-auto', 'scrollbar-sidebar');
   });
 });
