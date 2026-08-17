@@ -14,6 +14,7 @@ const mockFoliosService = {
   postTransaction: vi.fn(),
   voidTransaction: vi.fn(),
   checkout: vi.fn(),
+  reopen: vi.fn(),
   setCreditLimit: vi.fn(),
   setArAccount: vi.fn(),
 };
@@ -139,6 +140,19 @@ describe('FoliosController', () => {
         'folio-1',
         'user-1',
       );
+    });
+  });
+
+  describe('reopen', () => {
+    it('should reopen a folio', async () => {
+      mockFoliosService.reopen.mockResolvedValue({
+        id: 'folio-1',
+        status: FolioStatus.OPEN,
+      });
+
+      await controller.reopen('folio-1');
+
+      expect(mockFoliosService.reopen).toHaveBeenCalledWith('folio-1');
     });
   });
 
