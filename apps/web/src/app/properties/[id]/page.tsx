@@ -43,7 +43,7 @@ export default function PropertyDetailPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading property...</p>
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function PropertyDetailPage() {
           <ArrowLeft className="h-4 mr-2 w-4" />
           Back
         </Button>
-        <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+        <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
           <h3 className="font-semibold text-red-800">Error loading property</h3>
           <p className="mt-2 text-red-600">{error || 'Property not found'}</p>
         </div>
@@ -76,14 +76,14 @@ export default function PropertyDetailPage() {
       </div>
 
       {/* Property Info Card */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-8 rounded-3xl shadow-xl">
+      <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex gap-4 items-center">
-            <div className="bg-[#1e4b8e]/10 p-4 rounded-2xl">
-              <Building2 className="h-10 text-[#1e4b8e] w-10" />
+            <div className="bg-pura-blue/10 p-4 rounded-lg">
+              <Building2 className="h-10 text-pura-blue w-10" />
             </div>
             <div>
-              <h1 className="font-bold text-[#1e4b8e] text-3xl">
+              <h1 className="font-bold text-3xl text-pura-blue">
                 {property.name}
               </h1>
               <p className="mt-1 text-slate-600">
@@ -91,9 +91,7 @@ export default function PropertyDetailPage() {
               </p>
             </div>
           </div>
-          <Button className="bg-[#1e4b8e] hover:bg-[#153a6e]">
-            Edit Property
-          </Button>
+          <Button>Edit Property</Button>
         </div>
 
         {/* Details Grid */}
@@ -151,13 +149,13 @@ export default function PropertyDetailPage() {
         {property._count && (
           <div className="border-slate-200 border-t flex gap-8 mt-8 pt-6">
             <div>
-              <div className="font-bold text-[#1e4b8e] text-3xl">
+              <div className="font-bold text-3xl text-pura-blue">
                 {property._count.rooms}
               </div>
               <div className="mt-1 text-slate-600 text-sm">Total Rooms</div>
             </div>
             <div>
-              <div className="font-bold text-[#f5a623] text-3xl">
+              <div className="font-bold text-3xl text-pura-orange">
                 {property._count.roomTypes}
               </div>
               <div className="mt-1 text-slate-600 text-sm">Room Types</div>
@@ -168,11 +166,11 @@ export default function PropertyDetailPage() {
 
       {/* Rooms & Room Types sections would go here */}
       <div className="gap-6 grid lg:grid-cols-2">
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
           <h2 className="font-bold text-slate-800 text-xl">Rooms</h2>
           <p className="mt-2 text-slate-600">Room management coming soon...</p>
         </div>
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
           <h2 className="font-bold text-slate-800 text-xl">Room Types</h2>
           <p className="mt-2 text-slate-600">
             Room type management coming soon...

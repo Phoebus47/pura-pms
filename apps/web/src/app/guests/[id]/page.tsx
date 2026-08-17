@@ -96,7 +96,7 @@ export default function GuestDetailPage() {
                 {Array.from({ length: guest.vipLevel }).map((_, i) => (
                   <Star
                     key={`${guest.id}-vip-star-${i}`}
-                    className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
+                    className="fill-pura-orange h-4 text-pura-orange w-4"
                   />
                 ))}
               </div>
@@ -108,7 +108,11 @@ export default function GuestDetailPage() {
             <Button
               variant="outline"
               onClick={toggleBlacklist}
-              className={`rounded-xl ${guest.isBlacklist ? 'text-emerald-600 hover:bg-emerald-50' : 'text-red-600 hover:bg-red-50'}`}
+              className={
+                guest.isBlacklist
+                  ? 'text-emerald-600 hover:bg-emerald-50'
+                  : 'text-red-600 hover:bg-red-50'
+              }
             >
               {guest.isBlacklist ? (
                 <>
@@ -125,7 +129,6 @@ export default function GuestDetailPage() {
             <Button
               variant="outline"
               onClick={() => router.push(`/guests/${guestId}/edit`)}
-              className="rounded-xl"
             >
               <Edit className="h-4 mr-2 w-4" />
               Edit
@@ -133,7 +136,7 @@ export default function GuestDetailPage() {
             <Button
               variant="outline"
               onClick={handleDelete}
-              className="hover:bg-red-50 rounded-xl text-red-600"
+              className="hover:bg-red-50 text-red-600"
             >
               <Trash2 className="h-4 mr-2 w-4" />
               Delete
@@ -143,8 +146,8 @@ export default function GuestDetailPage() {
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
+        <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
+          <h2 className="font-bold mb-6 text-pura-blue text-xl">
             Personal Information
           </h2>
 
@@ -209,8 +212,8 @@ export default function GuestDetailPage() {
           )}
         </div>
 
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
+        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+          <h2 className="font-bold mb-6 text-pura-blue text-xl">
             Guest Statistics
           </h2>
 
@@ -225,7 +228,7 @@ export default function GuestDetailPage() {
                     Array.from({ length: guest.vipLevel }).map((_, i) => (
                       <Star
                         key={`${guest.id}-stats-star-${i}`}
-                        className="fill-[#f5a623] h-6 text-[#f5a623] w-6"
+                        className="fill-pura-orange h-6 text-pura-orange w-6"
                       />
                     ))
                   )}
@@ -236,7 +239,7 @@ export default function GuestDetailPage() {
             <DetailField
               label="Total Stays"
               value={
-                <p className="font-bold text-[#1e4b8e] text-3xl">
+                <p className="font-bold text-3xl text-pura-blue">
                   {guest.totalStays}
                 </p>
               }
@@ -245,7 +248,7 @@ export default function GuestDetailPage() {
             <DetailField
               label="Total Revenue"
               value={
-                <p className="font-bold text-[#1e4b8e] text-3xl">
+                <p className="font-bold text-3xl text-pura-blue">
                   ฿{Number(guest.totalRevenue).toLocaleString()}
                 </p>
               }
