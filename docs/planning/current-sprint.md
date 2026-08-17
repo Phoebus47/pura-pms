@@ -1,40 +1,43 @@
-# Current Sprint — Phase 4 Overbooking Recovery (Walk)
+# Current Sprint — Phase 4 Complimentary / House Use Rooms
 
-**Theme:** A confirmed guest arrives and the property has no room — walk them to a partner hotel
-**Goal:** Front desk can walk a confirmed reservation to a partner hotel, recording the cost paid to that hotel and the compensation given to the guest, without inventing a new AP/vendor-payable ledger.
-**Branch:** `cursor/feat-overbooking-walk-6a5d`
+**Theme:** Owner, staff, press, and barter stays occupy a room without posting room revenue
+**Goal:** Front desk can book complimentary or house-use reservations that count toward occupancy, stay at rate 0 (COMP / HOUSE), and record who approved them — without inventing a new ledger or reversing posted charges.
+**Branch:** `cursor/feat-comp-house-use-6a5d`
 **Base:** `dev`
-**Source:** `docs/planning/prd.md` §4.2 Overbooking recovery + §12
-**Depends on:** Reservation lifecycle (CONFIRMED → terminal status), same pattern as No-show. Do not reopen Room Move, Day-use, Split Stay, No-show, or Post-departure Charges.
+**Source:** `docs/planning/prd.md` §4.3 + §4.15 + §12; `docs/planning/reports-master-list.md` §2.5
+**Depends on:** Reservation create/update, Night Audit room posting skip (same pattern as day-use). Do not reopen Walk, Day-use, Split Stay, No-show, Room Move, or Post-departure.
 
 ## Working agreements
 
-- **One epic, one PR.** Conventional Commits (`feat(reservations): …`, `feat(partner-hotels): …`). Prisma **^6.19.2**.
-- **Usable first, no new ledger.** `cost` (paid to the partner hotel) and `compensationAmount` (given to the guest) are recorded on the `Walk` row for reporting only — this sprint does **not** post them through GL/AR/AP. Accounts payable to partner hotels is an explicit "wait" item in `phase-3-closeout.md`.
-- New minimal directory model `PartnerHotel` (property-scoped, active/inactive) — mirrors `RoomType`'s CRUD shape, not `ARAccount`'s AR machinery.
-- New reservation status `WALKED` (schema enum), mirrors how `NO_SHOW` is a terminal status reached only from `CONFIRMED`.
+- **One epic, one PR.** Conventional Commits (`feat(reservations): …`, `feat(night-audit): …`). Prisma **^6.19.2**.
+- **Occupancy, not revenue.** COMP / HOUSE stays still occupy the assigned room. Night Audit does **not** post a ROOM charge. Guest `totalRevenue` increments by 0.
+- Additive schema only: `StayPurpose` enum + authority fields on `Reservation`. No new ledger tables.
+- Stay purpose may change only while the reservation is `TENTATIVE` or `CONFIRMED`.
 - No hardcoded UI copy. New strings in `en.json` + `th.json` via `t()`.
 - Tests with the change.
 
 ## What ships
 
-1. Schema: `ReservationStatus.WALKED`, `PartnerHotel` model, `Walk` model (`cost`, `compensationAmount`, `compensationNotes`, `reason`, `walkedBy`, `walkedAt`).
-2. `POST /reservations/:id/walk` — only `CONFIRMED` reservations; validates the partner hotel belongs to the same property and is active; sets `status: WALKED`; records the `Walk` row. `GET /reservations/:id/walks` for history.
-3. `partner-hotels` module — plain CRUD (`create`, `findAll` by `propertyId`, `findOne`, `update`) guarded by `JwtAuthGuard`, matching `room-types`.
-4. Web: `/partner-hotels` admin page (create + activate/deactivate list) and a `WalkPanel` on the reservation detail page, visible only when the reservation is `CONFIRMED`.
+1. Schema: `StayPurpose` (`STANDARD | COMPLIMENTARY | HOUSE_USE`), `approvedBy`, `stayPurposeNote`, `department`, index on `stayPurpose`.
+2. Create/update: COMP and HOUSE force `roomRate` / `totalAmount` (and stay rates) to 0; default `rateCode` to `COMP` / `HOUSE` when unset. Complimentary requires `approvedBy`. House use requires `approvedBy` and `department`.
+3. Night Audit `processRoomPosting` skips non-revenue stays the same way it skips day-use (`stayPurpose: STANDARD` in the query).
+4. `GET /reservations?stayPurpose=` for the Complimentary & House Use list.
+5. Web: stay-type select + authority fields on new reservation; badges on list/detail; detail shows authority / purpose / department; reports panel lists COMP / HOUSE stays overlapping the selected business date.
 
 ## Invariants
 
-| Rule         | Constraint                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------------------------- |
-| Walk guard   | Only a `CONFIRMED` reservation can be walked. `CHECKED_IN` guests already have a room — use Room Move instead. |
-| Hotel guard  | The partner hotel must belong to the same property as the reservation and be `isActive`.                       |
-| Amount guard | `cost` and `compensationAmount` must be `>= 0`.                                                                |
-| Money        | No folio posting, no GL/AR/AP entry. `cost`/`compensationAmount` are reporting fields only.                    |
+| Rule           | Constraint                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------- |
+| Amount guard   | COMP / HOUSE always persist `roomRate = 0` and `totalAmount = 0`.                                 |
+| Authority      | Complimentary requires `approvedBy`. House use requires `approvedBy` and `department`.            |
+| Lifecycle      | `stayPurpose` can change only on `TENTATIVE` or `CONFIRMED`.                                      |
+| Occupancy      | Rooms stay blocked; Daily Flash occupancy still counts these stays.                               |
+| Posted charges | Do not void or reverse already posted ROOM charges. Only prevent future Night Audit room posting. |
+| Money          | No GL/AR/AP posting for the complimentary value. Lost revenue on the report uses rack `baseRate`. |
 
 ## Out of scope
 
-- Accounts payable / vendor commission tracking for partner hotels (wait item)
-- Auto-selecting or recommending a partner hotel
-- Notifying the guest (email/SMS) about the walk
-- Waitlist / auto re-accommodation once a room frees up
+- Accounts payable / GL posting of complimentary value
+- Changing stay purpose after check-in
+- VIP room lock / tax exemption (later Phase 4 items)
+- Reversing room charges already posted before a stay was marked COMP / HOUSE

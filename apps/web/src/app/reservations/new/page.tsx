@@ -24,10 +24,13 @@ import { GuestSearchDialog } from '@/components/guest-search-dialog';
 import { GuestFormDialog } from '@/components/guest-form-dialog';
 import { toast } from '@/lib/toast';
 import { DayUseBadge } from '@/components/day-use-badge';
+import { StayPurposeBadge } from '@/components/stay-purpose-badge';
+import { StayPurposeFields } from '@/components/stay-purpose-fields';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayOptions } from '@/components/split-stay-options';
 import { t } from '@/lib/i18n';
 import { buildSplitStayPayload, calendarNights } from '@/lib/split-stay';
+import { isNonRevenueStay, type StayPurpose } from '@/lib/stay-purpose';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -50,6 +53,10 @@ export default function NewReservationPage() {
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
   const [isDayUse, setIsDayUse] = useState(false);
+  const [stayPurpose, setStayPurpose] = useState<StayPurpose>('STANDARD');
+  const [approvedBy, setApprovedBy] = useState('');
+  const [stayPurposeNote, setStayPurposeNote] = useState('');
+  const [department, setDepartment] = useState('');
   const [isSplitStay, setIsSplitStay] = useState(false);
   const [splitDate, setSplitDate] = useState('');
   const [secondRoom, setSecondRoom] = useState<Room | null>(null);
@@ -142,6 +149,14 @@ export default function NewReservationPage() {
   }
 
   async function handleSubmit() {
+    if (isNonRevenueStay(stayPurpose) && !approvedBy.trim()) {
+      toast.warning(t('reservations.stayPurpose.authorityRequired'));
+      return;
+    }
+    if (stayPurpose === 'HOUSE_USE' && !department.trim()) {
+      toast.warning(t('reservations.stayPurpose.departmentRequired'));
+      return;
+    }
     setSubmitting(true);
     try {
       const firstRate = Number(selectedRoom!.roomType?.baseRate || 0);
@@ -162,6 +177,9 @@ export default function NewReservationPage() {
           calendarNights(splitDate, checkOut) * secondRate
         : firstRate * billedNights;
 
+      const billedRate = isNonRevenueStay(stayPurpose) ? 0 : firstRate;
+      const billedTotal = isNonRevenueStay(stayPurpose) ? 0 : calculatedTotal;
+
       const reservationData: CreateReservationDto = {
         guestId: selectedGuest!.id,
         roomId: selectedRoom!.id,
@@ -169,11 +187,17 @@ export default function NewReservationPage() {
         checkOut,
         adults: numberOfGuests,
         children: 0,
-        roomRate: firstRate,
-        totalAmount: calculatedTotal,
+        roomRate: billedRate,
+        totalAmount: billedTotal,
         specialRequest: specialRequests || undefined,
         status: 'CONFIRMED',
         isDayUse,
+        stayPurpose,
+        approvedBy: isNonRevenueStay(stayPurpose)
+          ? approvedBy.trim()
+          : undefined,
+        stayPurposeNote: stayPurposeNote.trim() || undefined,
+        department: stayPurpose === 'HOUSE_USE' ? department.trim() : undefined,
         stays,
       };
 
@@ -216,12 +240,11 @@ export default function NewReservationPage() {
   const billedNights = isDayUse ? 1 : nights;
   const firstRate = Number(selectedRoom?.roomType?.baseRate || 0);
   const secondRate = Number(secondRoom?.roomType?.baseRate || 0);
-  const totalAmount = isSplitStay
+  const rackTotal = isSplitStay
     ? calendarNights(checkIn, splitDate) * firstRate +
       calendarNights(splitDate, checkOut) * secondRate
-    : selectedRoom && billedNights > 0
-      ? firstRate * billedNights
-      : 0;
+    : firstRate * billedNights;
+  const totalAmount = isNonRevenueStay(stayPurpose) ? 0 : rackTotal;
   const splitMinDate = checkIn
     ? new Date(new Date(checkIn).getTime() + 86400000)
         .toISOString()
@@ -329,6 +352,17 @@ export default function NewReservationPage() {
                 </span>
               </span>
             </label>
+
+            <StayPurposeFields
+              stayPurpose={stayPurpose}
+              onStayPurposeChange={setStayPurpose}
+              approvedBy={approvedBy}
+              onApprovedByChange={setApprovedBy}
+              stayPurposeNote={stayPurposeNote}
+              onStayPurposeNoteChange={setStayPurposeNote}
+              department={department}
+              onDepartmentChange={setDepartment}
+            />
 
             <SplitStayOptions
               enabled={isSplitStay}
@@ -562,8 +596,32 @@ export default function NewReservationPage() {
                       {selectedGuest?.firstName} {selectedGuest?.lastName}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">
+                      {t('reservations.stayPurpose.label')}:
+                    </span>
+                    <span className="font-semibold">
+                      {isNonRevenueStay(stayPurpose) ? (
+                        <StayPurposeBadge stayPurpose={stayPurpose} />
+                      ) : (
+                        t('reservations.stayPurpose.standard')
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              <StayPurposeFields
+                stayPurpose={stayPurpose}
+                onStayPurposeChange={setStayPurpose}
+                approvedBy={approvedBy}
+                onApprovedByChange={setApprovedBy}
+                stayPurposeNote={stayPurposeNote}
+                onStayPurposeNoteChange={setStayPurposeNote}
+                department={department}
+                onDepartmentChange={setDepartment}
+                showAuthority
+              />
 
               <div>
                 <label

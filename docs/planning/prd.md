@@ -1234,7 +1234,7 @@ graph LR
 - [x] No-show / Late Cancellation Auto-charges
 - [x] Post-departure Charges
 - [x] Overbooking Recovery (Walk)
-- [ ] Complimentary / House Use Rooms
+- [x] Complimentary / House Use Rooms
 - [ ] Extended Stay Billing (weekly/monthly)
 - [ ] Tax Exemption Handling
 - [ ] VIP Room Pre-assignment & Lock

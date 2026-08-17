@@ -7,7 +7,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { ReservationStatus } from '@pura/database';
+import { ReservationStatus, StayPurpose } from '@pura/database';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 
 const mockPrismaService = {
@@ -23,6 +23,7 @@ const mockPrismaService = {
     deleteMany: vi.fn(),
     createMany: vi.fn(),
     update: vi.fn(),
+    updateMany: vi.fn(),
   },
   roomMove: {
     create: vi.fn(),
@@ -94,6 +95,9 @@ describe('ReservationsService', () => {
       count: 0,
     });
     mockPrismaService.reservationStay.update.mockResolvedValue({});
+    mockPrismaService.reservationStay.updateMany.mockResolvedValue({
+      count: 0,
+    });
     mockPrismaService.roomMove.create.mockResolvedValue({});
     mockPrismaService.roomMove.findMany.mockResolvedValue([]);
     mockPrismaService.walk.create.mockResolvedValue({});
@@ -227,6 +231,87 @@ describe('ReservationsService', () => {
 
       await expect(service.create(dayUseDto)).rejects.toThrow(
         BadRequestException,
+      );
+    });
+
+    it('should create a complimentary reservation at rate zero', async () => {
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.create.mockResolvedValue({
+        id: 'res-comp',
+        stayPurpose: StayPurpose.COMPLIMENTARY,
+      });
+      mockPrismaService.guest.update.mockResolvedValue({});
+
+      await service.create({
+        ...createDto,
+        stayPurpose: StayPurpose.COMPLIMENTARY,
+        approvedBy: 'GM',
+        stayPurposeNote: 'Press stay',
+        roomRate: 3500,
+        totalAmount: 7000,
+      });
+
+      expect(prisma.reservation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            stayPurpose: StayPurpose.COMPLIMENTARY,
+            approvedBy: 'GM',
+            stayPurposeNote: 'Press stay',
+            rateCode: 'COMP',
+            roomRate: 0,
+            totalAmount: 0,
+          }),
+        }),
+      );
+      expect(prisma.guest.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            totalRevenue: { increment: 0 },
+          }),
+        }),
+      );
+    });
+
+    it('should reject complimentary reservations without authority', async () => {
+      await expect(
+        service.create({
+          ...createDto,
+          stayPurpose: StayPurpose.COMPLIMENTARY,
+          roomRate: 3500,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should create a house-use reservation with department', async () => {
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.create.mockResolvedValue({
+        id: 'res-house',
+        stayPurpose: StayPurpose.HOUSE_USE,
+      });
+      mockPrismaService.guest.update.mockResolvedValue({});
+
+      await service.create({
+        ...createDto,
+        stayPurpose: StayPurpose.HOUSE_USE,
+        approvedBy: 'GM',
+        department: 'Sales',
+        roomRate: 3500,
+      });
+
+      expect(prisma.reservation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            stayPurpose: StayPurpose.HOUSE_USE,
+            department: 'Sales',
+            rateCode: 'HOUSE',
+            roomRate: 0,
+            totalAmount: 0,
+          }),
+        }),
       );
     });
 
@@ -477,6 +562,24 @@ describe('ReservationsService', () => {
         }),
       );
     });
+
+    it('should filter by stay purpose', async () => {
+      await service.findAll(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        StayPurpose.COMPLIMENTARY,
+      );
+      expect(prisma.reservation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            stayPurpose: StayPurpose.COMPLIMENTARY,
+          }),
+        }),
+      );
+    });
   });
 
   describe('findOne', () => {
@@ -530,6 +633,8 @@ describe('ReservationsService', () => {
       checkOut: new Date('2024-01-05'),
       roomRate: 100,
       isDayUse: false,
+      stayPurpose: StayPurpose.STANDARD,
+      status: ReservationStatus.CONFIRMED,
       stays: [],
       room: { propertyId: 'prop-1' },
     };
@@ -654,6 +759,44 @@ describe('ReservationsService', () => {
           }),
         }),
       );
+    });
+
+    it('should convert a confirmed stay to complimentary at rate zero', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        existingReservation,
+      );
+      mockPrismaService.reservation.update.mockResolvedValue({});
+
+      await service.update('res-1', {
+        stayPurpose: StayPurpose.COMPLIMENTARY,
+        approvedBy: 'GM',
+      });
+
+      expect(prisma.reservation.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            stayPurpose: StayPurpose.COMPLIMENTARY,
+            roomRate: 0,
+            totalAmount: 0,
+            rateCode: 'COMP',
+          }),
+        }),
+      );
+    });
+
+    it('should reject stay-purpose changes after check-in', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...existingReservation,
+        status: ReservationStatus.CHECKED_IN,
+      });
+
+      await expect(
+        service.update('res-1', {
+          stayPurpose: StayPurpose.HOUSE_USE,
+          approvedBy: 'GM',
+          department: 'Sales',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should reject date changes on a split stay without replacement stays', async () => {

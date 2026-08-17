@@ -402,6 +402,23 @@ describe('ReservationDetailPage', () => {
     expect(screen.getByText('Stay type')).toBeInTheDocument();
   });
 
+  it('renders complimentary authority details', async () => {
+    (reservationsAPI.getById as any).mockResolvedValue({
+      ...mockReservation,
+      stayPurpose: 'COMPLIMENTARY',
+      approvedBy: 'GM',
+      stayPurposeNote: 'Press',
+      totalAmount: 0,
+    });
+    render(<ReservationDetailPage />);
+
+    await waitFor(() =>
+      expect(screen.getAllByText('Complimentary').length).toBeGreaterThan(0),
+    );
+    expect(screen.getByText('GM')).toBeInTheDocument();
+    expect(screen.getByText('Press')).toBeInTheDocument();
+  });
+
   it('renders split stay segments', async () => {
     (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,

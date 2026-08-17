@@ -5,12 +5,13 @@ import { JournalsService } from '../financial/journals.service';
 import { ReservationsService } from '../reservations/reservations.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { Prisma } from '@pura/database';
+import { Prisma, StayPurpose } from '@pura/database';
 import {
   findStayCoveringBusinessDate,
   resolveNightAuditRoomCharge,
 } from '../reservations/reservation-stay.util';
 import { noShowArrivalCutoff } from '../reservations/no-show';
+import { isNonRevenueStay } from '../reservations/stay-purpose';
 
 type StartAuditResult =
   | {
@@ -175,6 +176,7 @@ export class NightAuditService {
       where: {
         status: 'CHECKED_IN',
         isDayUse: false,
+        stayPurpose: StayPurpose.STANDARD,
         room: {
           propertyId,
         },
@@ -212,9 +214,9 @@ export class NightAuditService {
 
     // 2. Post room charge for each (with idempotency)
     for (const res of reservations) {
-      if (res.isDayUse) {
+      if (res.isDayUse || isNonRevenueStay(res.stayPurpose)) {
         this.logger.log(
-          `Skipping day-use reservation ${res.id} for room posting`,
+          `Skipping non-revenue reservation ${res.id} for room posting`,
         );
         continue;
       }

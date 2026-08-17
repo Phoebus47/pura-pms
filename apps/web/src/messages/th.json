@@ -125,7 +125,18 @@
     "tbDebit": "เดบิต",
     "tbCredit": "เครดิต",
     "tbEmpty": "ไม่มีสมุดรายวันที่ลงบัญชีในวันนี้",
-    "tbDrilldown": "รายการสมุดรายวัน"
+    "tbDrilldown": "รายการสมุดรายวัน",
+    "compHouseTitle": "ห้องฟรีและห้องใช้ภายใน",
+    "compHouseEmpty": "ไม่มีห้องฟรีหรือห้องใช้ภายในในวันนี้",
+    "compHouseRoom": "ห้อง",
+    "compHouseGuest": "แขก",
+    "compHouseNights": "คืน",
+    "compHouseAuthority": "ผู้อนุมัติ",
+    "compHousePurpose": "วัตถุประสงค์",
+    "compHouseDepartment": "แผนก",
+    "compHouseTotalComp": "ห้องฟรี",
+    "compHouseTotalHouse": "ห้องใช้ภายใน",
+    "compHouseRevenueLost": "รายได้ที่เสียไป"
   },
   "fx": {
     "title": "อัตราแลกเปลี่ยน",
@@ -336,6 +347,20 @@
       "success": "ย้ายแขกไปโรงแรมคู่ค้าแล้ว",
       "history": "ประวัติการย้าย",
       "emptyHistory": "ยังไม่มีการย้ายแขก"
+    },
+    "stayPurpose": {
+      "label": "ประเภทการเข้าพัก",
+      "standard": "ปกติ",
+      "complimentary": "ห้องฟรี",
+      "houseUse": "ห้องใช้ภายใน",
+      "hint": "ห้องฟรีและห้องใช้ภายในคิดอัตรา 0 และ Night Audit จะไม่ลงค่าห้อง",
+      "approvedBy": "ผู้อนุมัติ",
+      "purpose": "วัตถุประสงค์",
+      "department": "แผนก",
+      "badgeComp": "ห้องฟรี",
+      "badgeHouse": "ห้องใช้ภายใน",
+      "authorityRequired": "ระบุผู้อนุมัติสำหรับห้องฟรีหรือห้องใช้ภายใน",
+      "departmentRequired": "ระบุแผนกสำหรับห้องใช้ภายใน"
     }
   }
 }

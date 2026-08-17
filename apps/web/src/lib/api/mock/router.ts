@@ -2010,8 +2010,17 @@ function applyWalk(reservationId: string, body: any) {
   return reservation;
 }
 
-function handleReservationsGet(path: string) {
-  if (path === '/reservations') return mockDb.reservations;
+function handleReservationsGet(path: string, params?: URLSearchParams) {
+  if (path === '/reservations') {
+    const stayPurpose = params?.get('stayPurpose');
+    if (!stayPurpose) {
+      return mockDb.reservations;
+    }
+    return mockDb.reservations.filter(
+      (reservation: { stayPurpose?: string }) =>
+        reservation.stayPurpose === stayPurpose,
+    );
+  }
   const movesMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-moves$/.exec(
     path,
   );
@@ -2054,6 +2063,9 @@ function handleReservationsGet(path: string) {
 
 function handleReservationsPost(path: string, body: any) {
   if (path === '/reservations') {
+    const stayPurpose = body?.stayPurpose;
+    const nonRevenue =
+      stayPurpose === 'COMPLIMENTARY' || stayPurpose === 'HOUSE_USE';
     const randomSuffix = Math.floor(Math.random() * 10000); // NOSONAR
     const newRes = {
       ...body,
@@ -2062,6 +2074,15 @@ function handleReservationsPost(path: string, body: any) {
       status: 'CONFIRMED',
       createdAt: new Date().toISOString(),
       stays: Array.isArray(body?.stays) ? body.stays : [],
+      roomRate: nonRevenue ? 0 : body?.roomRate,
+      totalAmount: nonRevenue ? 0 : body?.totalAmount,
+      rateCode:
+        body?.rateCode ||
+        (stayPurpose === 'COMPLIMENTARY'
+          ? 'COMP'
+          : stayPurpose === 'HOUSE_USE'
+            ? 'HOUSE'
+            : body?.rateCode),
     };
     mockDb.reservations.push(newRes);
     return newRes;
@@ -2119,8 +2140,13 @@ function handleReservationsDelete(path: string) {
   }
 }
 
-function handleReservations(method: string, path: string, body: any) {
-  if (method === 'GET') return handleReservationsGet(path);
+function handleReservations(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (method === 'GET') return handleReservationsGet(path, params);
   if (method === 'POST') return handleReservationsPost(path, body);
   if (method === 'PATCH') return handleReservationsPatch(path, body);
   if (method === 'DELETE') return handleReservationsDelete(path);
@@ -2232,7 +2258,7 @@ export async function routeMockRequest<T>(
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
-      () => handleReservations(method, path, body),
+      () => handleReservations(method, path, body, params),
       () => handleGuests(method, path, body, params),
     ];
 

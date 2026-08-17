@@ -132,7 +132,11 @@ model Reservation {
   paidAmount     Decimal           @default(0) @db.Decimal(12, 2)
   notes          String?
   specialRequest String?
-  isDayUse       Boolean           @default(false)
+  isDayUse        Boolean           @default(false)
+  stayPurpose     StayPurpose       @default(STANDARD)
+  approvedBy      String?
+  stayPurposeNote String?
+  department      String?
   roomId         String
   room           Room              @relation(fields: [roomId], references: [id])
   guestId        String
@@ -152,6 +156,7 @@ model Reservation {
   @@index([checkIn, checkOut])
   @@index([status])
   @@index([isDayUse])
+  @@index([stayPurpose])
 }
 
 model ReservationStay {
@@ -777,6 +782,12 @@ enum ReservationStatus {
   CANCELLED
   NO_SHOW
   WALKED
+}
+
+enum StayPurpose {
+  STANDARD
+  COMPLIMENTARY
+  HOUSE_USE
 }
 
 enum FolioType {

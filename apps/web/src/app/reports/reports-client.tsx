@@ -12,6 +12,7 @@ import { DailyRevenueTable } from './daily-revenue-table';
 import { DailyFlashPanel } from './daily-flash-panel';
 import { JournalsPanel } from './journals-panel';
 import { TrialBalancePanel } from './trial-balance-panel';
+import { CompHousePanel } from './comp-house-panel';
 
 function toDateInputValue(value: string | undefined): string {
   if (!value) return '';
@@ -142,6 +143,15 @@ export function ReportsClient() {
             journals={journals}
             loading={tbLoading}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('reports.compHouseTitle')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CompHousePanel propertyId={property?.id} date={selectedDate} />
         </CardContent>
       </Card>
     </div>

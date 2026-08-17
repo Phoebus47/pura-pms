@@ -18,7 +18,7 @@ import { MoveRoomDto } from './dto/move-room.dto';
 import { MarkNoShowDto } from './dto/mark-no-show.dto';
 import { WalkReservationDto } from './dto/walk-reservation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ReservationStatus } from '@pura/database';
+import { ReservationStatus, StayPurpose } from '@pura/database';
 
 @Controller('reservations')
 @UseGuards(JwtAuthGuard)
@@ -37,6 +37,7 @@ export class ReservationsController {
     @Query('checkIn') checkIn?: string,
     @Query('checkOut') checkOut?: string,
     @Query('guestId') guestId?: string,
+    @Query('stayPurpose') stayPurpose?: StayPurpose,
   ) {
     return this.reservationsService.findAll(
       propertyId,
@@ -44,6 +45,7 @@ export class ReservationsController {
       checkIn ? new Date(checkIn) : undefined,
       checkOut ? new Date(checkOut) : undefined,
       guestId,
+      stayPurpose,
     );
   }
 

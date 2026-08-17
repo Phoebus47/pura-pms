@@ -342,6 +342,29 @@ describe('NightAuditService', () => {
       expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
     });
 
+    it('should skip complimentary reservations when posting room charges', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-comp',
+          roomRate: 0,
+          isDayUse: false,
+          stayPurpose: 'COMPLIMENTARY',
+          folios: [
+            { id: 'folio-1', windows: [{ id: 'win-1', windowNumber: 1 }] },
+          ],
+        },
+      ]);
+      mockPrismaService.transactionCode.findFirst.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processRoomPosting('prop-1', businessDate);
+
+      expect(result.roomsPosted).toBe(0);
+      expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
+    });
+
     it('should skip day-use reservations when posting room charges', async () => {
       mockPrismaService.reservation.findMany.mockResolvedValue([
         {
@@ -364,7 +387,10 @@ describe('NightAuditService', () => {
       expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
       expect(mockPrismaService.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ isDayUse: false }),
+          where: expect.objectContaining({
+            isDayUse: false,
+            stayPurpose: 'STANDARD',
+          }),
         }),
       );
     });

@@ -15,9 +15,12 @@ import { reservationsAPI, type Reservation } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { DayUseBadge } from '@/components/day-use-badge';
+import { StayPurposeBadge } from '@/components/stay-purpose-badge';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
+import { isNonRevenueStay } from '@/lib/stay-purpose';
+import { t } from '@/lib/i18n';
 import { FolioDetail } from '@/components/folio-detail';
 import { RoomMovePanel } from '@/components/room-move-panel';
 import { WalkPanel } from '@/components/walk-panel';
@@ -156,6 +159,7 @@ export default function ReservationDetailPage() {
             <div className="flex gap-2 items-center mt-1">
               <ReservationStatusBadge status={reservation.status} />
               {reservation.isDayUse ? <DayUseBadge /> : null}
+              <StayPurposeBadge stayPurpose={reservation.stayPurpose} />
               {isSplitStay(reservation) ? <SplitStayBadge /> : null}
             </div>
           </div>
@@ -330,6 +334,41 @@ export default function ReservationDetailPage() {
                   </p>
                 </div>
               </div>
+
+              {isNonRevenueStay(reservation.stayPurpose) ? (
+                <div className="border-slate-200 border-t mt-6 pt-6">
+                  <div className="gap-6 grid md:grid-cols-2">
+                    <div>
+                      <p className="font-semibold text-slate-600 text-sm">
+                        {t('reservations.stayPurpose.approvedBy')}
+                      </p>
+                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                        {reservation.approvedBy}
+                      </p>
+                    </div>
+                    {reservation.stayPurposeNote ? (
+                      <div>
+                        <p className="font-semibold text-slate-600 text-sm">
+                          {t('reservations.stayPurpose.purpose')}
+                        </p>
+                        <p className="font-semibold mt-1 text-lg text-slate-800">
+                          {reservation.stayPurposeNote}
+                        </p>
+                      </div>
+                    ) : null}
+                    {reservation.stayPurpose === 'HOUSE_USE' ? (
+                      <div>
+                        <p className="font-semibold text-slate-600 text-sm">
+                          {t('reservations.stayPurpose.department')}
+                        </p>
+                        <p className="font-semibold mt-1 text-lg text-slate-800">
+                          {reservation.department}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
 
               {reservation.stays ? (
                 <div className="border-slate-200 border-t mt-6 pt-6">

@@ -125,7 +125,18 @@
     "tbDebit": "Debit",
     "tbCredit": "Credit",
     "tbEmpty": "No posted journals for this date",
-    "tbDrilldown": "Journal lines"
+    "tbDrilldown": "Journal lines",
+    "compHouseTitle": "Complimentary & House Use",
+    "compHouseEmpty": "No complimentary or house-use stays for this date",
+    "compHouseRoom": "Room",
+    "compHouseGuest": "Guest",
+    "compHouseNights": "Nights",
+    "compHouseAuthority": "Approved by",
+    "compHousePurpose": "Purpose",
+    "compHouseDepartment": "Department",
+    "compHouseTotalComp": "Complimentary rooms",
+    "compHouseTotalHouse": "House-use rooms",
+    "compHouseRevenueLost": "Revenue lost"
   },
   "fx": {
     "title": "Currency exchange",
@@ -336,6 +347,20 @@
       "success": "Guest walked to the partner hotel",
       "history": "Walk history",
       "emptyHistory": "No walks recorded yet"
+    },
+    "stayPurpose": {
+      "label": "Stay type",
+      "standard": "Standard",
+      "complimentary": "Complimentary",
+      "houseUse": "House use",
+      "hint": "Complimentary and house-use stays occupy a room at rate 0 and are not posted by Night Audit.",
+      "approvedBy": "Approved by",
+      "purpose": "Purpose",
+      "department": "Department",
+      "badgeComp": "Complimentary",
+      "badgeHouse": "House use",
+      "authorityRequired": "Enter who approved this complimentary or house-use stay",
+      "departmentRequired": "Enter the department for a house-use stay"
     }
   }
 }

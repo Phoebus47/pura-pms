@@ -114,6 +114,7 @@ describe('ReservationsController', () => {
         expect.any(Date),
         expect.any(Date),
         'guest-1',
+        undefined,
       );
     });
 
@@ -121,6 +122,7 @@ describe('ReservationsController', () => {
       mockReservationsService.findAll.mockResolvedValue([]);
       await controller.findAll();
       expect(mockReservationsService.findAll).toHaveBeenCalledWith(
+        undefined,
         undefined,
         undefined,
         undefined,
