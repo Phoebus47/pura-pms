@@ -139,6 +139,10 @@ model Reservation {
   department      String?
   billingCycle    BillingCycle      @default(NIGHTLY)
   lastInterimBillingDate DateTime?   @db.Date
+  taxExempt              Boolean           @default(false)
+  taxExemptReason        TaxExemptReason?
+  taxExemptDocumentRef   String?
+  taxExemptApprovedBy    String?
   roomId          String
   room           Room              @relation(fields: [roomId], references: [id])
   guestId        String
@@ -160,6 +164,7 @@ model Reservation {
   @@index([isDayUse])
   @@index([stayPurpose])
   @@index([billingCycle])
+  @@index([taxExempt])
 }
 
 model ReservationStay {
@@ -798,6 +803,13 @@ enum BillingCycle {
   NIGHTLY
   WEEKLY
   MONTHLY
+}
+
+enum TaxExemptReason {
+  DIPLOMATIC
+  GOVERNMENT
+  INTERNATIONAL_ORG
+  OTHER
 }
 
 enum FolioType {

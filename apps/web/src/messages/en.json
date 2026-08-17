@@ -371,6 +371,20 @@
       "hint": "Weekly and monthly cycles post room charges at cycle end and auto-close an interim folio.",
       "badgeWeekly": "Weekly billing",
       "badgeMonthly": "Monthly billing"
+    },
+    "taxExempt": {
+      "label": "VAT exemption",
+      "checkbox": "Tax-exempt stay (no VAT)",
+      "hint": "Diplomatic, government, and international-organization guests. VAT is not posted on folio charges. Document reference is required.",
+      "reason": "Exemption reason",
+      "documentRef": "Document reference",
+      "approvedBy": "Approved by",
+      "diplomatic": "Diplomatic",
+      "government": "Government",
+      "internationalOrg": "International organization",
+      "other": "Other",
+      "badge": "Tax exempt",
+      "fieldsRequired": "Enter exemption reason, document reference, and who approved"
     }
   }
 }

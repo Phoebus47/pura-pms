@@ -58,6 +58,10 @@ import {
   isExtendedBillingCycle,
 } from './billing-cycle';
 import { assertBillingCycleCompatible } from './billing-cycle-guards';
+import {
+  assertCanChangeTaxExempt,
+  assertTaxExemptFields,
+} from './tax-exemption';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -81,6 +85,13 @@ export class ReservationsService {
       stayPurpose,
       approvedBy: createReservationDto.approvedBy,
       department: createReservationDto.department,
+    });
+    const taxExempt = createReservationDto.taxExempt === true;
+    assertTaxExemptFields({
+      taxExempt,
+      taxExemptReason: createReservationDto.taxExemptReason,
+      taxExemptDocumentRef: createReservationDto.taxExemptDocumentRef,
+      taxExemptApprovedBy: createReservationDto.taxExemptApprovedBy,
     });
 
     const datesError = stayDatesError(checkIn, checkOut, isDayUse);
@@ -226,6 +237,16 @@ export class ReservationsService {
         stayPurposeNote: createReservationDto.stayPurposeNote,
         department: createReservationDto.department,
         billingCycle: isDayUse ? BillingCycle.NIGHTLY : billingCycle,
+        taxExempt,
+        taxExemptReason: taxExempt
+          ? createReservationDto.taxExemptReason
+          : undefined,
+        taxExemptDocumentRef: taxExempt
+          ? createReservationDto.taxExemptDocumentRef
+          : undefined,
+        taxExemptApprovedBy: taxExempt
+          ? createReservationDto.taxExemptApprovedBy
+          : undefined,
         roomId: createReservationDto.roomId,
         guestId: createReservationDto.guestId,
         stays:
@@ -265,6 +286,7 @@ export class ReservationsService {
     checkOut?: Date,
     guestId?: string,
     stayPurpose?: StayPurpose,
+    taxExempt?: boolean,
   ) {
     const where: Prisma.ReservationWhereInput = {};
 
@@ -278,6 +300,10 @@ export class ReservationsService {
 
     if (stayPurpose) {
       where.stayPurpose = stayPurpose;
+    }
+
+    if (taxExempt !== undefined) {
+      where.taxExempt = taxExempt;
     }
 
     if (checkIn || checkOut) {
@@ -357,6 +383,23 @@ export class ReservationsService {
       stayPurpose,
       approvedBy: updateReservationDto.approvedBy ?? reservation.approvedBy,
       department: updateReservationDto.department ?? reservation.department,
+    });
+    const taxExempt = updateReservationDto.taxExempt ?? reservation.taxExempt;
+    assertCanChangeTaxExempt(
+      reservation.status,
+      reservation.taxExempt,
+      updateReservationDto.taxExempt,
+    );
+    assertTaxExemptFields({
+      taxExempt,
+      taxExemptReason:
+        updateReservationDto.taxExemptReason ?? reservation.taxExemptReason,
+      taxExemptDocumentRef:
+        updateReservationDto.taxExemptDocumentRef ??
+        reservation.taxExemptDocumentRef,
+      taxExemptApprovedBy:
+        updateReservationDto.taxExemptApprovedBy ??
+        reservation.taxExemptApprovedBy,
     });
     const stayDatesChanged = Boolean(
       updateReservationDto.checkIn ||
@@ -517,6 +560,13 @@ export class ReservationsService {
       updateData.roomRate = 0;
       updateData.totalAmount = 0;
       updateData.rateCode = nonRevenueRateCode;
+    }
+
+    if (updateReservationDto.taxExempt === false) {
+      updateData.taxExempt = false;
+      updateData.taxExemptReason = null;
+      updateData.taxExemptDocumentRef = null;
+      updateData.taxExemptApprovedBy = null;
     }
 
     return this.persistReservationUpdate(

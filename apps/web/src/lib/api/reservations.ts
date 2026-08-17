@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 
 import type { ReservationStay, ReservationStayInput } from '@/lib/split-stay';
+import type { TaxExemptReason } from '@/lib/tax-exemption';
 
 export type StayPurpose = 'STANDARD' | 'COMPLIMENTARY' | 'HOUSE_USE';
 
@@ -40,6 +41,10 @@ export interface Reservation {
   department?: string;
   billingCycle?: BillingCycle;
   lastInterimBillingDate?: string;
+  taxExempt?: boolean;
+  taxExemptReason?: TaxExemptReason;
+  taxExemptDocumentRef?: string;
+  taxExemptApprovedBy?: string;
   stays?: ReservationStay[];
   cancellationReason?: string;
   actualCheckIn?: string;
@@ -151,6 +156,10 @@ export interface CreateReservationDto {
   stayPurposeNote?: string;
   department?: string;
   billingCycle?: BillingCycle;
+  taxExempt?: boolean;
+  taxExemptReason?: TaxExemptReason;
+  taxExemptDocumentRef?: string;
+  taxExemptApprovedBy?: string;
   stays?: ReservationStayInput[];
 }
 
@@ -163,6 +172,7 @@ export interface ReservationFilterParams {
   checkOut?: string;
   guestId?: string;
   stayPurpose?: StayPurpose;
+  taxExempt?: boolean;
 }
 
 export interface CalendarParams {
@@ -181,6 +191,9 @@ export const reservationsAPI = {
     if (filters?.checkOut) params.append('checkOut', filters.checkOut);
     if (filters?.guestId) params.append('guestId', filters.guestId);
     if (filters?.stayPurpose) params.append('stayPurpose', filters.stayPurpose);
+    if (filters?.taxExempt !== undefined) {
+      params.append('taxExempt', String(filters.taxExempt));
+    }
 
     const query = params.toString();
     const endpoint = query ? `/reservations?${query}` : '/reservations';

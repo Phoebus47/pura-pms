@@ -419,6 +419,22 @@ describe('ReservationDetailPage', () => {
     expect(screen.getByText('Press')).toBeInTheDocument();
   });
 
+  it('renders tax exemption document details', async () => {
+    (reservationsAPI.getById as any).mockResolvedValue({
+      ...mockReservation,
+      taxExempt: true,
+      taxExemptReason: 'DIPLOMATIC',
+      taxExemptDocumentRef: 'UN-2026-01',
+      taxExemptApprovedBy: 'GM',
+    });
+    render(<ReservationDetailPage />);
+
+    await waitFor(() =>
+      expect(screen.getAllByText('Tax exempt').length).toBeGreaterThan(0),
+    );
+    expect(screen.getByText('UN-2026-01')).toBeInTheDocument();
+  });
+
   it('renders split stay segments', async () => {
     (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,

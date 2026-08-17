@@ -38,6 +38,7 @@ export class ReservationsController {
     @Query('checkOut') checkOut?: string,
     @Query('guestId') guestId?: string,
     @Query('stayPurpose') stayPurpose?: StayPurpose,
+    @Query('taxExempt') taxExempt?: string,
   ) {
     return this.reservationsService.findAll(
       propertyId,
@@ -46,6 +47,7 @@ export class ReservationsController {
       checkOut ? new Date(checkOut) : undefined,
       guestId,
       stayPurpose,
+      taxExempt === 'true' ? true : taxExempt === 'false' ? false : undefined,
     );
   }
 

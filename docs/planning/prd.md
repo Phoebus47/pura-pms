@@ -1236,7 +1236,7 @@ graph LR
 - [x] Overbooking Recovery (Walk)
 - [x] Complimentary / House Use Rooms
 - [x] Extended Stay Billing (weekly/monthly)
-- [ ] Tax Exemption Handling
+- [x] Tax Exemption Handling
 - [ ] VIP Room Pre-assignment & Lock
 
 ### Phase 5: Advanced Features

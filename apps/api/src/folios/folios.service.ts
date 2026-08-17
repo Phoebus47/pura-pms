@@ -208,7 +208,7 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    const { shiftId, rateCode, propertyCurrency, status } =
+    const { shiftId, rateCode, propertyCurrency, status, taxExempt } =
       await resolvePostShiftId(this.prisma, folioId, postTransactionDto.userId);
     assertFolioOpenForPosting(status);
 
@@ -218,13 +218,19 @@ export class FoliosService {
       propertyCurrency,
     );
 
-    const amounts = computePostingAmounts(amountNet, trxCode);
+    const amounts = computePostingAmounts(amountNet, trxCode, { taxExempt });
 
-    const lines = await resolvePostingLines(this.prisma, trxCode, rateCode, {
-      trxCodeId: trxCode.id,
-      code: trxCode.code,
-      ...amounts,
-    });
+    const lines = await resolvePostingLines(
+      this.prisma,
+      trxCode,
+      rateCode,
+      {
+        trxCodeId: trxCode.id,
+        code: trxCode.code,
+        ...amounts,
+      },
+      taxExempt,
+    );
 
     await this.assertArCreditAllowsPost(folioId, sumBalanceImpact(lines));
 

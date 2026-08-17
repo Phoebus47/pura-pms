@@ -1,34 +1,32 @@
-# Current Sprint — Phase 4 Extended Stay Billing
+# Current Sprint — Phase 4 Tax Exemption
 
 **Status:** In progress  
-**Branch:** `cursor/feat-extended-stay-6a5d`  
-**Depends on:** Complimentary / House Use (`cursor/feat-comp-house-use-6a5d`, PR #81)
+**Branch:** `cursor/feat-tax-exemption-6a5d`  
+**Depends on:** Extended Stay Billing (merged to `dev`)
 
 ## Goal
 
-Weekly and monthly billing cycles for long-term guests: cycle-rate room posting at cycle end, auto interim folio close/open, and `ReportArchive` (`INTERIM_FOLIO`).
+Flag diplomatic / government / international-organization stays so folio charges skip VAT (7%). Store exemption reason, document reference, and approver. Posted transactions stay immutable — only new postings skip tax.
 
 ## Schema
 
-- `BillingCycle` enum: `NIGHTLY | WEEKLY | MONTHLY` (default `NIGHTLY`)
-- `Reservation.billingCycle`, `Reservation.lastInterimBillingDate`
-- `Folio.isInterim`
-- Migration: `20260817075000_add_extended_stay_billing`
+- `TaxExemptReason` enum: `DIPLOMATIC | GOVERNMENT | INTERNATIONAL_ORG | OTHER`
+- `Reservation.taxExempt` (default false), `taxExemptReason`, `taxExemptDocumentRef`, `taxExemptApprovedBy`
+- Migration: `20260817083000_add_reservation_tax_exemption`
 
 ## API
 
-1. Create/update: `billingCycle` on reservation DTO; `roomRate` is the **cycle rate** for weekly/monthly; `totalAmount` via `calculateExtendedStayTotal`. Not allowed with day-use or split stays.
-2. Night Audit `processRoomPosting`: skip non-cycle-end days for `WEEKLY`/`MONTHLY`; post lump `roomRate` on cycle end.
-3. Night Audit `processInterimFolios`: close open folio (`closeAsInterim`), create new folio, archive `INTERIM_FOLIO`, set `lastInterimBillingDate`.
-4. `FoliosService.closeAsInterim()` — closes without credit-limit check, sets `isInterim: true`.
+1. Create/update: tax-exempt stays require reason + document ref + approver. Cannot change after checkout/cancel/no-show/walk.
+2. `GET /reservations?taxExempt=true`
+3. Folio posting: `computePostingAmounts(..., { taxExempt })` skips VAT when the reservation is exempt (service charge still applies). Package split inherits the same flag.
 
 ## Web
 
-- Billing cycle select on new reservation (disabled for day-use / split stay)
-- `BillingCycleBadge` on list/detail
-- Interim label on folio tabs
-- i18n `reservations.billingCycle.*`, `folios.interimLabel`
+- Tax-exempt checkbox on new reservation; document fields on confirm
+- `TaxExemptBadge` on list/detail
+- Document/reason/approver on reservation detail
+- i18n `reservations.taxExempt.*`
 
 ## Deploy
 
-Run `prisma migrate deploy` (or Supabase `apply_migration`) for `20260817075000_add_extended_stay_billing` after merge.
+Run `prisma migrate deploy` after merge (additive).

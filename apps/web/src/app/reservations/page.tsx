@@ -9,6 +9,7 @@ import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { DayUseBadge } from '@/components/day-use-badge';
 import { StayPurposeBadge } from '@/components/stay-purpose-badge';
 import { BillingCycleBadge } from '@/components/billing-cycle-badge';
+import { TaxExemptBadge } from '@/components/tax-exempt-badge';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { isSplitStay } from '@/lib/split-stay';
 
@@ -206,6 +207,7 @@ export default function ReservationsPage() {
                             <BillingCycleBadge
                               billingCycle={reservation.billingCycle}
                             />
+                            <TaxExemptBadge taxExempt={reservation.taxExempt} />
                             {isSplitStay(reservation) ? (
                               <SplitStayBadge />
                             ) : null}
@@ -243,6 +245,10 @@ export default function ReservationsPage() {
                       />
                       <BillingCycleBadge
                         billingCycle={reservation.billingCycle}
+                        className="text-[10px]"
+                      />
+                      <TaxExemptBadge
+                        taxExempt={reservation.taxExempt}
                         className="text-[10px]"
                       />
                       {isSplitStay(reservation) ? (

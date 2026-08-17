@@ -171,9 +171,9 @@
   - [x] Weekly/monthly billing cycles
   - [x] Auto-generate interim folio
 
-- [ ] **Tax Exemption**
-  - [ ] Flag reservation for VAT exemption
-  - [ ] Store exemption documents
+- [x] **Tax Exemption**
+  - [x] Flag reservation for VAT exemption
+  - [x] Store exemption documents
 
 - [x] **Overbooking Recovery (Walk)**
   - [x] Partner hotel list
@@ -787,7 +787,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 6. Overbooking Recovery (Walk) — **shipped** (`PartnerHotel` directory, `Walk` record, no AP posting)
 7. Complimentary / House Use Rooms — **shipped** (`StayPurpose` COMP/HOUSE, rate 0, Night Audit skip, authority tracking)
 8. Extended Stay Billing (weekly/monthly) — **shipped** (`BillingCycle`, cycle-end NA posting, interim folio + archive)
-9. Tax Exemption Handling
+9. Tax Exemption Handling — **shipped** (`taxExempt` + document fields; folio posting skips VAT)
 10. VIP Room Pre-assignment & Lock
 
 ### Phase 5: Advanced Features

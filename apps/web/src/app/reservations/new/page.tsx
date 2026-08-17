@@ -36,7 +36,9 @@ import {
   isExtendedBillingCycle,
   type BillingCycle,
 } from '@/lib/billing-cycle';
-import { BillingCycleBadge } from '@/components/billing-cycle-badge';
+import { TaxExemptBadge } from '@/components/tax-exempt-badge';
+import { TaxExemptFields } from '@/components/tax-exempt-fields';
+import type { TaxExemptReason } from '@/lib/tax-exemption';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -64,6 +66,11 @@ export default function NewReservationPage() {
   const [stayPurposeNote, setStayPurposeNote] = useState('');
   const [department, setDepartment] = useState('');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('NIGHTLY');
+  const [taxExempt, setTaxExempt] = useState(false);
+  const [taxExemptReason, setTaxExemptReason] =
+    useState<TaxExemptReason>('DIPLOMATIC');
+  const [taxExemptDocumentRef, setTaxExemptDocumentRef] = useState('');
+  const [taxExemptApprovedBy, setTaxExemptApprovedBy] = useState('');
   const [isSplitStay, setIsSplitStay] = useState(false);
   const [splitDate, setSplitDate] = useState('');
   const [secondRoom, setSecondRoom] = useState<Room | null>(null);
@@ -174,6 +181,13 @@ export default function NewReservationPage() {
       toast.warning(t('reservations.stayPurpose.departmentRequired'));
       return;
     }
+    if (
+      taxExempt &&
+      (!taxExemptDocumentRef.trim() || !taxExemptApprovedBy.trim())
+    ) {
+      toast.warning(t('reservations.taxExempt.fieldsRequired'));
+      return;
+    }
     setSubmitting(true);
     try {
       const firstRate = Number(selectedRoom!.roomType?.baseRate || 0);
@@ -218,6 +232,12 @@ export default function NewReservationPage() {
         stayPurposeNote: stayPurposeNote.trim() || undefined,
         department: stayPurpose === 'HOUSE_USE' ? department.trim() : undefined,
         billingCycle: isDayUse ? 'NIGHTLY' : billingCycle,
+        taxExempt,
+        taxExemptReason: taxExempt ? taxExemptReason : undefined,
+        taxExemptDocumentRef: taxExempt
+          ? taxExemptDocumentRef.trim()
+          : undefined,
+        taxExemptApprovedBy: taxExempt ? taxExemptApprovedBy.trim() : undefined,
         stays,
       };
 
@@ -417,6 +437,17 @@ export default function NewReservationPage() {
                 {t('reservations.billingCycle.hint')}
               </p>
             </div>
+
+            <TaxExemptFields
+              taxExempt={taxExempt}
+              onTaxExemptChange={setTaxExempt}
+              taxExemptReason={taxExemptReason}
+              onTaxExemptReasonChange={setTaxExemptReason}
+              taxExemptDocumentRef={taxExemptDocumentRef}
+              onTaxExemptDocumentRefChange={setTaxExemptDocumentRef}
+              taxExemptApprovedBy={taxExemptApprovedBy}
+              onTaxExemptApprovedByChange={setTaxExemptApprovedBy}
+            />
 
             <SplitStayOptions
               enabled={isSplitStay}
@@ -662,6 +693,14 @@ export default function NewReservationPage() {
                       )}
                     </span>
                   </div>
+                  {taxExempt ? (
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">
+                        {t('reservations.taxExempt.label')}:
+                      </span>
+                      <TaxExemptBadge taxExempt />
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -675,6 +714,18 @@ export default function NewReservationPage() {
                 department={department}
                 onDepartmentChange={setDepartment}
                 showAuthority
+              />
+
+              <TaxExemptFields
+                taxExempt={taxExempt}
+                onTaxExemptChange={setTaxExempt}
+                taxExemptReason={taxExemptReason}
+                onTaxExemptReasonChange={setTaxExemptReason}
+                taxExemptDocumentRef={taxExemptDocumentRef}
+                onTaxExemptDocumentRefChange={setTaxExemptDocumentRef}
+                taxExemptApprovedBy={taxExemptApprovedBy}
+                onTaxExemptApprovedByChange={setTaxExemptApprovedBy}
+                showDetails
               />
 
               <div>

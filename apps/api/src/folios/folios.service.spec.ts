@@ -327,6 +327,50 @@ describe('FoliosService', () => {
       );
     });
 
+    it('should skip VAT when the reservation is tax-exempt', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
+        reservation: {
+          rateCode: null,
+          taxExempt: true,
+          room: { propertyId: 'prop-1' },
+        },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: true,
+        hasService: true,
+        serviceRate: 10,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-exempt',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', baseDto);
+
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            amountNet: 1000,
+            amountService: 100,
+            amountTax: 0,
+            amountTotal: 1100,
+          }),
+        }),
+      );
+    });
+
     it('should post a PAYMENT transaction (negative sign)', async () => {
       const mockWindow = { id: 'win-1' };
       const mockTrxCode = {

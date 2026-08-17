@@ -17,6 +17,7 @@ import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { DayUseBadge } from '@/components/day-use-badge';
 import { StayPurposeBadge } from '@/components/stay-purpose-badge';
 import { BillingCycleBadge } from '@/components/billing-cycle-badge';
+import { TaxExemptBadge } from '@/components/tax-exempt-badge';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
@@ -162,6 +163,7 @@ export default function ReservationDetailPage() {
               {reservation.isDayUse ? <DayUseBadge /> : null}
               <StayPurposeBadge stayPurpose={reservation.stayPurpose} />
               <BillingCycleBadge billingCycle={reservation.billingCycle} />
+              <TaxExemptBadge taxExempt={reservation.taxExempt} />
               {isSplitStay(reservation) ? <SplitStayBadge /> : null}
             </div>
           </div>
@@ -368,6 +370,37 @@ export default function ReservationDetailPage() {
                         </p>
                       </div>
                     ) : null}
+                  </div>
+                </div>
+              ) : null}
+
+              {reservation.taxExempt ? (
+                <div className="border-slate-200 border-t mt-6 pt-6">
+                  <div className="gap-6 grid md:grid-cols-2">
+                    <div>
+                      <p className="font-semibold text-slate-600 text-sm">
+                        {t('reservations.taxExempt.reason')}
+                      </p>
+                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                        {reservation.taxExemptReason}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-600 text-sm">
+                        {t('reservations.taxExempt.documentRef')}
+                      </p>
+                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                        {reservation.taxExemptDocumentRef}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-600 text-sm">
+                        {t('reservations.taxExempt.approvedBy')}
+                      </p>
+                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                        {reservation.taxExemptApprovedBy}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : null}

@@ -7,7 +7,11 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { ReservationStatus, StayPurpose } from '@pura/database';
+import {
+  ReservationStatus,
+  StayPurpose,
+  TaxExemptReason,
+} from '@pura/database';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 
 const mockPrismaService = {
@@ -272,6 +276,47 @@ describe('ReservationsService', () => {
           }),
         }),
       );
+    });
+
+    it('should create a tax-exempt reservation with document fields', async () => {
+      mockPrismaService.room.findUnique.mockResolvedValue({ id: 'room-1' });
+      mockPrismaService.guest.findUnique.mockResolvedValue({ id: 'guest-1' });
+      mockPrismaService.reservation.findMany.mockResolvedValue([]);
+      mockPrismaService.reservation.create.mockResolvedValue({
+        id: 'res-exempt',
+        taxExempt: true,
+      });
+      mockPrismaService.guest.update.mockResolvedValue({});
+
+      await service.create({
+        ...createDto,
+        taxExempt: true,
+        taxExemptReason: TaxExemptReason.DIPLOMATIC,
+        taxExemptDocumentRef: 'UN-2026-01',
+        taxExemptApprovedBy: 'GM',
+      });
+
+      expect(prisma.reservation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            taxExempt: true,
+            taxExemptReason: TaxExemptReason.DIPLOMATIC,
+            taxExemptDocumentRef: 'UN-2026-01',
+            taxExemptApprovedBy: 'GM',
+          }),
+        }),
+      );
+    });
+
+    it('should reject tax-exempt reservations without a document reference', async () => {
+      await expect(
+        service.create({
+          ...createDto,
+          taxExempt: true,
+          taxExemptReason: TaxExemptReason.GOVERNMENT,
+          taxExemptApprovedBy: 'GM',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should reject complimentary reservations without authority', async () => {

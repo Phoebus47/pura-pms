@@ -2012,14 +2012,23 @@ function applyWalk(reservationId: string, body: any) {
 
 function handleReservationsGet(path: string, params?: URLSearchParams) {
   if (path === '/reservations') {
+    let results = mockDb.reservations;
     const stayPurpose = params?.get('stayPurpose');
-    if (!stayPurpose) {
-      return mockDb.reservations;
+    if (stayPurpose) {
+      results = results.filter(
+        (reservation: { stayPurpose?: string }) =>
+          reservation.stayPurpose === stayPurpose,
+      );
     }
-    return mockDb.reservations.filter(
-      (reservation: { stayPurpose?: string }) =>
-        reservation.stayPurpose === stayPurpose,
-    );
+    const taxExempt = params?.get('taxExempt');
+    if (taxExempt === 'true' || taxExempt === 'false') {
+      const flag = taxExempt === 'true';
+      results = results.filter(
+        (reservation: { taxExempt?: boolean }) =>
+          reservation.taxExempt === flag,
+      );
+    }
+    return results;
   }
   const movesMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-moves$/.exec(
     path,
@@ -2075,6 +2084,14 @@ function handleReservationsPost(path: string, body: any) {
       createdAt: new Date().toISOString(),
       stays: Array.isArray(body?.stays) ? body.stays : [],
       billingCycle: body?.billingCycle || 'NIGHTLY',
+      taxExempt: body?.taxExempt === true,
+      taxExemptReason: body?.taxExempt ? body?.taxExemptReason : undefined,
+      taxExemptDocumentRef: body?.taxExempt
+        ? body?.taxExemptDocumentRef
+        : undefined,
+      taxExemptApprovedBy: body?.taxExempt
+        ? body?.taxExemptApprovedBy
+        : undefined,
       roomRate: nonRevenue ? 0 : body?.roomRate,
       totalAmount: nonRevenue ? 0 : body?.totalAmount,
       rateCode:
