@@ -10,6 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 const mockPrismaService = {
   reservation: {
     findMany: vi.fn(),
+    update: vi.fn(),
   },
   transactionCode: {
     findFirst: vi.fn(),
@@ -42,6 +43,8 @@ const mockPrismaService = {
 
 const mockFoliosService = {
   postTransaction: vi.fn(),
+  closeAsInterim: vi.fn(),
+  create: vi.fn(),
 };
 
 const mockJournalsService = {
@@ -342,6 +345,29 @@ describe('NightAuditService', () => {
       expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
     });
 
+    it('should skip complimentary reservations when posting room charges', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-comp',
+          roomRate: 0,
+          isDayUse: false,
+          stayPurpose: 'COMPLIMENTARY',
+          folios: [
+            { id: 'folio-1', windows: [{ id: 'win-1', windowNumber: 1 }] },
+          ],
+        },
+      ]);
+      mockPrismaService.transactionCode.findFirst.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processRoomPosting('prop-1', businessDate);
+
+      expect(result.roomsPosted).toBe(0);
+      expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
+    });
+
     it('should skip day-use reservations when posting room charges', async () => {
       mockPrismaService.reservation.findMany.mockResolvedValue([
         {
@@ -364,7 +390,10 @@ describe('NightAuditService', () => {
       expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
       expect(mockPrismaService.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ isDayUse: false }),
+          where: expect.objectContaining({
+            isDayUse: false,
+            stayPurpose: 'STANDARD',
+          }),
         }),
       );
     });
@@ -449,6 +478,120 @@ describe('NightAuditService', () => {
 
       expect(result.roomsPosted).toBe(0);
       expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('should skip weekly extended stays until the billing cycle ends', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-weekly',
+          roomRate: 5000,
+          isDayUse: false,
+          stayPurpose: 'STANDARD',
+          billingCycle: 'WEEKLY',
+          checkIn: new Date('2026-08-01T00:00:00.000Z'),
+          stays: [],
+          folios: [
+            { id: 'folio-1', windows: [{ id: 'win-1', windowNumber: 1 }] },
+          ],
+        },
+      ]);
+      mockPrismaService.transactionCode.findFirst.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processRoomPosting(
+        'prop-1',
+        new Date('2026-08-05T00:00:00.000Z'),
+      );
+
+      expect(result.roomsPosted).toBe(0);
+      expect(mockFoliosService.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('should post the cycle rate on a weekly billing cycle end', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-weekly',
+          roomRate: 5000,
+          isDayUse: false,
+          stayPurpose: 'STANDARD',
+          billingCycle: 'WEEKLY',
+          checkIn: new Date('2026-08-01T00:00:00.000Z'),
+          room: { number: '301' },
+          stays: [],
+          folios: [
+            { id: 'folio-1', windows: [{ id: 'win-1', windowNumber: 1 }] },
+          ],
+        },
+      ]);
+      mockPrismaService.transactionCode.findFirst.mockResolvedValue({
+        id: 'trx-room',
+      });
+      mockPrismaService.folioTransaction.findFirst.mockResolvedValue(null);
+      mockFoliosService.postTransaction.mockResolvedValue({});
+      mockPrismaService.nightAudit.update.mockResolvedValue({});
+
+      const result = await service.processRoomPosting(
+        'prop-1',
+        new Date('2026-08-08T00:00:00.000Z'),
+      );
+
+      expect(result.roomsPosted).toBe(1);
+      expect(result.totalRevenue).toBe(5000);
+      expect(mockFoliosService.postTransaction).toHaveBeenCalledWith(
+        'folio-1',
+        expect.objectContaining({
+          amountNet: 5000,
+          reference: expect.stringContaining('Weekly'),
+        }),
+      );
+    });
+  });
+
+  describe('processInterimFolios', () => {
+    it('should close the open folio and create a new one at cycle end', async () => {
+      mockPrismaService.reservation.findMany.mockResolvedValue([
+        {
+          id: 'res-weekly',
+          confirmNumber: 'CN-100',
+          billingCycle: 'WEEKLY',
+          checkIn: new Date('2026-08-01T00:00:00.000Z'),
+          lastInterimBillingDate: null,
+          folios: [
+            {
+              id: 'folio-1',
+              folioNumber: 'F000001',
+              balance: 5200,
+              status: 'OPEN',
+              isClosed: false,
+            },
+          ],
+        },
+      ]);
+      mockFoliosService.closeAsInterim.mockResolvedValue({});
+      mockFoliosService.create.mockResolvedValue({
+        id: 'folio-2',
+        folioNumber: 'F000002',
+      });
+      mockPrismaService.reportArchive.create.mockResolvedValue({});
+      mockPrismaService.reservation.update.mockResolvedValue({});
+
+      const result = await service.processInterimFolios(
+        'prop-1',
+        new Date('2026-08-08T00:00:00.000Z'),
+      );
+
+      expect(result.interimFoliosCreated).toBe(1);
+      expect(mockFoliosService.closeAsInterim).toHaveBeenCalledWith('folio-1');
+      expect(mockFoliosService.create).toHaveBeenCalledWith({
+        reservationId: 'res-weekly',
+      });
+      expect(mockPrismaService.reportArchive.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ reportType: 'INTERIM_FOLIO' }),
+        }),
+      );
     });
   });
 

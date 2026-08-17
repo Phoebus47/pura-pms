@@ -90,11 +90,11 @@ pura/
 **Current Phase:**
 
 - ✅ Phase 3: Financial & Audit (Complete)
+- ✅ Phase 4: Operations Edge Cases (Complete)
 
 **Remaining Phases:**
 
-- 🎯 Phase 4: Operations Edge Cases (Day-use, Room Move, No-show, etc.)
-- Phase 5: Advanced Features (Rate Derivation, AI Yield Management, PWA)
+- 🎯 Phase 5: Advanced Features (Rate Derivation, AI Yield Management, PWA)
 - Phase 6: Compliance & Communication (TM30, Guest Communication)
 - Phase 7: i18n & Multi-Property
 

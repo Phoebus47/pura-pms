@@ -132,8 +132,20 @@ model Reservation {
   paidAmount     Decimal           @default(0) @db.Decimal(12, 2)
   notes          String?
   specialRequest String?
-  isDayUse       Boolean           @default(false)
-  roomId         String
+  isDayUse        Boolean           @default(false)
+  stayPurpose     StayPurpose       @default(STANDARD)
+  approvedBy      String?
+  stayPurposeNote String?
+  department      String?
+  billingCycle    BillingCycle      @default(NIGHTLY)
+  lastInterimBillingDate DateTime?   @db.Date
+  taxExempt              Boolean           @default(false)
+  taxExemptReason        TaxExemptReason?
+  taxExemptDocumentRef   String?
+  taxExemptApprovedBy    String?
+  isRoomLocked           Boolean           @default(false)
+  roomLockNote           String?
+  roomId          String
   room           Room              @relation(fields: [roomId], references: [id])
   guestId        String
   guest          Guest             @relation(fields: [guestId], references: [id])
@@ -152,6 +164,10 @@ model Reservation {
   @@index([checkIn, checkOut])
   @@index([status])
   @@index([isDayUse])
+  @@index([stayPurpose])
+  @@index([billingCycle])
+  @@index([taxExempt])
+  @@index([isRoomLocked])
 }
 
 model ReservationStay {
@@ -240,6 +256,7 @@ model Folio {
   balance       Decimal       @default(0) @db.Decimal(12, 2)
   creditLimit   Decimal?      @db.Decimal(12, 2)
   isClosed      Boolean       @default(false) // Deprecated: Use status instead
+  isInterim     Boolean       @default(false)
   status        FolioStatus?  @default(OPEN)
   businessDate  DateTime?     @db.Date
   closedAt      DateTime?
@@ -777,6 +794,25 @@ enum ReservationStatus {
   CANCELLED
   NO_SHOW
   WALKED
+}
+
+enum StayPurpose {
+  STANDARD
+  COMPLIMENTARY
+  HOUSE_USE
+}
+
+enum BillingCycle {
+  NIGHTLY
+  WEEKLY
+  MONTHLY
+}
+
+enum TaxExemptReason {
+  DIPLOMATIC
+  GOVERNMENT
+  INTERNATIONAL_ORG
+  OTHER
 }
 
 enum FolioType {

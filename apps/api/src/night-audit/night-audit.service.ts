@@ -5,12 +5,18 @@ import { JournalsService } from '../financial/journals.service';
 import { ReservationsService } from '../reservations/reservations.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { Prisma } from '@pura/database';
+import { Prisma, StayPurpose, BillingCycle, FolioStatus } from '@pura/database';
 import {
   findStayCoveringBusinessDate,
+  isSameCalendarDay,
   resolveNightAuditRoomCharge,
 } from '../reservations/reservation-stay.util';
 import { noShowArrivalCutoff } from '../reservations/no-show';
+import { isNonRevenueStay } from '../reservations/stay-purpose';
+import {
+  isBillingCycleEnd,
+  isExtendedBillingCycle,
+} from '../reservations/billing-cycle';
 
 type StartAuditResult =
   | {
@@ -175,6 +181,7 @@ export class NightAuditService {
       where: {
         status: 'CHECKED_IN',
         isDayUse: false,
+        stayPurpose: StayPurpose.STANDARD,
         room: {
           propertyId,
         },
@@ -212,9 +219,20 @@ export class NightAuditService {
 
     // 2. Post room charge for each (with idempotency)
     for (const res of reservations) {
-      if (res.isDayUse) {
+      if (res.isDayUse || isNonRevenueStay(res.stayPurpose)) {
         this.logger.log(
-          `Skipping day-use reservation ${res.id} for room posting`,
+          `Skipping non-revenue reservation ${res.id} for room posting`,
+        );
+        continue;
+      }
+
+      const billingCycle = res.billingCycle ?? BillingCycle.NIGHTLY;
+      if (
+        isExtendedBillingCycle(billingCycle) &&
+        !isBillingCycleEnd(res.checkIn, businessDate, billingCycle)
+      ) {
+        this.logger.log(
+          `Skipping extended-stay reservation ${res.id} until billing cycle end`,
         );
         continue;
       }
@@ -242,11 +260,13 @@ export class NightAuditService {
         continue;
       }
 
-      const amountNet = resolveNightAuditRoomCharge(
-        Number(res.roomRate),
-        res.stays ?? [],
-        businessDate,
-      );
+      const amountNet = isExtendedBillingCycle(billingCycle)
+        ? Number(res.roomRate)
+        : resolveNightAuditRoomCharge(
+            Number(res.roomRate),
+            res.stays ?? [],
+            businessDate,
+          );
       if (amountNet === null) {
         continue;
       }
@@ -257,9 +277,15 @@ export class NightAuditService {
       );
       const roomNumber = coveringStay?.room?.number ?? res.room?.number;
       const dateLabel = businessDate.toLocaleDateString();
+      const cycleLabel =
+        billingCycle === BillingCycle.WEEKLY
+          ? 'Weekly'
+          : billingCycle === BillingCycle.MONTHLY
+            ? 'Monthly'
+            : 'Night Audit';
       const reference = roomNumber
-        ? `Night Audit - ${dateLabel} - Room ${roomNumber}`
-        : `Night Audit - ${dateLabel}`;
+        ? `${cycleLabel} - ${dateLabel} - Room ${roomNumber}`
+        : `${cycleLabel} - ${dateLabel}`;
 
       await this.foliosService.postTransaction(folio.id, {
         windowNumber: 1,
@@ -286,6 +312,91 @@ export class NightAuditService {
     });
 
     return { roomsPosted, totalRevenue };
+  }
+
+  async processInterimFolios(propertyId: string, businessDate: Date) {
+    this.logger.log(
+      `Processing interim folios for ${propertyId} on ${businessDate.toISOString()}`,
+    );
+
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        status: 'CHECKED_IN',
+        isDayUse: false,
+        stayPurpose: StayPurpose.STANDARD,
+        billingCycle: {
+          in: [BillingCycle.WEEKLY, BillingCycle.MONTHLY],
+        },
+        room: { propertyId },
+      },
+      include: {
+        folios: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    let interimFoliosCreated = 0;
+
+    for (const res of reservations) {
+      const cycle = res.billingCycle ?? BillingCycle.NIGHTLY;
+      if (!isBillingCycleEnd(res.checkIn, businessDate, cycle)) {
+        continue;
+      }
+
+      if (
+        res.lastInterimBillingDate &&
+        isSameCalendarDay(res.lastInterimBillingDate, businessDate)
+      ) {
+        continue;
+      }
+
+      const openFolio = res.folios.find(
+        (folio) =>
+          folio.status === FolioStatus.OPEN ||
+          folio.status === null ||
+          !folio.isClosed,
+      );
+      if (!openFolio) {
+        continue;
+      }
+
+      await this.foliosService.closeAsInterim(openFolio.id);
+      const newFolio = await this.foliosService.create({
+        reservationId: res.id,
+      });
+
+      await this.prisma.reportArchive.create({
+        data: {
+          propertyId,
+          reportType: 'INTERIM_FOLIO',
+          reportName: `Interim Folio - ${res.confirmNumber} - ${businessDate.toLocaleDateString()}`,
+          businessDate,
+          parameters: {
+            reservationId: res.id,
+            confirmNumber: res.confirmNumber,
+            closedFolioId: openFolio.id,
+            newFolioId: newFolio.id,
+            billingCycle: cycle,
+          },
+          data: {
+            closedFolioNumber: openFolio.folioNumber,
+            newFolioNumber: newFolio.folioNumber,
+            balance: Number(openFolio.balance),
+          },
+          generatedBy: 'SYSTEM',
+        },
+      });
+
+      await this.prisma.reservation.update({
+        where: { id: res.id },
+        data: { lastInterimBillingDate: businessDate },
+      });
+
+      interimFoliosCreated++;
+    }
+
+    return { interimFoliosCreated };
   }
 
   async generateNightAuditReport(

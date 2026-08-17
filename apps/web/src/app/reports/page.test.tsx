@@ -19,6 +19,12 @@ vi.mock('@/lib/api/reports', () => ({
   },
 }));
 
+vi.mock('@/lib/api/reservations', () => ({
+  reservationsAPI: {
+    getAll: vi.fn().mockResolvedValue([]),
+  },
+}));
+
 const property = {
   id: 'prop_mock_1',
   name: 'Demo Hotel',

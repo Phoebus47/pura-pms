@@ -155,25 +155,25 @@
   - [x] Re-issue key card trigger
   - [x] Update housekeeping status (old → Dirty, new → Occupied)
 
-- [ ] **VIP Room Pre-assignment**
-  - [ ] Lock room for VIP, prevent auto-reassignment
+- [x] **VIP Room Pre-assignment**
+  - [x] Lock room for VIP, prevent auto-reassignment
 
-- [ ] **Complimentary / House Use Rooms**
-  - [ ] Rate code type: COMP / HOUSE
-  - [ ] Count occupancy but not revenue
-  - [ ] Authority tracking
+- [x] **Complimentary / House Use Rooms**
+  - [x] Rate code type: COMP / HOUSE
+  - [x] Count occupancy but not revenue
+  - [x] Authority tracking
 
 - [ ] **Post-departure Charges**
   - [ ] Reopen folio after checkout
   - [ ] Post to city ledger if no card auth
 
-- [ ] **Extended Stay Billing**
-  - [ ] Weekly/monthly billing cycles
-  - [ ] Auto-generate interim folio
+- [x] **Extended Stay Billing**
+  - [x] Weekly/monthly billing cycles
+  - [x] Auto-generate interim folio
 
-- [ ] **Tax Exemption**
-  - [ ] Flag reservation for VAT exemption
-  - [ ] Store exemption documents
+- [x] **Tax Exemption**
+  - [x] Flag reservation for VAT exemption
+  - [x] Store exemption documents
 
 - [x] **Overbooking Recovery (Walk)**
   - [x] Partner hotel list
@@ -424,10 +424,10 @@
   - [ ] Waive penalty tracking
   - [ ] Revenue impact
 
-- [ ] **Complimentary & House Use Report**
-  - [ ] Authority tracking
-  - [ ] Purpose tracking
-  - [ ] Revenue lost calculation
+- [x] **Complimentary & House Use Report**
+  - [x] Authority tracking
+  - [x] Purpose tracking
+  - [x] Revenue lost calculation
 
 - [ ] **Police Report (TM.30)**
   - [ ] Auto-generation
@@ -777,7 +777,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 10. Package Revenue Breakdown (USALI split)
 11. Credit Limit Alerts & Auto-settlement
 
-### Phase 4: Operations Edge Cases (Room Move shipped — remaining items next)
+### Phase 4: Operations Edge Cases — **complete**
 
 1. Day-use Reservations — **shipped**
 2. Split Stay — **shipped**
@@ -785,10 +785,10 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 4. No-show / Late Cancellation Auto-charges — **shipped**
 5. Post-departure Charges — **shipped** (reopen closed folio; settle via existing card-preauth capture or AR transfer)
 6. Overbooking Recovery (Walk) — **shipped** (`PartnerHotel` directory, `Walk` record, no AP posting)
-7. Complimentary / House Use Rooms
-8. Extended Stay Billing (weekly/monthly)
-9. Tax Exemption Handling
-10. VIP Room Pre-assignment & Lock
+7. Complimentary / House Use Rooms — **shipped** (`StayPurpose` COMP/HOUSE, rate 0, Night Audit skip, authority tracking)
+8. Extended Stay Billing (weekly/monthly) — **shipped** (`BillingCycle`, cycle-end NA posting, interim folio + archive)
+9. Tax Exemption Handling — **shipped** (`taxExempt` + document fields; folio posting skips VAT)
+10. VIP Room Pre-assignment & Lock — **shipped** (`isRoomLocked` + note; blocks room change/move; split-stay incompatible)
 
 ### Phase 5: Advanced Features
 
@@ -825,4 +825,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–3 closeout complete (wait items remain). Phase 4 Room Move shipped; remaining Phase 4 items next.
+**Status:** Phase 1–4 complete. Phase 5 (Advanced Features) is current. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.

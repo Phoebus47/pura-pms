@@ -2010,8 +2010,34 @@ function applyWalk(reservationId: string, body: any) {
   return reservation;
 }
 
-function handleReservationsGet(path: string) {
-  if (path === '/reservations') return mockDb.reservations;
+function handleReservationsGet(path: string, params?: URLSearchParams) {
+  if (path === '/reservations') {
+    let results = mockDb.reservations;
+    const stayPurpose = params?.get('stayPurpose');
+    if (stayPurpose) {
+      results = results.filter(
+        (reservation: { stayPurpose?: string }) =>
+          reservation.stayPurpose === stayPurpose,
+      );
+    }
+    const taxExempt = params?.get('taxExempt');
+    if (taxExempt === 'true' || taxExempt === 'false') {
+      const flag = taxExempt === 'true';
+      results = results.filter(
+        (reservation: { taxExempt?: boolean }) =>
+          reservation.taxExempt === flag,
+      );
+    }
+    const isRoomLocked = params?.get('isRoomLocked');
+    if (isRoomLocked === 'true' || isRoomLocked === 'false') {
+      const flag = isRoomLocked === 'true';
+      results = results.filter(
+        (reservation: { isRoomLocked?: boolean }) =>
+          reservation.isRoomLocked === flag,
+      );
+    }
+    return results;
+  }
   const movesMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-moves$/.exec(
     path,
   );
@@ -2054,6 +2080,9 @@ function handleReservationsGet(path: string) {
 
 function handleReservationsPost(path: string, body: any) {
   if (path === '/reservations') {
+    const stayPurpose = body?.stayPurpose;
+    const nonRevenue =
+      stayPurpose === 'COMPLIMENTARY' || stayPurpose === 'HOUSE_USE';
     const randomSuffix = Math.floor(Math.random() * 10000); // NOSONAR
     const newRes = {
       ...body,
@@ -2062,6 +2091,26 @@ function handleReservationsPost(path: string, body: any) {
       status: 'CONFIRMED',
       createdAt: new Date().toISOString(),
       stays: Array.isArray(body?.stays) ? body.stays : [],
+      billingCycle: body?.billingCycle || 'NIGHTLY',
+      taxExempt: body?.taxExempt === true,
+      taxExemptDocumentRef: body?.taxExempt
+        ? body?.taxExemptDocumentRef
+        : undefined,
+      taxExemptApprovedBy: body?.taxExempt
+        ? body?.taxExemptApprovedBy
+        : undefined,
+      taxExemptReason: body?.taxExempt ? body?.taxExemptReason : undefined,
+      isRoomLocked: body?.isRoomLocked === true,
+      roomLockNote: body?.isRoomLocked ? body?.roomLockNote : undefined,
+      roomRate: nonRevenue ? 0 : body?.roomRate,
+      totalAmount: nonRevenue ? 0 : body?.totalAmount,
+      rateCode:
+        body?.rateCode ||
+        (stayPurpose === 'COMPLIMENTARY'
+          ? 'COMP'
+          : stayPurpose === 'HOUSE_USE'
+            ? 'HOUSE'
+            : body?.rateCode),
     };
     mockDb.reservations.push(newRes);
     return newRes;
@@ -2119,8 +2168,13 @@ function handleReservationsDelete(path: string) {
   }
 }
 
-function handleReservations(method: string, path: string, body: any) {
-  if (method === 'GET') return handleReservationsGet(path);
+function handleReservations(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (method === 'GET') return handleReservationsGet(path, params);
   if (method === 'POST') return handleReservationsPost(path, body);
   if (method === 'PATCH') return handleReservationsPatch(path, body);
   if (method === 'DELETE') return handleReservationsDelete(path);
@@ -2232,7 +2286,7 @@ export async function routeMockRequest<T>(
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
-      () => handleReservations(method, path, body),
+      () => handleReservations(method, path, body, params),
       () => handleGuests(method, path, body, params),
     ];
 

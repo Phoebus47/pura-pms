@@ -125,7 +125,18 @@
     "tbDebit": "Debit",
     "tbCredit": "Credit",
     "tbEmpty": "No posted journals for this date",
-    "tbDrilldown": "Journal lines"
+    "tbDrilldown": "Journal lines",
+    "compHouseTitle": "Complimentary & House Use",
+    "compHouseEmpty": "No complimentary or house-use stays for this date",
+    "compHouseRoom": "Room",
+    "compHouseGuest": "Guest",
+    "compHouseNights": "Nights",
+    "compHouseAuthority": "Approved by",
+    "compHousePurpose": "Purpose",
+    "compHouseDepartment": "Department",
+    "compHouseTotalComp": "Complimentary rooms",
+    "compHouseTotalHouse": "House-use rooms",
+    "compHouseRevenueLost": "Revenue lost"
   },
   "fx": {
     "title": "Currency exchange",
@@ -259,7 +270,8 @@
     "paymentSuccess": "Payment posted successfully",
     "paymentError": "Failed to post payment",
     "currency": "Currency",
-    "foreignAmount": "Foreign amount"
+    "foreignAmount": "Foreign amount",
+    "interimLabel": "Interim"
   },
   "preauth": {
     "title": "Card pre-authorizations",
@@ -336,6 +348,52 @@
       "success": "Guest walked to the partner hotel",
       "history": "Walk history",
       "emptyHistory": "No walks recorded yet"
+    },
+    "stayPurpose": {
+      "label": "Stay type",
+      "standard": "Standard",
+      "complimentary": "Complimentary",
+      "houseUse": "House use",
+      "hint": "Complimentary and house-use stays occupy a room at rate 0 and are not posted by Night Audit.",
+      "approvedBy": "Approved by",
+      "purpose": "Purpose",
+      "department": "Department",
+      "badgeComp": "Complimentary",
+      "badgeHouse": "House use",
+      "authorityRequired": "Enter who approved this complimentary or house-use stay",
+      "departmentRequired": "Enter the department for a house-use stay"
+    },
+    "billingCycle": {
+      "label": "Billing cycle",
+      "nightly": "Nightly",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "hint": "Weekly and monthly cycles post room charges at cycle end and auto-close an interim folio.",
+      "badgeWeekly": "Weekly billing",
+      "badgeMonthly": "Monthly billing"
+    },
+    "taxExempt": {
+      "label": "VAT exemption",
+      "checkbox": "Tax-exempt stay (no VAT)",
+      "hint": "Diplomatic, government, and international-organization guests. VAT is not posted on folio charges. Document reference is required.",
+      "reason": "Exemption reason",
+      "documentRef": "Document reference",
+      "approvedBy": "Approved by",
+      "diplomatic": "Diplomatic",
+      "government": "Government",
+      "internationalOrg": "International organization",
+      "other": "Other",
+      "badge": "Tax exempt",
+      "fieldsRequired": "Enter exemption reason, document reference, and who approved"
+    },
+    "roomLock": {
+      "label": "Room lock",
+      "checkbox": "Lock this room assignment",
+      "hint": "Pre-assign and protect the room from reassignment or mid-stay moves until unlocked.",
+      "note": "Lock note",
+      "badge": "Room locked",
+      "noteRequired": "Enter a note explaining why this VIP room is locked",
+      "moveBlocked": "Unlock the room assignment before moving the guest"
     }
   }
 }

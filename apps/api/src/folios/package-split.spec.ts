@@ -83,6 +83,11 @@ describe('package-split', () => {
       });
     });
 
+    it('skips VAT on split lines when tax-exempt', () => {
+      const lines = buildSplitPostingLines(1000, pkgBbRules, true);
+      expect(lines.every((line) => line.amountTax === 0)).toBe(true);
+    });
+
     it('throws when percents do not sum to 100', () => {
       expect(() =>
         buildSplitPostingLines(1000, [

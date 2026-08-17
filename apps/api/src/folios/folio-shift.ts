@@ -35,6 +35,7 @@ export async function resolvePostShiftId(
   rateCode: string | null;
   propertyCurrency: string;
   status: FolioStatus | null;
+  taxExempt: boolean;
 }> {
   const folio = await prisma.folio.findUnique({
     where: { id: folioId },
@@ -46,13 +47,14 @@ export async function resolvePostShiftId(
   const propertyCurrency =
     folio?.reservation?.room?.property?.currency ?? 'THB';
   const status = folio?.status ?? null;
+  const taxExempt = folio?.reservation?.taxExempt === true;
   if (userId === SYSTEM_USER_ID) {
-    return { shiftId: null, rateCode, propertyCurrency, status };
+    return { shiftId: null, rateCode, propertyCurrency, status, taxExempt };
   }
   const shiftId = await resolveCashierShiftId(
     prisma,
     userId,
     folio?.reservation?.room?.propertyId,
   );
-  return { shiftId, rateCode, propertyCurrency, status };
+  return { shiftId, rateCode, propertyCurrency, status, taxExempt };
 }

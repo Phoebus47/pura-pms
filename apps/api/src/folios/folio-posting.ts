@@ -26,6 +26,7 @@ export interface PostingTrxCode {
 export function computePostingAmounts(
   amountNetInput: number,
   trxCode: PostingTrxCode,
+  options?: { taxExempt?: boolean },
 ) {
   const amountNet = round2(Number(amountNetInput));
   let amountService = 0;
@@ -35,7 +36,7 @@ export function computePostingAmounts(
     amountService = round2((amountNet * Number(trxCode.serviceRate)) / 100);
   }
 
-  if (trxCode.hasTax) {
+  if (trxCode.hasTax && !options?.taxExempt) {
     amountTax = round2((amountNet + amountService) * 0.07);
   }
 

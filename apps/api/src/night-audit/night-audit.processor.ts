@@ -39,6 +39,12 @@ export class NightAuditProcessor extends WorkerHost {
         const { roomsPosted, totalRevenue } =
           await this.nightAuditService.processRoomPosting(propertyId, dateObj);
 
+        const { interimFoliosCreated } =
+          await this.nightAuditService.processInterimFolios(
+            propertyId,
+            dateObj,
+          );
+
         // 3. (Optional) Process Fixed Charges - placeholders for now but unblocks WP5
         // await this.nightAuditService.processFixedCharges(propertyId, dateObj);
 
@@ -50,6 +56,7 @@ export class NightAuditProcessor extends WorkerHost {
           {
             roomsPosted,
             totalRevenue,
+            interimFoliosCreated,
             noShowsPosted: noShows.noShowsPosted,
             noShowRevenue: noShows.noShowRevenue,
           },

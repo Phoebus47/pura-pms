@@ -110,6 +110,17 @@ describe('room-move helpers', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('rejects moves when the room assignment is locked', () => {
+    expect(() =>
+      assertRoomMoveAllowed(
+        { ...header, isRoomLocked: true },
+        'prop-1',
+        vacant,
+        'room-2',
+      ),
+    ).toThrow(BadRequestException);
+  });
+
   it('rejects a missing target room', () => {
     expect(() =>
       assertRoomMoveAllowed(header, 'prop-1', null, 'room-2'),

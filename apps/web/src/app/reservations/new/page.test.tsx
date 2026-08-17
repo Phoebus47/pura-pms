@@ -488,6 +488,81 @@ describe('NewReservationPage', () => {
     });
   });
 
+  it('creates a complimentary reservation at rate zero', async () => {
+    render(<NewReservationPage />);
+
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select Dates'));
+    fireEvent.change(screen.getByLabelText('Stay type'), {
+      target: { value: 'COMPLIMENTARY' },
+    });
+    await userEvent.click(screen.getByText('Next'));
+    await waitFor(() => screen.getByText('Select a Room'));
+    await userEvent.click(screen.getByText('Room 101'));
+    await userEvent.click(screen.getByText('Next'));
+    await userEvent.click(screen.getByText('Search Existing Guest'));
+    await userEvent.click(screen.getByText('Select John'));
+    await userEvent.click(screen.getByText('Next'));
+
+    fireEvent.change(screen.getByLabelText(/approved by/i), {
+      target: { value: 'GM' },
+    });
+
+    const confirmBtn = screen.getByRole('button', {
+      name: /confirm reservation/i,
+    });
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(reservationsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stayPurpose: 'COMPLIMENTARY',
+          approvedBy: 'GM',
+          roomRate: 0,
+          totalAmount: 0,
+        }),
+      );
+    });
+  });
+
+  it('creates a tax-exempt reservation with document fields', async () => {
+    render(<NewReservationPage />);
+
+    await userEvent.click(screen.getByText('Select Property'));
+    await userEvent.click(screen.getByText('Select Dates'));
+    fireEvent.click(screen.getByRole('checkbox', { name: /tax-exempt stay/i }));
+    await userEvent.click(screen.getByText('Next'));
+    await waitFor(() => screen.getByText('Select a Room'));
+    await userEvent.click(screen.getByText('Room 101'));
+    await userEvent.click(screen.getByText('Next'));
+    await userEvent.click(screen.getByText('Search Existing Guest'));
+    await userEvent.click(screen.getByText('Select John'));
+    await userEvent.click(screen.getByText('Next'));
+
+    fireEvent.change(screen.getByLabelText(/document reference/i), {
+      target: { value: 'UN-2026-01' },
+    });
+    fireEvent.change(screen.getByLabelText(/approved by/i), {
+      target: { value: 'GM' },
+    });
+
+    const confirmBtn = screen.getByRole('button', {
+      name: /confirm reservation/i,
+    });
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(reservationsAPI.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taxExempt: true,
+          taxExemptReason: 'DIPLOMATIC',
+          taxExemptDocumentRef: 'UN-2026-01',
+          taxExemptApprovedBy: 'GM',
+        }),
+      );
+    });
+  });
+
   it('clears day-use and restores overnight checkout', async () => {
     render(<NewReservationPage />);
 

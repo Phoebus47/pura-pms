@@ -313,14 +313,16 @@ Ensure code passes:
 ### Current Phase
 - **Phase 1:** ✅ Complete (Foundation)
 - **Phase 2:** ✅ Complete (Front Office Core)
-- **Phase 3:** 🎯 In Progress (Financial & Audit Module)
+- **Phase 3:** ✅ Complete (Financial & Audit Module)
+- **Phase 4:** ✅ Complete (Operations Edge Cases)
+- **Phase 5:** 🎯 In Progress (Advanced Features)
 
 ### Key Features to Implement
-- Financial Module (TransactionCode, FolioWindow, FolioTransaction)
-- Night Audit System (Queue-based)
-- Core Reports (DRR, Trial Balance, Daily Flash)
-- Tax Invoice System
-- Security & Compliance (PDPA, TM.30)
+- Rate Derivation (Parent/Child Rates)
+- Dynamic Pricing / Yield Management
+- Allotment & Blocks
+- Housekeeping Inspection Workflow
+- PWA (Offline Capability)
 
 ### Important Notes
 - All form fields must have `id` and `name` attributes for accessibility

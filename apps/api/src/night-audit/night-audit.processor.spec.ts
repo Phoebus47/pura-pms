@@ -5,6 +5,7 @@ import { Job } from 'bullmq';
 const mockNightAuditService = {
   processNoShows: vi.fn(),
   processRoomPosting: vi.fn(),
+  processInterimFolios: vi.fn(),
   rollBusinessDate: vi.fn(),
   generateNightAuditReport: vi.fn(),
   completeAudit: vi.fn(),
@@ -19,6 +20,9 @@ describe('NightAuditProcessor', () => {
     mockNightAuditService.processNoShows.mockResolvedValue({
       noShowsPosted: 0,
       noShowRevenue: 0,
+    });
+    mockNightAuditService.processInterimFolios.mockResolvedValue({
+      interimFoliosCreated: 0,
     });
     processor = new NightAuditProcessor(
       mockNightAuditService as unknown as NightAuditService,
@@ -52,6 +56,9 @@ describe('NightAuditProcessor', () => {
         roomsPosted: 5,
         totalRevenue: 5000,
       });
+      mockNightAuditService.processInterimFolios.mockResolvedValue({
+        interimFoliosCreated: 2,
+      });
       mockNightAuditService.generateNightAuditReport.mockResolvedValue({});
       mockNightAuditService.completeAudit.mockResolvedValue(new Date());
 
@@ -66,6 +73,10 @@ describe('NightAuditProcessor', () => {
         'prop-1',
         expect.any(Date),
       );
+      expect(mockNightAuditService.processInterimFolios).toHaveBeenCalledWith(
+        'prop-1',
+        expect.any(Date),
+      );
       expect(
         mockNightAuditService.generateNightAuditReport,
       ).toHaveBeenCalledWith(
@@ -75,6 +86,7 @@ describe('NightAuditProcessor', () => {
         expect.objectContaining({
           roomsPosted: 5,
           totalRevenue: 5000,
+          interimFoliosCreated: 2,
           noShowsPosted: 1,
           noShowRevenue: 1500,
         }),

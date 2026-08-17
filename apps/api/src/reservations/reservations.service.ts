@@ -11,7 +11,13 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { MoveRoomDto } from './dto/move-room.dto';
 import { MarkNoShowDto } from './dto/mark-no-show.dto';
 import { WalkReservationDto } from './dto/walk-reservation.dto';
-import { Prisma, ReservationStatus, RoomStatus } from '@pura/database';
+import {
+  Prisma,
+  ReservationStatus,
+  RoomStatus,
+  BillingCycle,
+  StayPurpose,
+} from '@pura/database';
 import { FoliosService } from '../folios/folios.service';
 import { mapHeaderReservation, mapStayOccupancy } from './reservation-calendar';
 import {
@@ -40,6 +46,28 @@ import {
   noShowChargeAmount,
 } from './no-show';
 import { assertCanWalk, assertWalkAmountsValid } from './walk';
+import {
+  assertCanChangeStayPurpose,
+  assertStayPurposeFields,
+  defaultRateCodeForPurpose,
+  isNonRevenueStay,
+  zeroNonRevenueAmount,
+} from './stay-purpose';
+import {
+  calculateExtendedStayTotal,
+  isExtendedBillingCycle,
+} from './billing-cycle';
+import { assertBillingCycleCompatible } from './billing-cycle-guards';
+import {
+  assertCanChangeTaxExempt,
+  assertTaxExemptFields,
+} from './tax-exemption';
+import {
+  assertRoomChangeAllowed,
+  assertRoomLockCompatible,
+  assertRoomLockFields,
+  reservationRoomChanging,
+} from './room-lock';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -55,6 +83,32 @@ export class ReservationsService {
     const checkIn = new Date(createReservationDto.checkIn);
     const checkOut = new Date(createReservationDto.checkOut);
     const isDayUse = createReservationDto.isDayUse === true;
+    const stayPurpose =
+      createReservationDto.stayPurpose ?? StayPurpose.STANDARD;
+    const billingCycle =
+      createReservationDto.billingCycle ?? BillingCycle.NIGHTLY;
+    assertStayPurposeFields({
+      stayPurpose,
+      approvedBy: createReservationDto.approvedBy,
+      department: createReservationDto.department,
+    });
+    const taxExempt = createReservationDto.taxExempt === true;
+    assertTaxExemptFields({
+      taxExempt,
+      taxExemptReason: createReservationDto.taxExemptReason,
+      taxExemptDocumentRef: createReservationDto.taxExemptDocumentRef,
+      taxExemptApprovedBy: createReservationDto.taxExemptApprovedBy,
+    });
+    const isRoomLocked = createReservationDto.isRoomLocked === true;
+    assertRoomLockFields({
+      isRoomLocked,
+      roomLockNote: createReservationDto.roomLockNote,
+    });
+
+    const nights = calculateNights(checkIn, checkOut, isDayUse);
+    const staysInput = createReservationDto.stays ?? [];
+    assertBillingCycleCompatible(billingCycle, isDayUse, staysInput.length);
+    assertRoomLockCompatible(isRoomLocked, staysInput.length);
 
     const datesError = stayDatesError(checkIn, checkOut, isDayUse);
     if (datesError) {
@@ -64,8 +118,6 @@ export class ReservationsService {
     if (checkIn < new Date(new Date().setHours(0, 0, 0, 0))) {
       throw new BadRequestException('Check-in date cannot be in the past');
     }
-
-    const nights = calculateNights(checkIn, checkOut, isDayUse);
 
     const room = await this.prisma.room.findUnique({
       where: { id: createReservationDto.roomId },
@@ -94,13 +146,25 @@ export class ReservationsService {
           room.propertyId,
         )
       : [];
+    const pricedStays = isNonRevenueStay(stayPurpose)
+      ? stayDrafts.map((stay) => ({
+          ...stay,
+          roomRate: 0,
+          rateCode:
+            stay.rateCode ??
+            defaultRateCodeForPurpose(
+              stayPurpose,
+              createReservationDto.rateCode,
+            ),
+        }))
+      : stayDrafts;
 
     const splitError = splitStayError(
       checkIn,
       checkOut,
       isDayUse,
       createReservationDto.roomId,
-      stayDrafts,
+      pricedStays,
     );
     if (splitError) {
       throw new BadRequestException(splitError);
@@ -124,21 +188,40 @@ export class ReservationsService {
           ],
     );
 
-    const totalAmount =
-      stayDrafts.length > 0
+    const billedRate = zeroNonRevenueAmount(
+      stayPurpose,
+      pricedStays.length > 0
+        ? pricedStays[0].roomRate
+        : Number(createReservationDto.roomRate),
+    );
+    const totalAmount = zeroNonRevenueAmount(
+      stayPurpose,
+      pricedStays.length > 0
         ? (createReservationDto.totalAmount ??
-          calculateSplitStayTotal(stayDrafts))
-        : calculateStayTotal(
-            nights,
-            Number(createReservationDto.roomRate),
-            isDayUse,
-            createReservationDto.totalAmount,
-          );
+            calculateSplitStayTotal(pricedStays))
+        : isExtendedBillingCycle(billingCycle)
+          ? (createReservationDto.totalAmount ??
+            calculateExtendedStayTotal(
+              nights,
+              Number(createReservationDto.roomRate),
+              billingCycle,
+              isDayUse,
+            ))
+          : calculateStayTotal(
+              nights,
+              Number(createReservationDto.roomRate),
+              isDayUse,
+              createReservationDto.totalAmount,
+            ),
+    );
+    const rateCode =
+      defaultRateCodeForPurpose(stayPurpose, createReservationDto.rateCode) ??
+      pricedStays[0]?.rateCode;
 
     const confirmNumber = this.generateConfirmNumber();
     const splitNights =
-      stayDrafts.length > 0
-        ? stayDrafts.reduce(
+      pricedStays.length > 0
+        ? pricedStays.reduce(
             (sum, stay) =>
               sum + calculateNights(stay.startDate, stay.endDate, false),
             0,
@@ -155,21 +238,37 @@ export class ReservationsService {
         children: createReservationDto.children || 0,
         status: createReservationDto.status || ReservationStatus.CONFIRMED,
         source: createReservationDto.source,
-        rateCode: createReservationDto.rateCode ?? stayDrafts[0]?.rateCode,
-        roomRate:
-          stayDrafts.length > 0
-            ? stayDrafts[0].roomRate
-            : createReservationDto.roomRate,
+        rateCode,
+        roomRate: billedRate,
         totalAmount,
         notes: createReservationDto.notes,
         specialRequest: createReservationDto.specialRequest,
         isDayUse,
+        stayPurpose,
+        approvedBy: createReservationDto.approvedBy,
+        stayPurposeNote: createReservationDto.stayPurposeNote,
+        department: createReservationDto.department,
+        billingCycle: isDayUse ? BillingCycle.NIGHTLY : billingCycle,
+        taxExempt,
+        taxExemptReason: taxExempt
+          ? createReservationDto.taxExemptReason
+          : undefined,
+        taxExemptDocumentRef: taxExempt
+          ? createReservationDto.taxExemptDocumentRef
+          : undefined,
+        taxExemptApprovedBy: taxExempt
+          ? createReservationDto.taxExemptApprovedBy
+          : undefined,
+        isRoomLocked,
+        roomLockNote: isRoomLocked
+          ? createReservationDto.roomLockNote
+          : undefined,
         roomId: createReservationDto.roomId,
         guestId: createReservationDto.guestId,
         stays:
-          stayDrafts.length > 0
+          pricedStays.length > 0
             ? {
-                create: stayDrafts.map((stay, sequence) => ({
+                create: pricedStays.map((stay, sequence) => ({
                   sequence,
                   startDate: stay.startDate,
                   endDate: stay.endDate,
@@ -202,6 +301,9 @@ export class ReservationsService {
     checkIn?: Date,
     checkOut?: Date,
     guestId?: string,
+    stayPurpose?: StayPurpose,
+    taxExempt?: boolean,
+    isRoomLocked?: boolean,
   ) {
     const where: Prisma.ReservationWhereInput = {};
 
@@ -211,6 +313,18 @@ export class ReservationsService {
 
     if (status) {
       where.status = status;
+    }
+
+    if (stayPurpose) {
+      where.stayPurpose = stayPurpose;
+    }
+
+    if (taxExempt !== undefined) {
+      where.taxExempt = taxExempt;
+    }
+
+    if (isRoomLocked !== undefined) {
+      where.isRoomLocked = isRoomLocked;
     }
 
     if (checkIn || checkOut) {
@@ -279,6 +393,44 @@ export class ReservationsService {
     } = updateReservationDto;
     const existingStays = reservation.stays ?? [];
     const isDayUse = updateReservationDto.isDayUse ?? reservation.isDayUse;
+    const currentPurpose = reservation.stayPurpose ?? StayPurpose.STANDARD;
+    const stayPurpose = updateReservationDto.stayPurpose ?? currentPurpose;
+    assertCanChangeStayPurpose(
+      reservation.status,
+      currentPurpose,
+      updateReservationDto.stayPurpose,
+    );
+    assertStayPurposeFields({
+      stayPurpose,
+      approvedBy: updateReservationDto.approvedBy ?? reservation.approvedBy,
+      department: updateReservationDto.department ?? reservation.department,
+    });
+    const taxExempt = updateReservationDto.taxExempt ?? reservation.taxExempt;
+    assertCanChangeTaxExempt(
+      reservation.status,
+      reservation.taxExempt,
+      updateReservationDto.taxExempt,
+    );
+    assertTaxExemptFields({
+      taxExempt,
+      taxExemptReason:
+        updateReservationDto.taxExemptReason ?? reservation.taxExemptReason,
+      taxExemptDocumentRef:
+        updateReservationDto.taxExemptDocumentRef ??
+        reservation.taxExemptDocumentRef,
+      taxExemptApprovedBy:
+        updateReservationDto.taxExemptApprovedBy ??
+        reservation.taxExemptApprovedBy,
+    });
+    const isRoomLocked =
+      updateReservationDto.isRoomLocked ?? reservation.isRoomLocked;
+    assertRoomLockFields({
+      isRoomLocked,
+      roomLockNote:
+        updateReservationDto.roomLockNote ?? reservation.roomLockNote,
+    });
+    const unlocking =
+      reservation.isRoomLocked && updateReservationDto.isRoomLocked === false;
     const stayDatesChanged = Boolean(
       updateReservationDto.checkIn ||
       updateReservationDto.checkOut ||
@@ -305,9 +457,20 @@ export class ReservationsService {
       staysInput && staysInput.length > 0
         ? await this.resolveStayDrafts(staysInput, reservation.room.propertyId)
         : [];
+    const nonRevenueRateCode = defaultRateCodeForPurpose(
+      stayPurpose,
+      updateReservationDto.rateCode ?? reservation.rateCode,
+    );
+    const pricedStays = isNonRevenueStay(stayPurpose)
+      ? stayDrafts.map((stay) => ({
+          ...stay,
+          roomRate: 0,
+          rateCode: stay.rateCode ?? nonRevenueRateCode,
+        }))
+      : stayDrafts;
     const headerRoomId =
-      stayDrafts.length > 0
-        ? stayDrafts[0].roomId
+      pricedStays.length > 0
+        ? pricedStays[0].roomId
         : (dtoRoomId ?? reservation.roomId);
 
     if (staysInput !== undefined) {
@@ -316,22 +479,50 @@ export class ReservationsService {
         checkOut,
         isDayUse,
         headerRoomId,
-        stayDrafts,
+        pricedStays,
       );
       if (splitError) {
         throw new BadRequestException(splitError);
       }
     }
 
+    const billingCycle =
+      updateReservationDto.billingCycle ??
+      reservation.billingCycle ??
+      BillingCycle.NIGHTLY;
+    assertBillingCycleCompatible(
+      billingCycle,
+      isDayUse,
+      staysInput !== undefined ? pricedStays.length : existingStays.length,
+    );
+    assertRoomLockCompatible(
+      isRoomLocked,
+      staysInput !== undefined ? pricedStays.length : existingStays.length,
+    );
+
     const datesError = stayDatesError(checkIn, checkOut, isDayUse);
     if (stayDatesChanged && datesError) {
       throw new BadRequestException(datesError);
     }
 
+    const roomChanging = reservationRoomChanging(
+      reservation.roomId,
+      dtoRoomId,
+      existingStays.map((stay, sequence) => ({
+        sequence: stay.sequence ?? sequence,
+        roomId: stay.roomId,
+      })),
+      pricedStays.map((stay, sequence) => ({
+        sequence,
+        roomId: stay.roomId,
+      })),
+    );
+    assertRoomChangeAllowed(isRoomLocked, unlocking, roomChanging);
+
     if (stayDatesChanged || staysInput !== undefined) {
       await this.assertRoomsAvailable(
-        stayDrafts.length > 0
-          ? stayDrafts.map((stay) => ({
+        pricedStays.length > 0
+          ? pricedStays.map((stay) => ({
               roomId: stay.roomId,
               startDate: stay.startDate,
               endDate: stay.endDate,
@@ -351,15 +542,23 @@ export class ReservationsService {
 
     const nights = calculateNights(checkIn, checkOut, isDayUse);
     const roomRate =
-      stayDrafts.length > 0
-        ? stayDrafts[0].roomRate
+      pricedStays.length > 0
+        ? pricedStays[0].roomRate
         : (updateReservationDto.roomRate ?? Number(reservation.roomRate));
     const totalAmount =
-      stayDrafts.length > 0
+      pricedStays.length > 0
         ? (updateReservationDto.totalAmount ??
-          calculateSplitStayTotal(stayDrafts))
-        : stayDatesChanged
-          ? calculateStayTotal(nights, Number(roomRate), isDayUse)
+          calculateSplitStayTotal(pricedStays))
+        : stayDatesChanged || updateReservationDto.billingCycle !== undefined
+          ? isExtendedBillingCycle(billingCycle)
+            ? (updateReservationDto.totalAmount ??
+              calculateExtendedStayTotal(
+                nights,
+                Number(roomRate),
+                billingCycle,
+                isDayUse,
+              ))
+            : calculateStayTotal(nights, Number(roomRate), isDayUse)
           : undefined;
 
     const updateData: Prisma.ReservationUpdateInput = {
@@ -374,26 +573,59 @@ export class ReservationsService {
       }
     }
 
-    if (staysInput !== undefined && stayDrafts.length > 0) {
-      updateData.nights = stayDrafts.reduce(
+    if (staysInput !== undefined && pricedStays.length > 0) {
+      updateData.nights = pricedStays.reduce(
         (sum, stay) =>
           sum + calculateNights(stay.startDate, stay.endDate, false),
         0,
       );
-      updateData.roomRate = stayDrafts[0].roomRate;
-      updateData.rateCode = stayDrafts[0].rateCode;
+      updateData.roomRate = pricedStays[0].roomRate;
+      updateData.rateCode = pricedStays[0].rateCode;
       updateData.totalAmount =
-        updateReservationDto.totalAmount ?? calculateSplitStayTotal(stayDrafts);
-      updateData.room = { connect: { id: stayDrafts[0].roomId } };
+        updateReservationDto.totalAmount ??
+        calculateSplitStayTotal(pricedStays);
+      updateData.room = { connect: { id: pricedStays[0].roomId } };
     }
 
-    if (staysInput !== undefined && stayDrafts.length === 0) {
+    if (staysInput !== undefined && pricedStays.length === 0) {
       updateData.nights = nights;
-      updateData.totalAmount = calculateStayTotal(
-        nights,
-        Number(roomRate),
-        isDayUse,
-      );
+      updateData.totalAmount = isExtendedBillingCycle(billingCycle)
+        ? calculateExtendedStayTotal(
+            nights,
+            Number(roomRate),
+            billingCycle,
+            isDayUse,
+          )
+        : calculateStayTotal(nights, Number(roomRate), isDayUse);
+    }
+
+    if (updateReservationDto.billingCycle !== undefined || stayDatesChanged) {
+      updateData.billingCycle = isDayUse ? BillingCycle.NIGHTLY : billingCycle;
+    }
+
+    if (isNonRevenueStay(stayPurpose)) {
+      updateData.stayPurpose = stayPurpose;
+      updateData.roomRate = 0;
+      updateData.totalAmount = 0;
+      updateData.rateCode = nonRevenueRateCode;
+    }
+
+    if (updateReservationDto.taxExempt === false) {
+      updateData.taxExempt = false;
+      updateData.taxExemptReason = null;
+      updateData.taxExemptDocumentRef = null;
+      updateData.taxExemptApprovedBy = null;
+    }
+
+    if (updateReservationDto.isRoomLocked === false) {
+      updateData.isRoomLocked = false;
+      updateData.roomLockNote = null;
+    }
+
+    if (updateReservationDto.isRoomLocked === true) {
+      updateData.isRoomLocked = true;
+      updateData.roomLockNote =
+        updateReservationDto.roomLockNote ?? reservation.roomLockNote;
     }
 
     return this.persistReservationUpdate(
@@ -403,7 +635,8 @@ export class ReservationsService {
         checkIn: updateReservationDto.checkIn ? checkIn : undefined,
         checkOut: updateReservationDto.checkOut ? checkOut : undefined,
       },
-      staysInput === undefined ? null : stayDrafts,
+      staysInput === undefined ? null : pricedStays,
+      isNonRevenueStay(stayPurpose),
     );
   }
 
@@ -798,8 +1031,9 @@ export class ReservationsService {
     id: string,
     data: Prisma.ReservationUpdateInput,
     stayDrafts: SplitStayDraft[] | null,
+    zeroStayRates = false,
   ) {
-    if (stayDrafts === null) {
+    if (stayDrafts === null && !zeroStayRates) {
       return this.prisma.reservation.update({
         where: { id },
         data,
@@ -808,8 +1042,20 @@ export class ReservationsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      if (stayDrafts === null && zeroStayRates) {
+        await tx.reservationStay.updateMany({
+          where: { reservationId: id },
+          data: { roomRate: 0 },
+        });
+        return tx.reservation.update({
+          where: { id },
+          data,
+          include: reservationMutationInclude,
+        });
+      }
+
       await tx.reservationStay.deleteMany({ where: { reservationId: id } });
-      if (stayDrafts.length > 0) {
+      if (stayDrafts && stayDrafts.length > 0) {
         await tx.reservationStay.createMany({
           data: stayDrafts.map((stay, sequence) => ({
             reservationId: id,

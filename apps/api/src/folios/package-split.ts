@@ -58,6 +58,7 @@ export function allocateNetByPercent(
 export function buildSplitPostingLines(
   amountNet: number,
   rules: PackageSplitRuleInput[],
+  taxExempt = false,
 ): SplitPostingLine[] {
   const percents = rules.map((rule) => Number(rule.percent));
   if (!percentsSumTo100(percents)) {
@@ -65,7 +66,9 @@ export function buildSplitPostingLines(
   }
   const nets = allocateNetByPercent(amountNet, percents);
   return rules.map((rule, index) => {
-    const amounts = computePostingAmounts(nets[index], rule.trxCode);
+    const amounts = computePostingAmounts(nets[index], rule.trxCode, {
+      taxExempt,
+    });
     return {
       trxCodeId: rule.trxCodeId,
       code: rule.trxCode.code,
@@ -98,6 +101,7 @@ export async function resolvePostingLines(
   trxCode: SplitTargetTrxCode,
   rateCode: string | null,
   singleLine: SplitPostingLine,
+  taxExempt = false,
 ): Promise<SplitPostingLine[]> {
   if (trxCode.code !== ROOM_CHARGE_TRX_CODE || !rateCode) {
     return [singleLine];
@@ -110,7 +114,7 @@ export async function resolvePostingLines(
   if (rules.length === 0) {
     return [singleLine];
   }
-  return buildSplitPostingLines(singleLine.amountNet, rules);
+  return buildSplitPostingLines(singleLine.amountNet, rules, taxExempt);
 }
 
 export async function persistPostingLines(

@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ReservationStatus, RoomStatus } from '@pura/database';
+import { assertRoomMoveAllowedWhenLocked } from './room-lock';
 
 export const BLOCKED_MOVE_STATUSES: ReadonlySet<RoomStatus> = new Set([
   RoomStatus.OUT_OF_ORDER,
@@ -25,6 +26,7 @@ export interface StayLike {
 export interface ReservationLike {
   status: ReservationStatus;
   roomId: string;
+  isRoomLocked?: boolean;
   checkIn: Date;
   checkOut: Date;
   isDayUse: boolean;
@@ -77,6 +79,8 @@ export function assertRoomMoveAllowed(
   toRoom: TargetRoomLike | null,
   toRoomId: string,
 ): TargetRoomLike {
+  assertRoomMoveAllowedWhenLocked(reservation.isRoomLocked === true);
+
   if (reservation.status !== ReservationStatus.CHECKED_IN) {
     throw new BadRequestException(
       'Only checked-in reservations can be moved to another room',

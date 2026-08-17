@@ -1,6 +1,11 @@
 import { apiClient } from './client';
 
 import type { ReservationStay, ReservationStayInput } from '@/lib/split-stay';
+import type { TaxExemptReason } from '@/lib/tax-exemption';
+
+export type StayPurpose = 'STANDARD' | 'COMPLIMENTARY' | 'HOUSE_USE';
+
+export type BillingCycle = 'NIGHTLY' | 'WEEKLY' | 'MONTHLY';
 
 export type ReservationStatus =
   | 'TENTATIVE'
@@ -30,6 +35,18 @@ export interface Reservation {
   specialRequest?: string;
   specialRequests?: string;
   isDayUse?: boolean;
+  stayPurpose?: StayPurpose;
+  approvedBy?: string;
+  stayPurposeNote?: string;
+  department?: string;
+  billingCycle?: BillingCycle;
+  lastInterimBillingDate?: string;
+  taxExempt?: boolean;
+  taxExemptReason?: TaxExemptReason;
+  taxExemptDocumentRef?: string;
+  taxExemptApprovedBy?: string;
+  isRoomLocked?: boolean;
+  roomLockNote?: string;
   stays?: ReservationStay[];
   cancellationReason?: string;
   actualCheckIn?: string;
@@ -136,6 +153,17 @@ export interface CreateReservationDto {
   specialRequest?: string;
   status?: ReservationStatus;
   isDayUse?: boolean;
+  stayPurpose?: StayPurpose;
+  approvedBy?: string;
+  stayPurposeNote?: string;
+  department?: string;
+  billingCycle?: BillingCycle;
+  taxExempt?: boolean;
+  taxExemptReason?: TaxExemptReason;
+  taxExemptDocumentRef?: string;
+  taxExemptApprovedBy?: string;
+  isRoomLocked?: boolean;
+  roomLockNote?: string;
   stays?: ReservationStayInput[];
 }
 
@@ -147,6 +175,9 @@ export interface ReservationFilterParams {
   checkIn?: string;
   checkOut?: string;
   guestId?: string;
+  stayPurpose?: StayPurpose;
+  taxExempt?: boolean;
+  isRoomLocked?: boolean;
 }
 
 export interface CalendarParams {
@@ -164,6 +195,13 @@ export const reservationsAPI = {
     if (filters?.checkIn) params.append('checkIn', filters.checkIn);
     if (filters?.checkOut) params.append('checkOut', filters.checkOut);
     if (filters?.guestId) params.append('guestId', filters.guestId);
+    if (filters?.stayPurpose) params.append('stayPurpose', filters.stayPurpose);
+    if (filters?.taxExempt !== undefined) {
+      params.append('taxExempt', String(filters.taxExempt));
+    }
+    if (filters?.isRoomLocked !== undefined) {
+      params.append('isRoomLocked', String(filters.isRoomLocked));
+    }
 
     const query = params.toString();
     const endpoint = query ? `/reservations?${query}` : '/reservations';

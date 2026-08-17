@@ -125,7 +125,18 @@
     "tbDebit": "เดบิต",
     "tbCredit": "เครดิต",
     "tbEmpty": "ไม่มีสมุดรายวันที่ลงบัญชีในวันนี้",
-    "tbDrilldown": "รายการสมุดรายวัน"
+    "tbDrilldown": "รายการสมุดรายวัน",
+    "compHouseTitle": "ห้องฟรีและห้องใช้ภายใน",
+    "compHouseEmpty": "ไม่มีห้องฟรีหรือห้องใช้ภายในในวันนี้",
+    "compHouseRoom": "ห้อง",
+    "compHouseGuest": "แขก",
+    "compHouseNights": "คืน",
+    "compHouseAuthority": "ผู้อนุมัติ",
+    "compHousePurpose": "วัตถุประสงค์",
+    "compHouseDepartment": "แผนก",
+    "compHouseTotalComp": "ห้องฟรี",
+    "compHouseTotalHouse": "ห้องใช้ภายใน",
+    "compHouseRevenueLost": "รายได้ที่เสียไป"
   },
   "fx": {
     "title": "อัตราแลกเปลี่ยน",
@@ -259,7 +270,8 @@
     "paymentSuccess": "บันทึกการชำระแล้ว",
     "paymentError": "บันทึกการชำระไม่สำเร็จ",
     "currency": "สกุลเงิน",
-    "foreignAmount": "จำนวนเงินสกุลต่างประเทศ"
+    "foreignAmount": "จำนวนเงินสกุลต่างประเทศ",
+    "interimLabel": "Interim"
   },
   "preauth": {
     "title": "พรีออธบัตร",
@@ -336,6 +348,52 @@
       "success": "ย้ายแขกไปโรงแรมคู่ค้าแล้ว",
       "history": "ประวัติการย้าย",
       "emptyHistory": "ยังไม่มีการย้ายแขก"
+    },
+    "stayPurpose": {
+      "label": "ประเภทการเข้าพัก",
+      "standard": "ปกติ",
+      "complimentary": "ห้องฟรี",
+      "houseUse": "ห้องใช้ภายใน",
+      "hint": "ห้องฟรีและห้องใช้ภายในคิดอัตรา 0 และ Night Audit จะไม่ลงค่าห้อง",
+      "approvedBy": "ผู้อนุมัติ",
+      "purpose": "วัตถุประสงค์",
+      "department": "แผนก",
+      "badgeComp": "ห้องฟรี",
+      "badgeHouse": "ห้องใช้ภายใน",
+      "authorityRequired": "ระบุผู้อนุมัติสำหรับห้องฟรีหรือห้องใช้ภายใน",
+      "departmentRequired": "ระบุแผนกสำหรับห้องใช้ภายใน"
+    },
+    "billingCycle": {
+      "label": "รอบบิล",
+      "nightly": "รายคืน",
+      "weekly": "รายสัปดาห์",
+      "monthly": "รายเดือน",
+      "hint": "รอบรายสัปดาห์/รายเดือนจะลงค่าห้องเมื่อครบรอบและปิด interim folio อัตโนมัติ",
+      "badgeWeekly": "บิลรายสัปดาห์",
+      "badgeMonthly": "บิลรายเดือน"
+    },
+    "taxExempt": {
+      "label": "ยกเว้นภาษีมูลค่าเพิ่ม",
+      "checkbox": "ยกเว้น VAT",
+      "hint": "แขกทูต ราชการ และองค์กรระหว่างประเทศ — โฟลิโอจะไม่ลง VAT ต้องระบุเลขที่เอกสาร",
+      "reason": "เหตุผลยกเว้น",
+      "documentRef": "เลขที่เอกสาร",
+      "approvedBy": "ผู้อนุมัติ",
+      "diplomatic": "ทูต",
+      "government": "ราชการ",
+      "internationalOrg": "องค์กรระหว่างประเทศ",
+      "other": "อื่น ๆ",
+      "badge": "ยกเว้น VAT",
+      "fieldsRequired": "ระบุเหตุผล เลขที่เอกสาร และผู้อนุมัติสำหรับการยกเว้น VAT"
+    },
+    "roomLock": {
+      "label": "ล็อกห้อง",
+      "checkbox": "ล็อกการมอบหมายห้องนี้",
+      "hint": "กำหนดห้องล่วงหน้าและป้องกันการย้ายหรือเปลี่ยนห้องจนกว่าจะปลดล็อก",
+      "note": "หมายเหตุการล็อก",
+      "badge": "ล็อกห้องแล้ว",
+      "noteRequired": "ระบุหมายเหตุสำหรับการล็อกห้อง VIP",
+      "moveBlocked": "ปลดล็อกห้องก่อนย้ายแขก"
     }
   }
 }

@@ -208,7 +208,7 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    const { shiftId, rateCode, propertyCurrency, status } =
+    const { shiftId, rateCode, propertyCurrency, status, taxExempt } =
       await resolvePostShiftId(this.prisma, folioId, postTransactionDto.userId);
     assertFolioOpenForPosting(status);
 
@@ -218,13 +218,19 @@ export class FoliosService {
       propertyCurrency,
     );
 
-    const amounts = computePostingAmounts(amountNet, trxCode);
+    const amounts = computePostingAmounts(amountNet, trxCode, { taxExempt });
 
-    const lines = await resolvePostingLines(this.prisma, trxCode, rateCode, {
-      trxCodeId: trxCode.id,
-      code: trxCode.code,
-      ...amounts,
-    });
+    const lines = await resolvePostingLines(
+      this.prisma,
+      trxCode,
+      rateCode,
+      {
+        trxCodeId: trxCode.id,
+        code: trxCode.code,
+        ...amounts,
+      },
+      taxExempt,
+    );
 
     await this.assertArCreditAllowsPost(folioId, sumBalanceImpact(lines));
 
@@ -385,6 +391,34 @@ export class FoliosService {
         isClosed: true,
         closedAt: new Date(),
         closedBy: userId,
+      },
+    });
+  }
+
+  /**
+   * Closes an open folio at an extended-stay billing cycle boundary without
+   * enforcing the credit limit. The folio is marked interim so staff can
+   * reopen it for post-departure charges if needed.
+   */
+  async closeAsInterim(id: string) {
+    const folio = await this.prisma.folio.findUnique({
+      where: { id },
+      select: { id: true, status: true, isClosed: true },
+    });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    if (folio.isClosed || folio.status === FolioStatus.CLOSED) {
+      throw new ConflictException('Folio is already closed');
+    }
+    return this.prisma.folio.update({
+      where: { id },
+      data: {
+        status: FolioStatus.CLOSED,
+        isClosed: true,
+        isInterim: true,
+        closedAt: new Date(),
+        closedBy: 'SYSTEM',
       },
     });
   }

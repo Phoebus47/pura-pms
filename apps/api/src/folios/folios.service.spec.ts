@@ -327,6 +327,50 @@ describe('FoliosService', () => {
       );
     });
 
+    it('should skip VAT when the reservation is tax-exempt', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
+        reservation: {
+          rateCode: null,
+          taxExempt: true,
+          room: { propertyId: 'prop-1' },
+        },
+      });
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: true,
+        hasService: true,
+        serviceRate: 10,
+      });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+          return cb(mockPrismaService);
+        },
+      );
+      mockPrismaService.folioTransaction.create.mockResolvedValue({
+        id: 'trx-exempt',
+      });
+      mockPrismaService.folioWindow.update.mockResolvedValue({});
+      mockPrismaService.folio.update.mockResolvedValue({});
+
+      await service.postTransaction('folio-1', baseDto);
+
+      expect(mockPrismaService.folioTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            amountNet: 1000,
+            amountService: 100,
+            amountTax: 0,
+            amountTotal: 1100,
+          }),
+        }),
+      );
+    });
+
     it('should post a PAYMENT transaction (negative sign)', async () => {
       const mockWindow = { id: 'win-1' };
       const mockTrxCode = {
@@ -1396,6 +1440,36 @@ describe('FoliosService', () => {
         }),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('closeAsInterim', () => {
+    it('should close an open folio as interim without checking credit limit', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        status: FolioStatus.OPEN,
+        isClosed: false,
+      });
+      const closed = {
+        id: 'folio-1',
+        status: FolioStatus.CLOSED,
+        isInterim: true,
+      };
+      mockPrismaService.folio.update.mockResolvedValue(closed);
+
+      const result = await service.closeAsInterim('folio-1');
+
+      expect(result).toEqual(closed);
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith({
+        where: { id: 'folio-1' },
+        data: {
+          status: FolioStatus.CLOSED,
+          isClosed: true,
+          isInterim: true,
+          closedAt: expect.any(Date),
+          closedBy: 'SYSTEM',
+        },
+      });
     });
   });
 

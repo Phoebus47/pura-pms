@@ -327,6 +327,31 @@ describe('Mock API Router', () => {
       expect(response.id).toBeDefined();
     });
 
+    it('should filter complimentary reservations', async () => {
+      const response: any = await routeMockRequest(
+        '/reservations?stayPurpose=COMPLIMENTARY',
+        { method: 'GET' },
+      );
+      expect(response).toHaveLength(1);
+      expect(response[0].stayPurpose).toBe('COMPLIMENTARY');
+    });
+
+    it('should zero rates when creating a complimentary reservation', async () => {
+      const response: any = await routeMockRequest('/reservations', {
+        method: 'POST',
+        body: JSON.stringify({
+          guestId: '123',
+          stayPurpose: 'COMPLIMENTARY',
+          approvedBy: 'GM',
+          roomRate: 3500,
+          totalAmount: 7000,
+        }),
+      });
+      expect(response.roomRate).toBe(0);
+      expect(response.totalAmount).toBe(0);
+      expect(response.rateCode).toBe('COMP');
+    });
+
     it('should persist nested stay segments on create', async () => {
       const stays = [
         {

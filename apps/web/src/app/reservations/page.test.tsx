@@ -268,6 +268,22 @@ describe('ReservationsPage', () => {
     });
   });
 
+  it('should display a complimentary badge', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue([
+      {
+        ...mockReservations[0],
+        stayPurpose: 'COMPLIMENTARY',
+        totalAmount: 0,
+      },
+    ]);
+
+    render(<ReservationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Complimentary').length).toBeGreaterThan(0);
+    });
+  });
+
   it('should display default error message if loading fails with non-Error', async () => {
     (reservationsAPI.getAll as any).mockRejectedValue('String Error');
 

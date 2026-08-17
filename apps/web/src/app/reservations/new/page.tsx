@@ -24,10 +24,23 @@ import { GuestSearchDialog } from '@/components/guest-search-dialog';
 import { GuestFormDialog } from '@/components/guest-form-dialog';
 import { toast } from '@/lib/toast';
 import { DayUseBadge } from '@/components/day-use-badge';
+import { StayPurposeBadge } from '@/components/stay-purpose-badge';
+import { StayPurposeFields } from '@/components/stay-purpose-fields';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayOptions } from '@/components/split-stay-options';
 import { t } from '@/lib/i18n';
 import { buildSplitStayPayload, calendarNights } from '@/lib/split-stay';
+import { isNonRevenueStay, type StayPurpose } from '@/lib/stay-purpose';
+import {
+  calculateExtendedStayTotal,
+  isExtendedBillingCycle,
+  type BillingCycle,
+} from '@/lib/billing-cycle';
+import { TaxExemptBadge } from '@/components/tax-exempt-badge';
+import { TaxExemptFields } from '@/components/tax-exempt-fields';
+import { RoomLockFields } from '@/components/room-lock-fields';
+import { RoomLockBadge } from '@/components/room-lock-badge';
+import type { TaxExemptReason } from '@/lib/tax-exemption';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -50,6 +63,18 @@ export default function NewReservationPage() {
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
   const [isDayUse, setIsDayUse] = useState(false);
+  const [stayPurpose, setStayPurpose] = useState<StayPurpose>('STANDARD');
+  const [approvedBy, setApprovedBy] = useState('');
+  const [stayPurposeNote, setStayPurposeNote] = useState('');
+  const [department, setDepartment] = useState('');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('NIGHTLY');
+  const [taxExempt, setTaxExempt] = useState(false);
+  const [taxExemptReason, setTaxExemptReason] =
+    useState<TaxExemptReason>('DIPLOMATIC');
+  const [taxExemptDocumentRef, setTaxExemptDocumentRef] = useState('');
+  const [taxExemptApprovedBy, setTaxExemptApprovedBy] = useState('');
+  const [isRoomLocked, setIsRoomLocked] = useState(false);
+  const [roomLockNote, setRoomLockNote] = useState('');
   const [isSplitStay, setIsSplitStay] = useState(false);
   const [splitDate, setSplitDate] = useState('');
   const [secondRoom, setSecondRoom] = useState<Room | null>(null);
@@ -60,6 +85,7 @@ export default function NewReservationPage() {
     if (checked) {
       setIsSplitStay(false);
       setSecondRoom(null);
+      setBillingCycle('NIGHTLY');
     }
     if (checked && checkIn) {
       setCheckOut(checkIn);
@@ -87,6 +113,23 @@ export default function NewReservationPage() {
       return;
     }
     setSecondRoom(null);
+  }
+
+  function handleRoomLockChange(checked: boolean) {
+    setIsRoomLocked(checked);
+    if (checked) {
+      setIsSplitStay(false);
+      setSecondRoom(null);
+    }
+  }
+
+  function handleBillingCycleChange(value: BillingCycle) {
+    setBillingCycle(value);
+    if (isExtendedBillingCycle(value)) {
+      setIsDayUse(false);
+      setIsSplitStay(false);
+      setSecondRoom(null);
+    }
   }
 
   async function handleStep1Next() {
@@ -142,6 +185,25 @@ export default function NewReservationPage() {
   }
 
   async function handleSubmit() {
+    if (isNonRevenueStay(stayPurpose) && !approvedBy.trim()) {
+      toast.warning(t('reservations.stayPurpose.authorityRequired'));
+      return;
+    }
+    if (stayPurpose === 'HOUSE_USE' && !department.trim()) {
+      toast.warning(t('reservations.stayPurpose.departmentRequired'));
+      return;
+    }
+    if (
+      taxExempt &&
+      (!taxExemptDocumentRef.trim() || !taxExemptApprovedBy.trim())
+    ) {
+      toast.warning(t('reservations.taxExempt.fieldsRequired'));
+      return;
+    }
+    if (isRoomLocked && !roomLockNote.trim()) {
+      toast.warning(t('reservations.roomLock.noteRequired'));
+      return;
+    }
     setSubmitting(true);
     try {
       const firstRate = Number(selectedRoom!.roomType?.baseRate || 0);
@@ -160,7 +222,12 @@ export default function NewReservationPage() {
       const calculatedTotal = stays
         ? calendarNights(checkIn, splitDate) * firstRate +
           calendarNights(splitDate, checkOut) * secondRate
-        : firstRate * billedNights;
+        : isExtendedBillingCycle(billingCycle)
+          ? calculateExtendedStayTotal(billedNights, firstRate, billingCycle)
+          : firstRate * billedNights;
+
+      const billedRate = isNonRevenueStay(stayPurpose) ? 0 : firstRate;
+      const billedTotal = isNonRevenueStay(stayPurpose) ? 0 : calculatedTotal;
 
       const reservationData: CreateReservationDto = {
         guestId: selectedGuest!.id,
@@ -169,11 +236,26 @@ export default function NewReservationPage() {
         checkOut,
         adults: numberOfGuests,
         children: 0,
-        roomRate: firstRate,
-        totalAmount: calculatedTotal,
+        roomRate: billedRate,
+        totalAmount: billedTotal,
         specialRequest: specialRequests || undefined,
         status: 'CONFIRMED',
         isDayUse,
+        stayPurpose,
+        approvedBy: isNonRevenueStay(stayPurpose)
+          ? approvedBy.trim()
+          : undefined,
+        stayPurposeNote: stayPurposeNote.trim() || undefined,
+        department: stayPurpose === 'HOUSE_USE' ? department.trim() : undefined,
+        billingCycle: isDayUse ? 'NIGHTLY' : billingCycle,
+        taxExempt,
+        taxExemptReason: taxExempt ? taxExemptReason : undefined,
+        taxExemptDocumentRef: taxExempt
+          ? taxExemptDocumentRef.trim()
+          : undefined,
+        taxExemptApprovedBy: taxExempt ? taxExemptApprovedBy.trim() : undefined,
+        isRoomLocked,
+        roomLockNote: isRoomLocked ? roomLockNote.trim() : undefined,
         stays,
       };
 
@@ -216,12 +298,13 @@ export default function NewReservationPage() {
   const billedNights = isDayUse ? 1 : nights;
   const firstRate = Number(selectedRoom?.roomType?.baseRate || 0);
   const secondRate = Number(secondRoom?.roomType?.baseRate || 0);
-  const totalAmount = isSplitStay
+  const rackTotal = isSplitStay
     ? calendarNights(checkIn, splitDate) * firstRate +
       calendarNights(splitDate, checkOut) * secondRate
-    : selectedRoom && billedNights > 0
-      ? firstRate * billedNights
-      : 0;
+    : isExtendedBillingCycle(billingCycle)
+      ? calculateExtendedStayTotal(billedNights, firstRate, billingCycle)
+      : firstRate * billedNights;
+  const totalAmount = isNonRevenueStay(stayPurpose) ? 0 : rackTotal;
   const splitMinDate = checkIn
     ? new Date(new Date(checkIn).getTime() + 86400000)
         .toISOString()
@@ -330,9 +413,73 @@ export default function NewReservationPage() {
               </span>
             </label>
 
+            <StayPurposeFields
+              stayPurpose={stayPurpose}
+              onStayPurposeChange={setStayPurpose}
+              approvedBy={approvedBy}
+              onApprovedByChange={setApprovedBy}
+              stayPurposeNote={stayPurposeNote}
+              onStayPurposeNoteChange={setStayPurposeNote}
+              department={department}
+              onDepartmentChange={setDepartment}
+            />
+
+            <div>
+              <label
+                htmlFor="billing-cycle"
+                className="block font-semibold mb-2 text-slate-700 text-sm"
+              >
+                {t('reservations.billingCycle.label')}
+              </label>
+              <select
+                id="billing-cycle"
+                name="billingCycle"
+                value={billingCycle}
+                onChange={(event) =>
+                  handleBillingCycleChange(event.target.value as BillingCycle)
+                }
+                disabled={isDayUse || isSplitStay}
+                className="border border-slate-300 disabled:bg-slate-50 disabled:text-slate-500 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+              >
+                <option value="NIGHTLY">
+                  {t('reservations.billingCycle.nightly')}
+                </option>
+                <option value="WEEKLY">
+                  {t('reservations.billingCycle.weekly')}
+                </option>
+                <option value="MONTHLY">
+                  {t('reservations.billingCycle.monthly')}
+                </option>
+              </select>
+              <p className="mt-1 text-slate-500 text-xs">
+                {t('reservations.billingCycle.hint')}
+              </p>
+            </div>
+
+            <TaxExemptFields
+              taxExempt={taxExempt}
+              onTaxExemptChange={setTaxExempt}
+              taxExemptReason={taxExemptReason}
+              onTaxExemptReasonChange={setTaxExemptReason}
+              taxExemptDocumentRef={taxExemptDocumentRef}
+              onTaxExemptDocumentRefChange={setTaxExemptDocumentRef}
+              taxExemptApprovedBy={taxExemptApprovedBy}
+              onTaxExemptApprovedByChange={setTaxExemptApprovedBy}
+            />
+
+            <RoomLockFields
+              isRoomLocked={isRoomLocked}
+              onIsRoomLockedChange={handleRoomLockChange}
+              roomLockNote={roomLockNote}
+              onRoomLockNoteChange={setRoomLockNote}
+              disabled={isSplitStay}
+            />
+
             <SplitStayOptions
               enabled={isSplitStay}
-              disabled={isDayUse}
+              disabled={
+                isDayUse || isExtendedBillingCycle(billingCycle) || isRoomLocked
+              }
               splitDate={splitDate}
               minDate={splitMinDate}
               maxDate={splitMaxDate}
@@ -562,8 +709,68 @@ export default function NewReservationPage() {
                       {selectedGuest?.firstName} {selectedGuest?.lastName}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">
+                      {t('reservations.stayPurpose.label')}:
+                    </span>
+                    <span className="font-semibold">
+                      {isNonRevenueStay(stayPurpose) ? (
+                        <StayPurposeBadge stayPurpose={stayPurpose} />
+                      ) : (
+                        t('reservations.stayPurpose.standard')
+                      )}
+                    </span>
+                  </div>
+                  {taxExempt ? (
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">
+                        {t('reservations.taxExempt.label')}:
+                      </span>
+                      <TaxExemptBadge taxExempt />
+                    </div>
+                  ) : null}
+                  {isRoomLocked ? (
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">
+                        {t('reservations.roomLock.label')}:
+                      </span>
+                      <RoomLockBadge isRoomLocked />
+                    </div>
+                  ) : null}
                 </div>
               </div>
+
+              <StayPurposeFields
+                stayPurpose={stayPurpose}
+                onStayPurposeChange={setStayPurpose}
+                approvedBy={approvedBy}
+                onApprovedByChange={setApprovedBy}
+                stayPurposeNote={stayPurposeNote}
+                onStayPurposeNoteChange={setStayPurposeNote}
+                department={department}
+                onDepartmentChange={setDepartment}
+                showAuthority
+              />
+
+              <TaxExemptFields
+                taxExempt={taxExempt}
+                onTaxExemptChange={setTaxExempt}
+                taxExemptReason={taxExemptReason}
+                onTaxExemptReasonChange={setTaxExemptReason}
+                taxExemptDocumentRef={taxExemptDocumentRef}
+                onTaxExemptDocumentRefChange={setTaxExemptDocumentRef}
+                taxExemptApprovedBy={taxExemptApprovedBy}
+                onTaxExemptApprovedByChange={setTaxExemptApprovedBy}
+                showDetails
+              />
+
+              <RoomLockFields
+                isRoomLocked={isRoomLocked}
+                onIsRoomLockedChange={setIsRoomLocked}
+                roomLockNote={roomLockNote}
+                onRoomLockNoteChange={setRoomLockNote}
+                showNote
+              />
 
               <div>
                 <label
