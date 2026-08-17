@@ -118,7 +118,7 @@ export function ShiftsClient() {
   return (
     <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
       <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
+        <h1 className="font-bold text-3xl text-pura-blue">
           {t('shifts.title')}
         </h1>
         {property ? (

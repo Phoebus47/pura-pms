@@ -41,7 +41,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-linear-to-br flex from-[#1e4b8e] items-center justify-center min-h-screen p-4 to-[#2d5aa0]">
+    <div className="bg-linear-to-br flex from-pura-blue items-center justify-center min-h-screen p-4 to-pura-blue-dark">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="mb-8 text-center">
@@ -50,8 +50,8 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="backdrop-blur-xl bg-white/95 p-8 rounded-3xl shadow-2xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-2xl">Sign In</h2>
+        <div className="bg-white p-8 rounded-xl shadow-lg">
+          <h2 className="font-bold mb-6 text-2xl text-pura-blue">Sign In</h2>
 
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email */}
@@ -67,7 +67,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@pura.com"
                 required
-                className="h-12 px-4 py-3 rounded-xl"
+                className="h-12 px-4 py-3"
               />
             </div>
 
@@ -84,29 +84,25 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="h-12 px-4 py-3 rounded-xl"
+                className="h-12 px-4 py-3"
               />
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-xl">
+              <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
                 <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
 
             {/* Login Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-[#1e4b8e] font-semibold hover:bg-[#153a6e] py-3 rounded-xl text-white transition-all w-full"
-            >
+            <Button type="submit" disabled={loading} className="py-3 w-full">
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 
           {/* Demo Credentials */}
-          <div className="bg-slate-50 mt-6 p-4 rounded-xl">
+          <div className="bg-slate-50 mt-6 p-4 rounded-lg">
             <p className="font-semibold mb-2 text-slate-600 text-xs">
               Demo Credentials:
             </p>

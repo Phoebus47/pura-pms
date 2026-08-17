@@ -28,6 +28,13 @@ const mockPrismaService = {
     create: vi.fn(),
     findMany: vi.fn(),
   },
+  partnerHotel: {
+    findUnique: vi.fn(),
+  },
+  walk: {
+    create: vi.fn(),
+    findMany: vi.fn(),
+  },
   room: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -89,6 +96,8 @@ describe('ReservationsService', () => {
     mockPrismaService.reservationStay.update.mockResolvedValue({});
     mockPrismaService.roomMove.create.mockResolvedValue({});
     mockPrismaService.roomMove.findMany.mockResolvedValue([]);
+    mockPrismaService.walk.create.mockResolvedValue({});
+    mockPrismaService.walk.findMany.mockResolvedValue([]);
     mockPrismaService.$transaction.mockImplementation(
       async (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
         callback(mockPrismaService),
@@ -1254,6 +1263,164 @@ describe('ReservationsService', () => {
       mockPrismaService.reservation.findUnique.mockResolvedValue(null);
 
       await expect(service.listRoomMoves('missing')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('walk', () => {
+    const confirmedReservation = {
+      id: 'res-1',
+      status: ReservationStatus.CONFIRMED,
+      notes: null,
+      room: { id: 'room-1', propertyId: 'prop-1' },
+    };
+    const partnerHotel = {
+      id: 'ph-1',
+      propertyId: 'prop-1',
+      isActive: true,
+    };
+    const dto = {
+      partnerHotelId: 'ph-1',
+      cost: 1500,
+      compensationAmount: 500,
+      compensationNotes: 'One free breakfast voucher',
+      reason: 'Overbooked',
+      walkedBy: 'usr-1',
+    };
+
+    it('records the walk and sets WALKED status', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        confirmedReservation,
+      );
+      mockPrismaService.partnerHotel.findUnique.mockResolvedValue(partnerHotel);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        ...confirmedReservation,
+        status: ReservationStatus.WALKED,
+      });
+
+      const result = await service.walk('res-1', dto);
+
+      expect(result.status).toBe(ReservationStatus.WALKED);
+      expect(mockPrismaService.walk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            reservationId: 'res-1',
+            partnerHotelId: 'ph-1',
+            cost: 1500,
+            compensationAmount: 500,
+            compensationNotes: 'One free breakfast voucher',
+            walkedBy: 'usr-1',
+          }),
+        }),
+      );
+    });
+
+    it('defaults compensationAmount to zero when omitted', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        confirmedReservation,
+      );
+      mockPrismaService.partnerHotel.findUnique.mockResolvedValue(partnerHotel);
+      mockPrismaService.reservation.update.mockResolvedValue({
+        ...confirmedReservation,
+        status: ReservationStatus.WALKED,
+      });
+
+      await service.walk('res-1', { ...dto, compensationAmount: undefined });
+
+      expect(mockPrismaService.walk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ compensationAmount: 0 }),
+        }),
+      );
+    });
+
+    it('rejects a reservation that is not confirmed', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        ...confirmedReservation,
+        status: ReservationStatus.CHECKED_IN,
+      });
+
+      await expect(service.walk('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockPrismaService.walk.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a negative cost', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        confirmedReservation,
+      );
+
+      await expect(service.walk('res-1', { ...dto, cost: -1 })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('throws NotFoundException when the partner hotel is missing', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        confirmedReservation,
+      );
+      mockPrismaService.partnerHotel.findUnique.mockResolvedValue(null);
+
+      await expect(service.walk('res-1', dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('rejects a partner hotel from another property', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        confirmedReservation,
+      );
+      mockPrismaService.partnerHotel.findUnique.mockResolvedValue({
+        ...partnerHotel,
+        propertyId: 'prop-2',
+      });
+
+      await expect(service.walk('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('rejects an inactive partner hotel', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(
+        confirmedReservation,
+      );
+      mockPrismaService.partnerHotel.findUnique.mockResolvedValue({
+        ...partnerHotel,
+        isActive: false,
+      });
+
+      await expect(service.walk('res-1', dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('listWalks', () => {
+    it('returns walk history for a reservation', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        id: 'res-1',
+      });
+      mockPrismaService.walk.findMany.mockResolvedValue([
+        { id: 'walk-1', partnerHotelId: 'ph-1' },
+      ]);
+
+      const result = await service.listWalks('res-1');
+
+      expect(result).toHaveLength(1);
+      expect(mockPrismaService.walk.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { reservationId: 'res-1' },
+          orderBy: { walkedAt: 'desc' },
+        }),
+      );
+    });
+
+    it('throws when the reservation is missing', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue(null);
+
+      await expect(service.listWalks('missing')).rejects.toThrow(
         NotFoundException,
       );
     });

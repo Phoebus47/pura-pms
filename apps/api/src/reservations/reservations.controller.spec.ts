@@ -19,6 +19,8 @@ const mockReservationsService = {
   moveRoom: vi.fn(),
   listRoomMoves: vi.fn(),
   markNoShow: vi.fn(),
+  walk: vi.fn(),
+  listWalks: vi.fn(),
 };
 
 describe('ReservationsController', () => {
@@ -237,6 +239,30 @@ describe('ReservationsController', () => {
       });
       await controller.markNoShow('1', dto);
       expect(mockReservationsService.markNoShow).toHaveBeenCalledWith('1', dto);
+    });
+  });
+
+  describe('walk', () => {
+    it('should walk a reservation to a partner hotel', async () => {
+      const dto = {
+        partnerHotelId: 'ph-1',
+        cost: 1500,
+        walkedBy: 'usr-1',
+      };
+      mockReservationsService.walk.mockResolvedValue({
+        id: '1',
+        status: ReservationStatus.WALKED,
+      });
+      await controller.walk('1', dto);
+      expect(mockReservationsService.walk).toHaveBeenCalledWith('1', dto);
+    });
+  });
+
+  describe('listWalks', () => {
+    it('should list walk history', async () => {
+      mockReservationsService.listWalks.mockResolvedValue([]);
+      await controller.listWalks('1');
+      expect(mockReservationsService.listWalks).toHaveBeenCalledWith('1');
     });
   });
 

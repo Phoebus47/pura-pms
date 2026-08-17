@@ -185,9 +185,9 @@ export function GuestFormDialog({
                   onClick={() => setFormData({ ...formData, vipLevel: level })}
                   aria-label={`VIP Level ${level === 0 ? 'Standard' : level}`}
                   aria-pressed={formData.vipLevel === level}
-                  className={`flex items-center gap-1 px-4 py-2 rounded-xl border-2 transition-all ${
+                  className={`flex items-center gap-1 px-4 py-2 rounded-xl border-2 transition-colors ${
                     formData.vipLevel === level
-                      ? 'border-[#f5a623] bg-[#f5a623]/10'
+                      ? 'border-pura-orange bg-pura-orange/10'
                       : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
@@ -198,7 +198,7 @@ export function GuestFormDialog({
                       {Array.from({ length: level }).map((_, i) => (
                         <Star
                           key={`level-${level}-star-${i}`}
-                          className="fill-[#f5a623] h-4 text-[#f5a623] w-4"
+                          className="fill-pura-orange h-4 text-pura-orange w-4"
                         />
                       ))}
                     </>

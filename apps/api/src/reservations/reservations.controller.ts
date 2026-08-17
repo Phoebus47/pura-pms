@@ -16,6 +16,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { MoveRoomDto } from './dto/move-room.dto';
 import { MarkNoShowDto } from './dto/mark-no-show.dto';
+import { WalkReservationDto } from './dto/walk-reservation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationStatus } from '@pura/database';
 
@@ -71,6 +72,11 @@ export class ReservationsController {
     return this.reservationsService.listRoomMoves(id);
   }
 
+  @Get(':id/walks')
+  listWalks(@Param('id') id: string) {
+    return this.reservationsService.listWalks(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(id);
@@ -104,6 +110,12 @@ export class ReservationsController {
   @HttpCode(HttpStatus.CREATED)
   markNoShow(@Param('id') id: string, @Body() dto: MarkNoShowDto) {
     return this.reservationsService.markNoShow(id, dto);
+  }
+
+  @Post(':id/walk')
+  @HttpCode(HttpStatus.CREATED)
+  walk(@Param('id') id: string, @Body() dto: WalkReservationDto) {
+    return this.reservationsService.walk(id, dto);
   }
 
   @Patch(':id/cancel')

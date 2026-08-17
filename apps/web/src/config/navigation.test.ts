@@ -18,6 +18,7 @@ import {
   Landmark,
   Wallet,
   MoonStar,
+  Building2,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -133,6 +134,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Wallet);
     });
 
+    it('should include Partner hotels navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Partner hotels',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/partner-hotels');
+      expect(item?.icon).toBe(Building2);
+    });
+
     it('should include Night Audit navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Night Audit',
@@ -165,6 +175,7 @@ describe('navigation', () => {
         'Tax invoices',
         'Accounts receivable',
         'Card pre-auths',
+        'Partner hotels',
         'Settings',
       ];
 
@@ -216,6 +227,7 @@ describe('navigation', () => {
         'Tax invoices',
         'Accounts receivable',
         'Card pre-auths',
+        'Partner hotels',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -226,6 +238,7 @@ describe('navigation', () => {
         '/tax-invoices',
         '/ar-accounts',
         '/card-preauths',
+        '/partner-hotels',
         '/settings',
       ]);
     });

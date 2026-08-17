@@ -113,7 +113,7 @@ export default function ReservationCalendarPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="font-bold text-[#1e4b8e] text-3xl">
+          <h1 className="font-bold text-3xl text-pura-blue">
             Reservation Calendar
           </h1>
           <p className="mt-1 text-slate-600">
@@ -122,14 +122,14 @@ export default function ReservationCalendarPage() {
         </div>
 
         <div className="flex gap-3 items-center">
-          <Button onClick={goToToday} variant="outline" className="rounded-xl">
+          <Button onClick={goToToday} variant="outline">
             Today
           </Button>
           <div className="flex gap-2 items-center">
             <Button
               onClick={previousMonth}
               variant="outline"
-              className="p-2 rounded-xl"
+              className="p-2"
               aria-label="Previous Month"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -137,7 +137,7 @@ export default function ReservationCalendarPage() {
             <Button
               onClick={nextMonth}
               variant="outline"
-              className="p-2 rounded-xl"
+              className="p-2"
               aria-label="Next Month"
             >
               <ChevronRight className="h-5 w-5" />
@@ -147,7 +147,7 @@ export default function ReservationCalendarPage() {
       </div>
 
       {/* Filters */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
         <div className="flex gap-4 items-center">
           <Filter className="h-5 text-slate-600 w-5" />
           <div className="flex-1">
@@ -170,12 +170,12 @@ export default function ReservationCalendarPage() {
       {loading ? (
         <div className="flex h-96 items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+            <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
             <p className="mt-4 text-slate-600">Loading calendar...</p>
           </div>
         </div>
       ) : (
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 overflow-hidden p-6 rounded-3xl shadow-xl">
+        <div className="bg-white border border-slate-200 overflow-hidden p-6 rounded-xl shadow-sm">
           {/* Day Headers */}
           <div className="gap-2 grid grid-cols-7 mb-4">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
@@ -209,16 +209,16 @@ export default function ReservationCalendarPage() {
               return (
                 <div
                   key={`day-${day}`}
-                  className={`aspect-square rounded-2xl border-2 p-2 transition-all ${
+                  className={`aspect-square rounded-lg border-2 p-2 transition-colors ${
                     isToday
-                      ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
+                      ? 'border-pura-blue bg-pura-blue/5'
                       : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex flex-col h-full">
                     <div
                       className={`text-sm font-bold mb-1 ${
-                        isToday ? 'text-[#1e4b8e]' : 'text-slate-700'
+                        isToday ? 'text-pura-blue' : 'text-slate-700'
                       }`}
                     >
                       {day}
@@ -227,7 +227,7 @@ export default function ReservationCalendarPage() {
                       {dayReservations.slice(0, 3).map((item) => (
                         <div
                           key={item.key}
-                          className="bg-white/80 border border-slate-200 cursor-pointer hover:bg-white p-1 rounded text-xs transition-colors truncate"
+                          className="bg-white border border-slate-200 cursor-pointer hover:bg-slate-50 p-1 rounded text-xs transition-colors truncate"
                           title={`${item.guestName} - Room ${item.roomNumber ?? ''}`}
                         >
                           <ReservationStatusBadge
@@ -257,8 +257,8 @@ export default function ReservationCalendarPage() {
       )}
 
       {/* Legend */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-        <h3 className="font-bold mb-4 text-[#1e4b8e] text-lg">Legend</h3>
+      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+        <h3 className="font-bold mb-4 text-lg text-pura-blue">Legend</h3>
         <div className="flex flex-wrap gap-4">
           <div className="flex gap-2 items-center">
             <ReservationStatusBadge status="CONFIRMED" />

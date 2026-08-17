@@ -108,10 +108,7 @@ export function PostPaymentDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        aria-describedby={undefined}
-        className="rounded-3xl sm:max-w-106.25"
-      >
+      <DialogContent aria-describedby={undefined} className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="font-bold text-2xl text-emerald-700">
             {t('folios.postPayment')}
@@ -179,7 +176,7 @@ export function PostPaymentDialog({
               required={!needsFx}
             />
           </div>
-          <div className="bg-slate-50 border border-slate-200 flex items-center justify-between p-4 rounded-2xl text-sm">
+          <div className="bg-slate-50 border border-slate-200 flex items-center justify-between p-4 rounded-lg text-sm">
             <p className="font-semibold text-slate-700">{t('folios.total')}</p>
             <p className="font-bold text-slate-900">
               ฿{net.toLocaleString(undefined, { maximumFractionDigits: 2 })}
@@ -198,18 +195,13 @@ export function PostPaymentDialog({
             />
           </div>
           <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="rounded-xl"
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               {t('folios.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700 rounded-xl"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               {loading ? t('folios.posting') : t('folios.postPaymentSubmit')}
             </Button>

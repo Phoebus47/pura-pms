@@ -13,6 +13,7 @@ import { APIError } from '@/lib/api/client';
 vi.mock('@/lib/api/folios', () => ({
   foliosAPI: {
     checkout: vi.fn(),
+    reopen: vi.fn(),
     setCreditLimit: vi.fn(),
     setArAccount: vi.fn(),
   },
@@ -46,6 +47,8 @@ const folio = {
   windows: [],
   createdAt: '2026-08-14',
 } as Folio;
+
+const closedFolio = { ...folio, status: 'CLOSED' } as Folio;
 
 function renderBar(ui: ReactNode) {
   const queryClient = new QueryClient({
@@ -85,5 +88,44 @@ describe('FolioCheckoutBar', () => {
       screen.getByRole('button', { name: t('folios.checkout') }),
     );
     expect(toast.error).toHaveBeenCalledWith(t('folios.creditLimitExceeded'));
+  });
+
+  it('does not show the reopen action for an open folio', () => {
+    renderBar(<FolioCheckoutBar folio={folio} onUpdated={vi.fn()} />);
+    expect(
+      screen.queryByRole('button', { name: t('folios.reopen') }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('reopens a closed folio and refreshes on success', async () => {
+    vi.mocked(foliosAPI.reopen).mockResolvedValue({
+      ...closedFolio,
+      status: 'OPEN',
+    } as Folio);
+    const onUpdated = vi.fn();
+    renderBar(<FolioCheckoutBar folio={closedFolio} onUpdated={onUpdated} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: t('folios.reopen') }),
+    );
+
+    expect(foliosAPI.reopen).toHaveBeenCalledWith('f1');
+    expect(toast.success).toHaveBeenCalledWith(t('folios.reopenSuccess'));
+    expect(onUpdated).toHaveBeenCalled();
+  });
+
+  it('toasts the reopen-failed copy when the folio is not closed', async () => {
+    vi.mocked(foliosAPI.reopen).mockRejectedValue(
+      new APIError(409, 'Conflict', {
+        message: 'Only a closed folio can be reopened',
+      }),
+    );
+    renderBar(<FolioCheckoutBar folio={closedFolio} onUpdated={vi.fn()} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: t('folios.reopen') }),
+    );
+
+    expect(toast.error).toHaveBeenCalledWith(t('folios.reopenFailed'));
   });
 });

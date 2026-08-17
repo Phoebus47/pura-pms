@@ -73,16 +73,16 @@ export function PropertyFormDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-3xl shadow-2xl w-full">
+    <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
+      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
         {/* Header */}
         <div className="border-b border-slate-200 flex items-center justify-between p-6">
-          <h2 className="font-bold text-[#1e4b8e] text-2xl">
+          <h2 className="font-bold text-2xl text-pura-blue">
             {property ? 'Edit Property' : 'New Property'}
           </h2>
           <button
             onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
+            className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
           >
             <X className="h-5 text-slate-600 w-5" />
           </button>
@@ -112,7 +112,7 @@ export function PropertyFormDialog({
                 }
                 required
                 placeholder="e.g., Grand Hotel Bangkok"
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
               />
             </div>
 
@@ -132,7 +132,7 @@ export function PropertyFormDialog({
                 }
                 placeholder="Full address"
                 rows={3}
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
+                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 resize-none rounded-lg transition-colors w-full"
               />
             </div>
 
@@ -153,7 +153,7 @@ export function PropertyFormDialog({
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="+66 2 123 4567"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
 
@@ -173,7 +173,7 @@ export function PropertyFormDialog({
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="contact@property.com"
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
             </div>
@@ -192,16 +192,12 @@ export function PropertyFormDialog({
               type="button"
               onClick={onClose}
               variant="outline"
-              className="flex-1 rounded-xl"
+              className="flex-1"
               disabled={loading}
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
-              disabled={loading}
-            >
+            <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? 'Saving...' : getSubmitButtonLabel(!!property)}
             </Button>
           </div>

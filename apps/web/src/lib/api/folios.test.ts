@@ -110,6 +110,15 @@ describe('foliosAPI', () => {
     expect(result).toEqual(mockResponse);
   });
 
+  it('should reopen a folio', async () => {
+    const mockResponse = { id: 'folio-1', status: 'OPEN' };
+    vi.mocked(apiClient.post).mockResolvedValue(mockResponse);
+
+    const result = await foliosAPI.reopen('folio-1');
+    expect(apiClient.post).toHaveBeenCalledWith('/folios/folio-1/reopen');
+    expect(result).toEqual(mockResponse);
+  });
+
   it('should patch a folio credit limit', async () => {
     const mockResponse = { id: 'folio-1', creditLimit: 2000 };
     vi.mocked(apiClient.patch).mockResolvedValue(mockResponse);

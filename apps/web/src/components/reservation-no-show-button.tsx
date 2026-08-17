@@ -60,7 +60,7 @@ export function ReservationNoShowButton({
         void handleMark();
       }}
       disabled={busy}
-      className="rounded-xl text-pura-orange"
+      className="text-pura-orange"
     >
       {t('reservations.noShow.action')}
     </Button>

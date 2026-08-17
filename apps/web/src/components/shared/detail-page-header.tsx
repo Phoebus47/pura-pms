@@ -25,12 +25,12 @@ export function DetailPageHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex gap-4 items-center">
-        <Button variant="outline" onClick={handleBack} className="rounded-xl">
+        <Button variant="outline" onClick={handleBack}>
           <ArrowLeft className="h-4 mr-2 w-4" />
           Back
         </Button>
         <div>
-          <h1 className="font-bold text-[#1e4b8e] text-3xl">{title}</h1>
+          <h1 className="font-bold text-3xl text-pura-blue">{title}</h1>
           {subtitle && (
             <div className="mt-1">
               {typeof subtitle === 'string' ? (

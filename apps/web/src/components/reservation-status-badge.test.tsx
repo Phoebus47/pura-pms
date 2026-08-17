@@ -10,26 +10,23 @@ describe('ReservationStatusBadge', () => {
     'CHECKED_OUT',
     'CANCELLED',
     'NO_SHOW',
+    'WALKED',
   ];
+
+  const labels: Record<ReservationStatus, string> = {
+    TENTATIVE: 'Tentative',
+    CONFIRMED: 'Confirmed',
+    CHECKED_IN: 'Checked In',
+    CHECKED_OUT: 'Checked Out',
+    CANCELLED: 'Cancelled',
+    NO_SHOW: 'No Show',
+    WALKED: 'Walked',
+  };
 
   it.each(statuses)('should render %s status correctly', (status) => {
     render(<ReservationStatusBadge status={status} />);
 
-    const badge = screen.getByText(
-      status === 'TENTATIVE'
-        ? 'Tentative'
-        : status === 'CONFIRMED'
-          ? 'Confirmed'
-          : status === 'CHECKED_IN'
-            ? 'Checked In'
-            : status === 'CHECKED_OUT'
-              ? 'Checked Out'
-              : status === 'CANCELLED'
-                ? 'Cancelled'
-                : 'No Show',
-    );
-
-    expect(badge).toBeInTheDocument();
+    expect(screen.getByText(labels[status])).toBeInTheDocument();
   });
 
   it('should apply custom className', () => {

@@ -237,20 +237,20 @@ export default function NewReservationPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-bold text-[#1e4b8e] text-3xl">New Reservation</h1>
+        <h1 className="font-bold text-3xl text-pura-blue">New Reservation</h1>
         <p className="mt-1 text-slate-600">Create a new booking step by step</p>
       </div>
 
       {/* Progress Steps */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.number} className="flex flex-1 items-center">
               <div className="flex flex-1 flex-col items-center">
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
                     currentStep >= step.number
-                      ? 'bg-[#1e4b8e] text-white'
+                      ? 'bg-pura-blue text-white'
                       : 'bg-slate-200 text-slate-500'
                   }`}
                 >
@@ -259,7 +259,7 @@ export default function NewReservationPage() {
                 <p
                   className={`text-sm font-semibold mt-2 ${
                     currentStep >= step.number
-                      ? 'text-[#1e4b8e]'
+                      ? 'text-pura-blue'
                       : 'text-slate-500'
                   }`}
                 >
@@ -268,8 +268,8 @@ export default function NewReservationPage() {
               </div>
               {index < steps.length - 1 && (
                 <div
-                  className={`h-1 flex-1 mx-4 rounded transition-all ${
-                    currentStep > step.number ? 'bg-[#1e4b8e]' : 'bg-slate-200'
+                  className={`h-1 flex-1 mx-4 rounded transition-colors ${
+                    currentStep > step.number ? 'bg-pura-blue' : 'bg-slate-200'
                   }`}
                 />
               )}
@@ -279,11 +279,11 @@ export default function NewReservationPage() {
       </div>
 
       {/* Step Content */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-8 rounded-3xl shadow-xl">
+      <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
         {/* Step 1: Dates & Property */}
         {currentStep === 1 && (
           <div className="space-y-6">
-            <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            <h2 className="font-bold text-2xl text-pura-blue">
               Select Dates and Property
             </h2>
 
@@ -317,7 +317,7 @@ export default function NewReservationPage() {
                 type="checkbox"
                 checked={isDayUse}
                 onChange={(e) => handleDayUseChange(e.target.checked)}
-                className="border-slate-300 focus-visible:outline-none focus-visible:ring-[#1e4b8e] focus-visible:ring-2 h-4 mt-1 rounded text-[#1e4b8e] w-4"
+                className="border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
               />
               <span>
                 <span className="block font-semibold text-slate-700 text-sm">
@@ -343,7 +343,7 @@ export default function NewReservationPage() {
             <div className="flex justify-end pt-4">
               <Button
                 onClick={handleStep1Next}
-                className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
+                className="bg-pura-blue hover:bg-pura-blue-dark"
               >
                 {loadingRooms ? 'Loading...' : 'Next'}
                 <ArrowRight className="h-4 ml-2 w-4" />
@@ -355,7 +355,7 @@ export default function NewReservationPage() {
         {/* Step 2: Room Selection */}
         {currentStep === 2 && (
           <div className="space-y-6">
-            <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            <h2 className="font-bold text-2xl text-pura-blue">
               {isSplitStay
                 ? t('reservations.splitStay.firstRoom')
                 : 'Select a Room'}
@@ -373,9 +373,9 @@ export default function NewReservationPage() {
                     type="button"
                     aria-label={`Room ${room.number}`}
                     onClick={() => setSelectedRoom(room)}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                    className={`p-4 rounded-xl border-2 text-left transition-colors ${
                       selectedRoom?.id === room.id
-                        ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
+                        ? 'border-pura-blue bg-pura-blue/5'
                         : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
@@ -392,7 +392,7 @@ export default function NewReservationPage() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-[#1e4b8e] text-2xl">
+                        <p className="font-bold text-2xl text-pura-blue">
                           ฿
                           {Number(
                             room.roomType?.baseRate || 0,
@@ -420,9 +420,9 @@ export default function NewReservationPage() {
                         type="button"
                         aria-label={`${t('reservations.splitStay.secondRoom')} ${room.number}`}
                         onClick={() => setSecondRoom(room)}
-                        className={`min-h-11 p-4 rounded-2xl border-2 text-left transition-all ${
+                        className={`min-h-11 p-4 rounded-xl border-2 text-left transition-colors ${
                           secondRoom?.id === room.id
-                            ? 'border-[#1e4b8e] bg-[#1e4b8e]/5'
+                            ? 'border-pura-blue bg-pura-blue/5'
                             : 'border-slate-200 hover:border-slate-300'
                         }`}
                       >
@@ -439,17 +439,13 @@ export default function NewReservationPage() {
             ) : null}
 
             <div className="flex justify-between pt-4">
-              <Button
-                onClick={() => setCurrentStep(1)}
-                variant="outline"
-                className="rounded-xl"
-              >
+              <Button onClick={() => setCurrentStep(1)} variant="outline">
                 <ArrowLeft className="h-4 mr-2 w-4" />
                 Back
               </Button>
               <Button
                 onClick={handleStep2Next}
-                className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
+                className="bg-pura-blue hover:bg-pura-blue-dark"
               >
                 Next
                 <ArrowRight className="h-4 ml-2 w-4" />
@@ -461,10 +457,10 @@ export default function NewReservationPage() {
         {/* Step 3: Guest Selection */}
         {currentStep === 3 && (
           <div className="space-y-6">
-            <h2 className="font-bold text-[#1e4b8e] text-2xl">Select Guest</h2>
+            <h2 className="font-bold text-2xl text-pura-blue">Select Guest</h2>
 
             {selectedGuest ? (
-              <div className="bg-[#1e4b8e]/5 border-[#1e4b8e] border-2 p-4 rounded-2xl">
+              <div className="bg-pura-blue/5 border-2 border-pura-blue p-4 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-lg text-slate-800">
@@ -481,7 +477,6 @@ export default function NewReservationPage() {
                     onClick={() => setSelectedGuest(null)}
                     variant="outline"
                     size="sm"
-                    className="rounded-xl"
                   >
                     Change
                   </Button>
@@ -491,14 +486,14 @@ export default function NewReservationPage() {
               <div className="flex gap-4">
                 <Button
                   onClick={() => setIsGuestSearchOpen(true)}
-                  className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
+                  className="bg-pura-blue flex-1 hover:bg-pura-blue-dark"
                 >
                   Search Existing Guest
                 </Button>
                 <Button
                   onClick={() => setIsGuestFormOpen(true)}
                   variant="outline"
-                  className="flex-1 rounded-xl"
+                  className="flex-1"
                 >
                   Create New Guest
                 </Button>
@@ -506,17 +501,13 @@ export default function NewReservationPage() {
             )}
 
             <div className="flex justify-between pt-4">
-              <Button
-                onClick={() => setCurrentStep(2)}
-                variant="outline"
-                className="rounded-xl"
-              >
+              <Button onClick={() => setCurrentStep(2)} variant="outline">
                 <ArrowLeft className="h-4 mr-2 w-4" />
                 Back
               </Button>
               <Button
                 onClick={handleStep3Next}
-                className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
+                className="bg-pura-blue hover:bg-pura-blue-dark"
               >
                 Next
                 <ArrowRight className="h-4 ml-2 w-4" />
@@ -528,13 +519,13 @@ export default function NewReservationPage() {
         {/* Step 4: Confirmation */}
         {currentStep === 4 && (
           <div className="space-y-6">
-            <h2 className="font-bold text-[#1e4b8e] text-2xl">
+            <h2 className="font-bold text-2xl text-pura-blue">
               Confirm Reservation
             </h2>
 
             {/* Summary */}
             <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-2xl">
+              <div className="bg-slate-50 p-4 rounded-xl">
                 <h3 className="font-semibold mb-2 text-slate-700">
                   Booking Details
                 </h3>
@@ -591,7 +582,7 @@ export default function NewReservationPage() {
                   }
                   min="1"
                   max={selectedRoom?.roomType?.maxOccupancy || 4}
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
                 />
               </div>
 
@@ -609,16 +600,16 @@ export default function NewReservationPage() {
                   onChange={(e) => setSpecialRequests(e.target.value)}
                   rows={3}
                   placeholder="Any special requests or notes..."
-                  className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
+                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
                 />
               </div>
 
-              <div className="bg-[#1e4b8e]/5 border-[#1e4b8e] border-2 p-4 rounded-2xl">
+              <div className="bg-pura-blue/5 border-2 border-pura-blue p-4 rounded-xl">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-lg text-slate-700">
                     Total Amount:
                   </span>
-                  <span className="font-bold text-[#1e4b8e] text-3xl">
+                  <span className="font-bold text-3xl text-pura-blue">
                     ฿{totalAmount.toLocaleString()}
                   </span>
                 </div>
@@ -639,7 +630,6 @@ export default function NewReservationPage() {
               <Button
                 onClick={() => setCurrentStep(3)}
                 variant="outline"
-                className="rounded-xl"
                 disabled={submitting}
               >
                 <ArrowLeft className="h-4 mr-2 w-4" />
@@ -648,7 +638,7 @@ export default function NewReservationPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
+                className="bg-pura-blue hover:bg-pura-blue-dark"
               >
                 {submitting ? 'Creating...' : 'Confirm Reservation'}
                 <Check className="h-4 ml-2 w-4" />
