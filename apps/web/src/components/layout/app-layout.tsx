@@ -17,13 +17,10 @@ export function AppLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden relative">
-      <div className="absolute bg-linear-to-br from-blue-50 inset-0 opacity-60 to-orange-50 via-indigo-50" />
-      <div className="absolute bg-pattern inset-0" />
-
+    <div className="bg-background flex h-screen overflow-hidden">
       <Sidebar />
 
-      <div className="flex flex-1 flex-col overflow-hidden relative z-10">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
         <main className="flex-1 lg:p-8 lg:pb-8 overflow-y-auto p-4 pb-20">
           {children}

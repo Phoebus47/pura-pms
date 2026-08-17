@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ShiftStatus } from '@pura/database';
+import { FolioStatus, ShiftStatus } from '@pura/database';
 
 export const SYSTEM_USER_ID = 'SYSTEM';
 export const OPEN_SHIFT_REQUIRED_MESSAGE =
@@ -34,6 +34,7 @@ export async function resolvePostShiftId(
   shiftId: string | null;
   rateCode: string | null;
   propertyCurrency: string;
+  status: FolioStatus | null;
 }> {
   const folio = await prisma.folio.findUnique({
     where: { id: folioId },
@@ -44,13 +45,14 @@ export async function resolvePostShiftId(
   const rateCode = folio?.reservation?.rateCode ?? null;
   const propertyCurrency =
     folio?.reservation?.room?.property?.currency ?? 'THB';
+  const status = folio?.status ?? null;
   if (userId === SYSTEM_USER_ID) {
-    return { shiftId: null, rateCode, propertyCurrency };
+    return { shiftId: null, rateCode, propertyCurrency, status };
   }
   const shiftId = await resolveCashierShiftId(
     prisma,
     userId,
     folio?.reservation?.room?.propertyId,
   );
-  return { shiftId, rateCode, propertyCurrency };
+  return { shiftId, rateCode, propertyCurrency, status };
 }

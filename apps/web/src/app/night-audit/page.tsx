@@ -83,20 +83,20 @@ export default function NightAuditPage() {
     <div className="container max-w-4xl mx-auto p-6">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-bold text-(--pura-blue) text-3xl tracking-tight">
+          <h1 className="font-bold text-3xl text-pura-blue tracking-tight">
             {t('nightAudit.title')}
           </h1>
           <p className="flex gap-2 items-center mt-1 text-slate-600">
             <Building2 className="size-4" aria-hidden="true" /> {property.name}
           </p>
         </div>
-        <div className="bg-background border border-(--pura-blue)/10 flex gap-3 items-center px-4 py-2 rounded-2xl shadow-sm">
+        <div className="bg-white border border-slate-200 flex gap-3 items-center px-4 py-2 rounded-lg">
           <Clock className="size-5 text-amber-500" aria-hidden="true" />
           <div>
             <p className="font-semibold text-slate-600 text-xs uppercase">
               {t('nightAudit.businessDate')}
             </p>
-            <p className="font-bold text-(--pura-blue) text-lg">
+            <p className="font-bold text-lg text-pura-blue">
               {businessDateLabel}
             </p>
           </div>
@@ -104,11 +104,11 @@ export default function NightAuditPage() {
       </div>
 
       <div className="gap-6 grid md:grid-cols-2">
-        <Card className="border-(--pura-blue)/5 border-2 md:col-span-2 overflow-hidden rounded-3xl shadow-xl">
-          <CardHeader className="bg-(--pura-blue)/5 border-(--pura-blue)/10 border-b">
+        <Card className="md:col-span-2 overflow-hidden">
+          <CardHeader className="bg-pura-blue/5 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-(--pura-blue)">
+                <CardTitle className="text-pura-blue">
                   {t('nightAudit.currentStatus')}
                 </CardTitle>
                 <CardDescription>
@@ -165,13 +165,13 @@ export default function NightAuditPage() {
               <div className="mb-6 space-y-2">
                 <div className="flex justify-between mb-1 text-sm">
                   <span className="flex font-medium gap-2 items-center">
-                    <RefreshCcw className="animate-spin size-4 text-(--pura-blue)" />
+                    <RefreshCcw className="animate-spin size-4 text-pura-blue" />
                     {t('nightAudit.processing')}
                   </span>
                 </div>
                 <div className="bg-slate-100 h-2.5 overflow-hidden rounded-full w-full">
                   <div
-                    className="animate-pulse bg-(--pura-blue) duration-500 h-2.5 rounded-full transition-all"
+                    className="animate-pulse bg-pura-blue duration-500 h-2.5 rounded-full transition-all"
                     style={{ width: '60%' }}
                   />
                 </div>
@@ -179,7 +179,7 @@ export default function NightAuditPage() {
             )}
 
             {isCompleted && (
-              <div className="bg-green-50 border border-green-200 flex gap-3 items-start mb-6 p-4 rounded-2xl">
+              <div className="bg-green-50 border border-green-200 flex gap-3 items-start mb-6 p-4 rounded-lg">
                 <CheckCircle2 className="mt-0.5 size-5 text-green-600" />
                 <div>
                   <p className="font-bold text-green-800">
@@ -193,7 +193,7 @@ export default function NightAuditPage() {
             )}
 
             {isFailed && (
-              <div className="bg-red-50 border border-red-200 flex gap-3 items-start mb-6 p-4 rounded-2xl">
+              <div className="bg-red-50 border border-red-200 flex gap-3 items-start mb-6 p-4 rounded-lg">
                 <AlertCircle className="mt-0.5 size-5 text-red-600" />
                 <div>
                   <p className="font-bold text-red-800">
@@ -206,11 +206,11 @@ export default function NightAuditPage() {
               </div>
             )}
           </CardContent>
-          <CardFooter className="bg-slate-50/50 border-t flex justify-center py-6">
+          <CardFooter className="bg-slate-50 border-t flex justify-center py-6">
             {!isCompleted && !isInProgress && (
               <Button
                 size="lg"
-                className="gap-2 h-14 hover:scale-105 px-12 rounded-2xl shadow-xl text-lg transition-transform"
+                className="gap-2 h-14 px-12 text-lg"
                 onClick={() => startMutation.mutate()}
                 disabled={startMutation.isPending}
               >
@@ -224,7 +224,7 @@ export default function NightAuditPage() {
               <Button
                 size="lg"
                 disabled
-                className="gap-2 h-14 opacity-70 px-12 rounded-2xl"
+                className="gap-2 h-14 opacity-70 px-12"
               >
                 <RefreshCcw className="animate-spin size-5" />{' '}
                 {t('nightAudit.inProgress')}
@@ -235,7 +235,7 @@ export default function NightAuditPage() {
                 variant="outline"
                 size="lg"
                 disabled
-                className="border-green-500 gap-2 h-14 px-12 rounded-2xl text-green-600"
+                className="border-green-500 gap-2 h-14 px-12 text-green-600"
               >
                 <CheckCircle2 className="size-5" />{' '}
                 {t('nightAudit.completedToday')}
@@ -245,8 +245,8 @@ export default function NightAuditPage() {
         </Card>
 
         {status?.errors && status.errors.length > 0 && (
-          <Card className="border-red-100 overflow-hidden rounded-3xl shadow-lg">
-            <CardHeader className="bg-red-50/50">
+          <Card className="border-red-200 overflow-hidden">
+            <CardHeader className="bg-red-50">
               <CardTitle className="flex gap-2 items-center text-red-800">
                 <AlertCircle className="size-5" /> {t('nightAudit.errors')}
               </CardTitle>
@@ -271,9 +271,9 @@ export default function NightAuditPage() {
           </Card>
         )}
 
-        <Card className="border-(--pura-blue)/5 overflow-hidden rounded-3xl shadow-lg">
-          <CardHeader className="bg-(--pura-blue)/5">
-            <CardTitle className="flex gap-2 items-center text-(--pura-blue)">
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-pura-blue/5">
+            <CardTitle className="flex gap-2 items-center text-pura-blue">
               <FileText className="size-5" /> {t('nightAudit.reports')}
             </CardTitle>
           </CardHeader>
@@ -286,15 +286,15 @@ export default function NightAuditPage() {
                     className="flex hover:bg-slate-50 items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex gap-3 items-center">
-                      <div className="bg-(--pura-blue)/10 p-2 rounded-xl">
-                        <FileText className="size-4 text-(--pura-blue)" />
+                      <div className="bg-pura-blue/10 p-2 rounded-lg">
+                        <FileText className="size-4 text-pura-blue" />
                       </div>
                       <p className="font-medium text-sm">{report.reportName}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="rounded-lg text-(--pura-blue)"
+                      className="text-pura-blue"
                     >
                       {t('nightAudit.view')}
                     </Button>

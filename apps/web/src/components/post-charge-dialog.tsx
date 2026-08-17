@@ -81,12 +81,9 @@ export function PostChargeDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        aria-describedby={undefined}
-        className="rounded-3xl sm:max-w-106.25"
-      >
+      <DialogContent aria-describedby={undefined} className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle className="font-bold text-[#1e4b8e] text-2xl">
+          <DialogTitle className="font-bold text-2xl text-pura-blue">
             Post Charge
           </DialogTitle>
         </DialogHeader>
@@ -121,7 +118,7 @@ export function PostChargeDialog({
               required
             />
           </div>
-          <div className="bg-slate-50 border border-slate-200 gap-x-4 gap-y-2 grid grid-cols-2 p-4 rounded-2xl text-sm">
+          <div className="bg-slate-50 border border-slate-200 gap-x-4 gap-y-2 grid grid-cols-2 p-4 rounded-lg text-sm">
             <p className="text-slate-500">Service</p>
             <p className="font-semibold text-right text-slate-700">
               ฿{service.toLocaleString(undefined, { maximumFractionDigits: 2 })}
@@ -160,19 +157,10 @@ export function PostChargeDialog({
             />
           </div>
           <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="rounded-xl"
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
-            >
+            <Button type="submit" disabled={loading}>
               {loading ? 'Posting...' : 'Post Charge'}
             </Button>
           </DialogFooter>

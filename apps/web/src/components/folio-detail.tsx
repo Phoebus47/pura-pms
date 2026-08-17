@@ -70,7 +70,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
 
   if (folios.length === 0) {
     return (
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-12 rounded-3xl text-center">
+      <div className="bg-white border border-slate-200 p-12 rounded-xl text-center">
         <Receipt className="h-12 mb-4 mx-auto text-slate-300 w-12" />
         <h3 className="font-semibold text-slate-700 text-xl">No Folio Found</h3>
         <p className="mt-2 text-slate-600">
@@ -93,10 +93,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 setActiveWindowNumber(1);
               }}
               className={cn(
-                'px-4 py-2 rounded-xl border transition-all font-medium text-sm',
+                'px-4 py-2 rounded-xl border transition-colors font-medium text-sm',
                 activeFolioId === folio.id
-                  ? 'bg-[#1e4b8e] text-white border-[#1e4b8e] shadow-lg shadow-blue-900/10'
-                  : 'bg-white/50 text-slate-600 border-white/60 hover:bg-white/70',
+                  ? 'bg-pura-blue text-white border-pura-blue'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50',
               )}
             >
               Folio {folio.folioNumber} ({folio.type})
@@ -104,7 +104,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
           ))}
         </div>
 
-        <div className="backdrop-blur-xl bg-white/60 border border-white/70 flex gap-6 items-center px-6 py-3 rounded-2xl shadow-black/5 shadow-xl">
+        <div className="bg-white border border-slate-200 flex gap-6 items-center px-6 py-3 rounded-xl shadow-sm">
           <div>
             <p className="font-bold text-slate-500 text-xs tracking-wider uppercase">
               Total Balance
@@ -138,9 +138,9 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
               key={num}
               onClick={() => setActiveWindowNumber(num)}
               className={cn(
-                'px-6 py-3 text-sm font-bold transition-all border-b-2 relative',
+                'px-6 py-3 text-sm font-bold transition-colors border-b-2 relative',
                 activeWindowNumber === num
-                  ? 'border-[#1e4b8e] text-[#1e4b8e]'
+                  ? 'border-pura-blue text-pura-blue'
                   : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300',
               )}
             >
@@ -156,22 +156,17 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
       </div>
 
       {/* Transactions Table */}
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 overflow-hidden rounded-3xl shadow-xl">
+      <div className="bg-white border border-slate-200 overflow-hidden rounded-xl shadow-sm">
         <div className="flex items-center justify-between p-6">
-          <h3 className="font-bold text-[#1e4b8e] text-xl">Transactions</h3>
+          <h3 className="font-bold text-pura-blue text-xl">Transactions</h3>
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              className="bg-[#1e4b8e] h-10 hover:bg-[#153a6e] px-4 rounded-xl"
-              onClick={() => setIsChargeDialogOpen(true)}
-            >
+            <Button size="sm" onClick={() => setIsChargeDialogOpen(true)}>
               <Plus className="h-4 mr-2 w-4" />
               Post Charge
             </Button>
             <Button
               size="sm"
               variant="outline"
-              className="border-[#1e4b8e] h-10 hover:bg-blue-50 px-4 rounded-xl text-[#1e4b8e]"
               onClick={() => setIsPaymentDialogOpen(true)}
             >
               <CreditCard className="h-4 mr-2 w-4" />
@@ -183,7 +178,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
         <div className="overflow-x-auto">
           <table className="text-left w-full">
             <thead>
-              <tr className="bg-slate-50/50 border-slate-200/60 border-y">
+              <tr className="bg-slate-50 border-slate-200 border-y">
                 <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
                   Date
                 </th>
@@ -214,8 +209,8 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                   <tr
                     key={trx.id}
                     className={cn(
-                      'hover:bg-white/50 transition-colors',
-                      trx.isVoid && 'opacity-50 line-through bg-slate-50/30',
+                      'hover:bg-slate-50 transition-colors',
+                      trx.isVoid && 'opacity-50 line-through bg-slate-50',
                     )}
                   >
                     <td className="px-6 py-4 text-slate-600 text-sm">
@@ -283,10 +278,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
             </tbody>
             {activeWindow && activeWindow.transactions.length > 0 && (
               <tfoot>
-                <tr className="bg-[#1e4b8e]/5 font-bold">
+                <tr className="bg-pura-blue/5 font-bold">
                   <td
                     colSpan={5}
-                    className="px-6 py-4 text-[#1e4b8e] text-right"
+                    className="px-6 py-4 text-pura-blue text-right"
                   >
                     Window Balance:
                   </td>
@@ -308,10 +303,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
       </div>
 
       {/* Routing Info (Placeholder for now) */}
-      <div className="bg-blue-50/50 border border-blue-100 flex gap-3 items-start p-4 rounded-2xl">
-        <AlertCircle className="h-5 mt-0.5 text-[#1e4b8e] w-5" />
+      <div className="bg-blue-50 border border-blue-100 flex gap-3 items-start p-4 rounded-xl">
+        <AlertCircle className="h-5 mt-0.5 text-pura-blue w-5" />
         <div>
-          <h4 className="font-bold text-[#1e4b8e] text-sm">
+          <h4 className="font-bold text-pura-blue text-sm">
             Billing Instructions
           </h4>
           <p className="mt-1 text-slate-600 text-xs">

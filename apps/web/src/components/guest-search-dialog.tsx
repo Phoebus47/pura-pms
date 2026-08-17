@@ -58,16 +58,16 @@ export function GuestSearchDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[80vh] max-w-2xl overflow-hidden rounded-3xl shadow-2xl w-full">
+    <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
+      <div className="bg-white max-h-[80vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
         {/* Header */}
         <div className="border-b border-slate-200 flex items-center justify-between p-6">
-          <h2 className="font-bold text-[#1e4b8e] text-2xl">
+          <h2 className="font-bold text-2xl text-pura-blue">
             {getDialogTitle(searched, guests.length > 0)}
           </h2>
           <button
             onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
+            className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
           >
             <X className="h-5 text-slate-600 w-5" />
           </button>
@@ -86,13 +86,13 @@ export function GuestSearchDialog({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search by name, email, or phone..."
-                className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
+                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-lg transition-colors w-full"
               />
             </div>
             <Button
               onClick={handleSearch}
               disabled={loading || !searchTerm.trim()}
-              className="bg-[#1e4b8e] hover:bg-[#153a6e] px-6 rounded-xl"
+              className="px-6"
             >
               {loading ? 'Searching...' : 'Search'}
             </Button>
@@ -108,7 +108,7 @@ export function GuestSearchDialog({
             <Button
               onClick={handleCreateNew}
               variant="outline"
-              className="rounded-xl w-full"
+              className="w-full"
             >
               <UserPlus className="h-4 mr-2 w-4" />
               Create New Guest Instead
@@ -135,10 +135,7 @@ export function GuestSearchDialog({
       return (
         <div className="py-12 text-center">
           <p className="mb-4 text-slate-600">No guests found</p>
-          <Button
-            onClick={handleCreateNew}
-            className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
-          >
+          <Button onClick={handleCreateNew}>
             <UserPlus className="h-4 mr-2 w-4" />
             Create New Guest
           </Button>
@@ -152,7 +149,7 @@ export function GuestSearchDialog({
           <button
             key={guest.id}
             onClick={() => handleSelect(guest)}
-            className="border border-slate-200 hover:bg-[#1e4b8e]/5 hover:border-[#1e4b8e] p-4 rounded-2xl text-left transition-all w-full"
+            className="border border-slate-200 hover:bg-pura-blue/5 hover:border-pura-blue p-4 rounded-lg text-left transition-colors w-full"
           >
             <div className="flex items-center justify-between">
               <div>

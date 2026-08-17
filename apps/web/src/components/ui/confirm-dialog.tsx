@@ -70,12 +70,12 @@ export function useConfirmDialog() {
 
   const Dialog = dialog ? (
     <dialog
-      className="backdrop-blur-sm bg-black/50 border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
+      className="bg-black/50 border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
       open
     >
-      <div className="bg-white border border-slate-200 max-w-md mx-4 p-6 rounded-2xl shadow-2xl w-full">
+      <div className="bg-white border border-slate-200 max-w-md mx-4 p-6 rounded-lg shadow-lg w-full">
         <h3
           id="confirm-dialog-title"
           className="font-semibold mb-2 text-lg text-slate-900"

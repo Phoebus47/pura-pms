@@ -37,7 +37,7 @@ export default function RoomsPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading rooms...</p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function RoomsPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">Error loading rooms</h3>
         <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadRooms} className="mt-4">
@@ -60,7 +60,7 @@ export default function RoomsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="font-bold text-[#1e4b8e] text-3xl">Rooms</h1>
+          <h1 className="font-bold text-3xl text-pura-blue">Rooms</h1>
           <p className="mt-1 text-slate-600">Manage rooms and their status</p>
         </div>
         <div className="flex gap-3">
@@ -68,7 +68,7 @@ export default function RoomsPage() {
             <Filter className="h-4 mr-2 w-4" />
             Filter
           </Button>
-          <Button className="bg-[#1e4b8e] hover:bg-[#153a6e] min-h-11">
+          <Button className="min-h-11">
             <Plus className="h-4 mr-2 w-4" />
             Add Room
           </Button>
@@ -94,10 +94,10 @@ export default function RoomsPage() {
               onClick={() =>
                 setStatusFilter(statusFilter === status ? undefined : status)
               }
-              className={`flex flex-col gap-3 min-w-0 p-4 relative rounded-2xl text-left transition-all ${
+              className={`flex flex-col gap-3 min-w-0 p-4 relative rounded-xl text-left transition-colors ${
                 statusFilter === status
-                  ? 'border border-[#1e4b8e] bg-[#1e4b8e]/5'
-                  : 'border border-white/50 bg-white/40 hover:bg-white/50'
+                  ? 'border border-pura-blue bg-pura-blue/5'
+                  : 'border border-slate-200 bg-white hover:bg-slate-50'
               }`}
             >
               <div className="font-bold text-2xl text-slate-800">{count}</div>
@@ -109,7 +109,7 @@ export default function RoomsPage() {
 
       {/* Rooms Grid */}
       {rooms.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 py-12 rounded-3xl text-center">
+        <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
           <Bed className="h-16 mx-auto text-slate-300 w-16" />
           <h3 className="font-semibold mt-4 text-lg text-slate-700">
             No rooms found
@@ -126,15 +126,15 @@ export default function RoomsPage() {
             <button
               key={room.id}
               type="button"
-              className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 cursor-pointer duration-300 focus:outline-none focus:ring-[#1e4b8e] focus:ring-2 focus:ring-offset-2 group hover:-translate-y-1 hover:bg-white/50 hover:border-white/70 hover:shadow-xl p-5 relative rounded-2xl shadow-lg text-left transition-all w-full"
+              className="bg-white border border-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pura-blue group hover:border-slate-300 p-5 relative rounded-xl shadow-sm text-left transition-colors w-full"
               onClick={() => {
                 router.push(`/rooms/${room.id}`);
               }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex gap-3 items-center">
-                  <div className="bg-[#1e4b8e]/10 p-2.5 rounded-xl">
-                    <Bed className="h-5 text-[#1e4b8e] w-5" />
+                  <div className="bg-pura-blue/10 p-2.5 rounded-xl">
+                    <Bed className="h-5 text-pura-blue w-5" />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-slate-800">
@@ -159,7 +159,7 @@ export default function RoomsPage() {
                   <div className="font-semibold mt-1 text-slate-700">
                     {room.roomType.name}
                   </div>
-                  <div className="font-semibold mt-1 text-[#1e4b8e] text-sm">
+                  <div className="font-semibold mt-1 text-pura-blue text-sm">
                     ฿{Number(room.roomType.baseRate).toLocaleString()}
                   </div>
                 </div>

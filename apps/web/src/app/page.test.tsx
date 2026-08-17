@@ -140,9 +140,9 @@ describe('Dashboard', () => {
         'inset-0',
         'isolate',
         'overflow-hidden',
-        'rounded-3xl',
+        'rounded-xl',
       );
-      expect(region.className).toContain('[clip-path:inset(0_round_1.5rem)]');
+      expect(region.className).toContain('[clip-path:inset(0_round_0.875rem)]');
       expect(region.parentElement).not.toHaveClass('overflow-hidden');
 
       const orb = region.querySelector('div');
@@ -158,7 +158,7 @@ describe('Dashboard', () => {
         '-top-4',
         'h-32',
         'w-32',
-        'opacity-20',
+        'opacity-10',
       );
     }
   });

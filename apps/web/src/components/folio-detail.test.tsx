@@ -210,7 +210,7 @@ describe('FolioDetail', () => {
     await user.click(screen.getByText('Folio 1002 (COMPANY)'));
     // Once clicked, it switches folio and sets window to 1.
     expect(screen.getByText('Folio 1002 (COMPANY)')).toHaveClass(
-      'bg-[#1e4b8e]',
+      'bg-pura-blue',
     );
   });
 

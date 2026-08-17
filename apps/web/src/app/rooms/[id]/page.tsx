@@ -72,7 +72,6 @@ export default function RoomDetailPage() {
             <Button
               variant="outline"
               onClick={() => router.push(`/rooms/${roomId}/edit`)}
-              className="rounded-xl"
             >
               <Edit className="h-4 mr-2 w-4" />
               Edit
@@ -80,7 +79,7 @@ export default function RoomDetailPage() {
             <Button
               variant="outline"
               onClick={handleDelete}
-              className="hover:bg-red-50 rounded-xl text-red-600"
+              className="hover:bg-red-50 text-red-600"
             >
               <Trash2 className="h-4 mr-2 w-4" />
               Delete
@@ -90,8 +89,8 @@ export default function RoomDetailPage() {
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 lg:col-span-2 p-6 rounded-3xl shadow-xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
+        <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
+          <h2 className="font-bold mb-6 text-pura-blue text-xl">
             Room Information
           </h2>
 
@@ -131,7 +130,7 @@ export default function RoomDetailPage() {
             <DetailField
               label="Base Rate"
               value={
-                <p className="font-semibold text-[#1e4b8e] text-lg">
+                <p className="font-semibold text-lg text-pura-blue">
                   ฿{Number(room.roomType?.baseRate || 0).toLocaleString()}
                 </p>
               }
@@ -157,8 +156,8 @@ export default function RoomDetailPage() {
           )}
         </div>
 
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
-          <h2 className="font-bold mb-6 text-[#1e4b8e] text-xl">
+        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+          <h2 className="font-bold mb-6 text-pura-blue text-xl">
             Room Type Details
           </h2>
 
@@ -190,7 +189,7 @@ export default function RoomDetailPage() {
                   {room.roomType.amenities.map((amenity, index) => (
                     <span
                       key={`${amenity}-${index}`}
-                      className="bg-[#1e4b8e]/10 font-semibold inline-flex items-center px-3 py-1 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-xs"
+                      className="bg-pura-blue/10 font-semibold inline-flex items-center px-3 py-1 ring-1 ring-inset ring-pura-blue/20 rounded-full text-pura-blue text-xs"
                     >
                       {amenity}
                     </span>

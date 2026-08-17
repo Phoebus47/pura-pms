@@ -146,8 +146,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="animate-in duration-500 fade-in max-w-7xl md:space-y-8 mx-auto space-y-6">
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/60 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between p-4 rounded-3xl shadow-2xl shadow-black/5 sm:p-6">
+    <div className="max-w-7xl md:space-y-8 mx-auto space-y-6">
+      <div className="bg-white border border-slate-200 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between p-4 rounded-xl sm:p-6">
         <div className="min-w-0">
           <h1 className="font-bold sm:text-4xl text-3xl text-pura-blue tracking-tight">
             Dashboard
@@ -160,13 +160,13 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-col gap-3 items-stretch sm:flex-row sm:flex-wrap sm:items-center">
           <Button
-            className="bg-pura-blue hover:bg-pura-blue-dark min-h-11 rounded-xl shadow-blue-900/10 shadow-lg sm:w-auto w-full"
+            className="min-h-11 sm:w-auto w-full"
             onClick={() => router.push('/reservations/new')}
           >
             <Calendar className="h-4 mr-2 w-4" />
             New Reservation
           </Button>
-          <div className="backdrop-blur-xl bg-white/50 border border-white/60 flex gap-2 items-center justify-center min-h-11 px-4 py-2.5 rounded-xl shadow-black/5 shadow-lg sm:w-auto w-full">
+          <div className="bg-slate-50 border border-slate-200 flex gap-2 items-center justify-center min-h-11 px-4 py-2.5 rounded-lg sm:w-auto w-full">
             <TrendingUp className="h-5 text-emerald-600 w-5" />
             <span className="font-semibold text-slate-600 text-sm whitespace-nowrap">
               {stats.occupancyRate}% Occupancy
@@ -181,7 +181,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-4 rounded-3xl shadow-xl sm:p-6">
+      <div className="bg-white border border-slate-200 p-4 rounded-xl sm:p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-bold text-2xl text-pura-blue">
             Recent Reservations
