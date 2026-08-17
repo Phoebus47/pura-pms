@@ -40,12 +40,12 @@ export function BaseFormDialog({
   };
 
   return (
-    <div className="backdrop-blur-sm bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
+    <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
       <div
-        className={`bg-white max-h-[90vh] ${maxWidthClasses[maxWidth]} overflow-hidden rounded-3xl shadow-2xl w-full`}
+        className={`bg-white max-h-[90vh] ${maxWidthClasses[maxWidth]} overflow-hidden rounded-xl shadow-lg w-full`}
       >
         <div className="border-b border-slate-200 flex items-center justify-between p-6">
-          <h2 className="font-bold text-[#1e4b8e] text-2xl">{title}</h2>
+          <h2 className="font-bold text-2xl text-pura-blue">{title}</h2>
           <button
             onClick={onClose}
             className="hover:bg-slate-100 p-2 rounded-xl transition-colors"

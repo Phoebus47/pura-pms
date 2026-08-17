@@ -21,16 +21,12 @@ export function FormDialogFooter({
         type="button"
         onClick={onCancel}
         variant="outline"
-        className="flex-1 rounded-xl"
+        className="flex-1"
         disabled={loading}
       >
         {cancelLabel}
       </Button>
-      <Button
-        type="submit"
-        className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] rounded-xl"
-        disabled={loading}
-      >
+      <Button type="submit" className="flex-1" disabled={loading}>
         {loading ? 'Saving...' : submitLabel}
       </Button>
     </div>
