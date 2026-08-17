@@ -219,6 +219,9 @@
   "folios": {
     "checkout": "Check out folio",
     "checkoutSuccess": "Folio closed",
+    "reopen": "Reopen for post-departure charge",
+    "reopenSuccess": "Folio reopened",
+    "reopenFailed": "Only a closed folio can be reopened",
     "creditLimit": "Credit limit",
     "creditLimitExceeded": "Folio balance exceeds the credit limit",
     "arCreditExceeded": "Folio balance exceeds the company AR credit limit",

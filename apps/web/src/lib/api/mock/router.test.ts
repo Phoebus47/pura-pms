@@ -1315,6 +1315,66 @@ describe('Mock API Router', () => {
     });
   });
 
+  describe('Folio post-departure charges', () => {
+    it('rejects posting to a closed folio', async () => {
+      const folioId = mockDb.folios[0].id;
+      await routeMockRequest(`/folios/${folioId}/checkout`, {
+        method: 'POST',
+        body: JSON.stringify({ userId: 'usr_mock_1' }),
+      });
+
+      await expect(
+        routeMockRequest(`/folios/${folioId}/transactions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 200,
+            userId: 'usr_mock_1',
+            businessDate: '2026-08-14',
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('rejects reopening a folio that is not closed', async () => {
+      const folioId = mockDb.folios[0].id;
+      await expect(
+        routeMockRequest(`/folios/${folioId}/reopen`, { method: 'POST' }),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('reopens a closed folio and allows posting again', async () => {
+      const folioId = mockDb.folios[0].id;
+      await routeMockRequest(`/folios/${folioId}/checkout`, {
+        method: 'POST',
+        body: JSON.stringify({ userId: 'usr_mock_1' }),
+      });
+
+      const reopened: any = await routeMockRequest(
+        `/folios/${folioId}/reopen`,
+        { method: 'POST' },
+      );
+      expect(reopened.status).toBe('OPEN');
+      expect(reopened.isClosed).toBe(false);
+
+      const response: any = await routeMockRequest(
+        `/folios/${folioId}/transactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            windowNumber: 1,
+            trxCodeId: 'tc_fnb',
+            amountNet: 200,
+            userId: 'usr_mock_1',
+            businessDate: '2026-08-14',
+          }),
+        },
+      );
+      expect(response.id).toBeDefined();
+    });
+  });
+
   describe('Card pre-auths', () => {
     it('holds, increments, and captures as a card payment', async () => {
       const held: any = await routeMockRequest('/card-preauths', {
