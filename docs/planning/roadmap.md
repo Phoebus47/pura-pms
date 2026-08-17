@@ -175,9 +175,9 @@
   - [ ] Flag reservation for VAT exemption
   - [ ] Store exemption documents
 
-- [ ] **Overbooking Recovery (Walk)**
-  - [ ] Partner hotel list
-  - [ ] Walk cost tracking & compensation
+- [x] **Overbooking Recovery (Walk)**
+  - [x] Partner hotel list
+  - [x] Walk cost tracking & compensation
 
 ---
 
@@ -782,9 +782,9 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 1. Day-use Reservations — **shipped**
 2. Split Stay — **shipped**
 3. Room Move Mid-stay — **shipped**
-4. No-show / Late Cancellation Auto-charges
-5. Post-departure Charges
-6. Overbooking Recovery (Walk)
+4. No-show / Late Cancellation Auto-charges — **shipped**
+5. Post-departure Charges — **shipped** (reopen closed folio; settle via existing card-preauth capture or AR transfer)
+6. Overbooking Recovery (Walk) — **shipped** (`PartnerHotel` directory, `Walk` record, no AP posting)
 7. Complimentary / House Use Rooms
 8. Extended Stay Billing (weekly/monthly)
 9. Tax Exemption Handling
