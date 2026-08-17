@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { Reservation } from '@/lib/api';
 
-export type GlowTone = 'blue' | 'orange' | 'sky' | 'blueDark';
+export type CardTone = 'blue' | 'orange' | 'sky' | 'blueDark';
 
 export interface StatCardItem {
   name: string;
@@ -11,25 +11,32 @@ export interface StatCardItem {
   icon: LucideIcon;
   change: string;
   changeType: 'positive' | 'negative' | 'neutral';
-  tone: GlowTone;
+  tone: CardTone;
 }
 
-const TONE_CLASSES: Record<GlowTone, { glow: string; icon: string }> = {
+const TONE_CLASSES: Record<
+  CardTone,
+  { accent: string; icon: string; hoverBg: string }
+> = {
   blue: {
-    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-blue)_0%,transparent_70%)]',
+    accent: 'group-hover:bg-pura-blue',
     icon: 'bg-pura-blue',
+    hoverBg: 'group-hover:bg-pura-blue/5',
   },
   orange: {
-    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-orange)_0%,transparent_70%)]',
+    accent: 'group-hover:bg-pura-orange',
     icon: 'bg-pura-orange',
+    hoverBg: 'group-hover:bg-pura-orange/5',
   },
   sky: {
-    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-sky)_0%,transparent_70%)]',
+    accent: 'group-hover:bg-pura-sky',
     icon: 'bg-pura-sky',
+    hoverBg: 'group-hover:bg-pura-sky/5',
   },
   blueDark: {
-    glow: 'bg-[radial-gradient(circle_at_center,var(--color-pura-blue-dark)_0%,transparent_70%)]',
+    accent: 'group-hover:bg-pura-blue-dark',
     icon: 'bg-pura-blue-dark',
+    hoverBg: 'group-hover:bg-pura-blue-dark/5',
   },
 };
 
@@ -42,21 +49,25 @@ export function StatCard({ stat }: StatCardProps) {
   const Icon = stat.icon;
 
   return (
-    <div className="bg-white border border-slate-200 group hover:border-slate-300 p-6 relative rounded-xl shadow-sm transition-colors">
+    <div
+      className={cn(
+        'bg-white border border-slate-200 group hover:border-slate-300 hover:shadow-md p-6 relative rounded-xl shadow-sm transition-all duration-200',
+        tones.hoverBg,
+      )}
+    >
       <div
         aria-hidden="true"
-        className="[clip-path:inset(0_round_0.875rem)] absolute inset-0 isolate overflow-hidden pointer-events-none rounded-xl"
-      >
-        <div
-          className={cn(
-            'absolute -right-4 -top-4 h-32 w-32 opacity-10 group-hover:opacity-20',
-            tones.glow,
-          )}
-        />
-      </div>
+        className={cn(
+          'absolute bg-slate-200 bottom-4 left-0 rounded-full top-4 transition-colors duration-200 w-1',
+          tones.accent,
+        )}
+      />
       <div className="relative z-10">
         <div
-          className={cn('inline-flex p-3.5 rounded-lg text-white', tones.icon)}
+          className={cn(
+            'inline-flex p-3.5 rounded-lg text-white transition-transform duration-200 group-hover:scale-105',
+            tones.icon,
+          )}
         >
           <Icon className="h-6 w-6" />
         </div>
@@ -90,7 +101,7 @@ export function RecentReservationRow({
     `${reservation.guest?.firstName ?? ''} ${reservation.guest?.lastName ?? ''}`.trim();
 
   return (
-    <div className="bg-white border border-slate-200 flex flex-col gap-3 hover:border-slate-300 p-4 rounded-lg sm:flex-row sm:items-center sm:justify-between transition-colors">
+    <div className="bg-white border border-slate-200 duration-200 flex flex-col gap-3 group hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm p-4 rounded-lg sm:flex-row sm:items-center sm:justify-between transition-all">
       <div className="flex gap-4 items-center min-w-0">
         <Avatar className="h-10 shrink-0 w-10">
           <AvatarImage
