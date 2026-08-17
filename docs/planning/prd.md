@@ -1231,9 +1231,9 @@ graph LR
 - [x] Day-use Reservations
 - [x] Split Stay
 - [x] Room Move Mid-stay
-- [ ] No-show / Late Cancellation Auto-charges
-- [ ] Post-departure Charges
-- [ ] Overbooking Recovery (Walk)
+- [x] No-show / Late Cancellation Auto-charges
+- [x] Post-departure Charges
+- [x] Overbooking Recovery (Walk)
 - [ ] Complimentary / House Use Rooms
 - [ ] Extended Stay Billing (weekly/monthly)
 - [ ] Tax Exemption Handling

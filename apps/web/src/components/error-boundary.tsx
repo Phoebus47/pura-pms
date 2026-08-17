@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<
 
       return (
         <div className="flex items-center justify-center min-h-screen p-4">
-          <div className="bg-white border border-slate-200 max-w-md p-6 rounded-2xl shadow-xl w-full">
+          <div className="bg-white border border-slate-200 max-w-md p-6 rounded-lg shadow-sm w-full">
             <h2 className="font-bold mb-2 text-slate-900 text-xl">
               Something went wrong
             </h2>

@@ -83,6 +83,25 @@ export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
     }
   }
 
+  async function handleReopen() {
+    try {
+      setBusy(true);
+      await foliosAPI.reopen(folio.id);
+      toast.success(t('folios.reopenSuccess'));
+      onUpdated();
+    } catch (err) {
+      if (err instanceof APIError && err.status === 409) {
+        toast.error(t('folios.reopenFailed'));
+        return;
+      }
+      toast.error(
+        err instanceof Error ? err.message : t('folios.reopenFailed'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
       <div className="space-y-2">
@@ -136,6 +155,17 @@ export function FolioCheckoutBar({ folio, onUpdated }: FolioCheckoutBarProps) {
       >
         {t('folios.checkout')}
       </Button>
+      {folio.status === 'CLOSED' && (
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          disabled={busy}
+          onClick={() => void handleReopen()}
+        >
+          {t('folios.reopen')}
+        </Button>
+      )}
     </div>
   );
 }

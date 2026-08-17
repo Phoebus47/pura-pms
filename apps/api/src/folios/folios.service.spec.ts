@@ -269,6 +269,7 @@ describe('FoliosService', () => {
 
     beforeEach(() => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: { rateCode: null, room: { propertyId: 'prop-1' } },
       });
       mockPrismaService.shift.findFirst.mockResolvedValue({
@@ -451,6 +452,28 @@ describe('FoliosService', () => {
       expect(true).toBe(true);
     });
 
+    it('should reject posting to a folio that is not open', async () => {
+      mockPrismaService.folioWindow.findUnique.mockResolvedValue({
+        id: 'win-1',
+      });
+      mockPrismaService.transactionCode.findUnique.mockResolvedValue({
+        id: 'trx-1',
+        type: 'CHARGE',
+        hasTax: false,
+        hasService: false,
+        serviceRate: null,
+      });
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.CLOSED,
+        reservation: { rateCode: null, room: { propertyId: 'prop-1' } },
+      });
+
+      await expect(service.postTransaction('folio-1', baseDto)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+
     it('should handle service charge without tax', async () => {
       mockPrismaService.folioWindow.findUnique.mockResolvedValue({
         id: 'win-1',
@@ -584,6 +607,7 @@ describe('FoliosService', () => {
 
     it('should post a single row when room charge has no matching split rules', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: { rateCode: 'STD', room: { propertyId: 'prop-1' } },
       });
       mockPrismaService.folioWindow.findUnique.mockResolvedValue({
@@ -636,6 +660,7 @@ describe('FoliosService', () => {
 
     it('should split PKG-BB 80/20 into two rows whose nets sum to original amountNet', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
       });
       mockPrismaService.folioWindow.findUnique.mockResolvedValue({
@@ -741,6 +766,7 @@ describe('FoliosService', () => {
 
     it('should not split payment code 9000', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
       });
       mockPrismaService.folioWindow.findUnique.mockResolvedValue({
@@ -789,6 +815,7 @@ describe('FoliosService', () => {
 
     it('should convert cash 9000 using guest currency as targetCurrency', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: {
           rateCode: null,
           room: { propertyId: 'prop-1', property: { currency: 'THB' } },
@@ -850,6 +877,7 @@ describe('FoliosService', () => {
 
     it('should throw 400 when cash 9000 has no matching exchange rate', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: {
           rateCode: null,
           room: { propertyId: 'prop-1', property: { currency: 'THB' } },
@@ -920,6 +948,7 @@ describe('FoliosService', () => {
 
     it('should throw 400 when split percents do not sum to 100', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
       });
       mockPrismaService.folioWindow.findUnique.mockResolvedValue({
@@ -979,6 +1008,7 @@ describe('FoliosService', () => {
 
     it('should split SYSTEM room posts when rateCode matches', async () => {
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         reservation: { rateCode: 'PKG-BB', room: { propertyId: 'prop-1' } },
       });
       mockPrismaService.folioWindow.findUnique.mockResolvedValue({
@@ -1245,6 +1275,7 @@ describe('FoliosService', () => {
       mockPrismaService.folioWindow.update.mockResolvedValue({});
       mockPrismaService.folio.update.mockResolvedValue({});
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         balance: 1500,
         creditLimit: 1000,
         reservation: {
@@ -1334,6 +1365,7 @@ describe('FoliosService', () => {
         serviceRate: null,
       });
       mockPrismaService.folio.findUnique.mockResolvedValue({
+        status: FolioStatus.OPEN,
         balance: 0,
         arAccount: {
           isActive: true,
@@ -1364,6 +1396,63 @@ describe('FoliosService', () => {
         }),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(mockPrismaService.folioTransaction.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reopen', () => {
+    it('should reopen a closed folio', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        status: FolioStatus.CLOSED,
+      });
+      const reopened = { id: 'folio-1', status: FolioStatus.OPEN };
+      mockPrismaService.folio.update.mockResolvedValue(reopened);
+
+      const result = await service.reopen('folio-1');
+
+      expect(result).toEqual(reopened);
+      expect(mockPrismaService.folio.update).toHaveBeenCalledWith({
+        where: { id: 'folio-1' },
+        data: {
+          status: FolioStatus.OPEN,
+          isClosed: false,
+          closedAt: null,
+          closedBy: null,
+        },
+      });
+    });
+
+    it('should throw NotFoundException when the folio does not exist', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue(null);
+
+      await expect(service.reopen('missing')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(mockPrismaService.folio.update).not.toHaveBeenCalled();
+    });
+
+    it('should reject reopening a folio that is not closed', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        status: FolioStatus.OPEN,
+      });
+
+      await expect(service.reopen('folio-1')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(mockPrismaService.folio.update).not.toHaveBeenCalled();
+    });
+
+    it('should reject reopening a folio already posted to city ledger', async () => {
+      mockPrismaService.folio.findUnique.mockResolvedValue({
+        id: 'folio-1',
+        status: FolioStatus.POSTED_TO_CITY_LEDGER,
+      });
+
+      await expect(service.reopen('folio-1')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(mockPrismaService.folio.update).not.toHaveBeenCalled();
     });
   });
 });

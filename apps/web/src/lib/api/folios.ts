@@ -145,6 +145,10 @@ export const foliosAPI = {
     return apiClient.post<Folio>(`/folios/${folioId}/checkout`, data);
   },
 
+  async reopen(folioId: string): Promise<Folio> {
+    return apiClient.post<Folio>(`/folios/${folioId}/reopen`);
+  },
+
   async setCreditLimit(
     folioId: string,
     creditLimit: number | null,

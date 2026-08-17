@@ -53,6 +53,7 @@ model Property {
   taxInvoices    TaxInvoice[]
   journalEntries JournalEntry[]
   arAccounts     ARAccount[]
+  partnerHotels  PartnerHotel[]
   createdAt      DateTime   @default(now())
 }
 
@@ -143,6 +144,7 @@ model Reservation {
   taxInvoices    TaxInvoice[]
   cardPreauths   CardPreauth[]
   roomMoves      RoomMove[]
+  walks          Walk[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -189,6 +191,42 @@ model RoomMove {
   folioTransferred Boolean     @default(true)
 
   @@index([reservationId, movedAt])
+}
+
+// Overbooking recovery — directory of hotels guests are walked to
+model PartnerHotel {
+  id            String   @id @default(cuid())
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id])
+  name          String
+  address       String?
+  phone         String?
+  contactPerson String?
+  isActive      Boolean  @default(true)
+  walks         Walk[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([propertyId, name])
+  @@index([propertyId, isActive])
+}
+
+// Overbooking recovery — records a guest walked to a partner hotel
+model Walk {
+  id                 String       @id @default(cuid())
+  reservationId      String
+  reservation        Reservation  @relation(fields: [reservationId], references: [id])
+  partnerHotelId     String
+  partnerHotel       PartnerHotel @relation(fields: [partnerHotelId], references: [id])
+  reason             String?
+  cost               Decimal      @db.Decimal(12, 2)
+  compensationAmount Decimal      @default(0) @db.Decimal(12, 2)
+  compensationNotes  String?
+  walkedAt           DateTime     @default(now())
+  walkedBy           String
+
+  @@index([reservationId, walkedAt])
+  @@index([partnerHotelId])
 }
 
 // ==================== BILLING ====================
@@ -738,6 +776,7 @@ enum ReservationStatus {
   CHECKED_OUT
   CANCELLED
   NO_SHOW
+  WALKED
 }
 
 enum FolioType {

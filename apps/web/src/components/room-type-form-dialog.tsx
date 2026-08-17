@@ -241,12 +241,12 @@ export function RoomTypeFormDialog({
                   }
                 }}
                 placeholder="e.g., WiFi, TV, Mini Bar"
-                className="border border-slate-300 flex-1 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all"
+                className="border border-slate-300 flex-1 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors"
               />
               <Button
                 type="button"
                 onClick={addAmenity}
-                className="bg-[#1e4b8e] hover:bg-[#153a6e] px-4 rounded-xl"
+                className="px-4"
                 aria-label="Add amenity"
               >
                 <Plus className="h-5 w-5" />
@@ -259,7 +259,7 @@ export function RoomTypeFormDialog({
                 {formData.amenities.map((amenity, index) => (
                   <div
                     key={`${amenity}-${index}`}
-                    className="bg-[#1e4b8e]/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-sm"
+                    className="bg-pura-blue/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-1 ring-inset ring-pura-blue/20 rounded-full text-pura-blue text-sm"
                   >
                     {amenity}
                     <button

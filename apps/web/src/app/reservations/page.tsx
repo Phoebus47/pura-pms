@@ -39,7 +39,7 @@ export default function ReservationsPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading reservations...</p>
         </div>
       </div>
@@ -48,7 +48,7 @@ export default function ReservationsPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">
           Error loading reservations
         </h3>
@@ -64,7 +64,7 @@ export default function ReservationsPage() {
     <div className="md:space-y-6 space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="font-bold md:text-3xl text-[#1e4b8e] text-2xl">
+          <h1 className="font-bold md:text-3xl text-2xl text-pura-blue">
             Reservations
           </h1>
           <p className="md:text-base mt-1 text-slate-600 text-sm">
@@ -84,7 +84,7 @@ export default function ReservationsPage() {
             <span className="sm:hidden">Calendar</span>
           </Button>
           <Button
-            className="bg-[#1e4b8e] flex-1 hover:bg-[#153a6e] md:flex-initial md:text-base text-sm"
+            className="bg-pura-blue flex-1 hover:bg-pura-blue-dark md:flex-initial md:text-base text-sm"
             onClick={() => router.push('/reservations/new')}
           >
             <Plus className="h-4 mr-2 w-4" />
@@ -95,7 +95,7 @@ export default function ReservationsPage() {
       </div>
 
       {reservations.length === 0 ? (
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 py-12 rounded-3xl text-center">
+        <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
           <Calendar className="h-16 mx-auto text-slate-300 w-16" />
           <h3 className="font-semibold mt-4 text-lg text-slate-700">
             No reservations yet
@@ -104,7 +104,7 @@ export default function ReservationsPage() {
             Get started by creating your first reservation
           </p>
           <Button
-            className="bg-[#1e4b8e] hover:bg-[#153a6e] mt-4"
+            className="bg-pura-blue hover:bg-pura-blue-dark mt-4"
             onClick={() => router.push('/reservations/new')}
           >
             <Plus className="h-4 mr-2 w-4" />
@@ -113,11 +113,11 @@ export default function ReservationsPage() {
         </div>
       ) : (
         <>
-          <div className="hidden md:block relative rounded-3xl shadow-xl">
-            <div className="[clip-path:inset(0_round_1.5rem)] backdrop-blur-2xl bg-white/40 border border-white/50 isolate overflow-hidden rounded-3xl">
+          <div className="hidden md:block relative rounded-xl">
+            <div className="bg-white border border-slate-200 overflow-hidden rounded-xl">
               <div className="overflow-x-auto">
                 <table className="min-w-[56rem] w-full">
-                  <thead className="bg-slate-50/50 border-b border-slate-200">
+                  <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
                         Confirmation
@@ -149,13 +149,13 @@ export default function ReservationsPage() {
                     {reservations.map((reservation) => (
                       <tr
                         key={reservation.id}
-                        className="cursor-pointer hover:bg-white/50 transition-colors"
+                        className="cursor-pointer hover:bg-slate-50 transition-colors"
                         onClick={() => {
                           router.push(`/reservations/${reservation.id}`);
                         }}
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-mono font-semibold text-[#1e4b8e] text-sm">
+                          <div className="font-mono font-semibold text-pura-blue text-sm">
                             {reservation.confirmNumber}
                           </div>
                         </td>
@@ -188,7 +188,7 @@ export default function ReservationsPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-semibold text-[#1e4b8e] text-sm">
+                          <div className="font-semibold text-pura-blue text-sm">
                             ฿{Number(reservation.totalAmount).toLocaleString()}
                           </div>
                         </td>
@@ -215,7 +215,7 @@ export default function ReservationsPage() {
             {reservations.map((reservation) => (
               <button
                 key={reservation.id}
-                className="active:scale-[0.98] backdrop-blur-2xl bg-white/40 border border-white/50 p-4 rounded-2xl shadow-lg text-left transition-all w-full"
+                className="bg-white border border-slate-200 p-4 rounded-lg shadow-sm text-left transition-colors w-full"
                 onClick={() => {
                   router.push(`/reservations/${reservation.id}`);
                 }}
@@ -224,7 +224,7 @@ export default function ReservationsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex flex-wrap gap-1.5 items-center">
-                      <div className="font-mono font-semibold text-[#1e4b8e] text-sm">
+                      <div className="font-mono font-semibold text-pura-blue text-sm">
                         {reservation.confirmNumber}
                       </div>
                       <ReservationStatusBadge status={reservation.status} />
@@ -248,7 +248,7 @@ export default function ReservationsPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold text-[#1e4b8e] text-sm">
+                    <div className="font-semibold text-pura-blue text-sm">
                       ฿{Number(reservation.totalAmount).toLocaleString()}
                     </div>
                     <div className="mt-1 text-slate-500 text-xs">

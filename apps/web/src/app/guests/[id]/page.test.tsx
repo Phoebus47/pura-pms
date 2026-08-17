@@ -236,7 +236,7 @@ describe('GuestDetailPage', () => {
     );
 
     // Header stars
-    const stars = document.getElementsByClassName('text-[#f5a623]');
+    const stars = document.getElementsByClassName('text-pura-orange');
     expect(stars.length).toBeGreaterThan(0);
   });
 

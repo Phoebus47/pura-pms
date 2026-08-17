@@ -37,7 +37,7 @@ export default function RoomTypesPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-12 mx-auto rounded-full w-12"></div>
+          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
           <p className="mt-4 text-slate-600">Loading room types...</p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function RoomTypesPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">Error loading room types</h3>
         <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadRoomTypes} className="mt-4">
@@ -63,19 +63,19 @@ export default function RoomTypesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-bold text-[#1e4b8e] text-3xl">Room Types</h1>
+            <h1 className="font-bold text-3xl text-pura-blue">Room Types</h1>
             <p className="mt-1 text-slate-600">
               Manage room type configurations and pricing
             </p>
           </div>
-          <Button className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl">
+          <Button>
             <Plus className="h-4 mr-2 w-4" />
             Add Room Type
           </Button>
         </div>
 
         {/* Search */}
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
           <div className="relative">
             <Search className="-translate-y-1/2 absolute h-5 left-4 text-slate-400 top-1/2 w-5" />
             <Input
@@ -83,24 +83,24 @@ export default function RoomTypesPage() {
               placeholder="Search room types by name or code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-12 pl-12 pr-4 py-3 rounded-2xl shadow-lg w-full"
+              className="h-12 pl-12 pr-4 py-3 rounded-lg w-full"
             />
           </div>
         </div>
 
         {/* Stats */}
         <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
             <p className="font-semibold text-slate-600 text-sm">Total Types</p>
-            <p className="font-bold mt-2 text-[#1e4b8e] text-3xl">
+            <p className="font-bold mt-2 text-3xl text-pura-blue">
               {roomTypes.length}
             </p>
           </div>
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
             <p className="font-semibold text-slate-600 text-sm">
               Avg Base Rate
             </p>
-            <p className="font-bold mt-2 text-[#1e4b8e] text-3xl">
+            <p className="font-bold mt-2 text-3xl text-pura-blue">
               ฿
               {roomTypes.length > 0
                 ? Math.round(
@@ -112,9 +112,9 @@ export default function RoomTypesPage() {
                 : 0}
             </p>
           </div>
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-6 rounded-3xl shadow-xl">
+          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
             <p className="font-semibold text-slate-600 text-sm">Total Rooms</p>
-            <p className="font-bold mt-2 text-[#1e4b8e] text-3xl">
+            <p className="font-bold mt-2 text-3xl text-pura-blue">
               {roomTypes.reduce((sum, rt) => sum + (rt._count?.rooms || 0), 0)}
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function RoomTypesPage() {
 
         {/* Room Types Grid */}
         {filteredRoomTypes.length === 0 ? (
-          <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-12 rounded-3xl shadow-xl text-center">
+          <div className="bg-white border border-slate-200 p-12 rounded-xl shadow-sm text-center">
             <p className="text-slate-600">
               {searchTerm
                 ? 'No room types found matching your search'
@@ -134,12 +134,12 @@ export default function RoomTypesPage() {
             {filteredRoomTypes.map((roomType) => (
               <div
                 key={roomType.id}
-                className="backdrop-blur-2xl bg-white/40 border border-white/50 group hover:shadow-2xl p-6 rounded-3xl shadow-xl transition-all"
+                className="bg-white border border-slate-200 group hover:border-slate-300 p-6 rounded-xl shadow-sm transition-colors"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="font-bold text-[#1e4b8e] text-xl">
+                    <h3 className="font-bold text-pura-blue text-xl">
                       {roomType.name}
                     </h3>
                     <p className="font-mono mt-1 text-slate-500 text-sm">
@@ -174,7 +174,7 @@ export default function RoomTypesPage() {
                 <div className="mb-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600 text-sm">Base Rate</span>
-                    <span className="font-bold text-[#1e4b8e] text-lg">
+                    <span className="font-bold text-lg text-pura-blue">
                       ฿{Number(roomType.baseRate).toLocaleString()}
                     </span>
                   </div>
@@ -204,7 +204,7 @@ export default function RoomTypesPage() {
                       {roomType.amenities.slice(0, 3).map((amenity) => (
                         <span
                           key={amenity}
-                          className="bg-[#1e4b8e]/10 font-semibold inline-flex items-center px-2 py-1 ring-[#1e4b8e]/20 ring-1 ring-inset rounded-full text-[#1e4b8e] text-xs"
+                          className="bg-pura-blue/10 font-semibold inline-flex items-center px-2 py-1 ring-1 ring-inset ring-pura-blue/20 rounded-full text-pura-blue text-xs"
                         >
                           {amenity}
                         </span>

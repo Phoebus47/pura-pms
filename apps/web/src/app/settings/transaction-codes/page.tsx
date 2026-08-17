@@ -119,7 +119,7 @@ export default function TransactionCodesSettingsPage() {
         {filtered.map((x) => (
           <tr
             key={x.id}
-            className="border-slate-200/60 border-t text-slate-800 text-sm"
+            className="border-slate-200 border-t text-slate-800 text-sm"
           >
             <td className="font-semibold px-3 py-3">{x.code}</td>
             <td className="px-3 py-3">{x.description}</td>
@@ -131,11 +131,7 @@ export default function TransactionCodesSettingsPage() {
             </td>
             <td className="px-3 py-3">{x.glAccountCode}</td>
             <td className="px-3 py-3 text-right">
-              <Button
-                variant="outline"
-                className="rounded-xl"
-                onClick={() => openEdit(x)}
-              >
+              <Button variant="outline" onClick={() => openEdit(x)}>
                 Edit
               </Button>
             </td>
@@ -155,22 +151,17 @@ export default function TransactionCodesSettingsPage() {
             </Link>{' '}
             / Transaction Codes
           </p>
-          <h1 className="font-bold text-[#1e4b8e] text-3xl">
+          <h1 className="font-bold text-3xl text-pura-blue">
             Transaction Codes
           </h1>
           <p className="mt-1 text-slate-600">
             Manage the PMS chart of accounts mapping used for posting.
           </p>
         </div>
-        <Button
-          onClick={openCreate}
-          className="bg-[#1e4b8e] hover:bg-[#153a6e] rounded-xl"
-        >
-          New Code
-        </Button>
+        <Button onClick={openCreate}>New Code</Button>
       </div>
 
-      <div className="backdrop-blur-2xl bg-white/40 border border-white/60 p-4 rounded-2xl shadow-2xl shadow-black/5">
+      <div className="bg-white border border-slate-200 p-4 rounded-xl">
         <div className="flex gap-3 items-center justify-between">
           <div className="max-w-md relative w-full">
             <Label htmlFor="search" className="sr-only">
@@ -183,13 +174,12 @@ export default function TransactionCodesSettingsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by code or description..."
-              className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-2.5 rounded-2xl text-slate-800 text-sm w-full"
+              className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-2.5 rounded-lg text-slate-800 text-sm w-full"
             />
           </div>
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={() => void refresh()}
             disabled={loading}
           >

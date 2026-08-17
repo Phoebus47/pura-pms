@@ -48,14 +48,14 @@ describe('Sidebar', () => {
     render(<Sidebar />);
 
     const reservationsLink = screen.getByText('Reservations').closest('a');
-    expect(reservationsLink).toHaveClass('bg-white/95', 'text-[#1e4b8e]');
+    expect(reservationsLink).toHaveClass('bg-white', 'text-pura-blue');
   });
 
   it('should render version information', () => {
     render(<Sidebar />);
 
     expect(screen.getByText('PURA PMS')).toHaveClass('text-white');
-    expect(screen.getByText(/v1.0.0/)).toHaveClass('text-white/80');
+    expect(screen.getByText(/v1.0.0/)).toHaveClass('text-white/60');
   });
 
   it('should be hidden on mobile', () => {

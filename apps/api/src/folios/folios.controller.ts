@@ -55,6 +55,11 @@ export class FoliosController {
     return this.foliosService.checkout(id, dto.userId);
   }
 
+  @Post(':id/reopen')
+  reopen(@Param('id') id: string) {
+    return this.foliosService.reopen(id);
+  }
+
   @Patch(':id/credit-limit')
   setCreditLimit(@Param('id') id: string, @Body() dto: SetCreditLimitDto) {
     return this.foliosService.setCreditLimit(id, dto.creditLimit);

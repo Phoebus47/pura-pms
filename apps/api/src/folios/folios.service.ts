@@ -13,6 +13,10 @@ import { VoidTransactionDto } from './dto/void-transaction.dto';
 import { resolveCashierShiftId, resolvePostShiftId } from './folio-shift';
 import { computePostingAmounts, standardWindowCreates } from './folio-posting';
 import {
+  assertFolioOpenForPosting,
+  assertFolioReopenable,
+} from './post-departure';
+import {
   persistPostingLines,
   resolvePostingLines,
   sumBalanceImpact,
@@ -204,11 +208,9 @@ export class FoliosService {
       throw new BadRequestException('businessDate is required for posting');
     }
 
-    const { shiftId, rateCode, propertyCurrency } = await resolvePostShiftId(
-      this.prisma,
-      folioId,
-      postTransactionDto.userId,
-    );
+    const { shiftId, rateCode, propertyCurrency, status } =
+      await resolvePostShiftId(this.prisma, folioId, postTransactionDto.userId);
+    assertFolioOpenForPosting(status);
 
     const { amountNet, reference } = await this.resolveCashFxAmount(
       trxCode.code,
@@ -383,6 +385,34 @@ export class FoliosService {
         isClosed: true,
         closedAt: new Date(),
         closedBy: userId,
+      },
+    });
+  }
+
+  /**
+   * Reopens a closed folio for a post-departure charge (minibar, damage,
+   * etc.). Settlement is handled by the existing card-preauth capture or
+   * AR transfer endpoints once the charge is posted; call `checkout` again
+   * to close the folio once it is settled. Who posts the resulting charge
+   * is recorded on the `FolioTransaction`, so this action does not need an
+   * actor field of its own (matches `CardPreauthsService.release`).
+   */
+  async reopen(id: string) {
+    const folio = await this.prisma.folio.findUnique({
+      where: { id },
+      select: { id: true, status: true },
+    });
+    if (!folio) {
+      throw new NotFoundException(`Folio with ID ${id} not found`);
+    }
+    assertFolioReopenable(folio.status);
+    return this.prisma.folio.update({
+      where: { id },
+      data: {
+        status: FolioStatus.OPEN,
+        isClosed: false,
+        closedAt: null,
+        closedBy: null,
       },
     });
   }

@@ -1006,6 +1006,74 @@ function handleCardPreauths(
   if (method === 'PATCH') return handleCardPreauthsPatch(path, body);
 }
 
+function handlePartnerHotelsGet(path: string, params: URLSearchParams) {
+  if (path === '/partner-hotels') {
+    const propertyId = params.get('propertyId');
+    return mockDb.partnerHotels.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+  const match = /^\/partner-hotels\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const hotel = mockDb.partnerHotels.find((row: any) => row.id === match[1]);
+  if (!hotel) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Partner hotel not found',
+    });
+  }
+  return hotel;
+}
+
+function handlePartnerHotelsPost(path: string, body: any) {
+  if (path !== '/partner-hotels') return;
+  const existing = mockDb.partnerHotels.find(
+    (row: any) => row.propertyId === body.propertyId && row.name === body.name,
+  );
+  if (existing) {
+    throw new APIError(400, 'Bad Request', {
+      message: `Partner hotel with name ${body.name} already exists for this property`,
+    });
+  }
+  const hotel = {
+    id: `ph_mock_${Date.now()}`,
+    propertyId: body.propertyId,
+    name: body.name,
+    address: body.address,
+    phone: body.phone,
+    contactPerson: body.contactPerson,
+    isActive: body.isActive ?? true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  mockDb.partnerHotels.push(hotel);
+  return hotel;
+}
+
+function handlePartnerHotelsPatch(path: string, body: any) {
+  const match = /^\/partner-hotels\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const hotel = mockDb.partnerHotels.find((row: any) => row.id === match[1]);
+  if (!hotel) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Partner hotel not found',
+    });
+  }
+  Object.assign(hotel, body, { updatedAt: new Date().toISOString() });
+  return hotel;
+}
+
+function handlePartnerHotels(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/partner-hotels')) return;
+  if (method === 'GET') return handlePartnerHotelsGet(path, params);
+  if (method === 'POST') return handlePartnerHotelsPost(path, body);
+  if (method === 'PATCH') return handlePartnerHotelsPatch(path, body);
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -1452,14 +1520,44 @@ function handleFolioVoid(path: string, body: any) {
   return { id: correction.id };
 }
 
+function handleFolioReopen(path: string) {
+  const match = /^\/folios\/([a-zA-Z0-9_-]+)\/reopen$/.exec(path);
+  if (!match) return;
+  const folio = mockDb.folios.find((row: any) => row.id === match[1]);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  if (folio.status !== 'CLOSED') {
+    throw new APIError(409, 'Conflict', {
+      message:
+        'Only a closed folio can be reopened for a post-departure charge',
+    });
+  }
+  folio.status = 'OPEN';
+  folio.isClosed = false;
+  folio.closedAt = null;
+  folio.closedBy = null;
+  return folio;
+}
+
 function handleFolioPost(path: string, body: any) {
   const voidRes = handleFolioVoid(path, body);
   if (voidRes !== undefined) return voidRes;
+
+  const reopenRes = handleFolioReopen(path);
+  if (reopenRes !== undefined) return reopenRes;
 
   const match = /^\/folios\/([a-zA-Z0-9_-]+)\/transactions$/.exec(path);
   if (!match) return;
 
   const folioId = match[1];
+  const folioForStatus = mockDb.folios.find((row: any) => row.id === folioId);
+  if (folioForStatus && folioForStatus.status !== 'OPEN') {
+    throw new APIError(409, 'Conflict', {
+      message: 'Folio is not open for posting. Reopen a closed folio first.',
+    });
+  }
+
   const windowId = mockDb.folioWindows.find(
     (w: any) => w.folioId === folioId && w.windowNumber === body.windowNumber,
   )?.id;
@@ -1851,6 +1949,67 @@ function applyRoomMove(reservationId: string, body: any) {
   return reservation;
 }
 
+function applyWalk(reservationId: string, body: any) {
+  const idx = mockDb.reservations.findIndex((r: any) => r.id === reservationId);
+  if (idx === -1) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+
+  const reservation = mockDb.reservations[idx];
+  if (reservation.status !== 'CONFIRMED') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Only confirmed reservations can be walked to another hotel',
+    });
+  }
+
+  const cost = Number(body?.cost);
+  const compensationAmount = Number(body?.compensationAmount ?? 0);
+  if (cost < 0 || compensationAmount < 0) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Walk cost and compensation amount cannot be negative',
+    });
+  }
+
+  const partnerHotel = mockDb.partnerHotels.find(
+    (row: any) => row.id === body?.partnerHotelId,
+  );
+  if (!partnerHotel) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Partner hotel not found',
+    });
+  }
+  if (!partnerHotel.isActive) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Partner hotel is not active',
+    });
+  }
+
+  reservation.status = 'WALKED';
+  if (body?.reason) {
+    reservation.notes =
+      `${reservation.notes || ''}\nWalked: ${body.reason}`.trim();
+  }
+
+  const walk = {
+    id: `walk_mock_${Date.now()}`,
+    reservationId,
+    partnerHotelId: partnerHotel.id,
+    reason: body?.reason,
+    cost,
+    compensationAmount,
+    compensationNotes: body?.compensationNotes,
+    walkedAt: new Date().toISOString(),
+    walkedBy: body?.walkedBy || 'usr_mock_1',
+    partnerHotel: {
+      id: partnerHotel.id,
+      name: partnerHotel.name,
+      phone: partnerHotel.phone,
+    },
+  };
+  mockDb.walks.push(walk);
+  return reservation;
+}
+
 function handleReservationsGet(path: string) {
   if (path === '/reservations') return mockDb.reservations;
   const movesMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/room-moves$/.exec(
@@ -1870,6 +2029,23 @@ function handleReservationsGet(path: string) {
       .sort(
         (a: any, b: any) =>
           new Date(b.movedAt).getTime() - new Date(a.movedAt).getTime(),
+      );
+  }
+  const walksMatch = /^\/reservations\/([a-zA-Z0-9_-]+)\/walks$/.exec(path);
+  if (walksMatch) {
+    const reservation = mockDb.reservations.find(
+      (r: any) => r.id === walksMatch[1],
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Reservation not found',
+      });
+    }
+    return mockDb.walks
+      .filter((walk: any) => walk.reservationId === walksMatch[1])
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.walkedAt).getTime() - new Date(a.walkedAt).getTime(),
       );
   }
   const match = /^\/reservations\/([a-zA-Z0-9_-]+)$/.exec(path);
@@ -1915,6 +2091,10 @@ function handleReservationsPost(path: string, body: any) {
   match = /^\/reservations\/([a-zA-Z0-9_-]+)\/no-show$/.exec(path);
   if (match) {
     return applyNoShow(match[1], body);
+  }
+  match = /^\/reservations\/([a-zA-Z0-9_-]+)\/walk$/.exec(path);
+  if (match) {
+    return applyWalk(match[1], body);
   }
 }
 
@@ -2048,6 +2228,7 @@ export async function routeMockRequest<T>(
       () => handleTaxInvoices(method, path, body, params),
       () => handleArAccounts(method, path, body, params),
       () => handleCardPreauths(method, path, body, params),
+      () => handlePartnerHotels(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

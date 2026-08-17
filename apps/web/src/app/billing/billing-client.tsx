@@ -44,7 +44,7 @@ export function BillingClient() {
   function renderMain() {
     if (reservationId === '') {
       return (
-        <div className="backdrop-blur-2xl bg-white/40 border border-white/50 p-10 rounded-3xl shadow-xl text-center">
+        <div className="bg-white border border-slate-200 p-10 rounded-xl text-center">
           <Receipt className="h-14 mb-4 mx-auto text-slate-300 w-14" />
           <h2 className="font-semibold text-slate-800 text-xl">
             Select a reservation
@@ -57,10 +57,7 @@ export function BillingClient() {
             </code>{' '}
             to this URL.
           </p>
-          <Button
-            asChild
-            className="bg-[#1e4b8e] hover:bg-[#153a6e] mt-6 rounded-xl"
-          >
+          <Button asChild className="mt-6">
             <Link href="/reservations">
               <ExternalLink className="h-4 mr-2 w-4" />
               Go to reservations
@@ -71,8 +68,8 @@ export function BillingClient() {
     }
     if (loadingRes) {
       return (
-        <div className="bg-white/30 border border-white/50 flex flex-col h-48 items-center justify-center rounded-3xl">
-          <div className="animate-spin border-[#1e4b8e] border-b-2 h-10 rounded-full w-10" />
+        <div className="bg-white border border-slate-200 flex flex-col h-48 items-center justify-center rounded-xl">
+          <div className="animate-spin border-b-2 border-pura-blue h-10 rounded-full w-10" />
           <p className="mt-4 text-slate-600">Loading reservation…</p>
         </div>
       );
@@ -80,9 +77,9 @@ export function BillingClient() {
     if (resError !== null || reservation === null) {
       const message = resError ?? 'Reservation not found';
       return (
-        <div className="bg-red-50/80 border border-red-200 p-8 rounded-3xl text-center">
+        <div className="bg-red-50 border border-red-200 p-8 rounded-xl text-center">
           <p className="font-semibold text-red-800">{message}</p>
-          <Button asChild variant="outline" className="mt-4 rounded-xl">
+          <Button asChild variant="outline" className="mt-4">
             <Link href="/reservations">Back to reservations</Link>
           </Button>
         </div>
@@ -96,7 +93,7 @@ export function BillingClient() {
 
     return (
       <>
-        <div className="backdrop-blur-xl bg-white/60 border border-white/70 flex flex-wrap gap-6 items-start justify-between p-6 rounded-3xl shadow-black/5 shadow-xl">
+        <div className="bg-white border border-slate-200 flex flex-wrap gap-6 items-start justify-between p-6 rounded-xl shadow-sm">
           <div>
             <p className="font-bold text-slate-500 text-xs tracking-wider uppercase">
               Guest
@@ -116,7 +113,7 @@ export function BillingClient() {
               {roomLabel}
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-xl shrink-0">
+          <Button asChild variant="outline" className="shrink-0">
             <Link href={`/reservations/${reservationId}`}>
               View reservation
             </Link>
@@ -130,7 +127,7 @@ export function BillingClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-bold text-[#1e4b8e] text-3xl">Billing</h1>
+        <h1 className="font-bold text-3xl text-pura-blue">Billing</h1>
         <p className="mt-1 text-slate-600">
           Folio windows, balances, and charge / payment posting
         </p>

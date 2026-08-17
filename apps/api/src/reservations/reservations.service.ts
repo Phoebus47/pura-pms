@@ -10,6 +10,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { MoveRoomDto } from './dto/move-room.dto';
 import { MarkNoShowDto } from './dto/mark-no-show.dto';
+import { WalkReservationDto } from './dto/walk-reservation.dto';
 import { Prisma, ReservationStatus, RoomStatus } from '@pura/database';
 import { FoliosService } from '../folios/folios.service';
 import { mapHeaderReservation, mapStayOccupancy } from './reservation-calendar';
@@ -38,6 +39,7 @@ import {
   NO_SHOW_TRX_CODE,
   noShowChargeAmount,
 } from './no-show';
+import { assertCanWalk, assertWalkAmountsValid } from './walk';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -629,6 +631,69 @@ export class ReservationsService {
         toRoom: { select: { id: true, number: true } },
       },
       orderBy: { movedAt: 'desc' },
+    });
+  }
+
+  async walk(id: string, dto: WalkReservationDto) {
+    const reservation = await this.findOne(id);
+    assertCanWalk(reservation);
+
+    const cost = Number(dto.cost);
+    const compensationAmount = Number(dto.compensationAmount ?? 0);
+    assertWalkAmountsValid(cost, compensationAmount);
+
+    const partnerHotel = await this.prisma.partnerHotel.findUnique({
+      where: { id: dto.partnerHotelId },
+    });
+    if (!partnerHotel) {
+      throw new NotFoundException(
+        `Partner hotel with ID ${dto.partnerHotelId} not found`,
+      );
+    }
+    if (partnerHotel.propertyId !== reservation.room.propertyId) {
+      throw new BadRequestException(
+        'Partner hotel does not belong to this property',
+      );
+    }
+    if (!partnerHotel.isActive) {
+      throw new BadRequestException('Partner hotel is not active');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.walk.create({
+        data: {
+          reservationId: id,
+          partnerHotelId: dto.partnerHotelId,
+          reason: dto.reason,
+          cost,
+          compensationAmount,
+          compensationNotes: dto.compensationNotes,
+          walkedBy: dto.walkedBy,
+        },
+      });
+
+      return tx.reservation.update({
+        where: { id },
+        data: {
+          status: ReservationStatus.WALKED,
+          notes: dto.reason
+            ? `${reservation.notes || ''}\nWalked: ${dto.reason}`.trim()
+            : reservation.notes,
+        },
+        include: reservationMutationInclude,
+      });
+    });
+  }
+
+  async listWalks(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.walk.findMany({
+      where: { reservationId: id },
+      include: {
+        partnerHotel: { select: { id: true, name: true, phone: true } },
+      },
+      orderBy: { walkedAt: 'desc' },
     });
   }
 
