@@ -143,6 +143,8 @@ model Reservation {
   taxExemptReason        TaxExemptReason?
   taxExemptDocumentRef   String?
   taxExemptApprovedBy    String?
+  isRoomLocked           Boolean           @default(false)
+  roomLockNote           String?
   roomId          String
   room           Room              @relation(fields: [roomId], references: [id])
   guestId        String
@@ -165,6 +167,7 @@ model Reservation {
   @@index([stayPurpose])
   @@index([billingCycle])
   @@index([taxExempt])
+  @@index([isRoomLocked])
 }
 
 model ReservationStay {

@@ -155,8 +155,8 @@
   - [x] Re-issue key card trigger
   - [x] Update housekeeping status (old → Dirty, new → Occupied)
 
-- [ ] **VIP Room Pre-assignment**
-  - [ ] Lock room for VIP, prevent auto-reassignment
+- [x] **VIP Room Pre-assignment**
+  - [x] Lock room for VIP, prevent auto-reassignment
 
 - [x] **Complimentary / House Use Rooms**
   - [x] Rate code type: COMP / HOUSE
@@ -788,7 +788,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 7. Complimentary / House Use Rooms — **shipped** (`StayPurpose` COMP/HOUSE, rate 0, Night Audit skip, authority tracking)
 8. Extended Stay Billing (weekly/monthly) — **shipped** (`BillingCycle`, cycle-end NA posting, interim folio + archive)
 9. Tax Exemption Handling — **shipped** (`taxExempt` + document fields; folio posting skips VAT)
-10. VIP Room Pre-assignment & Lock
+10. VIP Room Pre-assignment & Lock — **shipped** (`isRoomLocked` + note; blocks room change/move; split-stay incompatible)
 
 ### Phase 5: Advanced Features
 

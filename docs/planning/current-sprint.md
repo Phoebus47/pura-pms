@@ -1,32 +1,33 @@
-# Current Sprint — Phase 4 Tax Exemption
+# Current Sprint — Phase 4 VIP Room Lock
 
-**Status:** In progress  
-**Branch:** `cursor/feat-tax-exemption-6a5d`  
-**Depends on:** Extended Stay Billing (merged to `dev`)
+**Status:** Complete  
+**Branch:** `cursor/feat-vip-room-lock-6a5d`  
+**Depends on:** Tax Exemption (merged to `dev`)
 
 ## Goal
 
-Flag diplomatic / government / international-organization stays so folio charges skip VAT (7%). Store exemption reason, document reference, and approver. Posted transactions stay immutable — only new postings skip tax.
+Lock a specific room assignment for VIP reservations. Prevent room changes and mid-stay moves while locked. Require a lock note for audit trail.
 
 ## Schema
 
-- `TaxExemptReason` enum: `DIPLOMATIC | GOVERNMENT | INTERNATIONAL_ORG | OTHER`
-- `Reservation.taxExempt` (default false), `taxExemptReason`, `taxExemptDocumentRef`, `taxExemptApprovedBy`
-- Migration: `20260817083000_add_reservation_tax_exemption`
+- `Reservation.isRoomLocked` (default false), `roomLockNote`
+- Migration: `20260817090000_add_reservation_room_lock`
 
 ## API
 
-1. Create/update: tax-exempt stays require reason + document ref + approver. Cannot change after checkout/cancel/no-show/walk.
-2. `GET /reservations?taxExempt=true`
-3. Folio posting: `computePostingAmounts(..., { taxExempt })` skips VAT when the reservation is exempt (service charge still applies). Package split inherits the same flag.
+1. Create/update: locked reservations require `roomLockNote`. Incompatible with split stays.
+2. Block room assignment changes while locked (unless unlocking).
+3. Block room-move endpoint when locked.
+4. `GET /reservations?isRoomLocked=true`
 
 ## Web
 
-- Tax-exempt checkbox on new reservation; document fields on confirm
-- `TaxExemptBadge` on list/detail
-- Document/reason/approver on reservation detail
-- i18n `reservations.taxExempt.*`
+- Room lock checkbox + note on new reservation (split stay disabled when locked)
+- `RoomLockBadge` on list/detail
+- Lock note on reservation detail
+- Room move panel disabled when locked
+- i18n `reservations.roomLock.*`
 
 ## Deploy
 
-Run `prisma migrate deploy` after merge (additive).
+Migration applied to Supabase (`add_reservation_room_lock`).

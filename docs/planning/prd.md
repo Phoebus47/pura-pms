@@ -499,6 +499,13 @@ Supported Payment Methods:
 - Flag ใน reservation → folio ไม่คิด VAT
 - ต้องเก็บเอกสารยกเว้นภาษี
 
+### VIP Room Pre-assignment & Lock
+
+- ล็อกห้องสำหรับแขก VIP ก่อน check-in
+- ห้ามเปลี่ยนห้องหรือ room move ขณะล็อก (ต้อง unlock ก่อน)
+- บันทึก lock note สำหรับ audit trail
+- ไม่รองรับ split stay
+
 ### Extended Stay / Long-term Guest
 
 - แขกพักเป็นสัปดาห์/เดือน
@@ -1237,7 +1244,7 @@ graph LR
 - [x] Complimentary / House Use Rooms
 - [x] Extended Stay Billing (weekly/monthly)
 - [x] Tax Exemption Handling
-- [ ] VIP Room Pre-assignment & Lock
+- [x] VIP Room Pre-assignment & Lock
 
 ### Phase 5: Advanced Features
 

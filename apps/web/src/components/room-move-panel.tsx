@@ -23,6 +23,7 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
   const userId = useAuthStore((state) => state.user?.id) ?? 'usr_mock_1';
   const queryClient = useQueryClient();
   const propertyId = reservation.room?.property?.id;
+  const roomLocked = reservation.isRoomLocked === true;
   const [toRoomId, setToRoomId] = useState('');
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
@@ -89,6 +90,11 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
           {t('reservations.roomMove.currentRoom')}:{' '}
           {reservation.room?.number ?? reservation.roomId}
         </p>
+        {roomLocked ? (
+          <p className="text-amber-800 text-sm">
+            {t('reservations.roomLock.moveBlocked')}
+          </p>
+        ) : null}
         <form
           className="space-y-4"
           onSubmit={(event) => {
@@ -105,7 +111,7 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
             options={options}
             required
             placeholder={t('reservations.roomMove.placeholder')}
-            disabled={busy || options.length === 0}
+            disabled={busy || options.length === 0 || roomLocked}
           />
           {options.length === 0 ? (
             <p className="text-slate-600 text-sm">
@@ -124,7 +130,7 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
               disabled={busy}
             />
           </div>
-          <Button type="submit" disabled={busy || !toRoomId}>
+          <Button type="submit" disabled={busy || !toRoomId || roomLocked}>
             {t('reservations.roomMove.submit')}
           </Button>
         </form>

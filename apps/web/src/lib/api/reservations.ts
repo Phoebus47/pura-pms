@@ -45,6 +45,8 @@ export interface Reservation {
   taxExemptReason?: TaxExemptReason;
   taxExemptDocumentRef?: string;
   taxExemptApprovedBy?: string;
+  isRoomLocked?: boolean;
+  roomLockNote?: string;
   stays?: ReservationStay[];
   cancellationReason?: string;
   actualCheckIn?: string;
@@ -160,6 +162,8 @@ export interface CreateReservationDto {
   taxExemptReason?: TaxExemptReason;
   taxExemptDocumentRef?: string;
   taxExemptApprovedBy?: string;
+  isRoomLocked?: boolean;
+  roomLockNote?: string;
   stays?: ReservationStayInput[];
 }
 
@@ -173,6 +177,7 @@ export interface ReservationFilterParams {
   guestId?: string;
   stayPurpose?: StayPurpose;
   taxExempt?: boolean;
+  isRoomLocked?: boolean;
 }
 
 export interface CalendarParams {
@@ -193,6 +198,9 @@ export const reservationsAPI = {
     if (filters?.stayPurpose) params.append('stayPurpose', filters.stayPurpose);
     if (filters?.taxExempt !== undefined) {
       params.append('taxExempt', String(filters.taxExempt));
+    }
+    if (filters?.isRoomLocked !== undefined) {
+      params.append('isRoomLocked', String(filters.isRoomLocked));
     }
 
     const query = params.toString();

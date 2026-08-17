@@ -18,6 +18,7 @@ import { DayUseBadge } from '@/components/day-use-badge';
 import { StayPurposeBadge } from '@/components/stay-purpose-badge';
 import { BillingCycleBadge } from '@/components/billing-cycle-badge';
 import { TaxExemptBadge } from '@/components/tax-exempt-badge';
+import { RoomLockBadge } from '@/components/room-lock-badge';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
@@ -164,6 +165,7 @@ export default function ReservationDetailPage() {
               <StayPurposeBadge stayPurpose={reservation.stayPurpose} />
               <BillingCycleBadge billingCycle={reservation.billingCycle} />
               <TaxExemptBadge taxExempt={reservation.taxExempt} />
+              <RoomLockBadge isRoomLocked={reservation.isRoomLocked} />
               {isSplitStay(reservation) ? <SplitStayBadge /> : null}
             </div>
           </div>
@@ -402,6 +404,17 @@ export default function ReservationDetailPage() {
                       </p>
                     </div>
                   </div>
+                </div>
+              ) : null}
+
+              {reservation.isRoomLocked ? (
+                <div className="border-slate-200 border-t mt-6 pt-6">
+                  <p className="font-semibold text-slate-600 text-sm">
+                    {t('reservations.roomLock.note')}
+                  </p>
+                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                    {reservation.roomLockNote}
+                  </p>
                 </div>
               ) : null}
 

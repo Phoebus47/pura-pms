@@ -116,6 +116,14 @@ export class CreateReservationDto {
   @IsOptional()
   taxExemptApprovedBy?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isRoomLocked?: boolean;
+
+  @IsString()
+  @IsOptional()
+  roomLockNote?: string;
+
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

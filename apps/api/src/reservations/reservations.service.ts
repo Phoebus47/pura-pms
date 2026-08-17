@@ -62,6 +62,12 @@ import {
   assertCanChangeTaxExempt,
   assertTaxExemptFields,
 } from './tax-exemption';
+import {
+  assertRoomChangeAllowed,
+  assertRoomLockCompatible,
+  assertRoomLockFields,
+  reservationRoomChanging,
+} from './room-lock';
 
 const SPLIT_DATE_PATCH_ERROR =
   'Split stay date or room changes must include the full stays array';
@@ -93,6 +99,16 @@ export class ReservationsService {
       taxExemptDocumentRef: createReservationDto.taxExemptDocumentRef,
       taxExemptApprovedBy: createReservationDto.taxExemptApprovedBy,
     });
+    const isRoomLocked = createReservationDto.isRoomLocked === true;
+    assertRoomLockFields({
+      isRoomLocked,
+      roomLockNote: createReservationDto.roomLockNote,
+    });
+
+    const nights = calculateNights(checkIn, checkOut, isDayUse);
+    const staysInput = createReservationDto.stays ?? [];
+    assertBillingCycleCompatible(billingCycle, isDayUse, staysInput.length);
+    assertRoomLockCompatible(isRoomLocked, staysInput.length);
 
     const datesError = stayDatesError(checkIn, checkOut, isDayUse);
     if (datesError) {
@@ -102,10 +118,6 @@ export class ReservationsService {
     if (checkIn < new Date(new Date().setHours(0, 0, 0, 0))) {
       throw new BadRequestException('Check-in date cannot be in the past');
     }
-
-    const nights = calculateNights(checkIn, checkOut, isDayUse);
-    const staysInput = createReservationDto.stays ?? [];
-    assertBillingCycleCompatible(billingCycle, isDayUse, staysInput.length);
 
     const room = await this.prisma.room.findUnique({
       where: { id: createReservationDto.roomId },
@@ -247,6 +259,10 @@ export class ReservationsService {
         taxExemptApprovedBy: taxExempt
           ? createReservationDto.taxExemptApprovedBy
           : undefined,
+        isRoomLocked,
+        roomLockNote: isRoomLocked
+          ? createReservationDto.roomLockNote
+          : undefined,
         roomId: createReservationDto.roomId,
         guestId: createReservationDto.guestId,
         stays:
@@ -287,6 +303,7 @@ export class ReservationsService {
     guestId?: string,
     stayPurpose?: StayPurpose,
     taxExempt?: boolean,
+    isRoomLocked?: boolean,
   ) {
     const where: Prisma.ReservationWhereInput = {};
 
@@ -304,6 +321,10 @@ export class ReservationsService {
 
     if (taxExempt !== undefined) {
       where.taxExempt = taxExempt;
+    }
+
+    if (isRoomLocked !== undefined) {
+      where.isRoomLocked = isRoomLocked;
     }
 
     if (checkIn || checkOut) {
@@ -401,6 +422,15 @@ export class ReservationsService {
         updateReservationDto.taxExemptApprovedBy ??
         reservation.taxExemptApprovedBy,
     });
+    const isRoomLocked =
+      updateReservationDto.isRoomLocked ?? reservation.isRoomLocked;
+    assertRoomLockFields({
+      isRoomLocked,
+      roomLockNote:
+        updateReservationDto.roomLockNote ?? reservation.roomLockNote,
+    });
+    const unlocking =
+      reservation.isRoomLocked && updateReservationDto.isRoomLocked === false;
     const stayDatesChanged = Boolean(
       updateReservationDto.checkIn ||
       updateReservationDto.checkOut ||
@@ -465,11 +495,29 @@ export class ReservationsService {
       isDayUse,
       staysInput !== undefined ? pricedStays.length : existingStays.length,
     );
+    assertRoomLockCompatible(
+      isRoomLocked,
+      staysInput !== undefined ? pricedStays.length : existingStays.length,
+    );
 
     const datesError = stayDatesError(checkIn, checkOut, isDayUse);
     if (stayDatesChanged && datesError) {
       throw new BadRequestException(datesError);
     }
+
+    const roomChanging = reservationRoomChanging(
+      reservation.roomId,
+      dtoRoomId,
+      existingStays.map((stay, sequence) => ({
+        sequence: stay.sequence ?? sequence,
+        roomId: stay.roomId,
+      })),
+      pricedStays.map((stay, sequence) => ({
+        sequence,
+        roomId: stay.roomId,
+      })),
+    );
+    assertRoomChangeAllowed(isRoomLocked, unlocking, roomChanging);
 
     if (stayDatesChanged || staysInput !== undefined) {
       await this.assertRoomsAvailable(
@@ -567,6 +615,17 @@ export class ReservationsService {
       updateData.taxExemptReason = null;
       updateData.taxExemptDocumentRef = null;
       updateData.taxExemptApprovedBy = null;
+    }
+
+    if (updateReservationDto.isRoomLocked === false) {
+      updateData.isRoomLocked = false;
+      updateData.roomLockNote = null;
+    }
+
+    if (updateReservationDto.isRoomLocked === true) {
+      updateData.isRoomLocked = true;
+      updateData.roomLockNote =
+        updateReservationDto.roomLockNote ?? reservation.roomLockNote;
     }
 
     return this.persistReservationUpdate(
