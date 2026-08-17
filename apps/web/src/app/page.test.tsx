@@ -117,7 +117,7 @@ describe('Dashboard', () => {
     expect(screen.getByText(/Room 101/)).toBeInTheDocument();
   });
 
-  it('should clip each stat card glow inside an aria-hidden overflow-hidden region', async () => {
+  it('should show a tone accent bar on each stat card for hover feedback', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
     (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
@@ -127,39 +127,25 @@ describe('Dashboard', () => {
       expect(screen.getByText('Total Reservations')).toBeInTheDocument();
     });
 
-    const glowRegions = Array.from(
+    const accentBars = Array.from(
       container.querySelectorAll('[aria-hidden="true"]'),
-    ).filter((element) => element.classList.contains('overflow-hidden'));
+    ).filter((element) => element.classList.contains('w-1'));
 
-    expect(glowRegions).toHaveLength(4);
+    expect(accentBars).toHaveLength(4);
 
-    for (const region of glowRegions) {
-      expect(region).toHaveClass(
-        'pointer-events-none',
+    for (const bar of accentBars) {
+      expect(bar).toHaveClass(
         'absolute',
-        'inset-0',
-        'isolate',
-        'overflow-hidden',
-        'rounded-xl',
+        'left-0',
+        'top-4',
+        'bottom-4',
+        'w-1',
+        'rounded-full',
+        'bg-slate-200',
+        'transition-colors',
       );
-      expect(region.className).toContain('[clip-path:inset(0_round_0.875rem)]');
-      expect(region.parentElement).not.toHaveClass('overflow-hidden');
-
-      const orb = region.querySelector('div');
-      if (!orb) {
-        throw new Error('expected a radial glow inside the clip region');
-      }
-      expect(orb).not.toHaveClass('blur-2xl');
-      expect(orb).not.toHaveClass('rounded-full');
-      expect(orb.className).toContain('bg-[radial-gradient');
-      expect(orb).toHaveClass(
-        'absolute',
-        '-right-4',
-        '-top-4',
-        'h-32',
-        'w-32',
-        'opacity-10',
-      );
+      expect(bar.className).toContain('group-hover:bg-pura');
+      expect(bar.className).not.toContain('radial-gradient');
     }
   });
 
