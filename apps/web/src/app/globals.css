@@ -146,3 +146,26 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Thin scrollbar that blends with the dark pura-blue sidebar */
+.scrollbar-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.25);
+  border-radius: 9999px;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(255 255 255 / 0.4);
+}
