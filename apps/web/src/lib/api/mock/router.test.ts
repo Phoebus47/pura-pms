@@ -456,6 +456,84 @@ describe('Mock API Router', () => {
       ).rejects.toThrow(APIError);
     });
 
+    it('should walk a confirmed reservation to a partner hotel', async () => {
+      const hotel: any = await routeMockRequest('/partner-hotels', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          name: 'Grand Partner Hotel',
+          phone: '02-000-0000',
+        }),
+      });
+
+      const response: any = await routeMockRequest(
+        `/reservations/res_mock_2/walk`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            partnerHotelId: hotel.id,
+            cost: 1500,
+            compensationAmount: 500,
+            reason: 'Overbooked',
+            walkedBy: 'usr_mock_1',
+          }),
+        },
+      );
+      expect(response.status).toBe('WALKED');
+
+      const history: any = await routeMockRequest(
+        `/reservations/res_mock_2/walks`,
+        { method: 'GET' },
+      );
+      expect(history).toHaveLength(1);
+      expect(history[0].partnerHotelId).toBe(hotel.id);
+      expect(history[0].cost).toBe(1500);
+      expect(history[0].compensationAmount).toBe(500);
+    });
+
+    it('should reject a walk when the reservation is not confirmed', async () => {
+      const hotel: any = await routeMockRequest('/partner-hotels', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          name: 'Another Partner Hotel',
+        }),
+      });
+
+      await expect(
+        routeMockRequest(`/reservations/res_mock_1/walk`, {
+          method: 'POST',
+          body: JSON.stringify({
+            partnerHotelId: hotel.id,
+            cost: 1000,
+            walkedBy: 'usr_mock_1',
+          }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('should reject a walk to an inactive partner hotel', async () => {
+      const hotel: any = await routeMockRequest('/partner-hotels', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId: mockDb.properties[0].id,
+          name: 'Inactive Partner Hotel',
+          isActive: false,
+        }),
+      });
+
+      await expect(
+        routeMockRequest(`/reservations/res_mock_2/walk`, {
+          method: 'POST',
+          body: JSON.stringify({
+            partnerHotelId: hotel.id,
+            cost: 1000,
+            walkedBy: 'usr_mock_1',
+          }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
     it('should delete a reservation', async () => {
       const resId = mockDb.reservations[0].id;
       const response: any = await routeMockRequest(`/reservations/${resId}`, {
@@ -1352,6 +1430,61 @@ describe('Mock API Router', () => {
         },
       );
       expect(captured.status).toBe('CAPTURED');
+    });
+  });
+
+  describe('Partner hotels', () => {
+    it('creates, lists, and updates a partner hotel', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const created: any = await routeMockRequest('/partner-hotels', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          name: 'Grand Partner Hotel',
+          phone: '02-000-0000',
+        }),
+      });
+      expect(created.isActive).toBe(true);
+
+      const list: any = await routeMockRequest(
+        `/partner-hotels?propertyId=${propertyId}`,
+        { method: 'GET' },
+      );
+      expect(list).toHaveLength(1);
+      expect(list[0].id).toBe(created.id);
+
+      const fetched: any = await routeMockRequest(
+        `/partner-hotels/${created.id}`,
+        { method: 'GET' },
+      );
+      expect(fetched.name).toBe('Grand Partner Hotel');
+
+      const updated: any = await routeMockRequest(
+        `/partner-hotels/${created.id}`,
+        { method: 'PATCH', body: JSON.stringify({ isActive: false }) },
+      );
+      expect(updated.isActive).toBe(false);
+    });
+
+    it('rejects a duplicate partner hotel name for the same property', async () => {
+      const propertyId = mockDb.properties[0].id;
+      await routeMockRequest('/partner-hotels', {
+        method: 'POST',
+        body: JSON.stringify({ propertyId, name: 'Duplicate Hotel' }),
+      });
+
+      await expect(
+        routeMockRequest('/partner-hotels', {
+          method: 'POST',
+          body: JSON.stringify({ propertyId, name: 'Duplicate Hotel' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('throws 404 for an unknown partner hotel', async () => {
+      await expect(
+        routeMockRequest('/partner-hotels/missing', { method: 'GET' }),
+      ).rejects.toThrow(APIError);
     });
   });
 });

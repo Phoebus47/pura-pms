@@ -35,6 +35,10 @@ const statusConfig: Record<
     label: 'No Show',
     className: 'bg-amber-100 text-amber-700 ring-amber-600/20',
   },
+  WALKED: {
+    label: 'Walked',
+    className: 'bg-orange-100 text-orange-700 ring-orange-600/20',
+  },
 };
 
 export function ReservationStatusBadge({

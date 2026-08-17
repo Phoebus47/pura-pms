@@ -20,6 +20,7 @@ import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
 import { FolioDetail } from '@/components/folio-detail';
 import { RoomMovePanel } from '@/components/room-move-panel';
+import { WalkPanel } from '@/components/walk-panel';
 import { ReservationNoShowButton } from '@/components/reservation-no-show-button';
 import { cn } from '@/lib/utils';
 
@@ -433,6 +434,10 @@ export default function ReservationDetailPage() {
               reservation={reservation}
               onMoved={loadReservation}
             />
+          ) : null}
+
+          {reservation.status === 'CONFIRMED' ? (
+            <WalkPanel reservation={reservation} onWalked={loadReservation} />
           ) : null}
 
           {/* Metadata */}
