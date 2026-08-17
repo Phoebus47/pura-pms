@@ -1452,14 +1452,44 @@ function handleFolioVoid(path: string, body: any) {
   return { id: correction.id };
 }
 
+function handleFolioReopen(path: string) {
+  const match = /^\/folios\/([a-zA-Z0-9_-]+)\/reopen$/.exec(path);
+  if (!match) return;
+  const folio = mockDb.folios.find((row: any) => row.id === match[1]);
+  if (!folio) {
+    throw new APIError(404, 'Not Found', { message: 'Folio not found' });
+  }
+  if (folio.status !== 'CLOSED') {
+    throw new APIError(409, 'Conflict', {
+      message:
+        'Only a closed folio can be reopened for a post-departure charge',
+    });
+  }
+  folio.status = 'OPEN';
+  folio.isClosed = false;
+  folio.closedAt = null;
+  folio.closedBy = null;
+  return folio;
+}
+
 function handleFolioPost(path: string, body: any) {
   const voidRes = handleFolioVoid(path, body);
   if (voidRes !== undefined) return voidRes;
+
+  const reopenRes = handleFolioReopen(path);
+  if (reopenRes !== undefined) return reopenRes;
 
   const match = /^\/folios\/([a-zA-Z0-9_-]+)\/transactions$/.exec(path);
   if (!match) return;
 
   const folioId = match[1];
+  const folioForStatus = mockDb.folios.find((row: any) => row.id === folioId);
+  if (folioForStatus && folioForStatus.status !== 'OPEN') {
+    throw new APIError(409, 'Conflict', {
+      message: 'Folio is not open for posting. Reopen a closed folio first.',
+    });
+  }
+
   const windowId = mockDb.folioWindows.find(
     (w: any) => w.folioId === folioId && w.windowNumber === body.windowNumber,
   )?.id;
