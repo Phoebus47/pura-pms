@@ -777,7 +777,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 10. Package Revenue Breakdown (USALI split)
 11. Credit Limit Alerts & Auto-settlement
 
-### Phase 4: Operations Edge Cases (Room Move shipped — remaining items next)
+### Phase 4: Operations Edge Cases — **complete**
 
 1. Day-use Reservations — **shipped**
 2. Split Stay — **shipped**
@@ -825,4 +825,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–3 closeout complete (wait items remain). Phase 4 Room Move shipped; remaining Phase 4 items next.
+**Status:** Phase 1–4 complete. Phase 5 (Advanced Features) is current. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.

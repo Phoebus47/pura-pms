@@ -1,33 +1,26 @@
-# Current Sprint — Phase 4 VIP Room Lock
+# Current Sprint — Phase 4 Complete
 
 **Status:** Complete  
-**Branch:** `cursor/feat-vip-room-lock-6a5d`  
-**Depends on:** Tax Exemption (merged to `dev`)
+**Closed:** 2026-08-17  
+**Promoted:** `dev` → `main`
 
-## Goal
+## Phase 4 Summary
 
-Lock a specific room assignment for VIP reservations. Prevent room changes and mid-stay moves while locked. Require a lock note for audit trail.
+All Operations Edge Cases epics shipped:
 
-## Schema
+1. Day-use Reservations
+2. Split Stay
+3. Room Move Mid-stay
+4. No-show / Late Cancellation Auto-charges
+5. Post-departure Charges
+6. Overbooking Recovery (Walk)
+7. Complimentary / House Use Rooms
+8. Extended Stay Billing (weekly/monthly)
+9. Tax Exemption Handling
+10. VIP Room Pre-assignment & Lock
 
-- `Reservation.isRoomLocked` (default false), `roomLockNote`
-- Migration: `20260817090000_add_reservation_room_lock`
+See `docs/planning/phase-4-closeout.md` for PR references and migrations.
 
-## API
+## Next Sprint
 
-1. Create/update: locked reservations require `roomLockNote`. Incompatible with split stays.
-2. Block room assignment changes while locked (unless unlocking).
-3. Block room-move endpoint when locked.
-4. `GET /reservations?isRoomLocked=true`
-
-## Web
-
-- Room lock checkbox + note on new reservation (split stay disabled when locked)
-- `RoomLockBadge` on list/detail
-- Lock note on reservation detail
-- Room move panel disabled when locked
-- i18n `reservations.roomLock.*`
-
-## Deploy
-
-Migration applied to Supabase (`add_reservation_room_lock`).
+**Phase 5: Advanced Features** — start with Rate Derivation (Parent/Child Rates) per `docs/planning/roadmap.md`.
