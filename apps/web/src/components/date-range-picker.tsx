@@ -63,7 +63,7 @@ export function DateRangePicker({
               onChange={(e) => handleCheckInChange(e.target.value)}
               min={today}
               required
-              className="border border-slate-300 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
+              className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
             />
           </div>
         </div>
@@ -88,7 +88,7 @@ export function DateRangePicker({
               required
               disabled={sameDayStay}
               aria-disabled={sameDayStay}
-              className="border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500 focus:border-[#1e4b8e] focus:ring-[#1e4b8e]/10 focus:ring-4 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
+              className="border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
             />
           </div>
         </div>
@@ -101,8 +101,8 @@ export function DateRangePicker({
         </div>
       ) : (
         nights > 0 && (
-          <div className="bg-[#1e4b8e]/5 border border-[#1e4b8e]/20 flex items-center justify-center p-3 rounded-xl">
-            <p className="font-semibold text-[#1e4b8e] text-sm">
+          <div className="bg-pura-blue/5 border border-pura-blue/20 flex items-center justify-center p-3 rounded-xl">
+            <p className="font-semibold text-pura-blue text-sm">
               {nights} {nights === 1 ? 'night' : 'nights'}
             </p>
           </div>
