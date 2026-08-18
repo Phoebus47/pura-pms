@@ -60,6 +60,7 @@ model Property {
   housekeepingInspections HousekeepingInspection[]
   hardwareAgents HardwareAgent[]
   hardwareJobs   HardwareJob[]
+  registrationCards RegistrationCard[]
   createdAt      DateTime   @default(now())
 }
 
@@ -171,6 +172,7 @@ model Reservation {
   walks          Walk[]
   blockId        String?
   block          RoomBlock?        @relation(fields: [blockId], references: [id])
+  registrationCards RegistrationCard[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -878,6 +880,38 @@ model HardwareJob {
 
   @@index([propertyId, status, createdAt])
   @@index([agentId, createdAt])
+}
+
+enum RegistrationCardStatus {
+  DRAFT
+  SIGNED
+  VOID
+}
+
+model RegistrationCard {
+  id                String                 @id @default(cuid())
+  propertyId        String
+  property          Property               @relation(fields: [propertyId], references: [id])
+  reservationId     String
+  reservation       Reservation            @relation(fields: [reservationId], references: [id])
+  version           Int                    @default(1)
+  status            RegistrationCardStatus @default(DRAFT)
+  guestSnapshot     Json
+  staySnapshot      Json
+  propertySnapshot  Json
+  signatureData     String?
+  signedAt          DateTime?
+  signedByGuestName String?
+  voidReason        String?
+  voidedAt          DateTime?
+  voidedBy          String?
+  createdBy         String
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@unique([reservationId, version])
+  @@index([reservationId, status])
+  @@index([propertyId, createdAt])
 }
 
 // ==================== RATES ====================
