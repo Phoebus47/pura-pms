@@ -19,6 +19,11 @@ import {
   Wallet,
   MoonStar,
   Building2,
+  Percent,
+  TrendingUp,
+  Layers,
+  ClipboardCheck,
+  Printer,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -134,6 +139,45 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Wallet);
     });
 
+    it('should include Rates navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Rates');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/rates');
+      expect(item?.icon).toBe(Percent);
+    });
+
+    it('should include Yield navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Yield');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/yield');
+      expect(item?.icon).toBe(TrendingUp);
+    });
+
+    it('should include Blocks navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Blocks');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/blocks');
+      expect(item?.icon).toBe(Layers);
+    });
+
+    it('should include Housekeeping navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Housekeeping',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/housekeeping');
+      expect(item?.icon).toBe(ClipboardCheck);
+    });
+
+    it('should include Hardware navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Hardware',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/hardware-bridge');
+      expect(item?.icon).toBe(Printer);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -167,6 +211,11 @@ describe('navigation', () => {
         'Reservations',
         'Guests',
         'Rooms',
+        'Housekeeping',
+        'Hardware',
+        'Rates',
+        'Yield',
+        'Blocks',
         'Billing',
         'Shifts',
         'Night Audit',
@@ -228,6 +277,11 @@ describe('navigation', () => {
         'Accounts receivable',
         'Card pre-auths',
         'Partner hotels',
+        'Rates',
+        'Yield',
+        'Blocks',
+        'Housekeeping',
+        'Hardware',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -239,6 +293,11 @@ describe('navigation', () => {
         '/ar-accounts',
         '/card-preauths',
         '/partner-hotels',
+        '/rates',
+        '/yield',
+        '/blocks',
+        '/housekeeping',
+        '/hardware-bridge',
         '/settings',
       ]);
     });

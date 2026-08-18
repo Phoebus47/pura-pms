@@ -10,12 +10,12 @@
 
 ### Web App + Hybrid Solution
 
-- [ ] **PWA Setup** (Progressive Web App)
-  - [ ] Configure Next.js for PWA
-  - [ ] Service Worker setup
-  - [ ] Offline-first capability
+- [x] **PWA Setup** (Progressive Web App) (v1: installable + read-only offline)
+  - [x] Configure Next.js for PWA (Serwist / Turbopack)
+  - [x] Service Worker setup
+  - [x] Offline-first capability (query persist + offline banner)
   - [ ] Background sync
-  - [ ] Install prompt
+  - [ ] Install prompt (custom UX; browser install works)
 
 - [ ] **Local Device Agent (Bridge)**
   - [ ] Choose tech stack (Electron or Go)
@@ -101,11 +101,11 @@
 
 ### Rate Management
 
-- [ ] **Rate Derivation (Parent/Child Rates)**
-  - [ ] Add parentRateId to Rate model
-  - [ ] Formula engine (e.g., "Rate B = Rate A - 10%")
-  - [ ] Auto-update when parent rate changes
-  - [ ] UI for managing rate relationships
+- [x] **Rate Derivation (Parent/Child Rates)**
+  - [x] Add parentRateId to Rate model
+  - [x] Formula engine (e.g., "Rate B = Rate A - 10%")
+  - [x] Auto-update when parent rate changes
+  - [x] UI for managing rate relationships
 
 - [ ] **Rate Packages**
   - [ ] Package model (includes breakfast, spa, etc.)
@@ -114,16 +114,16 @@
 
 ### Allotment & Blocks
 
-- [ ] **Allotment Model**
-  - [ ] Create Allotment model
-  - [ ] Agent/OTA quota management
-  - [ ] Cut-off date tracking
-  - [ ] Pickup reports
+- [x] **Allotment Model**
+  - [x] Create Allotment model
+  - [x] Agent/OTA quota management
+  - [x] Cut-off date tracking
+  - [x] Pickup reports
 
-- [ ] **Block Management**
-  - [ ] Block model for group bookings
-  - [ ] Block allocation UI
-  - [ ] Block release logic
+- [x] **Block Management**
+  - [x] Block model for group bookings
+  - [x] Block allocation UI
+  - [x] Block release logic
 
 ### Guest Management
 
@@ -183,12 +183,12 @@
 
 ## 🧹 Housekeeping Enhancements
 
-- [ ] **Inspection Workflow**
-  - [ ] Add `INSPECTED` status to RoomStatus enum
-  - [ ] Workflow: Dirty → Clean → Inspected → Ready
-  - [ ] Inspection checklist model
+- [x] **Inspection Workflow**
+  - [x] Track inspection on `Room.hkStage` (not `RoomStatus`)
+  - [x] Workflow: Dirty → Clean → Inspected → Ready
+  - [x] Inspection checklist model
   - [ ] Photo evidence (optional)
-  - [ ] Supervisor approval UI
+  - [x] Supervisor approval UI
 
 - [ ] **Out of Order vs. Out of Service**
   - [ ] Already have OUT_OF_ORDER and OUT_OF_SERVICE in enum ✅
@@ -246,12 +246,12 @@
 
 ## 🔧 System & Security Enhancements
 
-- [ ] **Hardware Bridge**
-  - [ ] Local Agent application
-  - [ ] Printer API
-  - [ ] Key Card Encoder API
-  - [ ] Passport Scanner API
-  - [ ] Smart Card Reader API
+- [x] **Hardware Bridge** (v1: localhost agent + cloud job log; vendor SDKs wait)
+  - [x] Local Agent application (`apps/hardware-bridge`, mock adapters)
+  - [x] Printer API
+  - [x] Key Card Encoder API
+  - [x] Passport Scanner API
+  - [x] Smart Card Reader API
 
 - [ ] **Reason Codes**
   - [ ] ReasonCode model ✅ (in schema)
@@ -562,10 +562,10 @@
 
 ### Yield Management (Module 4.23)
 
-- [ ] Demand forecasting (historical data)
-- [ ] Competitor rate monitoring
-- [ ] Automated rate recommendations
-- [ ] Pace analysis with alerts
+- [x] Demand forecasting (historical data) — on-books occupancy over the next 14 days
+- [x] Competitor rate monitoring — manual capture
+- [x] Automated rate recommendations — rule-based (not ML)
+- [x] Pace analysis with alerts
 
 ### Self-Service Portal (Module 4.24)
 
@@ -792,12 +792,12 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 
 ### Phase 5: Advanced Features
 
-1. Rate Derivation (Parent/Child Rates)
-2. Dynamic Pricing / Yield Management (AI)
-3. Allotment & Blocks
-4. Housekeeping Inspection (Workflow)
-5. Hardware Bridge (Local Agent)
-6. PWA (Offline Capability)
+1. Rate Derivation (Parent/Child Rates) — **shipped** (`parentRateId` + percent/amount offset; cascade on parent change)
+2. Dynamic Pricing / Yield Management (AI) — **shipped (rule-based v1)** (pace vs last year, competitor capture, HIGH_DEMAND / SLOW_PACE / COMP_UNDERCUT; apply updates parent Rate)
+3. Allotment & Blocks — **shipped** (`RoomBlock` allotment/group, cutoff release, pickup report)
+4. Housekeeping Inspection (Workflow) — **shipped** (`Room.hkStage` Dirty→Clean→Ready, supervisor checklist; Inspected is the inspection record)
+5. Hardware Bridge (Local Agent) — **shipped (mock v1)** (localhost agent + `HardwareJob` audit; vendor SDKs wait)
+6. PWA (Offline Capability) — **shipped (read-only v1)** (Serwist SW, manifest, query persist; mutations blocked offline)
 7. Digital Registration Card (Tablet Signature)
 8. Wake-up Call System
 9. DND/MUR Status Indicators

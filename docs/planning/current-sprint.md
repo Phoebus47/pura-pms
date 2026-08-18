@@ -1,26 +1,26 @@
-# Current Sprint — Phase 4 Complete
+# Current Sprint — Phase 5 PWA (Offline v1)
 
-**Status:** Complete  
-**Closed:** 2026-08-17  
-**Promoted:** `dev` → `main`
+**Status:** Ready for review
+**Branch:** `cursor/feat-pwa-offline-6a5d`
+**Depends on:** Hardware Bridge (`cursor/feat-hardware-bridge-6a5d`, #92)
+**Roles:** @PM → @Architect → @Frontend → @QA
 
-## Phase 4 Summary
+## Goal
 
-All Operations Edge Cases epics shipped:
+Installable PWA with read-only offline continuity. No offline mutations or
+background sync in v1.
 
-1. Day-use Reservations
-2. Split Stay
-3. Room Move Mid-stay
-4. No-show / Late Cancellation Auto-charges
-5. Post-departure Charges
-6. Overbooking Recovery (Walk)
-7. Complimentary / House Use Rooms
-8. Extended Stay Billing (weekly/monthly)
-9. Tax Exemption Handling
-10. VIP Room Pre-assignment & Lock
+## Web
 
-See `docs/planning/phase-4-closeout.md` for PR references and migrations.
+- Serwist service worker (production only) via `/serwist/sw.js`
+- `app/manifest.ts` + PNG icons (192, 512 maskable)
+- `/offline` navigation fallback
+- Offline banner + mutation guard on API client
+- TanStack Query persist (IndexedDB) for FO read queries
 
-## Next Sprint
+## Wait
 
-**Phase 5: Advanced Features** — start with Rate Derivation (Parent/Child Rates) per `docs/planning/roadmap.md`.
+- Background Sync for writes
+- Offline check-in / checkout / folio posting
+- Push notifications
+- Custom install prompt campaign

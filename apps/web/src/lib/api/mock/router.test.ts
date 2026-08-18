@@ -1572,4 +1572,196 @@ describe('Mock API Router', () => {
       ).rejects.toThrow(APIError);
     });
   });
+
+  describe('Rates', () => {
+    it('creates a parent and derives a child amount', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const roomTypeId = mockDb.roomTypes[0].id;
+      const parent: any = await routeMockRequest('/rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          roomTypeId,
+          code: 'BAR',
+          name: 'Best Available',
+          amount: 1500,
+          startDate: '2026-01-01',
+          endDate: '2026-12-31',
+        }),
+      });
+      expect(parent.amount).toBe(1500);
+
+      const child: any = await routeMockRequest('/rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          roomTypeId,
+          code: 'CORP',
+          name: 'Corporate',
+          parentRateId: parent.id,
+          deriveMode: 'PERCENT_OFFSET',
+          deriveValue: -10,
+          startDate: '2026-01-01',
+          endDate: '2026-12-31',
+        }),
+      });
+      expect(child.amount).toBe(1350);
+
+      await routeMockRequest(`/rates/${parent.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ amount: 2000 }),
+      });
+      const childAfter = mockDb.rates.find((row: any) => row.id === child.id);
+      expect(childAfter.amount).toBe(1800);
+    });
+
+    it('throws 404 for an unknown rate', async () => {
+      await expect(
+        routeMockRequest('/rates/missing', { method: 'GET' }),
+      ).rejects.toThrow(APIError);
+    });
+  });
+
+  describe('Yield', () => {
+    it('saves a competitor rate and generates a recommendation', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const competitor: any = await routeMockRequest('/yield/competitors', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          competitorName: 'Hotel B',
+          stayDate: '2026-08-20',
+          amount: 900,
+        }),
+      });
+      expect(competitor.competitorName).toBe('Hotel B');
+
+      const listed: any = await routeMockRequest(
+        `/yield/competitors?propertyId=${propertyId}`,
+        { method: 'GET' },
+      );
+      expect(listed).toHaveLength(1);
+
+      if (mockDb.rates.length === 0) {
+        await routeMockRequest('/rates', {
+          method: 'POST',
+          body: JSON.stringify({
+            propertyId,
+            roomTypeId: mockDb.roomTypes[0].id,
+            code: 'BAR',
+            name: 'Best Available',
+            amount: 1500,
+            startDate: '2026-01-01',
+            endDate: '2026-12-31',
+          }),
+        });
+      }
+
+      const generated: any = await routeMockRequest(
+        '/yield/recommendations/generate',
+        {
+          method: 'POST',
+          body: JSON.stringify({ propertyId }),
+        },
+      );
+      expect(generated[0].reason).toBe('HIGH_DEMAND');
+
+      const applied: any = await routeMockRequest(
+        `/yield/recommendations/${generated[0].id}/apply`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(applied.status).toBe('APPLIED');
+    });
+  });
+
+  describe('Blocks', () => {
+    it('creates an allotment and reports pickup remaining', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const block: any = await routeMockRequest('/blocks', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          roomTypeId: mockDb.roomTypes[0].id,
+          code: 'OTA-AUG',
+          name: 'Booking.com',
+          kind: 'ALLOTMENT',
+          startDate: '2026-08-18',
+          endDate: '2026-08-20',
+          cutoffDate: '2026-08-17',
+          allottedRooms: 2,
+        }),
+      });
+      expect(block.code).toBe('OTA-AUG');
+      const pickup: any = await routeMockRequest(`/blocks/${block.id}/pickup`, {
+        method: 'GET',
+      });
+      expect(pickup.remaining).toBe(2);
+      const released: any = await routeMockRequest(
+        `/blocks/${block.id}/release`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(released.status).toBe('RELEASED');
+    });
+  });
+
+  describe('Housekeeping', () => {
+    it('marks a dirty room clean then ready after inspection', async () => {
+      const dirty = mockDb.rooms.find((row: any) => row.hkStage === 'DIRTY');
+      const cleaned: any = await routeMockRequest(
+        `/housekeeping/rooms/${dirty.id}/clean`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(cleaned.hkStage).toBe('CLEAN');
+      const inspected: any = await routeMockRequest(
+        `/housekeeping/rooms/${dirty.id}/inspections`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            inspectedBy: 'usr_mock_1',
+            lines: [
+              { itemCode: 'BED', passed: true },
+              { itemCode: 'BATH', passed: true },
+              { itemCode: 'LINEN', passed: true },
+              { itemCode: 'AMENITIES', passed: true },
+              { itemCode: 'MINIBAR', passed: true },
+            ],
+          }),
+        },
+      );
+      expect(inspected.result).toBe('PASSED');
+      expect(dirty.hkStage).toBe('READY');
+    });
+  });
+
+  describe('Hardware Bridge', () => {
+    it('registers an agent then creates and simulates a print job', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const agent: any = await routeMockRequest('/hardware-bridge/agents', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          name: 'Front desk PC',
+          machineId: 'fd-01',
+        }),
+      });
+      expect(agent.machineId).toBe('fd-01');
+      const job: any = await routeMockRequest('/hardware-bridge/jobs', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          type: 'PRINT',
+          requestedBy: 'front-desk',
+          payload: { jobType: 'receipt' },
+          agentId: agent.id,
+        }),
+      });
+      expect(job.status).toBe('PENDING');
+      const simulated: any = await routeMockRequest(
+        `/hardware-bridge/jobs/${job.id}/simulate`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(simulated.status).toBe('COMPLETED');
+      expect(simulated.result).toEqual({ printed: true });
+    });
+  });
 });

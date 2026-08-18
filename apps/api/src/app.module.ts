@@ -20,6 +20,11 @@ import { TaxInvoicesModule } from './tax-invoices/tax-invoices.module';
 import { ArAccountsModule } from './ar-accounts/ar-accounts.module';
 import { CardPreauthsModule } from './card-preauths/card-preauths.module';
 import { PartnerHotelsModule } from './partner-hotels/partner-hotels.module';
+import { RatesModule } from './rates/rates.module';
+import { YieldModule } from './yield/yield.module';
+import { BlocksModule } from './blocks/blocks.module';
+import { HousekeepingModule } from './housekeeping/housekeeping.module';
+import { HardwareBridgeModule } from './hardware-bridge/hardware-bridge.module';
 
 @Module({
   imports: [
@@ -39,6 +44,11 @@ import { PartnerHotelsModule } from './partner-hotels/partner-hotels.module';
     ArAccountsModule,
     CardPreauthsModule,
     PartnerHotelsModule,
+    RatesModule,
+    YieldModule,
+    BlocksModule,
+    HousekeepingModule,
+    HardwareBridgeModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

@@ -13,6 +13,7 @@ export interface Room {
   number: string;
   floor?: number;
   status: RoomStatus;
+  hkStage?: 'DIRTY' | 'CLEAN' | 'READY';
   notes?: string;
   roomTypeId: string;
   propertyId: string;

@@ -54,6 +54,12 @@ model Property {
   journalEntries JournalEntry[]
   arAccounts     ARAccount[]
   partnerHotels  PartnerHotel[]
+  competitorRates CompetitorRate[]
+  yieldRecommendations YieldRecommendation[]
+  roomBlocks     RoomBlock[]
+  housekeepingInspections HousekeepingInspection[]
+  hardwareAgents HardwareAgent[]
+  hardwareJobs   HardwareJob[]
   createdAt      DateTime   @default(now())
 }
 
@@ -71,6 +77,9 @@ model RoomType {
   rooms       Room[]
   rates       Rate[]
   reservationStays ReservationStay[]
+  competitorRates CompetitorRate[]
+  yieldRecommendations YieldRecommendation[]
+  roomBlocks RoomBlock[]
 }
 
 model Room {
@@ -84,10 +93,13 @@ model Room {
   property     Property           @relation(fields: [propertyId], references: [id])
   reservations Reservation[]
   reservationStays ReservationStay[]
+  hkStage      HkStage            @default(READY)
   housekeeping HousekeepingTask[]
+  inspections  HousekeepingInspection[]
   movesFrom    RoomMove[]         @relation("RoomMoveFrom")
   movesTo      RoomMove[]         @relation("RoomMoveTo")
   @@unique([propertyId, number])
+  @@index([propertyId, hkStage])
 }
 
 // ==================== GUESTS ====================
@@ -157,6 +169,8 @@ model Reservation {
   cardPreauths   CardPreauth[]
   roomMoves      RoomMove[]
   walks          Walk[]
+  blockId        String?
+  block          RoomBlock?        @relation(fields: [blockId], references: [id])
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -168,6 +182,7 @@ model Reservation {
   @@index([billingCycle])
   @@index([taxExempt])
   @@index([isRoomLocked])
+  @@index([blockId])
 }
 
 model ReservationStay {
@@ -739,22 +754,257 @@ model HousekeepingTask {
   createdAt   DateTime   @default(now())
 }
 
+enum HkStage {
+  DIRTY
+  CLEAN
+  READY
+}
+
+enum InspectionResult {
+  PASSED
+  FAILED
+}
+
+model HousekeepingInspection {
+  id           String                         @id @default(cuid())
+  propertyId   String
+  property     Property                       @relation(fields: [propertyId], references: [id])
+  roomId       String
+  room         Room                           @relation(fields: [roomId], references: [id])
+  businessDate DateTime                       @db.Date
+  result       InspectionResult
+  inspectedBy  String
+  notes        String?
+  lines        HousekeepingInspectionLine[]
+  createdAt    DateTime                       @default(now())
+
+  @@index([propertyId, businessDate])
+  @@index([roomId, createdAt])
+}
+
+model HousekeepingInspectionLine {
+  id            String                   @id @default(cuid())
+  inspectionId  String
+  inspection    HousekeepingInspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  itemCode      String
+  passed        Boolean
+  notes         String?
+
+  @@index([inspectionId])
+}
+
+// ==================== HARDWARE BRIDGE ====================
+
+enum HardwareDeviceType {
+  PRINTER
+  KEY_CARD_ENCODER
+  PASSPORT_SCANNER
+  SMART_CARD_READER
+}
+
+enum HardwareVendor {
+  GENERIC
+  VINGCARD
+  SALTO
+  HAFELE
+}
+
+enum HardwareJobType {
+  PRINT
+  KEYCARD_ENCODE
+  PASSPORT_SCAN
+  ID_CARD_READ
+}
+
+enum HardwareJobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model HardwareAgent {
+  id         String            @id @default(cuid())
+  propertyId String
+  property   Property          @relation(fields: [propertyId], references: [id])
+  name       String
+  machineId  String
+  isActive   Boolean           @default(true)
+  lastSeenAt DateTime?
+  devices    HardwareDevice[]
+  jobs       HardwareJob[]
+  createdAt  DateTime          @default(now())
+
+  @@unique([propertyId, machineId])
+  @@index([propertyId, isActive])
+}
+
+model HardwareDevice {
+  id         String              @id @default(cuid())
+  agentId    String
+  agent      HardwareAgent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  type       HardwareDeviceType
+  vendor     HardwareVendor      @default(GENERIC)
+  label      String
+  externalId String?
+  isDefault  Boolean             @default(false)
+  isActive   Boolean             @default(true)
+  jobs       HardwareJob[]
+  createdAt  DateTime            @default(now())
+
+  @@index([agentId, type])
+}
+
+model HardwareJob {
+  id             String             @id @default(cuid())
+  propertyId     String
+  property       Property           @relation(fields: [propertyId], references: [id])
+  agentId        String?
+  agent          HardwareAgent?     @relation(fields: [agentId], references: [id])
+  deviceId       String?
+  device         HardwareDevice?    @relation(fields: [deviceId], references: [id])
+  type           HardwareJobType
+  status         HardwareJobStatus  @default(PENDING)
+  idempotencyKey String?            @unique
+  reservationId  String?
+  requestedBy    String
+  payload        Json
+  result         Json?
+  errorMessage   String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime           @default(now())
+
+  @@index([propertyId, status, createdAt])
+  @@index([agentId, createdAt])
+}
+
 // ==================== RATES ====================
 
+enum RateDeriveMode {
+  PERCENT_OFFSET
+  AMOUNT_OFFSET
+}
+
 model Rate {
-  id         String   @id @default(cuid())
-  code       String
-  name       String
-  roomTypeId String
-  roomType   RoomType @relation(fields: [roomTypeId], references: [id])
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
-  amount     Decimal  @db.Decimal(10, 2)
-  startDate  DateTime @db.Date
-  endDate    DateTime @db.Date
-  daysOfWeek Int[]
-  isActive   Boolean  @default(true)
+  id           String          @id @default(cuid())
+  code         String
+  name         String
+  roomTypeId   String
+  roomType     RoomType        @relation(fields: [roomTypeId], references: [id])
+  propertyId   String
+  property     Property        @relation(fields: [propertyId], references: [id])
+  amount       Decimal         @db.Decimal(10, 2)
+  startDate    DateTime        @db.Date
+  endDate      DateTime        @db.Date
+  daysOfWeek   Int[]
+  isActive     Boolean         @default(true)
+  parentRateId String?
+  parentRate   Rate?           @relation("RateDerivation", fields: [parentRateId], references: [id], onDelete: Restrict)
+  childRates   Rate[]          @relation("RateDerivation")
+  deriveMode   RateDeriveMode?
+  deriveValue  Decimal?        @db.Decimal(10, 4)
+  yieldRecommendations YieldRecommendation[]
   @@index([roomTypeId, startDate, endDate])
+  @@index([parentRateId])
+  @@index([propertyId, code])
+}
+
+enum YieldRecommendationStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+}
+
+enum YieldRecommendReason {
+  HIGH_DEMAND
+  SLOW_PACE
+  COMP_UNDERCUT
+}
+
+model CompetitorRate {
+  id              String    @id @default(cuid())
+  propertyId      String
+  property        Property  @relation(fields: [propertyId], references: [id])
+  competitorName  String
+  roomTypeId      String?
+  roomType        RoomType? @relation(fields: [roomTypeId], references: [id])
+  stayDate        DateTime  @db.Date
+  amount          Decimal   @db.Decimal(10, 2)
+  notes           String?
+  capturedAt      DateTime  @default(now())
+
+  @@index([propertyId, stayDate])
+  @@index([roomTypeId, stayDate])
+}
+
+model YieldRecommendation {
+  id                 String                     @id @default(cuid())
+  propertyId         String
+  property           Property                   @relation(fields: [propertyId], references: [id])
+  roomTypeId         String
+  roomType           RoomType                   @relation(fields: [roomTypeId], references: [id])
+  rateId             String
+  rate               Rate                       @relation(fields: [rateId], references: [id])
+  stayDate           DateTime                   @db.Date
+  currentAmount      Decimal                    @db.Decimal(10, 2)
+  recommendedAmount  Decimal                    @db.Decimal(10, 2)
+  occupancyPct       Decimal                    @db.Decimal(5, 2)
+  paceDeltaPct       Decimal?                   @db.Decimal(6, 2)
+  competitorAmount   Decimal?                   @db.Decimal(10, 2)
+  reason             YieldRecommendReason
+  status             YieldRecommendationStatus  @default(PENDING)
+  appliedAt          DateTime?
+  createdAt          DateTime                   @default(now())
+
+  @@index([propertyId, status])
+  @@index([propertyId, stayDate])
+  @@index([rateId, stayDate])
+}
+
+enum BlockKind {
+  ALLOTMENT
+  GROUP
+}
+
+enum BlockInventoryMode {
+  GENERAL
+  DEDICATED
+}
+
+enum BlockStatus {
+  OPEN
+  RELEASED
+  CLOSED
+}
+
+model RoomBlock {
+  id             String             @id @default(cuid())
+  propertyId     String
+  property       Property           @relation(fields: [propertyId], references: [id])
+  roomTypeId     String
+  roomType       RoomType           @relation(fields: [roomTypeId], references: [id])
+  code           String
+  name           String
+  kind           BlockKind
+  inventoryMode  BlockInventoryMode @default(GENERAL)
+  channel        String?
+  startDate      DateTime           @db.Date
+  endDate        DateTime           @db.Date
+  cutoffDate     DateTime           @db.Date
+  allottedRooms  Int
+  releasedRooms  Int                @default(0)
+  status         BlockStatus        @default(OPEN)
+  notes          String?
+  reservations   Reservation[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([propertyId, code])
+  @@index([propertyId, status])
+  @@index([propertyId, startDate, endDate])
+  @@index([cutoffDate, status])
 }
 
 // ==================== AUDIT LOG ====================
