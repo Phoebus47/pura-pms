@@ -1673,4 +1673,34 @@ describe('Mock API Router', () => {
       expect(applied.status).toBe('APPLIED');
     });
   });
+
+  describe('Blocks', () => {
+    it('creates an allotment and reports pickup remaining', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const block: any = await routeMockRequest('/blocks', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          roomTypeId: mockDb.roomTypes[0].id,
+          code: 'OTA-AUG',
+          name: 'Booking.com',
+          kind: 'ALLOTMENT',
+          startDate: '2026-08-18',
+          endDate: '2026-08-20',
+          cutoffDate: '2026-08-17',
+          allottedRooms: 2,
+        }),
+      });
+      expect(block.code).toBe('OTA-AUG');
+      const pickup: any = await routeMockRequest(`/blocks/${block.id}/pickup`, {
+        method: 'GET',
+      });
+      expect(pickup.remaining).toBe(2);
+      const released: any = await routeMockRequest(
+        `/blocks/${block.id}/release`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(released.status).toBe('RELEASED');
+    });
+  });
 });

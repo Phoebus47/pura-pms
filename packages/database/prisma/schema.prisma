@@ -56,6 +56,7 @@ model Property {
   partnerHotels  PartnerHotel[]
   competitorRates CompetitorRate[]
   yieldRecommendations YieldRecommendation[]
+  roomBlocks     RoomBlock[]
   createdAt      DateTime   @default(now())
 }
 
@@ -75,6 +76,7 @@ model RoomType {
   reservationStays ReservationStay[]
   competitorRates CompetitorRate[]
   yieldRecommendations YieldRecommendation[]
+  roomBlocks RoomBlock[]
 }
 
 model Room {
@@ -161,6 +163,8 @@ model Reservation {
   cardPreauths   CardPreauth[]
   roomMoves      RoomMove[]
   walks          Walk[]
+  blockId        String?
+  block          RoomBlock?        @relation(fields: [blockId], references: [id])
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -172,6 +176,7 @@ model Reservation {
   @@index([billingCycle])
   @@index([taxExempt])
   @@index([isRoomLocked])
+  @@index([blockId])
 }
 
 model ReservationStay {
@@ -824,6 +829,50 @@ model YieldRecommendation {
   @@index([propertyId, status])
   @@index([propertyId, stayDate])
   @@index([rateId, stayDate])
+}
+
+enum BlockKind {
+  ALLOTMENT
+  GROUP
+}
+
+enum BlockInventoryMode {
+  GENERAL
+  DEDICATED
+}
+
+enum BlockStatus {
+  OPEN
+  RELEASED
+  CLOSED
+}
+
+model RoomBlock {
+  id             String             @id @default(cuid())
+  propertyId     String
+  property       Property           @relation(fields: [propertyId], references: [id])
+  roomTypeId     String
+  roomType       RoomType           @relation(fields: [roomTypeId], references: [id])
+  code           String
+  name           String
+  kind           BlockKind
+  inventoryMode  BlockInventoryMode @default(GENERAL)
+  channel        String?
+  startDate      DateTime           @db.Date
+  endDate        DateTime           @db.Date
+  cutoffDate     DateTime           @db.Date
+  allottedRooms  Int
+  releasedRooms  Int                @default(0)
+  status         BlockStatus        @default(OPEN)
+  notes          String?
+  reservations   Reservation[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([propertyId, code])
+  @@index([propertyId, status])
+  @@index([propertyId, startDate, endDate])
+  @@index([cutoffDate, status])
 }
 
 // ==================== AUDIT LOG ====================

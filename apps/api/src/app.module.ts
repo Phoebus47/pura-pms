@@ -22,6 +22,7 @@ import { CardPreauthsModule } from './card-preauths/card-preauths.module';
 import { PartnerHotelsModule } from './partner-hotels/partner-hotels.module';
 import { RatesModule } from './rates/rates.module';
 import { YieldModule } from './yield/yield.module';
+import { BlocksModule } from './blocks/blocks.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { YieldModule } from './yield/yield.module';
     PartnerHotelsModule,
     RatesModule,
     YieldModule,
+    BlocksModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

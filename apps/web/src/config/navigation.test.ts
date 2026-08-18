@@ -21,6 +21,7 @@ import {
   Building2,
   Percent,
   TrendingUp,
+  Layers,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -150,6 +151,13 @@ describe('navigation', () => {
       expect(item?.icon).toBe(TrendingUp);
     });
 
+    it('should include Blocks navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Blocks');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/blocks');
+      expect(item?.icon).toBe(Layers);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -185,6 +193,7 @@ describe('navigation', () => {
         'Rooms',
         'Rates',
         'Yield',
+        'Blocks',
         'Billing',
         'Shifts',
         'Night Audit',
@@ -248,6 +257,7 @@ describe('navigation', () => {
         'Partner hotels',
         'Rates',
         'Yield',
+        'Blocks',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -261,6 +271,7 @@ describe('navigation', () => {
         '/partner-hotels',
         '/rates',
         '/yield',
+        '/blocks',
         '/settings',
       ]);
     });

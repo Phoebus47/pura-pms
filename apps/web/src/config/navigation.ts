@@ -15,6 +15,7 @@ import {
   Building2,
   Percent,
   TrendingUp,
+  Layers,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -56,6 +57,12 @@ export const navigationItems: NavigationItem[] = [
     href: '/yield',
     icon: TrendingUp,
     labelKey: 'nav.yield',
+  },
+  {
+    name: 'Blocks',
+    href: '/blocks',
+    icon: Layers,
+    labelKey: 'nav.blocks',
   },
   {
     name: 'Billing',
@@ -207,6 +214,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/yield',
     icon: TrendingUp,
     labelKey: 'nav.yield',
+  },
+  {
+    name: 'Blocks',
+    href: '/blocks',
+    icon: Layers,
+    labelKey: 'nav.blocks',
   },
   {
     name: 'Settings',

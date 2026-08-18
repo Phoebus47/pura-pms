@@ -1324,6 +1324,106 @@ function handleRates(
   if (method === 'PATCH') return handleRatesPatch(path, body);
 }
 
+function mockBlockPickup(block: any) {
+  const pickedUp = mockDb.reservations.filter(
+    (row: any) =>
+      row.blockId === block.id &&
+      row.status !== 'CANCELLED' &&
+      row.status !== 'NO_SHOW',
+  ).length;
+  const remaining = Math.max(
+    0,
+    Number(block.allottedRooms) - Number(block.releasedRooms || 0) - pickedUp,
+  );
+  return {
+    blockId: block.id,
+    allottedRooms: block.allottedRooms,
+    releasedRooms: block.releasedRooms || 0,
+    pickedUp,
+    remaining,
+    nights: [
+      {
+        stayDate: String(block.startDate).slice(0, 10),
+        allotted: block.allottedRooms,
+        pickedUp,
+        remaining,
+      },
+    ],
+  };
+}
+
+function handleBlocks(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/blocks' && !path.startsWith('/blocks/')) return;
+
+  if (method === 'GET' && path === '/blocks') {
+    const propertyId = params.get('propertyId');
+    return mockDb.roomBlocks.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'POST' && path === '/blocks') {
+    const row = {
+      id: `block_mock_${Date.now()}`,
+      releasedRooms: 0,
+      status: 'OPEN',
+      inventoryMode:
+        body.kind === 'GROUP' ? 'DEDICATED' : body.inventoryMode || 'GENERAL',
+      _count: { reservations: 0 },
+      ...body,
+    };
+    mockDb.roomBlocks.push(row);
+    return row;
+  }
+
+  const pickupMatch = /^\/blocks\/([a-zA-Z0-9_-]+)\/pickup$/.exec(path);
+  if (method === 'GET' && pickupMatch) {
+    const block = mockDb.roomBlocks.find(
+      (row: any) => row.id === pickupMatch[1],
+    );
+    if (!block) {
+      throw new APIError(404, 'Not Found', { message: 'Block not found' });
+    }
+    return mockBlockPickup(block);
+  }
+
+  const releaseMatch = /^\/blocks\/([a-zA-Z0-9_-]+)\/release$/.exec(path);
+  if (method === 'POST' && releaseMatch) {
+    const block = mockDb.roomBlocks.find(
+      (row: any) => row.id === releaseMatch[1],
+    );
+    if (!block) {
+      throw new APIError(404, 'Not Found', { message: 'Block not found' });
+    }
+    const report = mockBlockPickup(block);
+    block.releasedRooms = (block.releasedRooms || 0) + report.remaining;
+    block.status = 'RELEASED';
+    return block;
+  }
+
+  const attachMatch = /^\/blocks\/([a-zA-Z0-9_-]+)\/reservations$/.exec(path);
+  if (method === 'POST' && attachMatch) {
+    const block = mockDb.roomBlocks.find(
+      (row: any) => row.id === attachMatch[1],
+    );
+    if (!block) {
+      throw new APIError(404, 'Not Found', { message: 'Block not found' });
+    }
+    const reservation = mockDb.reservations.find(
+      (row: any) => row.id === body.reservationId,
+    );
+    if (reservation) {
+      reservation.blockId = block.id;
+    }
+    return mockBlockPickup(block);
+  }
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -2535,6 +2635,7 @@ export async function routeMockRequest<T>(
       () => handlePartnerHotels(method, path, body, params),
       () => handleRates(method, path, body, params),
       () => handleYield(method, path, body, params),
+      () => handleBlocks(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

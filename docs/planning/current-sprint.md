@@ -1,38 +1,28 @@
-# Current Sprint — Phase 5 Dynamic Pricing / Yield
+# Current Sprint — Phase 5 Allotment & Blocks
 
 **Status:** In progress  
-**Branch:** `cursor/feat-yield-pricing-6a5d`  
-**Depends on:** Rate Derivation (`cursor/feat-rate-derivation-6a5d`)
+**Branch:** `cursor/feat-allotment-blocks-6a5d`  
+**Depends on:** Yield (`cursor/feat-yield-pricing-6a5d`)
 
 ## Goal
 
-Pace versus last year, competitor rate capture, and rule-based rate recommendations. Applying a recommendation updates a standalone parent rate (derived children cascade).
-
-This slice is **not** a machine-learning model. See ADR 004.
+Agent/OTA allotments and group blocks with cutoff release and pickup reporting.
 
 ## Schema
 
-- `CompetitorRate` — manual competitor amount by stay date
-- `YieldRecommendation` — PENDING / APPLIED / DISMISSED
-- Migration: `20260818030000_add_yield_management`
+- `RoomBlock` (`ALLOTMENT` | `GROUP`, `GENERAL` | `DEDICATED`)
+- `Reservation.blockId` optional
+- Migration: `20260818040000_add_room_blocks`
 
 ## API
 
-1. `GET /yield/pace?propertyId`
-2. `POST /yield/recommendations/generate`
-3. `GET /yield/recommendations`
-4. `POST /yield/recommendations/:id/apply` | `dismiss`
-5. `GET/POST/PATCH /yield/competitors`
-
-## Rules
-
-- Occupancy ≥ 85% → raise 10% (`HIGH_DEMAND`)
-- Occupancy < 70% and competitor ≥ 8% cheaper → match competitor (`COMP_UNDERCUT`)
-- Occupancy ≤ 40% and pace ≤ −10pp vs last year → lower 10% (`SLOW_PACE`)
-- Derived and zero-amount (COMP/HOUSE) rates are skipped
+1. `POST/GET/PATCH /blocks`
+2. `GET /blocks/:id/pickup`
+3. `POST /blocks/:id/reservations` — attach pickup
+4. `POST /blocks/:id/release` — return unused rooms after cutoff (also auto on read when cutoff ≤ businessDate)
 
 ## Web
 
-- `/yield` — pace table, recommendations, competitor form
-- Nav: Yield
-- i18n `yield.*`
+- `/blocks` catalog, pickup panel, attach + release
+- Nav: Blocks
+- i18n `blocks.*`

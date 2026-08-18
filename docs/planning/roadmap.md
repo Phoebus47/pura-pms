@@ -114,16 +114,16 @@
 
 ### Allotment & Blocks
 
-- [ ] **Allotment Model**
-  - [ ] Create Allotment model
-  - [ ] Agent/OTA quota management
-  - [ ] Cut-off date tracking
-  - [ ] Pickup reports
+- [x] **Allotment Model**
+  - [x] Create Allotment model
+  - [x] Agent/OTA quota management
+  - [x] Cut-off date tracking
+  - [x] Pickup reports
 
-- [ ] **Block Management**
-  - [ ] Block model for group bookings
-  - [ ] Block allocation UI
-  - [ ] Block release logic
+- [x] **Block Management**
+  - [x] Block model for group bookings
+  - [x] Block allocation UI
+  - [x] Block release logic
 
 ### Guest Management
 
@@ -794,7 +794,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 
 1. Rate Derivation (Parent/Child Rates) — **shipped** (`parentRateId` + percent/amount offset; cascade on parent change)
 2. Dynamic Pricing / Yield Management (AI) — **shipped (rule-based v1)** (pace vs last year, competitor capture, HIGH_DEMAND / SLOW_PACE / COMP_UNDERCUT; apply updates parent Rate)
-3. Allotment & Blocks
+3. Allotment & Blocks — **shipped** (`RoomBlock` allotment/group, cutoff release, pickup report)
 4. Housekeeping Inspection (Workflow)
 5. Hardware Bridge (Local Agent)
 6. PWA (Offline Capability)
