@@ -1248,7 +1248,7 @@ graph LR
 
 ### Phase 5: Advanced Features
 
-- [ ] Rate Derivation (Parent/Child Rates)
+- [x] Rate Derivation (Parent/Child Rates)
 - [ ] Dynamic Pricing / Yield Management (AI)
 - [ ] Allotment & Blocks
 - [ ] Housekeeping Inspection (Workflow)

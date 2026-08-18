@@ -13,6 +13,7 @@ import {
   Landmark,
   Wallet,
   Building2,
+  Percent,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -43,6 +44,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.guests',
   },
   { name: 'Rooms', href: '/rooms', icon: Bed, labelKey: 'nav.rooms' },
+  {
+    name: 'Rates',
+    href: '/rates',
+    icon: Percent,
+    labelKey: 'nav.rates',
+  },
   {
     name: 'Billing',
     href: '/billing',
@@ -181,6 +188,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/partner-hotels',
     icon: Building2,
     labelKey: 'nav.partnerHotels',
+  },
+  {
+    name: 'Rates',
+    href: '/rates',
+    icon: Percent,
+    labelKey: 'nav.rates',
   },
   {
     name: 'Settings',

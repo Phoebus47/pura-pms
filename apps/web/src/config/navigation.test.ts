@@ -19,6 +19,7 @@ import {
   Wallet,
   MoonStar,
   Building2,
+  Percent,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -134,6 +135,13 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Wallet);
     });
 
+    it('should include Rates navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Rates');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/rates');
+      expect(item?.icon).toBe(Percent);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -167,6 +175,7 @@ describe('navigation', () => {
         'Reservations',
         'Guests',
         'Rooms',
+        'Rates',
         'Billing',
         'Shifts',
         'Night Audit',
@@ -228,6 +237,7 @@ describe('navigation', () => {
         'Accounts receivable',
         'Card pre-auths',
         'Partner hotels',
+        'Rates',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -239,6 +249,7 @@ describe('navigation', () => {
         '/ar-accounts',
         '/card-preauths',
         '/partner-hotels',
+        '/rates',
         '/settings',
       ]);
     });

@@ -101,11 +101,11 @@
 
 ### Rate Management
 
-- [ ] **Rate Derivation (Parent/Child Rates)**
-  - [ ] Add parentRateId to Rate model
-  - [ ] Formula engine (e.g., "Rate B = Rate A - 10%")
-  - [ ] Auto-update when parent rate changes
-  - [ ] UI for managing rate relationships
+- [x] **Rate Derivation (Parent/Child Rates)**
+  - [x] Add parentRateId to Rate model
+  - [x] Formula engine (e.g., "Rate B = Rate A - 10%")
+  - [x] Auto-update when parent rate changes
+  - [x] UI for managing rate relationships
 
 - [ ] **Rate Packages**
   - [ ] Package model (includes breakfast, spa, etc.)
@@ -792,7 +792,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 
 ### Phase 5: Advanced Features
 
-1. Rate Derivation (Parent/Child Rates)
+1. Rate Derivation (Parent/Child Rates) — **shipped** (`parentRateId` + percent/amount offset; cascade on parent change)
 2. Dynamic Pricing / Yield Management (AI)
 3. Allotment & Blocks
 4. Housekeeping Inspection (Workflow)

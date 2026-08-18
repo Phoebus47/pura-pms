@@ -21,6 +21,7 @@ export interface MockData {
   cardPreauths: any[];
   roomMoves: any[];
   partnerHotels: any[];
+  rates: any[];
   walks: any[];
 }
 
@@ -459,5 +460,6 @@ export const mockDb: any = {
   cardPreauths: [],
   roomMoves: [],
   partnerHotels: [],
+  rates: [],
   walks: [],
 };

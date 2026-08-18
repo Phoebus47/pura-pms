@@ -1074,6 +1074,120 @@ function handlePartnerHotels(
   if (method === 'PATCH') return handlePartnerHotelsPatch(path, body);
 }
 
+function mockDerivedAmount(parentAmount: number, mode: string, value: number) {
+  const next =
+    mode === 'PERCENT_OFFSET'
+      ? parentAmount * (1 + value / 100)
+      : parentAmount + value;
+  return Math.round((next + Number.EPSILON) * 100) / 100;
+}
+
+function cascadeMockRates(parentId: string, parentAmount: number) {
+  const children = mockDb.rates.filter(
+    (row: any) => row.parentRateId === parentId,
+  );
+  for (const child of children) {
+    child.amount = mockDerivedAmount(
+      parentAmount,
+      child.deriveMode,
+      Number(child.deriveValue),
+    );
+    cascadeMockRates(child.id, child.amount);
+  }
+}
+
+function handleRatesGet(path: string, params: URLSearchParams) {
+  if (path === '/rates') {
+    const propertyId = params.get('propertyId');
+    const roomTypeId = params.get('roomTypeId');
+    return mockDb.rates.filter(
+      (row: any) =>
+        (!propertyId || row.propertyId === propertyId) &&
+        (!roomTypeId || row.roomTypeId === roomTypeId),
+    );
+  }
+  const match = /^\/rates\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const rate = mockDb.rates.find((row: any) => row.id === match[1]);
+  if (!rate) {
+    throw new APIError(404, 'Not Found', { message: 'Rate not found' });
+  }
+  return rate;
+}
+
+function handleRatesPost(path: string, body: any) {
+  if (path !== '/rates') return;
+  const parent = body.parentRateId
+    ? mockDb.rates.find((row: any) => row.id === body.parentRateId)
+    : null;
+  if (body.parentRateId && !parent) {
+    throw new APIError(404, 'Not Found', { message: 'Parent rate not found' });
+  }
+  const amount = parent
+    ? mockDerivedAmount(
+        Number(parent.amount),
+        body.deriveMode,
+        Number(body.deriveValue),
+      )
+    : Number(body.amount);
+  const rate = {
+    id: `rate_mock_${Date.now()}`,
+    code: body.code,
+    name: body.name,
+    roomTypeId: body.roomTypeId,
+    propertyId: body.propertyId,
+    amount,
+    startDate: body.startDate,
+    endDate: body.endDate,
+    daysOfWeek: body.daysOfWeek || [0, 1, 2, 3, 4, 5, 6],
+    isActive: body.isActive ?? true,
+    parentRateId: body.parentRateId || null,
+    deriveMode: body.deriveMode || null,
+    deriveValue: body.deriveValue ?? null,
+    parentRate: parent
+      ? {
+          id: parent.id,
+          code: parent.code,
+          name: parent.name,
+          amount: parent.amount,
+        }
+      : null,
+  };
+  mockDb.rates.push(rate);
+  return rate;
+}
+
+function handleRatesPatch(path: string, body: any) {
+  const match = /^\/rates\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const rate = mockDb.rates.find((row: any) => row.id === match[1]);
+  if (!rate) {
+    throw new APIError(404, 'Not Found', { message: 'Rate not found' });
+  }
+  if (rate.parentRateId && body.amount !== undefined) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Amount of a derived rate is calculated from its parent',
+    });
+  }
+  Object.assign(rate, body);
+  if (body.amount !== undefined) {
+    cascadeMockRates(rate.id, Number(rate.amount));
+  }
+  return rate;
+}
+
+function handleRates(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/rates' && !path.startsWith('/rates/')) return;
+  if (method === 'GET') return handleRatesGet(path, params);
+  if (method === 'POST') return handleRatesPost(path, body);
+  if (method === 'PATCH') return handleRatesPatch(path, body);
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -2283,6 +2397,7 @@ export async function routeMockRequest<T>(
       () => handleArAccounts(method, path, body, params),
       () => handleCardPreauths(method, path, body, params),
       () => handlePartnerHotels(method, path, body, params),
+      () => handleRates(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

@@ -18,6 +18,7 @@
     "arAccounts": "Accounts receivable",
     "cardPreauths": "Card pre-auths",
     "partnerHotels": "Partner hotels",
+    "rates": "Rates",
     "settings": "Settings",
     "more": "More"
   },
@@ -244,6 +245,28 @@
     "activated": "Partner hotel activated",
     "deactivated": "Partner hotel deactivated",
     "updateFailed": "Failed to update partner hotel"
+  },
+  "rates": {
+    "title": "Rates",
+    "subtitle": "Parent and child rate plans. Child amounts update when the parent changes.",
+    "create": "Add rate",
+    "list": "Rate plans",
+    "code": "Rate code",
+    "name": "Name",
+    "roomType": "Room type",
+    "amount": "Amount",
+    "parent": "Parent rate",
+    "standalone": "Standalone (no parent)",
+    "deriveMode": "Formula",
+    "percentOffset": "Percent offset",
+    "amountOffset": "Amount offset",
+    "deriveValue": "Offset value",
+    "createSubmit": "Save rate",
+    "createSuccess": "Rate saved",
+    "empty": "No rates yet",
+    "updateAmount": "Update amount",
+    "updateSuccess": "Rate updated",
+    "updateFailed": "Failed to update rate"
   },
   "folios": {
     "checkout": "Check out folio",

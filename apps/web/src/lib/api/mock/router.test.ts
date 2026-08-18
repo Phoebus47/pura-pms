@@ -1572,4 +1572,53 @@ describe('Mock API Router', () => {
       ).rejects.toThrow(APIError);
     });
   });
+
+  describe('Rates', () => {
+    it('creates a parent and derives a child amount', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const roomTypeId = mockDb.roomTypes[0].id;
+      const parent: any = await routeMockRequest('/rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          roomTypeId,
+          code: 'BAR',
+          name: 'Best Available',
+          amount: 1500,
+          startDate: '2026-01-01',
+          endDate: '2026-12-31',
+        }),
+      });
+      expect(parent.amount).toBe(1500);
+
+      const child: any = await routeMockRequest('/rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          roomTypeId,
+          code: 'CORP',
+          name: 'Corporate',
+          parentRateId: parent.id,
+          deriveMode: 'PERCENT_OFFSET',
+          deriveValue: -10,
+          startDate: '2026-01-01',
+          endDate: '2026-12-31',
+        }),
+      });
+      expect(child.amount).toBe(1350);
+
+      await routeMockRequest(`/rates/${parent.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ amount: 2000 }),
+      });
+      const childAfter = mockDb.rates.find((row: any) => row.id === child.id);
+      expect(childAfter.amount).toBe(1800);
+    });
+
+    it('throws 404 for an unknown rate', async () => {
+      await expect(
+        routeMockRequest('/rates/missing', { method: 'GET' }),
+      ).rejects.toThrow(APIError);
+    });
+  });
 });

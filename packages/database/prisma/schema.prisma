@@ -741,20 +741,32 @@ model HousekeepingTask {
 
 // ==================== RATES ====================
 
+enum RateDeriveMode {
+  PERCENT_OFFSET
+  AMOUNT_OFFSET
+}
+
 model Rate {
-  id         String   @id @default(cuid())
-  code       String
-  name       String
-  roomTypeId String
-  roomType   RoomType @relation(fields: [roomTypeId], references: [id])
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
-  amount     Decimal  @db.Decimal(10, 2)
-  startDate  DateTime @db.Date
-  endDate    DateTime @db.Date
-  daysOfWeek Int[]
-  isActive   Boolean  @default(true)
+  id           String          @id @default(cuid())
+  code         String
+  name         String
+  roomTypeId   String
+  roomType     RoomType        @relation(fields: [roomTypeId], references: [id])
+  propertyId   String
+  property     Property        @relation(fields: [propertyId], references: [id])
+  amount       Decimal         @db.Decimal(10, 2)
+  startDate    DateTime        @db.Date
+  endDate      DateTime        @db.Date
+  daysOfWeek   Int[]
+  isActive     Boolean         @default(true)
+  parentRateId String?
+  parentRate   Rate?           @relation("RateDerivation", fields: [parentRateId], references: [id], onDelete: Restrict)
+  childRates   Rate[]          @relation("RateDerivation")
+  deriveMode   RateDeriveMode?
+  deriveValue  Decimal?        @db.Decimal(10, 4)
   @@index([roomTypeId, startDate, endDate])
+  @@index([parentRateId])
+  @@index([propertyId, code])
 }
 
 // ==================== AUDIT LOG ====================
