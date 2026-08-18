@@ -1621,4 +1621,56 @@ describe('Mock API Router', () => {
       ).rejects.toThrow(APIError);
     });
   });
+
+  describe('Yield', () => {
+    it('saves a competitor rate and generates a recommendation', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const competitor: any = await routeMockRequest('/yield/competitors', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          competitorName: 'Hotel B',
+          stayDate: '2026-08-20',
+          amount: 900,
+        }),
+      });
+      expect(competitor.competitorName).toBe('Hotel B');
+
+      const listed: any = await routeMockRequest(
+        `/yield/competitors?propertyId=${propertyId}`,
+        { method: 'GET' },
+      );
+      expect(listed).toHaveLength(1);
+
+      if (mockDb.rates.length === 0) {
+        await routeMockRequest('/rates', {
+          method: 'POST',
+          body: JSON.stringify({
+            propertyId,
+            roomTypeId: mockDb.roomTypes[0].id,
+            code: 'BAR',
+            name: 'Best Available',
+            amount: 1500,
+            startDate: '2026-01-01',
+            endDate: '2026-12-31',
+          }),
+        });
+      }
+
+      const generated: any = await routeMockRequest(
+        '/yield/recommendations/generate',
+        {
+          method: 'POST',
+          body: JSON.stringify({ propertyId }),
+        },
+      );
+      expect(generated[0].reason).toBe('HIGH_DEMAND');
+
+      const applied: any = await routeMockRequest(
+        `/yield/recommendations/${generated[0].id}/apply`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(applied.status).toBe('APPLIED');
+    });
+  });
 });

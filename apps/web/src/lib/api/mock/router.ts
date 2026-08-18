@@ -1176,6 +1176,142 @@ function handleRatesPatch(path: string, body: any) {
   return rate;
 }
 
+function handleYield(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/yield' && !path.startsWith('/yield/')) return;
+
+  if (method === 'GET' && path === '/yield/pace') {
+    const rooms = mockDb.rooms.filter(
+      (row: any) => row.status !== 'OUT_OF_ORDER',
+    );
+    const occupied = mockDb.reservations.filter(
+      (row: any) => row.status === 'CHECKED_IN' || row.status === 'CONFIRMED',
+    ).length;
+    const occupancyPct =
+      rooms.length > 0
+        ? Math.round((occupied / rooms.length) * 10000) / 100
+        : 0;
+    const stayDate = new Date().toISOString().slice(0, 10);
+    return {
+      from: stayDate,
+      to: stayDate,
+      days: [
+        {
+          stayDate,
+          lastYearDate: stayDate,
+          capacity: rooms.length,
+          occupied,
+          occupancyPct,
+          lastYearOccupied: occupied,
+          lastYearOccupancyPct: occupancyPct,
+          paceDeltaPct: 0,
+          alert: false,
+        },
+      ],
+    };
+  }
+
+  if (method === 'GET' && path === '/yield/recommendations') {
+    const status = params.get('status');
+    return mockDb.yieldRecommendations.filter(
+      (row: any) => !status || row.status === status,
+    );
+  }
+
+  if (method === 'POST' && path === '/yield/recommendations/generate') {
+    const rate = mockDb.rates.find((row: any) => !row.parentRateId);
+    if (!rate) return [];
+    const rec = {
+      id: `yield_rec_${Date.now()}`,
+      propertyId: body.propertyId || rate.propertyId,
+      roomTypeId: rate.roomTypeId,
+      rateId: rate.id,
+      stayDate: new Date().toISOString().slice(0, 10),
+      currentAmount: Number(rate.amount),
+      recommendedAmount: Math.round(Number(rate.amount) * 1.1 * 100) / 100,
+      occupancyPct: 90,
+      paceDeltaPct: 5,
+      competitorAmount: null,
+      reason: 'HIGH_DEMAND',
+      status: 'PENDING',
+      rate: { id: rate.id, code: rate.code, name: rate.name },
+    };
+    mockDb.yieldRecommendations.push(rec);
+    return [rec];
+  }
+
+  const applyMatch = /^\/yield\/recommendations\/([a-zA-Z0-9_-]+)\/apply$/.exec(
+    path,
+  );
+  if (method === 'POST' && applyMatch) {
+    const rec = mockDb.yieldRecommendations.find(
+      (row: any) => row.id === applyMatch[1],
+    );
+    if (!rec) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Recommendation not found',
+      });
+    }
+    rec.status = 'APPLIED';
+    const rate = mockDb.rates.find((row: any) => row.id === rec.rateId);
+    if (rate) {
+      rate.amount = rec.recommendedAmount;
+    }
+    return rec;
+  }
+
+  const dismissMatch =
+    /^\/yield\/recommendations\/([a-zA-Z0-9_-]+)\/dismiss$/.exec(path);
+  if (method === 'POST' && dismissMatch) {
+    const rec = mockDb.yieldRecommendations.find(
+      (row: any) => row.id === dismissMatch[1],
+    );
+    if (!rec) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Recommendation not found',
+      });
+    }
+    rec.status = 'DISMISSED';
+    return rec;
+  }
+
+  if (method === 'GET' && path === '/yield/competitors') {
+    return mockDb.competitorRates;
+  }
+
+  if (method === 'POST' && path === '/yield/competitors') {
+    const row = {
+      id: `comp_mock_${Date.now()}`,
+      propertyId: body.propertyId,
+      competitorName: body.competitorName,
+      roomTypeId: body.roomTypeId || null,
+      stayDate: body.stayDate,
+      amount: Number(body.amount),
+      notes: body.notes || null,
+    };
+    mockDb.competitorRates.push(row);
+    return row;
+  }
+
+  const patchMatch = /^\/yield\/competitors\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (method === 'PATCH' && patchMatch) {
+    const row = mockDb.competitorRates.find(
+      (item: any) => item.id === patchMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Competitor rate not found',
+      });
+    }
+    Object.assign(row, body);
+    return row;
+  }
+}
+
 function handleRates(
   method: string,
   path: string,
@@ -2398,6 +2534,7 @@ export async function routeMockRequest<T>(
       () => handleCardPreauths(method, path, body, params),
       () => handlePartnerHotels(method, path, body, params),
       () => handleRates(method, path, body, params),
+      () => handleYield(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

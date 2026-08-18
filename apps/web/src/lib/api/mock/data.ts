@@ -22,6 +22,8 @@ export interface MockData {
   roomMoves: any[];
   partnerHotels: any[];
   rates: any[];
+  competitorRates: any[];
+  yieldRecommendations: any[];
   walks: any[];
 }
 
@@ -461,5 +463,7 @@ export const mockDb: any = {
   roomMoves: [],
   partnerHotels: [],
   rates: [],
+  competitorRates: [],
+  yieldRecommendations: [],
   walks: [],
 };

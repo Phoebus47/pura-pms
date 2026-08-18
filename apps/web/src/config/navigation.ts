@@ -14,6 +14,7 @@ import {
   Wallet,
   Building2,
   Percent,
+  TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -49,6 +50,12 @@ export const navigationItems: NavigationItem[] = [
     href: '/rates',
     icon: Percent,
     labelKey: 'nav.rates',
+  },
+  {
+    name: 'Yield',
+    href: '/yield',
+    icon: TrendingUp,
+    labelKey: 'nav.yield',
   },
   {
     name: 'Billing',
@@ -194,6 +201,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/rates',
     icon: Percent,
     labelKey: 'nav.rates',
+  },
+  {
+    name: 'Yield',
+    href: '/yield',
+    icon: TrendingUp,
+    labelKey: 'nav.yield',
   },
   {
     name: 'Settings',

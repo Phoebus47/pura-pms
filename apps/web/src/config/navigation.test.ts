@@ -20,6 +20,7 @@ import {
   MoonStar,
   Building2,
   Percent,
+  TrendingUp,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -142,6 +143,13 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Percent);
     });
 
+    it('should include Yield navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Yield');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/yield');
+      expect(item?.icon).toBe(TrendingUp);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -176,6 +184,7 @@ describe('navigation', () => {
         'Guests',
         'Rooms',
         'Rates',
+        'Yield',
         'Billing',
         'Shifts',
         'Night Audit',
@@ -238,6 +247,7 @@ describe('navigation', () => {
         'Card pre-auths',
         'Partner hotels',
         'Rates',
+        'Yield',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -250,6 +260,7 @@ describe('navigation', () => {
         '/card-preauths',
         '/partner-hotels',
         '/rates',
+        '/yield',
         '/settings',
       ]);
     });

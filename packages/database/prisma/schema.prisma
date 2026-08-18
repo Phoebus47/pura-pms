@@ -54,6 +54,8 @@ model Property {
   journalEntries JournalEntry[]
   arAccounts     ARAccount[]
   partnerHotels  PartnerHotel[]
+  competitorRates CompetitorRate[]
+  yieldRecommendations YieldRecommendation[]
   createdAt      DateTime   @default(now())
 }
 
@@ -71,6 +73,8 @@ model RoomType {
   rooms       Room[]
   rates       Rate[]
   reservationStays ReservationStay[]
+  competitorRates CompetitorRate[]
+  yieldRecommendations YieldRecommendation[]
 }
 
 model Room {
@@ -764,9 +768,62 @@ model Rate {
   childRates   Rate[]          @relation("RateDerivation")
   deriveMode   RateDeriveMode?
   deriveValue  Decimal?        @db.Decimal(10, 4)
+  yieldRecommendations YieldRecommendation[]
   @@index([roomTypeId, startDate, endDate])
   @@index([parentRateId])
   @@index([propertyId, code])
+}
+
+enum YieldRecommendationStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+}
+
+enum YieldRecommendReason {
+  HIGH_DEMAND
+  SLOW_PACE
+  COMP_UNDERCUT
+}
+
+model CompetitorRate {
+  id              String    @id @default(cuid())
+  propertyId      String
+  property        Property  @relation(fields: [propertyId], references: [id])
+  competitorName  String
+  roomTypeId      String?
+  roomType        RoomType? @relation(fields: [roomTypeId], references: [id])
+  stayDate        DateTime  @db.Date
+  amount          Decimal   @db.Decimal(10, 2)
+  notes           String?
+  capturedAt      DateTime  @default(now())
+
+  @@index([propertyId, stayDate])
+  @@index([roomTypeId, stayDate])
+}
+
+model YieldRecommendation {
+  id                 String                     @id @default(cuid())
+  propertyId         String
+  property           Property                   @relation(fields: [propertyId], references: [id])
+  roomTypeId         String
+  roomType           RoomType                   @relation(fields: [roomTypeId], references: [id])
+  rateId             String
+  rate               Rate                       @relation(fields: [rateId], references: [id])
+  stayDate           DateTime                   @db.Date
+  currentAmount      Decimal                    @db.Decimal(10, 2)
+  recommendedAmount  Decimal                    @db.Decimal(10, 2)
+  occupancyPct       Decimal                    @db.Decimal(5, 2)
+  paceDeltaPct       Decimal?                   @db.Decimal(6, 2)
+  competitorAmount   Decimal?                   @db.Decimal(10, 2)
+  reason             YieldRecommendReason
+  status             YieldRecommendationStatus  @default(PENDING)
+  appliedAt          DateTime?
+  createdAt          DateTime                   @default(now())
+
+  @@index([propertyId, status])
+  @@index([propertyId, stayDate])
+  @@index([rateId, stayDate])
 }
 
 // ==================== AUDIT LOG ====================

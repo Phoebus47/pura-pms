@@ -562,10 +562,10 @@
 
 ### Yield Management (Module 4.23)
 
-- [ ] Demand forecasting (historical data)
-- [ ] Competitor rate monitoring
-- [ ] Automated rate recommendations
-- [ ] Pace analysis with alerts
+- [x] Demand forecasting (historical data) — on-books occupancy over the next 14 days
+- [x] Competitor rate monitoring — manual capture
+- [x] Automated rate recommendations — rule-based (not ML)
+- [x] Pace analysis with alerts
 
 ### Self-Service Portal (Module 4.24)
 
@@ -793,7 +793,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ### Phase 5: Advanced Features
 
 1. Rate Derivation (Parent/Child Rates) — **shipped** (`parentRateId` + percent/amount offset; cascade on parent change)
-2. Dynamic Pricing / Yield Management (AI)
+2. Dynamic Pricing / Yield Management (AI) — **shipped (rule-based v1)** (pace vs last year, competitor capture, HIGH_DEMAND / SLOW_PACE / COMP_UNDERCUT; apply updates parent Rate)
 3. Allotment & Blocks
 4. Housekeeping Inspection (Workflow)
 5. Hardware Bridge (Local Agent)

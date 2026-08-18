@@ -1,32 +1,38 @@
-# Current Sprint — Phase 5 Rate Derivation
+# Current Sprint — Phase 5 Dynamic Pricing / Yield
 
 **Status:** In progress  
-**Branch:** `cursor/feat-rate-derivation-6a5d`  
-**Depends on:** Phase 4 closeout (merged to `main`)
+**Branch:** `cursor/feat-yield-pricing-6a5d`  
+**Depends on:** Rate Derivation (`cursor/feat-rate-derivation-6a5d`)
 
 ## Goal
 
-Parent/child rate plans with a formula engine. Changing a parent amount immediately recalculates derived children (and grandchildren).
+Pace versus last year, competitor rate capture, and rule-based rate recommendations. Applying a recommendation updates a standalone parent rate (derived children cascade).
+
+This slice is **not** a machine-learning model. See ADR 004.
 
 ## Schema
 
-- `RateDeriveMode`: `PERCENT_OFFSET | AMOUNT_OFFSET`
-- `Rate.parentRateId`, `deriveMode`, `deriveValue`
-- Migration: `20260818020000_add_rate_derivation`
+- `CompetitorRate` — manual competitor amount by stay date
+- `YieldRecommendation` — PENDING / APPLIED / DISMISSED
+- Migration: `20260818030000_add_yield_management`
 
 ## API
 
-1. `POST/GET/PATCH /rates` — catalog CRUD
-2. Derived create computes `amount` from the parent
-3. Parent amount update cascades to children
-4. Cycle and negative-amount guards; derived amount cannot be set by hand
+1. `GET /yield/pace?propertyId`
+2. `POST /yield/recommendations/generate`
+3. `GET /yield/recommendations`
+4. `POST /yield/recommendations/:id/apply` | `dismiss`
+5. `GET/POST/PATCH /yield/competitors`
+
+## Rules
+
+- Occupancy ≥ 85% → raise 10% (`HIGH_DEMAND`)
+- Occupancy < 70% and competitor ≥ 8% cheaper → match competitor (`COMP_UNDERCUT`)
+- Occupancy ≤ 40% and pace ≤ −10pp vs last year → lower 10% (`SLOW_PACE`)
+- Derived and zero-amount (COMP/HOUSE) rates are skipped
 
 ## Web
 
-- `/rates` catalog with parent picker and formula fields
-- Nav: Rates
-- i18n `rates.*`
-
-## Deploy
-
-Additive migration. Apply to Supabase after merge.
+- `/yield` — pace table, recommendations, competitor form
+- Nav: Yield
+- i18n `yield.*`
