@@ -24,6 +24,7 @@ import { RatesModule } from './rates/rates.module';
 import { YieldModule } from './yield/yield.module';
 import { BlocksModule } from './blocks/blocks.module';
 import { HousekeepingModule } from './housekeeping/housekeeping.module';
+import { HardwareBridgeModule } from './hardware-bridge/hardware-bridge.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HousekeepingModule } from './housekeeping/housekeeping.module';
     YieldModule,
     BlocksModule,
     HousekeepingModule,
+    HardwareBridgeModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',
