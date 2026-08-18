@@ -13,6 +13,11 @@ import {
   Landmark,
   Wallet,
   Building2,
+  Percent,
+  TrendingUp,
+  Layers,
+  ClipboardCheck,
+  Printer,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -43,6 +48,36 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.guests',
   },
   { name: 'Rooms', href: '/rooms', icon: Bed, labelKey: 'nav.rooms' },
+  {
+    name: 'Housekeeping',
+    href: '/housekeeping',
+    icon: ClipboardCheck,
+    labelKey: 'nav.housekeeping',
+  },
+  {
+    name: 'Hardware',
+    href: '/hardware-bridge',
+    icon: Printer,
+    labelKey: 'nav.hardwareBridge',
+  },
+  {
+    name: 'Rates',
+    href: '/rates',
+    icon: Percent,
+    labelKey: 'nav.rates',
+  },
+  {
+    name: 'Yield',
+    href: '/yield',
+    icon: TrendingUp,
+    labelKey: 'nav.yield',
+  },
+  {
+    name: 'Blocks',
+    href: '/blocks',
+    icon: Layers,
+    labelKey: 'nav.blocks',
+  },
   {
     name: 'Billing',
     href: '/billing',
@@ -181,6 +216,36 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/partner-hotels',
     icon: Building2,
     labelKey: 'nav.partnerHotels',
+  },
+  {
+    name: 'Rates',
+    href: '/rates',
+    icon: Percent,
+    labelKey: 'nav.rates',
+  },
+  {
+    name: 'Yield',
+    href: '/yield',
+    icon: TrendingUp,
+    labelKey: 'nav.yield',
+  },
+  {
+    name: 'Blocks',
+    href: '/blocks',
+    icon: Layers,
+    labelKey: 'nav.blocks',
+  },
+  {
+    name: 'Housekeeping',
+    href: '/housekeeping',
+    icon: ClipboardCheck,
+    labelKey: 'nav.housekeeping',
+  },
+  {
+    name: 'Hardware',
+    href: '/hardware-bridge',
+    icon: Printer,
+    labelKey: 'nav.hardwareBridge',
   },
   {
     name: 'Settings',

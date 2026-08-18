@@ -40,6 +40,7 @@ import {
   occupancyWindowForMove,
   occupiedStatusForVacant,
 } from './room-move';
+import { hkStageForStatusChange } from '../housekeeping/hk-rules';
 import {
   assertCanMarkNoShow,
   NO_SHOW_TRX_CODE,
@@ -749,7 +750,13 @@ export class ReservationsService {
 
     await this.prisma.room.update({
       where: { id: reservation.roomId },
-      data: { status: 'OCCUPIED_CLEAN' },
+      data: {
+        status: 'OCCUPIED_CLEAN',
+        hkStage: hkStageForStatusChange(
+          'OCCUPIED_CLEAN',
+          reservation.room?.hkStage ?? 'READY',
+        ),
+      },
     });
 
     const existingFolios = await this.foliosService.findByReservationId(id);
@@ -783,7 +790,7 @@ export class ReservationsService {
 
     await this.prisma.room.update({
       where: { id: reservation.roomId },
-      data: { status: 'VACANT_DIRTY' },
+      data: { status: 'VACANT_DIRTY', hkStage: 'DIRTY' },
     });
 
     return updated;
@@ -830,11 +837,17 @@ export class ReservationsService {
 
       await tx.room.update({
         where: { id: fromRoomId },
-        data: { status: RoomStatus.VACANT_DIRTY },
+        data: { status: RoomStatus.VACANT_DIRTY, hkStage: 'DIRTY' },
       });
       await tx.room.update({
         where: { id: dto.toRoomId },
-        data: { status: occupiedStatus },
+        data: {
+          status: occupiedStatus,
+          hkStage: hkStageForStatusChange(
+            occupiedStatus,
+            target.hkStage ?? 'READY',
+          ),
+        },
       });
       await tx.roomMove.create({
         data: {

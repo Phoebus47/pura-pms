@@ -1248,10 +1248,10 @@ graph LR
 
 ### Phase 5: Advanced Features
 
-- [ ] Rate Derivation (Parent/Child Rates)
-- [ ] Dynamic Pricing / Yield Management (AI)
-- [ ] Allotment & Blocks
-- [ ] Housekeeping Inspection (Workflow)
+- [x] Rate Derivation (Parent/Child Rates)
+- [x] Dynamic Pricing / Yield Management (AI)
+- [x] Allotment & Blocks
+- [x] Housekeeping Inspection (Workflow)
 - [ ] Hardware Bridge (Local Agent)
 - [ ] PWA (Offline Capability)
 - [ ] Digital Registration Card (Tablet Signature)

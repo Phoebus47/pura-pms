@@ -1322,11 +1322,11 @@ describe('ReservationsService', () => {
       expect(result.roomId).toBe('room-2');
       expect(mockPrismaService.room.update).toHaveBeenCalledWith({
         where: { id: 'room-1' },
-        data: { status: 'VACANT_DIRTY' },
+        data: { status: 'VACANT_DIRTY', hkStage: 'DIRTY' },
       });
       expect(mockPrismaService.room.update).toHaveBeenCalledWith({
         where: { id: 'room-2' },
-        data: { status: 'OCCUPIED_CLEAN' },
+        data: { status: 'OCCUPIED_CLEAN', hkStage: 'READY' },
       });
       expect(mockPrismaService.roomMove.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1370,7 +1370,7 @@ describe('ReservationsService', () => {
 
       expect(mockPrismaService.room.update).toHaveBeenCalledWith({
         where: { id: 'room-2' },
-        data: { status: 'OCCUPIED_DIRTY' },
+        data: { status: 'OCCUPIED_DIRTY', hkStage: 'DIRTY' },
       });
     });
 

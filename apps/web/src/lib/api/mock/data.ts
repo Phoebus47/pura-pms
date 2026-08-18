@@ -21,6 +21,14 @@ export interface MockData {
   cardPreauths: any[];
   roomMoves: any[];
   partnerHotels: any[];
+  rates: any[];
+  competitorRates: any[];
+  yieldRecommendations: any[];
+  roomBlocks: any[];
+  housekeepingInspections: any[];
+  hardwareAgents: any[];
+  hardwareDevices: any[];
+  hardwareJobs: any[];
   walks: any[];
 }
 
@@ -94,6 +102,7 @@ export const mockDb: any = {
       roomTypeId: 'rt_mock_1',
       number: '101',
       status: 'VACANT_CLEAN',
+      hkStage: 'READY',
       condition: 'CLEAN',
     },
     {
@@ -102,6 +111,7 @@ export const mockDb: any = {
       roomTypeId: 'rt_mock_1',
       number: '102',
       status: 'OCCUPIED_CLEAN',
+      hkStage: 'CLEAN',
       condition: 'DIRTY',
     },
     {
@@ -110,6 +120,7 @@ export const mockDb: any = {
       roomTypeId: 'rt_mock_2',
       number: '201',
       status: 'VACANT_DIRTY',
+      hkStage: 'DIRTY',
       condition: 'DIRTY',
     },
   ],
@@ -459,5 +470,13 @@ export const mockDb: any = {
   cardPreauths: [],
   roomMoves: [],
   partnerHotels: [],
+  rates: [],
+  competitorRates: [],
+  yieldRecommendations: [],
+  roomBlocks: [],
+  housekeepingInspections: [],
+  hardwareAgents: [],
+  hardwareDevices: [],
+  hardwareJobs: [],
   walks: [],
 };

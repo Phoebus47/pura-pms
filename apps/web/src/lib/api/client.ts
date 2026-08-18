@@ -1,3 +1,5 @@
+import { assertOnlineMutation } from '@/lib/pwa/offline';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface RequestOptions extends RequestInit {
@@ -30,6 +32,9 @@ export class APIClient {
     endpoint: string,
     options: RequestOptions = {},
   ): Promise<T> {
+    const method = options.method ?? 'GET';
+    assertOnlineMutation(method);
+
     const { token, ...fetchOptions } = options;
 
     const headers: Record<string, string> = {

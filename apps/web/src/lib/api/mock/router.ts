@@ -1074,6 +1074,562 @@ function handlePartnerHotels(
   if (method === 'PATCH') return handlePartnerHotelsPatch(path, body);
 }
 
+function mockDerivedAmount(parentAmount: number, mode: string, value: number) {
+  const next =
+    mode === 'PERCENT_OFFSET'
+      ? parentAmount * (1 + value / 100)
+      : parentAmount + value;
+  return Math.round((next + Number.EPSILON) * 100) / 100;
+}
+
+function cascadeMockRates(parentId: string, parentAmount: number) {
+  const children = mockDb.rates.filter(
+    (row: any) => row.parentRateId === parentId,
+  );
+  for (const child of children) {
+    child.amount = mockDerivedAmount(
+      parentAmount,
+      child.deriveMode,
+      Number(child.deriveValue),
+    );
+    cascadeMockRates(child.id, child.amount);
+  }
+}
+
+function handleRatesGet(path: string, params: URLSearchParams) {
+  if (path === '/rates') {
+    const propertyId = params.get('propertyId');
+    const roomTypeId = params.get('roomTypeId');
+    return mockDb.rates.filter(
+      (row: any) =>
+        (!propertyId || row.propertyId === propertyId) &&
+        (!roomTypeId || row.roomTypeId === roomTypeId),
+    );
+  }
+  const match = /^\/rates\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const rate = mockDb.rates.find((row: any) => row.id === match[1]);
+  if (!rate) {
+    throw new APIError(404, 'Not Found', { message: 'Rate not found' });
+  }
+  return rate;
+}
+
+function handleRatesPost(path: string, body: any) {
+  if (path !== '/rates') return;
+  const parent = body.parentRateId
+    ? mockDb.rates.find((row: any) => row.id === body.parentRateId)
+    : null;
+  if (body.parentRateId && !parent) {
+    throw new APIError(404, 'Not Found', { message: 'Parent rate not found' });
+  }
+  const amount = parent
+    ? mockDerivedAmount(
+        Number(parent.amount),
+        body.deriveMode,
+        Number(body.deriveValue),
+      )
+    : Number(body.amount);
+  const rate = {
+    id: `rate_mock_${Date.now()}`,
+    code: body.code,
+    name: body.name,
+    roomTypeId: body.roomTypeId,
+    propertyId: body.propertyId,
+    amount,
+    startDate: body.startDate,
+    endDate: body.endDate,
+    daysOfWeek: body.daysOfWeek || [0, 1, 2, 3, 4, 5, 6],
+    isActive: body.isActive ?? true,
+    parentRateId: body.parentRateId || null,
+    deriveMode: body.deriveMode || null,
+    deriveValue: body.deriveValue ?? null,
+    parentRate: parent
+      ? {
+          id: parent.id,
+          code: parent.code,
+          name: parent.name,
+          amount: parent.amount,
+        }
+      : null,
+  };
+  mockDb.rates.push(rate);
+  return rate;
+}
+
+function handleRatesPatch(path: string, body: any) {
+  const match = /^\/rates\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const rate = mockDb.rates.find((row: any) => row.id === match[1]);
+  if (!rate) {
+    throw new APIError(404, 'Not Found', { message: 'Rate not found' });
+  }
+  if (rate.parentRateId && body.amount !== undefined) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Amount of a derived rate is calculated from its parent',
+    });
+  }
+  Object.assign(rate, body);
+  if (body.amount !== undefined) {
+    cascadeMockRates(rate.id, Number(rate.amount));
+  }
+  return rate;
+}
+
+function handleYield(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/yield' && !path.startsWith('/yield/')) return;
+
+  if (method === 'GET' && path === '/yield/pace') {
+    const rooms = mockDb.rooms.filter(
+      (row: any) => row.status !== 'OUT_OF_ORDER',
+    );
+    const occupied = mockDb.reservations.filter(
+      (row: any) => row.status === 'CHECKED_IN' || row.status === 'CONFIRMED',
+    ).length;
+    const occupancyPct =
+      rooms.length > 0
+        ? Math.round((occupied / rooms.length) * 10000) / 100
+        : 0;
+    const stayDate = new Date().toISOString().slice(0, 10);
+    return {
+      from: stayDate,
+      to: stayDate,
+      days: [
+        {
+          stayDate,
+          lastYearDate: stayDate,
+          capacity: rooms.length,
+          occupied,
+          occupancyPct,
+          lastYearOccupied: occupied,
+          lastYearOccupancyPct: occupancyPct,
+          paceDeltaPct: 0,
+          alert: false,
+        },
+      ],
+    };
+  }
+
+  if (method === 'GET' && path === '/yield/recommendations') {
+    const status = params.get('status');
+    return mockDb.yieldRecommendations.filter(
+      (row: any) => !status || row.status === status,
+    );
+  }
+
+  if (method === 'POST' && path === '/yield/recommendations/generate') {
+    const rate = mockDb.rates.find((row: any) => !row.parentRateId);
+    if (!rate) return [];
+    const rec = {
+      id: `yield_rec_${Date.now()}`,
+      propertyId: body.propertyId || rate.propertyId,
+      roomTypeId: rate.roomTypeId,
+      rateId: rate.id,
+      stayDate: new Date().toISOString().slice(0, 10),
+      currentAmount: Number(rate.amount),
+      recommendedAmount: Math.round(Number(rate.amount) * 1.1 * 100) / 100,
+      occupancyPct: 90,
+      paceDeltaPct: 5,
+      competitorAmount: null,
+      reason: 'HIGH_DEMAND',
+      status: 'PENDING',
+      rate: { id: rate.id, code: rate.code, name: rate.name },
+    };
+    mockDb.yieldRecommendations.push(rec);
+    return [rec];
+  }
+
+  const applyMatch = /^\/yield\/recommendations\/([a-zA-Z0-9_-]+)\/apply$/.exec(
+    path,
+  );
+  if (method === 'POST' && applyMatch) {
+    const rec = mockDb.yieldRecommendations.find(
+      (row: any) => row.id === applyMatch[1],
+    );
+    if (!rec) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Recommendation not found',
+      });
+    }
+    rec.status = 'APPLIED';
+    const rate = mockDb.rates.find((row: any) => row.id === rec.rateId);
+    if (rate) {
+      rate.amount = rec.recommendedAmount;
+    }
+    return rec;
+  }
+
+  const dismissMatch =
+    /^\/yield\/recommendations\/([a-zA-Z0-9_-]+)\/dismiss$/.exec(path);
+  if (method === 'POST' && dismissMatch) {
+    const rec = mockDb.yieldRecommendations.find(
+      (row: any) => row.id === dismissMatch[1],
+    );
+    if (!rec) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Recommendation not found',
+      });
+    }
+    rec.status = 'DISMISSED';
+    return rec;
+  }
+
+  if (method === 'GET' && path === '/yield/competitors') {
+    return mockDb.competitorRates;
+  }
+
+  if (method === 'POST' && path === '/yield/competitors') {
+    const row = {
+      id: `comp_mock_${Date.now()}`,
+      propertyId: body.propertyId,
+      competitorName: body.competitorName,
+      roomTypeId: body.roomTypeId || null,
+      stayDate: body.stayDate,
+      amount: Number(body.amount),
+      notes: body.notes || null,
+    };
+    mockDb.competitorRates.push(row);
+    return row;
+  }
+
+  const patchMatch = /^\/yield\/competitors\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (method === 'PATCH' && patchMatch) {
+    const row = mockDb.competitorRates.find(
+      (item: any) => item.id === patchMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Competitor rate not found',
+      });
+    }
+    Object.assign(row, body);
+    return row;
+  }
+}
+
+function handleRates(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/rates' && !path.startsWith('/rates/')) return;
+  if (method === 'GET') return handleRatesGet(path, params);
+  if (method === 'POST') return handleRatesPost(path, body);
+  if (method === 'PATCH') return handleRatesPatch(path, body);
+}
+
+function mockBlockPickup(block: any) {
+  const pickedUp = mockDb.reservations.filter(
+    (row: any) =>
+      row.blockId === block.id &&
+      row.status !== 'CANCELLED' &&
+      row.status !== 'NO_SHOW',
+  ).length;
+  const remaining = Math.max(
+    0,
+    Number(block.allottedRooms) - Number(block.releasedRooms || 0) - pickedUp,
+  );
+  return {
+    blockId: block.id,
+    allottedRooms: block.allottedRooms,
+    releasedRooms: block.releasedRooms || 0,
+    pickedUp,
+    remaining,
+    nights: [
+      {
+        stayDate: String(block.startDate).slice(0, 10),
+        allotted: block.allottedRooms,
+        pickedUp,
+        remaining,
+      },
+    ],
+  };
+}
+
+function handleBlocks(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/blocks' && !path.startsWith('/blocks/')) return;
+
+  if (method === 'GET' && path === '/blocks') {
+    const propertyId = params.get('propertyId');
+    return mockDb.roomBlocks.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'POST' && path === '/blocks') {
+    const row = {
+      id: `block_mock_${Date.now()}`,
+      releasedRooms: 0,
+      status: 'OPEN',
+      inventoryMode:
+        body.kind === 'GROUP' ? 'DEDICATED' : body.inventoryMode || 'GENERAL',
+      _count: { reservations: 0 },
+      ...body,
+    };
+    mockDb.roomBlocks.push(row);
+    return row;
+  }
+
+  const pickupMatch = /^\/blocks\/([a-zA-Z0-9_-]+)\/pickup$/.exec(path);
+  if (method === 'GET' && pickupMatch) {
+    const block = mockDb.roomBlocks.find(
+      (row: any) => row.id === pickupMatch[1],
+    );
+    if (!block) {
+      throw new APIError(404, 'Not Found', { message: 'Block not found' });
+    }
+    return mockBlockPickup(block);
+  }
+
+  const releaseMatch = /^\/blocks\/([a-zA-Z0-9_-]+)\/release$/.exec(path);
+  if (method === 'POST' && releaseMatch) {
+    const block = mockDb.roomBlocks.find(
+      (row: any) => row.id === releaseMatch[1],
+    );
+    if (!block) {
+      throw new APIError(404, 'Not Found', { message: 'Block not found' });
+    }
+    const report = mockBlockPickup(block);
+    block.releasedRooms = (block.releasedRooms || 0) + report.remaining;
+    block.status = 'RELEASED';
+    return block;
+  }
+
+  const attachMatch = /^\/blocks\/([a-zA-Z0-9_-]+)\/reservations$/.exec(path);
+  if (method === 'POST' && attachMatch) {
+    const block = mockDb.roomBlocks.find(
+      (row: any) => row.id === attachMatch[1],
+    );
+    if (!block) {
+      throw new APIError(404, 'Not Found', { message: 'Block not found' });
+    }
+    const reservation = mockDb.reservations.find(
+      (row: any) => row.id === body.reservationId,
+    );
+    if (reservation) {
+      reservation.blockId = block.id;
+    }
+    return mockBlockPickup(block);
+  }
+}
+
+const HK_CHECKLIST_ITEMS = [
+  { code: 'BED', required: true },
+  { code: 'BATH', required: true },
+  { code: 'LINEN', required: true },
+  { code: 'AMENITIES', required: true },
+  { code: 'MINIBAR', required: false },
+];
+
+function handleHousekeeping(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/housekeeping/board' && !path.startsWith('/housekeeping/')) {
+    return;
+  }
+
+  if (method === 'GET' && path === '/housekeeping/board') {
+    const propertyId = params.get('propertyId');
+    return mockDb.rooms.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'GET' && path === '/housekeeping/checklist') {
+    return HK_CHECKLIST_ITEMS;
+  }
+
+  const cleanMatch = /^\/housekeeping\/rooms\/([a-zA-Z0-9_-]+)\/clean$/.exec(
+    path,
+  );
+  if (method === 'POST' && cleanMatch) {
+    const room = mockDb.rooms.find((row: any) => row.id === cleanMatch[1]);
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    room.hkStage = 'CLEAN';
+    if (room.status === 'VACANT_DIRTY') room.status = 'VACANT_CLEAN';
+    if (room.status === 'OCCUPIED_DIRTY') room.status = 'OCCUPIED_CLEAN';
+    return room;
+  }
+
+  const inspectMatch =
+    /^\/housekeeping\/rooms\/([a-zA-Z0-9_-]+)\/inspections$/.exec(path);
+  if (method === 'POST' && inspectMatch) {
+    const room = mockDb.rooms.find((row: any) => row.id === inspectMatch[1]);
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    const requiredFailed = (body.lines || []).some(
+      (line: any) =>
+        ['BED', 'BATH', 'LINEN', 'AMENITIES'].includes(line.itemCode) &&
+        !line.passed,
+    );
+    const row = {
+      id: `insp_mock_${Date.now()}`,
+      roomId: room.id,
+      result: requiredFailed ? 'FAILED' : 'PASSED',
+      lines: body.lines || [],
+    };
+    mockDb.housekeepingInspections.push(row);
+    if (requiredFailed) {
+      room.hkStage = 'DIRTY';
+      if (room.status === 'VACANT_CLEAN') room.status = 'VACANT_DIRTY';
+      if (room.status === 'OCCUPIED_CLEAN') room.status = 'OCCUPIED_DIRTY';
+    } else {
+      room.hkStage = 'READY';
+    }
+    return row;
+  }
+
+  if (method === 'GET' && inspectMatch) {
+    return mockDb.housekeepingInspections.filter(
+      (row: any) => row.roomId === inspectMatch[1],
+    );
+  }
+}
+
+const HB_CATALOG = {
+  jobTypes: ['PRINT', 'KEYCARD_ENCODE', 'PASSPORT_SCAN', 'ID_CARD_READ'],
+  deviceTypes: [
+    'PRINTER',
+    'KEY_CARD_ENCODER',
+    'PASSPORT_SCANNER',
+    'SMART_CARD_READER',
+  ],
+  vendors: ['GENERIC', 'VINGCARD', 'SALTO', 'HAFELE'],
+};
+
+function simulatedHardwareResult(job: any) {
+  if (job.type === 'PRINT') return { printed: true };
+  if (job.type === 'KEYCARD_ENCODE') {
+    return { encoded: true, roomNumber: job.payload?.roomNumber ?? '101' };
+  }
+  if (job.type === 'PASSPORT_SCAN') {
+    return {
+      firstName: 'SOMCHAI',
+      lastName: 'JAADEE',
+      nationality: 'THA',
+      idType: 'PASSPORT',
+      idNumber: 'AA1234567',
+    };
+  }
+  return { citizenId: '1234567890123', firstName: 'Somchai', lastName: 'Suk' };
+}
+
+function handleHardwareBridge(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/hardware-bridge')) return;
+
+  if (method === 'GET' && path === '/hardware-bridge/catalog') {
+    return HB_CATALOG;
+  }
+
+  if (method === 'GET' && path === '/hardware-bridge/agents') {
+    const propertyId = params.get('propertyId');
+    return mockDb.hardwareAgents.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'POST' && path === '/hardware-bridge/agents') {
+    const row = {
+      id: `hb_agent_${Date.now()}`,
+      propertyId: body.propertyId,
+      name: body.name,
+      machineId: body.machineId,
+      isActive: true,
+      lastSeenAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    mockDb.hardwareAgents.push(row);
+    return row;
+  }
+
+  const heartbeatMatch =
+    /^\/hardware-bridge\/agents\/([a-zA-Z0-9_-]+)\/heartbeat$/.exec(path);
+  if (method === 'POST' && heartbeatMatch) {
+    const agent = mockDb.hardwareAgents.find(
+      (row: any) => row.id === heartbeatMatch[1],
+    );
+    if (!agent) {
+      throw new APIError(404, 'Not Found', { message: 'Agent not found' });
+    }
+    agent.lastSeenAt = new Date().toISOString();
+    return agent;
+  }
+
+  if (method === 'GET' && path === '/hardware-bridge/jobs') {
+    const propertyId = params.get('propertyId');
+    return mockDb.hardwareJobs.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'POST' && path === '/hardware-bridge/jobs') {
+    const row = {
+      id: `hb_job_${Date.now()}`,
+      propertyId: body.propertyId,
+      agentId: body.agentId ?? null,
+      type: body.type,
+      status: 'PENDING',
+      requestedBy: body.requestedBy,
+      payload: body.payload || {},
+      result: null,
+      errorMessage: null,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+    };
+    mockDb.hardwareJobs.push(row);
+    return row;
+  }
+
+  const jobActionMatch =
+    /^\/hardware-bridge\/jobs\/([a-zA-Z0-9_-]+)\/(complete|fail|simulate)$/.exec(
+      path,
+    );
+  if (method === 'POST' && jobActionMatch) {
+    const job = mockDb.hardwareJobs.find(
+      (row: any) => row.id === jobActionMatch[1],
+    );
+    if (!job) {
+      throw new APIError(404, 'Not Found', { message: 'Job not found' });
+    }
+    const action = jobActionMatch[2];
+    if (action === 'fail') {
+      job.status = 'FAILED';
+      job.errorMessage = body?.errorMessage || 'failed';
+      job.completedAt = new Date().toISOString();
+      return job;
+    }
+    job.status = 'COMPLETED';
+    job.completedAt = new Date().toISOString();
+    job.result =
+      action === 'simulate'
+        ? simulatedHardwareResult(job)
+        : (body?.result ?? {});
+    return job;
+  }
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -2283,6 +2839,11 @@ export async function routeMockRequest<T>(
       () => handleArAccounts(method, path, body, params),
       () => handleCardPreauths(method, path, body, params),
       () => handlePartnerHotels(method, path, body, params),
+      () => handleRates(method, path, body, params),
+      () => handleYield(method, path, body, params),
+      () => handleBlocks(method, path, body, params),
+      () => handleHousekeeping(method, path, body, params),
+      () => handleHardwareBridge(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

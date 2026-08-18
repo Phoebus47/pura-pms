@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Prisma, RoomStatus, RoomType } from '@pura/database';
+import { hkStageForStatusChange } from '../housekeeping/hk-rules';
 
 @Injectable()
 export class RoomsService {
@@ -175,10 +176,15 @@ export class RoomsService {
   }
 
   async updateStatus(id: string, status: RoomStatus) {
-    await this.findOne(id);
+    const room = await this.findOne(id);
+    const currentStage =
+      typeof room.hkStage === 'string' ? room.hkStage : 'READY';
     return this.prisma.room.update({
       where: { id },
-      data: { status },
+      data: {
+        status,
+        hkStage: hkStageForStatusChange(status, currentStage),
+      },
       include: {
         roomType: true,
         property: {

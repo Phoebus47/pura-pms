@@ -38,6 +38,7 @@ export interface TargetRoomLike {
   propertyId: string;
   status: RoomStatus;
   roomTypeId: string;
+  hkStage?: string;
 }
 
 export function occupiedStatusForVacant(status: RoomStatus): RoomStatus {
