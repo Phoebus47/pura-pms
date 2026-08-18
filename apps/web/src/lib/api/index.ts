@@ -13,6 +13,7 @@ export * from './exchange-rates';
 export * from './rates';
 export * from './yield';
 export * from './blocks';
+export * from './housekeeping';
 export * from './tax-invoices';
 export * from './ar-accounts';
 export * from './card-preauths';

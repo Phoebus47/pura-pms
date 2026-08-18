@@ -22,6 +22,7 @@ import {
   Percent,
   TrendingUp,
   Layers,
+  ClipboardCheck,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -158,6 +159,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Layers);
     });
 
+    it('should include Housekeeping navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Housekeeping',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/housekeeping');
+      expect(item?.icon).toBe(ClipboardCheck);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -191,6 +201,7 @@ describe('navigation', () => {
         'Reservations',
         'Guests',
         'Rooms',
+        'Housekeeping',
         'Rates',
         'Yield',
         'Blocks',
@@ -258,6 +269,7 @@ describe('navigation', () => {
         'Rates',
         'Yield',
         'Blocks',
+        'Housekeeping',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -272,6 +284,7 @@ describe('navigation', () => {
         '/rates',
         '/yield',
         '/blocks',
+        '/housekeeping',
         '/settings',
       ]);
     });

@@ -1424,6 +1424,85 @@ function handleBlocks(
   }
 }
 
+const HK_CHECKLIST_ITEMS = [
+  { code: 'BED', required: true },
+  { code: 'BATH', required: true },
+  { code: 'LINEN', required: true },
+  { code: 'AMENITIES', required: true },
+  { code: 'MINIBAR', required: false },
+];
+
+function handleHousekeeping(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (path !== '/housekeeping/board' && !path.startsWith('/housekeeping/')) {
+    return;
+  }
+
+  if (method === 'GET' && path === '/housekeeping/board') {
+    const propertyId = params.get('propertyId');
+    return mockDb.rooms.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'GET' && path === '/housekeeping/checklist') {
+    return HK_CHECKLIST_ITEMS;
+  }
+
+  const cleanMatch = /^\/housekeeping\/rooms\/([a-zA-Z0-9_-]+)\/clean$/.exec(
+    path,
+  );
+  if (method === 'POST' && cleanMatch) {
+    const room = mockDb.rooms.find((row: any) => row.id === cleanMatch[1]);
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    room.hkStage = 'CLEAN';
+    if (room.status === 'VACANT_DIRTY') room.status = 'VACANT_CLEAN';
+    if (room.status === 'OCCUPIED_DIRTY') room.status = 'OCCUPIED_CLEAN';
+    return room;
+  }
+
+  const inspectMatch =
+    /^\/housekeeping\/rooms\/([a-zA-Z0-9_-]+)\/inspections$/.exec(path);
+  if (method === 'POST' && inspectMatch) {
+    const room = mockDb.rooms.find((row: any) => row.id === inspectMatch[1]);
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    const requiredFailed = (body.lines || []).some(
+      (line: any) =>
+        ['BED', 'BATH', 'LINEN', 'AMENITIES'].includes(line.itemCode) &&
+        !line.passed,
+    );
+    const row = {
+      id: `insp_mock_${Date.now()}`,
+      roomId: room.id,
+      result: requiredFailed ? 'FAILED' : 'PASSED',
+      lines: body.lines || [],
+    };
+    mockDb.housekeepingInspections.push(row);
+    if (requiredFailed) {
+      room.hkStage = 'DIRTY';
+      if (room.status === 'VACANT_CLEAN') room.status = 'VACANT_DIRTY';
+      if (room.status === 'OCCUPIED_CLEAN') room.status = 'OCCUPIED_DIRTY';
+    } else {
+      room.hkStage = 'READY';
+    }
+    return row;
+  }
+
+  if (method === 'GET' && inspectMatch) {
+    return mockDb.housekeepingInspections.filter(
+      (row: any) => row.roomId === inspectMatch[1],
+    );
+  }
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -2636,6 +2715,7 @@ export async function routeMockRequest<T>(
       () => handleRates(method, path, body, params),
       () => handleYield(method, path, body, params),
       () => handleBlocks(method, path, body, params),
+      () => handleHousekeeping(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

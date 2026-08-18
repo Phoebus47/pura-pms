@@ -183,12 +183,12 @@
 
 ## 🧹 Housekeeping Enhancements
 
-- [ ] **Inspection Workflow**
-  - [ ] Add `INSPECTED` status to RoomStatus enum
-  - [ ] Workflow: Dirty → Clean → Inspected → Ready
-  - [ ] Inspection checklist model
+- [x] **Inspection Workflow**
+  - [x] Track inspection on `Room.hkStage` (not `RoomStatus`)
+  - [x] Workflow: Dirty → Clean → Inspected → Ready
+  - [x] Inspection checklist model
   - [ ] Photo evidence (optional)
-  - [ ] Supervisor approval UI
+  - [x] Supervisor approval UI
 
 - [ ] **Out of Order vs. Out of Service**
   - [ ] Already have OUT_OF_ORDER and OUT_OF_SERVICE in enum ✅
@@ -795,7 +795,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 1. Rate Derivation (Parent/Child Rates) — **shipped** (`parentRateId` + percent/amount offset; cascade on parent change)
 2. Dynamic Pricing / Yield Management (AI) — **shipped (rule-based v1)** (pace vs last year, competitor capture, HIGH_DEMAND / SLOW_PACE / COMP_UNDERCUT; apply updates parent Rate)
 3. Allotment & Blocks — **shipped** (`RoomBlock` allotment/group, cutoff release, pickup report)
-4. Housekeeping Inspection (Workflow)
+4. Housekeeping Inspection (Workflow) — **shipped** (`Room.hkStage` Dirty→Clean→Ready, supervisor checklist; Inspected is the inspection record)
 5. Hardware Bridge (Local Agent)
 6. PWA (Offline Capability)
 7. Digital Registration Card (Tablet Signature)

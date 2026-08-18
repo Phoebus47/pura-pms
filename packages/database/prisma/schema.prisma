@@ -57,6 +57,7 @@ model Property {
   competitorRates CompetitorRate[]
   yieldRecommendations YieldRecommendation[]
   roomBlocks     RoomBlock[]
+  housekeepingInspections HousekeepingInspection[]
   createdAt      DateTime   @default(now())
 }
 
@@ -90,10 +91,13 @@ model Room {
   property     Property           @relation(fields: [propertyId], references: [id])
   reservations Reservation[]
   reservationStays ReservationStay[]
+  hkStage      HkStage            @default(READY)
   housekeeping HousekeepingTask[]
+  inspections  HousekeepingInspection[]
   movesFrom    RoomMove[]         @relation("RoomMoveFrom")
   movesTo      RoomMove[]         @relation("RoomMoveTo")
   @@unique([propertyId, number])
+  @@index([propertyId, hkStage])
 }
 
 // ==================== GUESTS ====================
@@ -746,6 +750,45 @@ model HousekeepingTask {
   startedAt   DateTime?
   completedAt DateTime?
   createdAt   DateTime   @default(now())
+}
+
+enum HkStage {
+  DIRTY
+  CLEAN
+  READY
+}
+
+enum InspectionResult {
+  PASSED
+  FAILED
+}
+
+model HousekeepingInspection {
+  id           String                         @id @default(cuid())
+  propertyId   String
+  property     Property                       @relation(fields: [propertyId], references: [id])
+  roomId       String
+  room         Room                           @relation(fields: [roomId], references: [id])
+  businessDate DateTime                       @db.Date
+  result       InspectionResult
+  inspectedBy  String
+  notes        String?
+  lines        HousekeepingInspectionLine[]
+  createdAt    DateTime                       @default(now())
+
+  @@index([propertyId, businessDate])
+  @@index([roomId, createdAt])
+}
+
+model HousekeepingInspectionLine {
+  id            String                   @id @default(cuid())
+  inspectionId  String
+  inspection    HousekeepingInspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  itemCode      String
+  passed        Boolean
+  notes         String?
+
+  @@index([inspectionId])
 }
 
 // ==================== RATES ====================

@@ -16,6 +16,7 @@ import {
   Percent,
   TrendingUp,
   Layers,
+  ClipboardCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -46,6 +47,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.guests',
   },
   { name: 'Rooms', href: '/rooms', icon: Bed, labelKey: 'nav.rooms' },
+  {
+    name: 'Housekeeping',
+    href: '/housekeeping',
+    icon: ClipboardCheck,
+    labelKey: 'nav.housekeeping',
+  },
   {
     name: 'Rates',
     href: '/rates',
@@ -220,6 +227,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/blocks',
     icon: Layers,
     labelKey: 'nav.blocks',
+  },
+  {
+    name: 'Housekeeping',
+    href: '/housekeeping',
+    icon: ClipboardCheck,
+    labelKey: 'nav.housekeeping',
   },
   {
     name: 'Settings',

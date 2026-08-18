@@ -1,28 +1,39 @@
-# Current Sprint — Phase 5 Allotment & Blocks
+# Current Sprint — Phase 5 Housekeeping Inspection
 
-**Status:** In progress  
-**Branch:** `cursor/feat-allotment-blocks-6a5d`  
-**Depends on:** Yield (`cursor/feat-yield-pricing-6a5d`)
+**Status:** In progress
+**Branch:** `cursor/feat-hk-inspection-6a5d`
+**Depends on:** Allotment (`cursor/feat-allotment-blocks-6a5d`)
+**Roles:** @PM → @Architect → @Backend → @Frontend → @QA
 
 ## Goal
 
-Agent/OTA allotments and group blocks with cutoff release and pickup reporting.
+Dirty → Clean → Inspected → Ready with a supervisor checklist. Do not add
+`INSPECTED` to `RoomStatus` (occupancy stays on that enum).
 
-## Schema
+## Database
 
-- `RoomBlock` (`ALLOTMENT` | `GROUP`, `GENERAL` | `DEDICATED`)
-- `Reservation.blockId` optional
-- Migration: `20260818040000_add_room_blocks`
+- `Room.hkStage`: `DIRTY` | `CLEAN` | `READY` (default `READY`)
+- `HousekeepingInspection` + `HousekeepingInspectionLine`
+- Migration: `20260818050000_add_housekeeping_inspection`
+- Checkout / room-move to dirty also sets `hkStage = DIRTY`
 
 ## API
 
-1. `POST/GET/PATCH /blocks`
-2. `GET /blocks/:id/pickup`
-3. `POST /blocks/:id/reservations` — attach pickup
-4. `POST /blocks/:id/release` — return unused rooms after cutoff (also auto on read when cutoff ≤ businessDate)
+1. `GET /housekeeping/board?propertyId=`
+2. `GET /housekeeping/checklist`
+3. `POST /housekeeping/rooms/:id/clean`
+4. `POST /housekeeping/rooms/:id/inspections`
+5. `GET /housekeeping/rooms/:id/inspections`
+
+Pass → `READY`. Fail required item → `DIRTY` + dirty room status.
 
 ## Web
 
-- `/blocks` catalog, pickup panel, attach + release
-- Nav: Blocks
-- i18n `blocks.*`
+- `/housekeeping` board by stage, mark clean, inspect checklist
+- Nav: Housekeeping
+- i18n `housekeeping.*` (EN + TH)
+
+## Wait
+
+- Photo evidence
+- Gate FO assignment on `READY` (availability still uses `RoomStatus`)

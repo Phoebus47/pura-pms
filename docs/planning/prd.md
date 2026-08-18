@@ -1251,7 +1251,7 @@ graph LR
 - [x] Rate Derivation (Parent/Child Rates)
 - [x] Dynamic Pricing / Yield Management (AI)
 - [x] Allotment & Blocks
-- [ ] Housekeeping Inspection (Workflow)
+- [x] Housekeeping Inspection (Workflow)
 - [ ] Hardware Bridge (Local Agent)
 - [ ] PWA (Offline Capability)
 - [ ] Digital Registration Card (Tablet Signature)

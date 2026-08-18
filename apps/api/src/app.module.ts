@@ -23,6 +23,7 @@ import { PartnerHotelsModule } from './partner-hotels/partner-hotels.module';
 import { RatesModule } from './rates/rates.module';
 import { YieldModule } from './yield/yield.module';
 import { BlocksModule } from './blocks/blocks.module';
+import { HousekeepingModule } from './housekeeping/housekeeping.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { BlocksModule } from './blocks/blocks.module';
     RatesModule,
     YieldModule,
     BlocksModule,
+    HousekeepingModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

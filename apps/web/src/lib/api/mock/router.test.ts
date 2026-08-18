@@ -1703,4 +1703,33 @@ describe('Mock API Router', () => {
       expect(released.status).toBe('RELEASED');
     });
   });
+
+  describe('Housekeeping', () => {
+    it('marks a dirty room clean then ready after inspection', async () => {
+      const dirty = mockDb.rooms.find((row: any) => row.hkStage === 'DIRTY');
+      const cleaned: any = await routeMockRequest(
+        `/housekeeping/rooms/${dirty.id}/clean`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(cleaned.hkStage).toBe('CLEAN');
+      const inspected: any = await routeMockRequest(
+        `/housekeeping/rooms/${dirty.id}/inspections`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            inspectedBy: 'usr_mock_1',
+            lines: [
+              { itemCode: 'BED', passed: true },
+              { itemCode: 'BATH', passed: true },
+              { itemCode: 'LINEN', passed: true },
+              { itemCode: 'AMENITIES', passed: true },
+              { itemCode: 'MINIBAR', passed: true },
+            ],
+          }),
+        },
+      );
+      expect(inspected.result).toBe('PASSED');
+      expect(dirty.hkStage).toBe('READY');
+    });
+  });
 });

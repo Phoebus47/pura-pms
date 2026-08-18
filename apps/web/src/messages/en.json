@@ -21,6 +21,7 @@
     "rates": "Rates",
     "yield": "Yield",
     "blocks": "Blocks",
+    "housekeeping": "Housekeeping",
     "settings": "Settings",
     "more": "More"
   },
@@ -334,6 +335,31 @@
     "release": "Release unused",
     "releaseSuccess": "Unused rooms released",
     "releaseFailed": "Could not release block"
+  },
+  "housekeeping": {
+    "title": "Housekeeping inspection",
+    "subtitle": "Dirty → Clean → Inspected → Ready. Supervisor checklist before the room is ready.",
+    "board": "Room board",
+    "stageDirty": "Dirty",
+    "stageClean": "Clean",
+    "stageReady": "Inspected / ready",
+    "empty": "No rooms in this stage",
+    "markClean": "Mark cleaned",
+    "cleanSuccess": "Room marked clean",
+    "cleanFailed": "Could not mark room clean",
+    "inspectTitle": "Inspection",
+    "inspectHint": "Select a cleaned room to inspect.",
+    "inspectSubmit": "Submit inspection",
+    "inspectSuccess": "Inspection saved",
+    "inspectFailed": "Could not save inspection",
+    "required": "required",
+    "items": {
+      "BED": "Bed made",
+      "BATH": "Bathroom",
+      "LINEN": "Linen",
+      "AMENITIES": "Amenities",
+      "MINIBAR": "Minibar"
+    }
   },
   "folios": {
     "checkout": "Check out folio",
