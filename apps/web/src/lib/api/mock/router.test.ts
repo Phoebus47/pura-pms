@@ -1732,4 +1732,36 @@ describe('Mock API Router', () => {
       expect(dirty.hkStage).toBe('READY');
     });
   });
+
+  describe('Hardware Bridge', () => {
+    it('registers an agent then creates and simulates a print job', async () => {
+      const propertyId = mockDb.properties[0].id;
+      const agent: any = await routeMockRequest('/hardware-bridge/agents', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          name: 'Front desk PC',
+          machineId: 'fd-01',
+        }),
+      });
+      expect(agent.machineId).toBe('fd-01');
+      const job: any = await routeMockRequest('/hardware-bridge/jobs', {
+        method: 'POST',
+        body: JSON.stringify({
+          propertyId,
+          type: 'PRINT',
+          requestedBy: 'front-desk',
+          payload: { jobType: 'receipt' },
+          agentId: agent.id,
+        }),
+      });
+      expect(job.status).toBe('PENDING');
+      const simulated: any = await routeMockRequest(
+        `/hardware-bridge/jobs/${job.id}/simulate`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      expect(simulated.status).toBe('COMPLETED');
+      expect(simulated.result).toEqual({ printed: true });
+    });
+  });
 });

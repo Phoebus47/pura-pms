@@ -26,6 +26,9 @@ export interface MockData {
   yieldRecommendations: any[];
   roomBlocks: any[];
   housekeepingInspections: any[];
+  hardwareAgents: any[];
+  hardwareDevices: any[];
+  hardwareJobs: any[];
   walks: any[];
 }
 
@@ -472,5 +475,8 @@ export const mockDb: any = {
   yieldRecommendations: [],
   roomBlocks: [],
   housekeepingInspections: [],
+  hardwareAgents: [],
+  hardwareDevices: [],
+  hardwareJobs: [],
   walks: [],
 };

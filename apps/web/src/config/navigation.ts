@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Layers,
   ClipboardCheck,
+  Printer,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -52,6 +53,12 @@ export const navigationItems: NavigationItem[] = [
     href: '/housekeeping',
     icon: ClipboardCheck,
     labelKey: 'nav.housekeeping',
+  },
+  {
+    name: 'Hardware',
+    href: '/hardware-bridge',
+    icon: Printer,
+    labelKey: 'nav.hardwareBridge',
   },
   {
     name: 'Rates',
@@ -233,6 +240,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/housekeeping',
     icon: ClipboardCheck,
     labelKey: 'nav.housekeeping',
+  },
+  {
+    name: 'Hardware',
+    href: '/hardware-bridge',
+    icon: Printer,
+    labelKey: 'nav.hardwareBridge',
   },
   {
     name: 'Settings',

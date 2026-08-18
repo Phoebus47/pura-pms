@@ -1503,6 +1503,131 @@ function handleHousekeeping(
   }
 }
 
+const HB_CATALOG = {
+  jobTypes: ['PRINT', 'KEYCARD_ENCODE', 'PASSPORT_SCAN', 'ID_CARD_READ'],
+  deviceTypes: [
+    'PRINTER',
+    'KEY_CARD_ENCODER',
+    'PASSPORT_SCANNER',
+    'SMART_CARD_READER',
+  ],
+  vendors: ['GENERIC', 'VINGCARD', 'SALTO', 'HAFELE'],
+};
+
+function simulatedHardwareResult(job: any) {
+  if (job.type === 'PRINT') return { printed: true };
+  if (job.type === 'KEYCARD_ENCODE') {
+    return { encoded: true, roomNumber: job.payload?.roomNumber ?? '101' };
+  }
+  if (job.type === 'PASSPORT_SCAN') {
+    return {
+      givenName: 'SOMCHAI',
+      surname: 'SUK',
+      documentNumber: 'AB1234567',
+    };
+  }
+  return { citizenId: '1234567890123', firstName: 'Somchai', lastName: 'Suk' };
+}
+
+function handleHardwareBridge(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/hardware-bridge')) return;
+
+  if (method === 'GET' && path === '/hardware-bridge/catalog') {
+    return HB_CATALOG;
+  }
+
+  if (method === 'GET' && path === '/hardware-bridge/agents') {
+    const propertyId = params.get('propertyId');
+    return mockDb.hardwareAgents.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'POST' && path === '/hardware-bridge/agents') {
+    const row = {
+      id: `hb_agent_${Date.now()}`,
+      propertyId: body.propertyId,
+      name: body.name,
+      machineId: body.machineId,
+      isActive: true,
+      lastSeenAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    mockDb.hardwareAgents.push(row);
+    return row;
+  }
+
+  const heartbeatMatch =
+    /^\/hardware-bridge\/agents\/([a-zA-Z0-9_-]+)\/heartbeat$/.exec(path);
+  if (method === 'POST' && heartbeatMatch) {
+    const agent = mockDb.hardwareAgents.find(
+      (row: any) => row.id === heartbeatMatch[1],
+    );
+    if (!agent) {
+      throw new APIError(404, 'Not Found', { message: 'Agent not found' });
+    }
+    agent.lastSeenAt = new Date().toISOString();
+    return agent;
+  }
+
+  if (method === 'GET' && path === '/hardware-bridge/jobs') {
+    const propertyId = params.get('propertyId');
+    return mockDb.hardwareJobs.filter(
+      (row: any) => !propertyId || row.propertyId === propertyId,
+    );
+  }
+
+  if (method === 'POST' && path === '/hardware-bridge/jobs') {
+    const row = {
+      id: `hb_job_${Date.now()}`,
+      propertyId: body.propertyId,
+      agentId: body.agentId ?? null,
+      type: body.type,
+      status: 'PENDING',
+      requestedBy: body.requestedBy,
+      payload: body.payload || {},
+      result: null,
+      errorMessage: null,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+    };
+    mockDb.hardwareJobs.push(row);
+    return row;
+  }
+
+  const jobActionMatch =
+    /^\/hardware-bridge\/jobs\/([a-zA-Z0-9_-]+)\/(complete|fail|simulate)$/.exec(
+      path,
+    );
+  if (method === 'POST' && jobActionMatch) {
+    const job = mockDb.hardwareJobs.find(
+      (row: any) => row.id === jobActionMatch[1],
+    );
+    if (!job) {
+      throw new APIError(404, 'Not Found', { message: 'Job not found' });
+    }
+    const action = jobActionMatch[2];
+    if (action === 'fail') {
+      job.status = 'FAILED';
+      job.errorMessage = body?.errorMessage || 'failed';
+      job.completedAt = new Date().toISOString();
+      return job;
+    }
+    job.status = 'COMPLETED';
+    job.completedAt = new Date().toISOString();
+    job.result =
+      action === 'simulate'
+        ? simulatedHardwareResult(job)
+        : (body?.result ?? {});
+    return job;
+  }
+}
+
 function requireOpenShiftForCashier(userId: string, propertyId?: string) {
   if (userId === 'SYSTEM') return null;
   const shift = findOpenShift(userId, propertyId);
@@ -2716,6 +2841,7 @@ export async function routeMockRequest<T>(
       () => handleYield(method, path, body, params),
       () => handleBlocks(method, path, body, params),
       () => handleHousekeeping(method, path, body, params),
+      () => handleHardwareBridge(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

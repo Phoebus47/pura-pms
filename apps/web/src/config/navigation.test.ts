@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Layers,
   ClipboardCheck,
+  Printer,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -168,6 +169,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(ClipboardCheck);
     });
 
+    it('should include Hardware navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Hardware',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/hardware-bridge');
+      expect(item?.icon).toBe(Printer);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -202,6 +212,7 @@ describe('navigation', () => {
         'Guests',
         'Rooms',
         'Housekeeping',
+        'Hardware',
         'Rates',
         'Yield',
         'Blocks',
@@ -270,6 +281,7 @@ describe('navigation', () => {
         'Yield',
         'Blocks',
         'Housekeeping',
+        'Hardware',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -285,6 +297,7 @@ describe('navigation', () => {
         '/yield',
         '/blocks',
         '/housekeeping',
+        '/hardware-bridge',
         '/settings',
       ]);
     });
