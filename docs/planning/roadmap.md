@@ -246,12 +246,12 @@
 
 ## 🔧 System & Security Enhancements
 
-- [ ] **Hardware Bridge**
-  - [ ] Local Agent application
-  - [ ] Printer API
-  - [ ] Key Card Encoder API
-  - [ ] Passport Scanner API
-  - [ ] Smart Card Reader API
+- [x] **Hardware Bridge** (v1: localhost agent + cloud job log; vendor SDKs wait)
+  - [x] Local Agent application (`apps/hardware-bridge`, mock adapters)
+  - [x] Printer API
+  - [x] Key Card Encoder API
+  - [x] Passport Scanner API
+  - [x] Smart Card Reader API
 
 - [ ] **Reason Codes**
   - [ ] ReasonCode model ✅ (in schema)
@@ -796,7 +796,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 2. Dynamic Pricing / Yield Management (AI) — **shipped (rule-based v1)** (pace vs last year, competitor capture, HIGH_DEMAND / SLOW_PACE / COMP_UNDERCUT; apply updates parent Rate)
 3. Allotment & Blocks — **shipped** (`RoomBlock` allotment/group, cutoff release, pickup report)
 4. Housekeeping Inspection (Workflow) — **shipped** (`Room.hkStage` Dirty→Clean→Ready, supervisor checklist; Inspected is the inspection record)
-5. Hardware Bridge (Local Agent)
+5. Hardware Bridge (Local Agent) — **shipped (mock v1)** (localhost agent + `HardwareJob` audit; vendor SDKs wait)
 6. PWA (Offline Capability)
 7. Digital Registration Card (Tablet Signature)
 8. Wake-up Call System

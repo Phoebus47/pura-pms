@@ -67,3 +67,12 @@ export function useCompleteJob() {
     onSuccess: () => invalidateHardware(queryClient),
   });
 }
+
+export function useFailJob() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, errorMessage }: { id: string; errorMessage: string }) =>
+      hardwareBridgeAPI.failJob(id, errorMessage),
+    onSuccess: () => invalidateHardware(queryClient),
+  });
+}

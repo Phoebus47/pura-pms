@@ -58,6 +58,8 @@ model Property {
   yieldRecommendations YieldRecommendation[]
   roomBlocks     RoomBlock[]
   housekeepingInspections HousekeepingInspection[]
+  hardwareAgents HardwareAgent[]
+  hardwareJobs   HardwareJob[]
   createdAt      DateTime   @default(now())
 }
 
@@ -789,6 +791,93 @@ model HousekeepingInspectionLine {
   notes         String?
 
   @@index([inspectionId])
+}
+
+// ==================== HARDWARE BRIDGE ====================
+
+enum HardwareDeviceType {
+  PRINTER
+  KEY_CARD_ENCODER
+  PASSPORT_SCANNER
+  SMART_CARD_READER
+}
+
+enum HardwareVendor {
+  GENERIC
+  VINGCARD
+  SALTO
+  HAFELE
+}
+
+enum HardwareJobType {
+  PRINT
+  KEYCARD_ENCODE
+  PASSPORT_SCAN
+  ID_CARD_READ
+}
+
+enum HardwareJobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model HardwareAgent {
+  id         String            @id @default(cuid())
+  propertyId String
+  property   Property          @relation(fields: [propertyId], references: [id])
+  name       String
+  machineId  String
+  isActive   Boolean           @default(true)
+  lastSeenAt DateTime?
+  devices    HardwareDevice[]
+  jobs       HardwareJob[]
+  createdAt  DateTime          @default(now())
+
+  @@unique([propertyId, machineId])
+  @@index([propertyId, isActive])
+}
+
+model HardwareDevice {
+  id         String              @id @default(cuid())
+  agentId    String
+  agent      HardwareAgent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  type       HardwareDeviceType
+  vendor     HardwareVendor      @default(GENERIC)
+  label      String
+  externalId String?
+  isDefault  Boolean             @default(false)
+  isActive   Boolean             @default(true)
+  jobs       HardwareJob[]
+  createdAt  DateTime            @default(now())
+
+  @@index([agentId, type])
+}
+
+model HardwareJob {
+  id             String             @id @default(cuid())
+  propertyId     String
+  property       Property           @relation(fields: [propertyId], references: [id])
+  agentId        String?
+  agent          HardwareAgent?     @relation(fields: [agentId], references: [id])
+  deviceId       String?
+  device         HardwareDevice?    @relation(fields: [deviceId], references: [id])
+  type           HardwareJobType
+  status         HardwareJobStatus  @default(PENDING)
+  idempotencyKey String?            @unique
+  reservationId  String?
+  requestedBy    String
+  payload        Json
+  result         Json?
+  errorMessage   String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime           @default(now())
+
+  @@index([propertyId, status, createdAt])
+  @@index([agentId, createdAt])
 }
 
 // ==================== RATES ====================

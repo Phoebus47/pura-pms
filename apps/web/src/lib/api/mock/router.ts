@@ -1521,9 +1521,11 @@ function simulatedHardwareResult(job: any) {
   }
   if (job.type === 'PASSPORT_SCAN') {
     return {
-      givenName: 'SOMCHAI',
-      surname: 'SUK',
-      documentNumber: 'AB1234567',
+      firstName: 'SOMCHAI',
+      lastName: 'JAADEE',
+      nationality: 'THA',
+      idType: 'PASSPORT',
+      idNumber: 'AA1234567',
     };
   }
   return { citizenId: '1234567890123', firstName: 'Somchai', lastName: 'Suk' };

@@ -8,6 +8,7 @@ import { localBridge } from '@/lib/api/local-bridge';
 import {
   useCompleteJob,
   useCreateJob,
+  useFailJob,
   useSimulateJob,
 } from '@/hooks/use-hardware-bridge';
 import type { HardwareJobType } from '@/lib/api/hardware-bridge';
@@ -34,6 +35,7 @@ export function HbActionsPanel({
   const createJob = useCreateJob();
   const simulateJob = useSimulateJob();
   const completeJob = useCompleteJob();
+  const failJob = useFailJob();
 
   async function simulate(
     type: HardwareJobType,
@@ -77,6 +79,9 @@ export function HbActionsPanel({
       await completeJob.mutateAsync({ id: jobId, result });
       toast.success(t(successKey));
     } catch {
+      await failJob
+        .mutateAsync({ id: jobId, errorMessage: 'local-agent-failed' })
+        .catch(() => undefined);
       toast.error(t('hardwareBridge.jobFailed'));
     }
   }

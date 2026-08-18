@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { propertiesAPI } from '@/lib/api/properties';
 import { DEFAULT_AGENT_URL, localBridge } from '@/lib/api/local-bridge';
@@ -29,22 +29,12 @@ export function HardwareBridgeClient() {
   const { data: jobs = EMPTY_JOBS } = useHbJobs(propertyId);
   const [agentUrl, setAgentUrl] = useState(DEFAULT_AGENT_URL);
   const [requestedBy, setRequestedBy] = useState(DEFAULT_REQUESTED_BY);
-  const [agentOnline, setAgentOnline] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    localBridge
-      .health(agentUrl)
-      .then((health) => {
-        if (!cancelled) setAgentOnline(Boolean(health.ok));
-      })
-      .catch(() => {
-        if (!cancelled) setAgentOnline(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [agentUrl]);
+  const { data: health } = useQuery({
+    queryKey: ['local-bridge-health', agentUrl],
+    queryFn: () => localBridge.health(agentUrl),
+    retry: false,
+  });
+  const agentOnline = Boolean(health?.ok);
 
   return (
     <div className="max-w-5xl md:p-6 mx-auto p-4 space-y-6">
