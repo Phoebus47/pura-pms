@@ -4,6 +4,13 @@
     "loading": "Loading",
     "cancel": "Cancel"
   },
+  "pwa": {
+    "offlineBanner": "You are offline — showing last synced data. Changes need a connection.",
+    "offlineMutationBlocked": "This action needs an internet connection.",
+    "offlineTitle": "You are offline",
+    "offlineBody": "This page is not available without a connection. Open a page you visited while online or try again when back online.",
+    "offlineHome": "Back to dashboard"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "reservations": "Reservations",

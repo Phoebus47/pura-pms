@@ -6,6 +6,7 @@ import {
   setAuthToken,
   clearAuthToken,
 } from './client';
+import { OfflineMutationError } from '@/lib/pwa/offline';
 
 describe('APIClient', () => {
   const originalFetch = globalThis.fetch;
@@ -45,6 +46,10 @@ describe('APIClient', () => {
         globalThis as unknown as { localStorage: typeof localStorageMock }
       ).localStorage = localStorageMock;
     }
+    Object.defineProperty(navigator, 'onLine', {
+      configurable: true,
+      value: true,
+    });
     vi.clearAllMocks();
   });
 
@@ -186,6 +191,18 @@ describe('APIClient', () => {
   });
 
   describe('post', () => {
+    it('blocks POST when the browser is offline', async () => {
+      Object.defineProperty(navigator, 'onLine', {
+        configurable: true,
+        value: false,
+      });
+      const client = new APIClient();
+      await expect(client.post('/test', { name: 'Test' })).rejects.toThrow(
+        OfflineMutationError,
+      );
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
     it('should make POST request with data', async () => {
       const mockData = { id: '1', name: 'Test' };
       const postData = { name: 'Test' };

@@ -10,12 +10,12 @@
 
 ### Web App + Hybrid Solution
 
-- [ ] **PWA Setup** (Progressive Web App)
-  - [ ] Configure Next.js for PWA
-  - [ ] Service Worker setup
-  - [ ] Offline-first capability
+- [x] **PWA Setup** (Progressive Web App) (v1: installable + read-only offline)
+  - [x] Configure Next.js for PWA (Serwist / Turbopack)
+  - [x] Service Worker setup
+  - [x] Offline-first capability (query persist + offline banner)
   - [ ] Background sync
-  - [ ] Install prompt
+  - [ ] Install prompt (custom UX; browser install works)
 
 - [ ] **Local Device Agent (Bridge)**
   - [ ] Choose tech stack (Electron or Go)
@@ -797,7 +797,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 3. Allotment & Blocks — **shipped** (`RoomBlock` allotment/group, cutoff release, pickup report)
 4. Housekeeping Inspection (Workflow) — **shipped** (`Room.hkStage` Dirty→Clean→Ready, supervisor checklist; Inspected is the inspection record)
 5. Hardware Bridge (Local Agent) — **shipped (mock v1)** (localhost agent + `HardwareJob` audit; vendor SDKs wait)
-6. PWA (Offline Capability)
+6. PWA (Offline Capability) — **shipped (read-only v1)** (Serwist SW, manifest, query persist; mutations blocked offline)
 7. Digital Registration Card (Tablet Signature)
 8. Wake-up Call System
 9. DND/MUR Status Indicators

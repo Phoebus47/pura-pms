@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AppLayout } from '@/components/layout/app-layout';
+import { PwaProvider } from '@/components/pwa/pwa-provider';
 import { Toaster } from '@/components/ui/toast';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { QueryProvider } from '@/lib/providers/query-provider';
@@ -41,10 +42,19 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   ),
+  applicationName: 'PURA PMS',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'PURA PMS',
+  },
   icons: {
-    icon: '/pura-icon.svg',
-    shortcut: '/pura-icon.svg',
-    apple: '/pura-icon.svg',
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/icons/icon-192.png',
+    apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
     type: 'website',
@@ -78,6 +88,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   colorScheme: 'light',
+  themeColor: '#1E4B8E',
 };
 
 export default function RootLayout({
@@ -90,12 +101,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ErrorBoundary>
-          <QueryProvider>
-            <AppLayout>{children}</AppLayout>
-            <Toaster />
-          </QueryProvider>
-        </ErrorBoundary>
+        <PwaProvider>
+          <ErrorBoundary>
+            <QueryProvider>
+              <AppLayout>{children}</AppLayout>
+              <Toaster />
+            </QueryProvider>
+          </ErrorBoundary>
+        </PwaProvider>
       </body>
     </html>
   );
