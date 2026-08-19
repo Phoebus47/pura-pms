@@ -1,26 +1,39 @@
-# Current Sprint — Phase 5 PWA (Offline v1)
+# Current Sprint — Phase 5 Digital Registration Card
 
-**Status:** Ready for review
-**Branch:** `cursor/feat-pwa-offline-6a5d`
-**Depends on:** Hardware Bridge (`cursor/feat-hardware-bridge-6a5d`, #92)
-**Roles:** @PM → @Architect → @Frontend → @QA
+**Status:** In progress
+**Branch:** `cursor/feat-digital-reg-card-6a5d`
+**Base:** `dev`
+**Roles:** @PM → @Architect → @Backend → @Frontend → @QA
 
 ## Goal
 
-Installable PWA with read-only offline continuity. No offline mutations or
-background sync in v1.
+Tablet signature capture for Thai registration card (ใบลงทะเบียน), immutable
+snapshots, print via Hardware Bridge `REG_CARD` job.
+
+## Database
+
+- `RegistrationCard` model with `DRAFT` / `SIGNED` / `VOID`
+- JSON snapshots + PNG signature base64
+- Versioning on re-sign
+
+## API
+
+- `POST /registration-cards` — create draft from reservation
+- `GET /registration-cards?reservationId=` — list
+- `GET /registration-cards/:id` — detail
+- `POST /registration-cards/:id/sign` — capture signature
+- `POST /registration-cards/:id/void` — void signed card
+- `POST /registration-cards/:id/print-job` — Hardware Bridge PRINT job
 
 ## Web
 
-- Serwist service worker (production only) via `/serwist/sw.js`
-- `app/manifest.ts` + PNG icons (192, 512 maskable)
-- `/offline` navigation fallback
-- Offline banner + mutation guard on API client
-- TanStack Query persist (IndexedDB) for FO read queries
+- `/registration-cards/[id]/sign` — canvas signature pad
+- `/registration-cards/[id]/print` — printable preview + hardware print
+- Panel on `/reservations/[id]` with soft check-in warning
 
 ## Wait
 
-- Background Sync for writes
-- Offline check-in / checkout / folio posting
-- Push notifications
-- Custom install prompt campaign
+- PDPA consent module
+- TM.30 auto-export
+- Kiosk / offline signature
+- Hard check-in gate
