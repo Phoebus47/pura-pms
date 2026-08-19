@@ -31,6 +31,24 @@ export function useMarkRoomClean() {
   });
 }
 
+export function useSetGuestRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      roomId,
+      request,
+      updatedBy,
+      note,
+    }: {
+      roomId: string;
+      request: 'NONE' | 'DND' | 'MUR';
+      updatedBy: string;
+      note?: string;
+    }) => housekeepingAPI.setGuestRequest(roomId, { request, updatedBy, note }),
+    onSuccess: () => invalidateBoard(queryClient),
+  });
+}
+
 export function useInspectRoom() {
   const queryClient = useQueryClient();
   return useMutation({

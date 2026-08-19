@@ -6,6 +6,7 @@ const mockHousekeepingService = {
   board: vi.fn(),
   checklist: vi.fn(),
   markClean: vi.fn(),
+  setGuestRequest: vi.fn(),
   inspections: vi.fn(),
   inspect: vi.fn(),
 };
@@ -35,12 +36,20 @@ describe('HousekeepingController', () => {
 
   it('marks clean and inspects', async () => {
     await controller.markClean('room-1');
+    await controller.setGuestRequest('room-1', {
+      request: 'DND',
+      updatedBy: 'usr-1',
+    });
     await controller.inspect('room-1', {
       inspectedBy: 'usr-1',
       lines: [],
     });
     await controller.inspections('room-1');
     expect(mockHousekeepingService.markClean).toHaveBeenCalledWith('room-1');
+    expect(mockHousekeepingService.setGuestRequest).toHaveBeenCalledWith(
+      'room-1',
+      { request: 'DND', updatedBy: 'usr-1' },
+    );
     expect(mockHousekeepingService.inspect).toHaveBeenCalledWith('room-1', {
       inspectedBy: 'usr-1',
       lines: [],

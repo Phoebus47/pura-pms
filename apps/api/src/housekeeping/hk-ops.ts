@@ -3,11 +3,13 @@ import { checklistPayload, HK_ROOM_INCLUDE, hkStore } from './hk-db';
 import {
   HK_CHECKLIST_MESSAGE,
   HK_CLOSED_MESSAGE,
+  HK_DND_CLEAN_MESSAGE,
   HK_NOT_CLEAN_MESSAGE,
   HK_NOT_DIRTY_MESSAGE,
   hasFullChecklist,
   inspectionPassed,
   isClosedRoomStatus,
+  isGuestRoomRequest,
   toCleanRoomStatus,
   toDirtyRoomStatus,
 } from './hk-rules';
@@ -52,6 +54,9 @@ export async function markRoomClean(prisma: unknown, id: string) {
   if (isClosedRoomStatus(room.status)) {
     throw new BadRequestException(HK_CLOSED_MESSAGE);
   }
+  if (room.guestRequest === 'DND') {
+    throw new BadRequestException(HK_DND_CLEAN_MESSAGE);
+  }
   if (room.hkStage === 'CLEAN') {
     return room;
   }
@@ -63,6 +68,40 @@ export async function markRoomClean(prisma: unknown, id: string) {
     data: {
       status: toCleanRoomStatus(room.status),
       hkStage: 'CLEAN',
+    },
+    include: HK_ROOM_INCLUDE,
+  });
+}
+
+export interface SetGuestRequestInput {
+  request: string;
+  updatedBy: string;
+  note?: string;
+}
+
+export async function setGuestRequest(
+  prisma: unknown,
+  id: string,
+  dto: SetGuestRequestInput,
+) {
+  const room = await requireRoom(prisma, id);
+  if (!isGuestRoomRequest(dto.request)) {
+    throw new BadRequestException('request must be NONE, DND, or MUR');
+  }
+  if (isClosedRoomStatus(room.status) && dto.request !== 'NONE') {
+    throw new BadRequestException(HK_CLOSED_MESSAGE);
+  }
+  const note =
+    dto.request === 'NONE'
+      ? null
+      : dto.note?.trim() || room.guestRequestNote || null;
+  return hkStore(prisma).room.update({
+    where: { id },
+    data: {
+      guestRequest: dto.request,
+      guestRequestNote: note,
+      guestRequestUpdatedAt: new Date(),
+      guestRequestUpdatedBy: dto.updatedBy,
     },
     include: HK_ROOM_INCLUDE,
   });
