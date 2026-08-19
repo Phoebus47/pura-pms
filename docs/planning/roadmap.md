@@ -798,9 +798,9 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 4. Housekeeping Inspection (Workflow) — **shipped** (`Room.hkStage` Dirty→Clean→Ready, supervisor checklist; Inspected is the inspection record)
 5. Hardware Bridge (Local Agent) — **shipped (mock v1)** (localhost agent + `HardwareJob` audit; vendor SDKs wait)
 6. PWA (Offline Capability) — **shipped (read-only v1)** (Serwist SW, manifest, query persist; mutations blocked offline)
-7. Digital Registration Card (Tablet Signature)
-8. Wake-up Call System
-9. DND/MUR Status Indicators
+7. Digital Registration Card (Tablet Signature) — **shipped** (`RegistrationCard` DRAFT→SIGNED→VOID; tablet sign + print)
+8. Wake-up Call System — **shipped (manual v1)** (`WakeUpCall` board; complete/miss/cancel; no PBX)
+9. DND/MUR Status Indicators — **shipped** (`Room.guestRequest` NONE|DND|MUR; HK board; block clean while DND)
 
 ### Phase 6: Compliance & Communication
 
@@ -825,4 +825,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–4 complete. Phase 5 (Advanced Features) is current. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
+**Status:** Phase 1–5 complete. Phase 6 (Compliance & Communication) is next. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.

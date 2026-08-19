@@ -1,19 +1,13 @@
-# Current Sprint — Phase 5 DND / MUR
+# Current Sprint — Phase 5 closed
 
-## Goal
+Phase 5 Advanced Features is complete on `dev` (PRs #93–#102 stack).
 
-Guest-request indicators on rooms: Do Not Disturb (DND) and Make Up Room (MUR),
-visible and toggleable from the housekeeping board.
+## Shipped this closeout window
 
-## Scope
+- Digital Registration Card (#95)
+- Wake-up Call board (#101)
+- DND/MUR guest-request indicators (#102)
 
-- `GuestRoomRequest` on `Room` (`NONE` | `DND` | `MUR`)
-- `POST /housekeeping/rooms/:id/guest-request`
-- Block mark-clean while DND is active
-- HK board badges + actions (en/th)
+## Next
 
-## Out of scope
-
-- Auto-clear on checkout
-- Door sensor / PBX integration
-- Separate DND/MUR board page
+Phase 6 #1 — TM30 Immigration Reporting (legal requirement).
