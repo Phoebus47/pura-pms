@@ -60,6 +60,8 @@ model Property {
   housekeepingInspections HousekeepingInspection[]
   hardwareAgents HardwareAgent[]
   hardwareJobs   HardwareJob[]
+  registrationCards RegistrationCard[]
+  wakeUpCalls    WakeUpCall[]
   createdAt      DateTime   @default(now())
 }
 
@@ -94,12 +96,18 @@ model Room {
   reservations Reservation[]
   reservationStays ReservationStay[]
   hkStage      HkStage            @default(READY)
+  guestRequest GuestRoomRequest   @default(NONE)
+  guestRequestNote String?
+  guestRequestUpdatedAt DateTime?
+  guestRequestUpdatedBy String?
   housekeeping HousekeepingTask[]
   inspections  HousekeepingInspection[]
   movesFrom    RoomMove[]         @relation("RoomMoveFrom")
   movesTo      RoomMove[]         @relation("RoomMoveTo")
+  wakeUpCalls  WakeUpCall[]
   @@unique([propertyId, number])
   @@index([propertyId, hkStage])
+  @@index([propertyId, guestRequest])
 }
 
 // ==================== GUESTS ====================
@@ -171,6 +179,8 @@ model Reservation {
   walks          Walk[]
   blockId        String?
   block          RoomBlock?        @relation(fields: [blockId], references: [id])
+  registrationCards RegistrationCard[]
+  wakeUpCalls    WakeUpCall[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -760,6 +770,12 @@ enum HkStage {
   READY
 }
 
+enum GuestRoomRequest {
+  NONE
+  DND
+  MUR
+}
+
 enum InspectionResult {
   PASSED
   FAILED
@@ -878,6 +894,72 @@ model HardwareJob {
 
   @@index([propertyId, status, createdAt])
   @@index([agentId, createdAt])
+}
+
+enum RegistrationCardStatus {
+  DRAFT
+  SIGNED
+  VOID
+}
+
+model RegistrationCard {
+  id                String                 @id @default(cuid())
+  propertyId        String
+  property          Property               @relation(fields: [propertyId], references: [id])
+  reservationId     String
+  reservation       Reservation            @relation(fields: [reservationId], references: [id])
+  version           Int                    @default(1)
+  status            RegistrationCardStatus @default(DRAFT)
+  guestSnapshot     Json
+  staySnapshot      Json
+  propertySnapshot  Json
+  signatureData     String?
+  signedAt          DateTime?
+  signedByGuestName String?
+  voidReason        String?
+  voidedAt          DateTime?
+  voidedBy          String?
+  createdBy         String
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@unique([reservationId, version])
+  @@index([reservationId, status])
+  @@index([propertyId, createdAt])
+}
+
+enum WakeUpCallStatus {
+  SCHEDULED
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+model WakeUpCall {
+  id            String           @id @default(cuid())
+  propertyId    String
+  property      Property         @relation(fields: [propertyId], references: [id])
+  reservationId String
+  reservation   Reservation      @relation(fields: [reservationId], references: [id])
+  roomId        String
+  room          Room             @relation(fields: [roomId], references: [id])
+  scheduledAt   DateTime
+  scheduledDate DateTime         @db.Date
+  status        WakeUpCallStatus @default(SCHEDULED)
+  notes         String?
+  scheduledBy   String
+  completedAt   DateTime?
+  completedBy   String?
+  missedAt      DateTime?
+  missedBy      String?
+  cancelledAt   DateTime?
+  cancelledBy   String?
+  cancelReason  String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([propertyId, scheduledDate, status])
+  @@index([reservationId, scheduledDate])
 }
 
 // ==================== RATES ====================

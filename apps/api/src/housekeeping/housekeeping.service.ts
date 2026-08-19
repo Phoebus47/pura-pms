@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateInspectionDto } from './dto/housekeeping.dto';
+import {
+  CreateInspectionDto,
+  SetGuestRequestDto,
+} from './dto/housekeeping.dto';
 import {
   createInspection,
   getBoard,
   getChecklist,
   listInspections,
   markRoomClean,
+  setGuestRequest,
 } from './hk-ops';
 
 @Injectable()
@@ -23,6 +27,10 @@ export class HousekeepingService {
 
   markClean(roomId: string) {
     return markRoomClean(this.prisma, roomId);
+  }
+
+  setGuestRequest(roomId: string, dto: SetGuestRequestDto) {
+    return setGuestRequest(this.prisma, roomId, dto);
   }
 
   inspections(roomId: string) {

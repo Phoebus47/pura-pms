@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { HK_NOT_DIRTY_MESSAGE } from './hk-rules';
-import { createInspection, markRoomClean } from './hk-ops';
+import { HK_DND_CLEAN_MESSAGE, HK_NOT_DIRTY_MESSAGE } from './hk-rules';
+import { createInspection, markRoomClean, setGuestRequest } from './hk-ops';
 
 function roomRow(overrides: Record<string, unknown> = {}) {
   return {
@@ -10,6 +10,10 @@ function roomRow(overrides: Record<string, unknown> = {}) {
     floor: 1,
     status: 'VACANT_DIRTY',
     hkStage: 'DIRTY',
+    guestRequest: 'NONE',
+    guestRequestNote: null,
+    guestRequestUpdatedAt: null,
+    guestRequestUpdatedBy: null,
     propertyId: 'prop-1',
     roomType: { id: 'rt-1', name: 'Deluxe', code: 'DLX' },
     inspections: [],
@@ -73,6 +77,30 @@ describe('hk-ops', () => {
         data: expect.objectContaining({
           status: 'VACANT_CLEAN',
           hkStage: 'CLEAN',
+        }),
+      }),
+    );
+  });
+
+  it('rejects cleaning while DND is active', async () => {
+    prisma.room.findUnique.mockResolvedValue(roomRow({ guestRequest: 'DND' }));
+    await expect(markRoomClean(prisma, 'room-1')).rejects.toMatchObject({
+      message: HK_DND_CLEAN_MESSAGE,
+    });
+  });
+
+  it('sets MUR guest request', async () => {
+    await setGuestRequest(prisma, 'room-1', {
+      request: 'MUR',
+      updatedBy: 'usr-1',
+      note: 'Guest asked for service',
+    });
+    expect(prisma.room.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          guestRequest: 'MUR',
+          guestRequestNote: 'Guest asked for service',
+          guestRequestUpdatedBy: 'usr-1',
         }),
       }),
     );

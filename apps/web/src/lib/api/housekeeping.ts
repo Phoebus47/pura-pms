@@ -2,6 +2,7 @@ import { apiClient, getAuthToken } from './client';
 import type { RoomStatus } from './rooms';
 
 export type HkStage = 'DIRTY' | 'CLEAN' | 'READY';
+export type GuestRoomRequest = 'NONE' | 'DND' | 'MUR';
 export type InspectionResult = 'PASSED' | 'FAILED';
 
 export interface HkChecklistItem {
@@ -15,6 +16,8 @@ export interface HkBoardRoom {
   floor?: number | null;
   status: RoomStatus;
   hkStage: HkStage;
+  guestRequest?: GuestRoomRequest;
+  guestRequestNote?: string | null;
   propertyId: string;
   roomType?: { id: string; name: string; code: string };
   inspections?: Array<{
@@ -55,6 +58,21 @@ export const housekeepingAPI = {
     return apiClient.post<HkBoardRoom>(
       `/housekeeping/rooms/${roomId}/clean`,
       {},
+      authToken(),
+    );
+  },
+
+  async setGuestRequest(
+    roomId: string,
+    data: {
+      request: GuestRoomRequest;
+      updatedBy: string;
+      note?: string;
+    },
+  ): Promise<HkBoardRoom> {
+    return apiClient.post<HkBoardRoom>(
+      `/housekeeping/rooms/${roomId}/guest-request`,
+      data,
       authToken(),
     );
   },

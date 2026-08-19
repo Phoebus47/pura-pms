@@ -27,6 +27,8 @@ import { t } from '@/lib/i18n';
 import { FolioDetail } from '@/components/folio-detail';
 import { RoomMovePanel } from '@/components/room-move-panel';
 import { WalkPanel } from '@/components/walk-panel';
+import { RegistrationCardPanel } from '@/components/registration-card-panel';
+import { WakeUpCallPanel } from '@/components/wake-up-call-panel';
 import { ReservationNoShowButton } from '@/components/reservation-no-show-button';
 import { cn } from '@/lib/utils';
 
@@ -520,6 +522,14 @@ export default function ReservationDetailPage() {
 
           {reservation.status === 'CONFIRMED' ? (
             <WalkPanel reservation={reservation} onWalked={loadReservation} />
+          ) : null}
+
+          {['CONFIRMED', 'CHECKED_IN'].includes(reservation.status) ? (
+            <RegistrationCardPanel reservation={reservation} />
+          ) : null}
+
+          {['CONFIRMED', 'CHECKED_IN'].includes(reservation.status) ? (
+            <WakeUpCallPanel reservation={reservation} />
           ) : null}
 
           {/* Metadata */}

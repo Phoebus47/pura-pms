@@ -1461,9 +1461,38 @@ function handleHousekeeping(
     if (!room) {
       throw new APIError(404, 'Not Found', { message: 'Room not found' });
     }
+    if (room.guestRequest === 'DND') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Clear Do Not Disturb before marking the room clean',
+      });
+    }
     room.hkStage = 'CLEAN';
     if (room.status === 'VACANT_DIRTY') room.status = 'VACANT_CLEAN';
     if (room.status === 'OCCUPIED_DIRTY') room.status = 'OCCUPIED_CLEAN';
+    return room;
+  }
+
+  const guestRequestMatch =
+    /^\/housekeeping\/rooms\/([a-zA-Z0-9_-]+)\/guest-request$/.exec(path);
+  if (method === 'POST' && guestRequestMatch) {
+    const room = mockDb.rooms.find(
+      (row: any) => row.id === guestRequestMatch[1],
+    );
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    if (!['NONE', 'DND', 'MUR'].includes(body.request)) {
+      throw new APIError(400, 'Bad Request', {
+        message: 'request must be NONE, DND, or MUR',
+      });
+    }
+    room.guestRequest = body.request;
+    room.guestRequestNote =
+      body.request === 'NONE'
+        ? null
+        : body.note || room.guestRequestNote || null;
+    room.guestRequestUpdatedAt = new Date().toISOString();
+    room.guestRequestUpdatedBy = body.updatedBy;
     return room;
   }
 
@@ -1529,6 +1558,399 @@ function simulatedHardwareResult(job: any) {
     };
   }
   return { citizenId: '1234567890123', firstName: 'Somchai', lastName: 'Suk' };
+}
+
+function buildMockRegCardSnapshots(reservation: any) {
+  const property = mockDb.properties.find(
+    (row: any) => row.id === reservation.propertyId,
+  );
+  const room = mockDb.rooms.find((row: any) => row.id === reservation.roomId);
+  const guest = mockDb.guests.find(
+    (row: any) => row.id === reservation.guestId,
+  );
+  const roomType = mockDb.roomTypes.find(
+    (row: any) => row.id === room?.roomTypeId,
+  );
+  return {
+    guestSnapshot: {
+      firstName: guest?.firstName || 'Guest',
+      lastName: guest?.lastName || 'Name',
+      email: guest?.email || null,
+      phone: guest?.phone || null,
+      idType: guest?.idType || null,
+      idNumber: guest?.idNumber || null,
+      nationality: guest?.nationality || null,
+      dateOfBirth: guest?.dateOfBirth || null,
+      address: guest?.address || null,
+    },
+    staySnapshot: {
+      confirmNumber: reservation.confirmNumber,
+      checkIn: reservation.checkIn,
+      checkOut: reservation.checkOut,
+      nights: reservation.nights || 1,
+      adults: reservation.adults || 1,
+      children: reservation.children || 0,
+      roomNumber: room?.number || '—',
+      roomTypeName: roomType?.name || null,
+      rateCode: reservation.rateCode || null,
+      roomRate: Number(reservation.roomRate || 0),
+    },
+    propertySnapshot: {
+      name: property?.name || 'Pura',
+      address: property?.address || null,
+      phone: property?.phone || null,
+      taxId: property?.taxId || null,
+    },
+  };
+}
+
+function handleRegistrationCardsGet(path: string, params: URLSearchParams) {
+  if (path === '/registration-cards') {
+    const reservationId = params.get('reservationId');
+    return mockDb.registrationCards
+      .filter(
+        (row: any) => !reservationId || row.reservationId === reservationId,
+      )
+      .sort((a: any, b: any) => b.version - a.version);
+  }
+  const match = /^\/registration-cards\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const card = mockDb.registrationCards.find((row: any) => row.id === match[1]);
+  if (!card) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Registration card not found',
+    });
+  }
+  return card;
+}
+
+function handleRegistrationCardsPost(path: string, body: any) {
+  const signMatch = /^\/registration-cards\/([a-zA-Z0-9_-]+)\/sign$/.exec(path);
+  if (signMatch) {
+    const card = mockDb.registrationCards.find(
+      (row: any) => row.id === signMatch[1],
+    );
+    if (!card) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Registration card not found',
+      });
+    }
+    if (card.status !== 'DRAFT') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only draft registration cards can be signed',
+      });
+    }
+    card.status = 'SIGNED';
+    card.signatureData = body.signatureData;
+    card.signedAt = new Date().toISOString();
+    card.signedByGuestName = body.signedByGuestName;
+    return card;
+  }
+
+  const voidMatch = /^\/registration-cards\/([a-zA-Z0-9_-]+)\/void$/.exec(path);
+  if (voidMatch) {
+    const card = mockDb.registrationCards.find(
+      (row: any) => row.id === voidMatch[1],
+    );
+    if (!card) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Registration card not found',
+      });
+    }
+    if (card.status !== 'SIGNED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only signed registration cards can be voided',
+      });
+    }
+    card.status = 'VOID';
+    card.voidReason = body.reason;
+    card.voidedAt = new Date().toISOString();
+    card.voidedBy = body.voidedBy;
+    return card;
+  }
+
+  const printMatch = /^\/registration-cards\/([a-zA-Z0-9_-]+)\/print-job$/.exec(
+    path,
+  );
+  if (printMatch) {
+    const card = mockDb.registrationCards.find(
+      (row: any) => row.id === printMatch[1],
+    );
+    if (!card) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Registration card not found',
+      });
+    }
+    if (card.status !== 'SIGNED') {
+      throw new APIError(409, 'Conflict', {
+        message: 'Only signed registration cards can be printed',
+      });
+    }
+    const job = {
+      id: `hb_job_${Date.now()}`,
+      propertyId: card.propertyId,
+      type: 'PRINT',
+      status: 'PENDING',
+      requestedBy: body.requestedBy,
+      reservationId: card.reservationId,
+      payload: {
+        jobType: 'REG_CARD',
+        registrationCardId: card.id,
+      },
+      createdAt: new Date().toISOString(),
+    };
+    mockDb.hardwareJobs.push(job);
+    return job;
+  }
+
+  if (path !== '/registration-cards') return;
+
+  const reservation = mockDb.reservations.find(
+    (row: any) => row.id === body.reservationId,
+  );
+  if (!reservation) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+
+  const existingDraft = mockDb.registrationCards.find(
+    (row: any) =>
+      row.reservationId === body.reservationId && row.status === 'DRAFT',
+  );
+  if (existingDraft) return existingDraft;
+
+  const latest = mockDb.registrationCards
+    .filter((row: any) => row.reservationId === body.reservationId)
+    .sort((a: any, b: any) => b.version - a.version)[0];
+  const snapshots = buildMockRegCardSnapshots(reservation);
+  const created = {
+    id: `rc_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    reservationId: body.reservationId,
+    version: (latest?.version || 0) + 1,
+    status: 'DRAFT',
+    ...snapshots,
+    signatureData: null,
+    signedAt: null,
+    signedByGuestName: null,
+    voidReason: null,
+    voidedAt: null,
+    voidedBy: null,
+    createdBy: body.createdBy,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    reservation: {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+    },
+    property: {
+      id: reservation.propertyId,
+      name: snapshots.propertySnapshot.name,
+    },
+  };
+  mockDb.registrationCards.push(created);
+  return created;
+}
+
+function handleRegistrationCards(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/registration-cards')) return;
+  if (method === 'GET') return handleRegistrationCardsGet(path, params);
+  if (method === 'POST') return handleRegistrationCardsPost(path, body);
+}
+
+function handleWakeUpCallsGet(path: string, params: URLSearchParams) {
+  if (path !== '/wake-up-calls') return;
+  const reservationId = params.get('reservationId');
+  const propertyId = params.get('propertyId');
+  const scheduledDate = params.get('scheduledDate');
+  if (!reservationId && !propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId or reservationId is required',
+    });
+  }
+  return mockDb.wakeUpCalls
+    .filter((row: any) => {
+      if (reservationId) return row.reservationId === reservationId;
+      if (row.propertyId !== propertyId) return false;
+      if (scheduledDate && row.scheduledDate !== scheduledDate) return false;
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
+    );
+}
+
+function handleWakeUpCallsPost(path: string, body: any) {
+  const completeMatch = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)\/complete$/.exec(
+    path,
+  );
+  if (completeMatch) {
+    const row = mockDb.wakeUpCalls.find(
+      (item: any) => item.id === completeMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    if (row.status !== 'SCHEDULED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only scheduled wake-up calls can be updated',
+      });
+    }
+    row.status = 'COMPLETED';
+    row.completedAt = new Date().toISOString();
+    row.completedBy = body.completedBy;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  const missMatch = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)\/miss$/.exec(path);
+  if (missMatch) {
+    const row = mockDb.wakeUpCalls.find(
+      (item: any) => item.id === missMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    if (row.status !== 'SCHEDULED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only scheduled wake-up calls can be updated',
+      });
+    }
+    row.status = 'MISSED';
+    row.missedAt = new Date().toISOString();
+    row.missedBy = body.missedBy;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  const cancelMatch = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)\/cancel$/.exec(path);
+  if (cancelMatch) {
+    const row = mockDb.wakeUpCalls.find(
+      (item: any) => item.id === cancelMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    if (row.status !== 'SCHEDULED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only scheduled wake-up calls can be updated',
+      });
+    }
+    row.status = 'CANCELLED';
+    row.cancelledAt = new Date().toISOString();
+    row.cancelledBy = body.cancelledBy;
+    row.cancelReason = body.cancelReason || null;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  if (path !== '/wake-up-calls') return;
+
+  const reservation = mockDb.reservations.find(
+    (row: any) => row.id === body.reservationId,
+  );
+  if (!reservation) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+  if (!['CONFIRMED', 'CHECKED_IN'].includes(reservation.status)) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'Wake-up calls can only be scheduled for confirmed or checked-in reservations',
+    });
+  }
+  if (!reservation.roomId || !reservation.room) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'Reservation must have a room assigned to schedule a wake-up call',
+    });
+  }
+
+  const scheduledAt = new Date(body.scheduledAt);
+  if (Number.isNaN(scheduledAt.getTime())) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'scheduledAt must be a valid date',
+    });
+  }
+  const scheduledDate = scheduledAt.toISOString().slice(0, 10);
+  const created = {
+    id: `wu_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    reservationId: reservation.id,
+    roomId: reservation.roomId,
+    scheduledAt: scheduledAt.toISOString(),
+    scheduledDate,
+    status: 'SCHEDULED',
+    notes: body.notes?.trim() || null,
+    scheduledBy: body.scheduledBy,
+    completedAt: null,
+    completedBy: null,
+    missedAt: null,
+    missedBy: null,
+    cancelledAt: null,
+    cancelledBy: null,
+    cancelReason: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    reservation: {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+      guest: reservation.guest
+        ? {
+            firstName: reservation.guest.firstName,
+            lastName: reservation.guest.lastName,
+          }
+        : undefined,
+    },
+    room: {
+      id: reservation.room.id,
+      number: reservation.room.number,
+    },
+    property: {
+      id: reservation.propertyId,
+      name:
+        mockDb.properties.find((p: any) => p.id === reservation.propertyId)
+          ?.name || 'Pura',
+    },
+  };
+  mockDb.wakeUpCalls.push(created);
+  return created;
+}
+
+function handleWakeUpCalls(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/wake-up-calls')) return;
+  if (method === 'GET') {
+    if (path === '/wake-up-calls') {
+      return handleWakeUpCallsGet(path, params);
+    }
+    const match = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)$/.exec(path);
+    if (!match) return;
+    const row = mockDb.wakeUpCalls.find((item: any) => item.id === match[1]);
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    return row;
+  }
+  if (method === 'POST') return handleWakeUpCallsPost(path, body);
 }
 
 function handleHardwareBridge(
@@ -2844,6 +3266,8 @@ export async function routeMockRequest<T>(
       () => handleBlocks(method, path, body, params),
       () => handleHousekeeping(method, path, body, params),
       () => handleHardwareBridge(method, path, body, params),
+      () => handleRegistrationCards(method, path, body, params),
+      () => handleWakeUpCalls(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

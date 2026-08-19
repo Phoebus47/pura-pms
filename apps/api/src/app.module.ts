@@ -25,6 +25,8 @@ import { YieldModule } from './yield/yield.module';
 import { BlocksModule } from './blocks/blocks.module';
 import { HousekeepingModule } from './housekeeping/housekeeping.module';
 import { HardwareBridgeModule } from './hardware-bridge/hardware-bridge.module';
+import { RegistrationCardsModule } from './registration-cards/registration-cards.module';
+import { WakeUpCallsModule } from './wake-up-calls/wake-up-calls.module';
 
 @Module({
   imports: [
@@ -49,6 +51,8 @@ import { HardwareBridgeModule } from './hardware-bridge/hardware-bridge.module';
     BlocksModule,
     HousekeepingModule,
     HardwareBridgeModule,
+    RegistrationCardsModule,
+    WakeUpCallsModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

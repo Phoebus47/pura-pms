@@ -20,12 +20,18 @@ vi.mock('@/lib/api/housekeeping', () => ({
     getBoard: vi.fn(),
     getChecklist: vi.fn(),
     markClean: vi.fn(),
+    setGuestRequest: vi.fn(),
     inspect: vi.fn(),
   },
 }));
 
 vi.mock('@/lib/api/properties', () => ({
   propertiesAPI: { getAll: vi.fn() },
+}));
+
+vi.mock('@/lib/stores/use-auth-store', () => ({
+  useAuthStore: (selector: (state: { user: { id: string } }) => unknown) =>
+    selector({ user: { id: 'usr_mock_1' } }),
 }));
 
 function renderPage() {
@@ -72,6 +78,7 @@ describe('HousekeepingPage', () => {
         number: '101',
         status: 'VACANT_DIRTY',
         hkStage: 'DIRTY',
+        guestRequest: 'NONE',
         propertyId: 'prop_1',
         roomType: { id: 'rt-1', name: 'Deluxe', code: 'DLX' },
       },
@@ -85,6 +92,34 @@ describe('HousekeepingPage', () => {
     );
     await waitFor(() => {
       expect(housekeepingAPI.markClean).toHaveBeenCalledWith('room-1');
+    });
+  });
+
+  it('sets DND on a room', async () => {
+    vi.mocked(housekeepingAPI.getBoard).mockResolvedValue([
+      {
+        id: 'room-1',
+        number: '101',
+        status: 'OCCUPIED_CLEAN',
+        hkStage: 'READY',
+        guestRequest: 'NONE',
+        propertyId: 'prop_1',
+        roomType: { id: 'rt-1', name: 'Deluxe', code: 'DLX' },
+      },
+    ] as never);
+    vi.mocked(housekeepingAPI.setGuestRequest).mockResolvedValue({
+      id: 'room-1',
+      guestRequest: 'DND',
+    } as never);
+    renderPage();
+    fireEvent.click(
+      await screen.findByRole('button', { name: t('housekeeping.setDnd') }),
+    );
+    await waitFor(() => {
+      expect(housekeepingAPI.setGuestRequest).toHaveBeenCalledWith(
+        'room-1',
+        expect.objectContaining({ request: 'DND', updatedBy: 'usr_mock_1' }),
+      );
     });
   });
 

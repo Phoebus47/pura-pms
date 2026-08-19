@@ -5,5 +5,6 @@ import { HardwareBridgeService } from './hardware-bridge.service';
 @Module({
   controllers: [HardwareBridgeController],
   providers: [HardwareBridgeService],
+  exports: [HardwareBridgeService],
 })
 export class HardwareBridgeModule {}

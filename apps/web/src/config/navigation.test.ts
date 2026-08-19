@@ -24,6 +24,7 @@ import {
   Layers,
   ClipboardCheck,
   Printer,
+  AlarmClock,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -178,6 +179,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Printer);
     });
 
+    it('should include Wake-up calls navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Wake-up calls',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/wake-up-calls');
+      expect(item?.icon).toBe(AlarmClock);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -282,6 +292,7 @@ describe('navigation', () => {
         'Blocks',
         'Housekeeping',
         'Hardware',
+        'Wake-up calls',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -298,6 +309,7 @@ describe('navigation', () => {
         '/blocks',
         '/housekeeping',
         '/hardware-bridge',
+        '/wake-up-calls',
         '/settings',
       ]);
     });

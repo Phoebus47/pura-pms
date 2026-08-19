@@ -29,7 +29,15 @@ export const HK_CLOSED_MESSAGE =
   'Out of order or out of service rooms cannot enter the inspection workflow';
 export const HK_CHECKLIST_MESSAGE =
   'Inspection must include every checklist item';
+export const HK_DND_CLEAN_MESSAGE =
+  'Clear Do Not Disturb before marking the room clean';
 
+export const GUEST_ROOM_REQUESTS = ['NONE', 'DND', 'MUR'] as const;
+export type GuestRoomRequest = (typeof GUEST_ROOM_REQUESTS)[number];
+
+export function isGuestRoomRequest(value: string): value is GuestRoomRequest {
+  return GUEST_ROOM_REQUESTS.includes(value as GuestRoomRequest);
+}
 const DIRTY_STATUSES = new Set(['VACANT_DIRTY', 'OCCUPIED_DIRTY']);
 const CLEAN_STATUSES = new Set(['VACANT_CLEAN', 'OCCUPIED_CLEAN']);
 const CLOSED_STATUSES = new Set(['OUT_OF_ORDER', 'OUT_OF_SERVICE']);
