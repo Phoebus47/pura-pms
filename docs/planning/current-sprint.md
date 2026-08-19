@@ -1,39 +1,32 @@
-# Current Sprint — Phase 5 Digital Registration Card
+# Current Sprint — Phase 5 Wake-up Call
 
 **Status:** In progress
-**Branch:** `cursor/feat-digital-reg-card-6a5d`
+**Branch:** `cursor/feat-wakeup-call-6a5d`
 **Base:** `dev`
 **Roles:** @PM → @Architect → @Backend → @Frontend → @QA
 
 ## Goal
 
-Tablet signature capture for Thai registration card (ใบลงทะเบียน), immutable
-snapshots, print via Hardware Bridge `REG_CARD` job.
+Manual wake-up call scheduling and FO delivery confirmation (no PBX in v1).
 
 ## Database
 
-- `RegistrationCard` model with `DRAFT` / `SIGNED` / `VOID`
-- JSON snapshots + PNG signature base64
-- Versioning on re-sign
+- `WakeUpCall` with `SCHEDULED` / `COMPLETED` / `MISSED` / `CANCELLED`
+- Links property, reservation, room; `scheduledDate` for board filters
 
 ## API
 
-- `POST /registration-cards` — create draft from reservation
-- `GET /registration-cards?reservationId=` — list
-- `GET /registration-cards/:id` — detail
-- `POST /registration-cards/:id/sign` — capture signature
-- `POST /registration-cards/:id/void` — void signed card
-- `POST /registration-cards/:id/print-job` — Hardware Bridge PRINT job
+- `GET /wake-up-calls?propertyId=&scheduledDate=`
+- `GET /wake-up-calls?reservationId=`
+- `POST /wake-up-calls` — schedule
+- `POST /wake-up-calls/:id/complete|miss|cancel`
 
 ## Web
 
-- `/registration-cards/[id]/sign` — canvas signature pad
-- `/registration-cards/[id]/print` — printable preview + hardware print
-- Panel on `/reservations/[id]` with soft check-in warning
+- `/wake-up-calls` board
+- Panel on reservation detail
 
 ## Wait
 
-- PDPA consent module
-- TM.30 auto-export
-- Kiosk / offline signature
-- Hard check-in gate
+- PBX / Hardware Bridge dial
+- Auto-miss after scheduled time

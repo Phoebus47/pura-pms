@@ -30,6 +30,7 @@
     "blocks": "Blocks",
     "housekeeping": "Housekeeping",
     "hardwareBridge": "Hardware",
+    "wakeUpCalls": "Wake-up calls",
     "settings": "Settings",
     "more": "More"
   },
@@ -573,6 +574,12 @@
       "voidFailed": "Could not void registration card",
       "printJobSuccess": "Print job sent",
       "printJobFailed": "Could not create print job"
+    },
+    "wakeUpCall": {
+      "title": "Wake-up calls",
+      "schedule": "Schedule wake-up",
+      "scheduleSuccess": "Wake-up call scheduled",
+      "scheduleFailed": "Could not schedule wake-up call"
     }
   },
   "registrationCard": {
@@ -604,5 +611,26 @@
     "print": "Print",
     "printViaBridge": "Print via hardware",
     "printPreview": "Print preview"
+  },
+  "wakeUpCalls": {
+    "title": "Wake-up calls",
+    "subtitle": "Schedule guest wake-up times and confirm delivery at the front desk.",
+    "list": "Today's calls",
+    "scheduledDate": "Date",
+    "scheduledAt": "Wake-up time",
+    "notes": "Notes",
+    "room": "Room",
+    "empty": "No wake-up calls for this date",
+    "statusScheduled": "Scheduled",
+    "statusCompleted": "Completed",
+    "statusMissed": "Missed",
+    "statusCancelled": "Cancelled",
+    "markCompleted": "Mark delivered",
+    "markMissed": "Mark missed",
+    "cancel": "Cancel",
+    "completeSuccess": "Wake-up marked delivered",
+    "missSuccess": "Wake-up marked missed",
+    "cancelSuccess": "Wake-up cancelled",
+    "actionFailed": "Could not update wake-up call"
   }
 }

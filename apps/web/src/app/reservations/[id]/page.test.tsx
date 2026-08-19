@@ -38,6 +38,10 @@ vi.mock('@/components/registration-card-panel', () => ({
   RegistrationCardPanel: () => <div data-testid="registration-card-panel" />,
 }));
 
+vi.mock('@/components/wake-up-call-panel', () => ({
+  WakeUpCallPanel: () => <div data-testid="wake-up-call-panel" />,
+}));
+
 vi.mock('@/components/reservation-no-show-button', () => ({
   ReservationNoShowButton: () => <div data-testid="no-show-button" />,
 }));
