@@ -1734,6 +1734,196 @@ function handleRegistrationCards(
   if (method === 'POST') return handleRegistrationCardsPost(path, body);
 }
 
+function handleWakeUpCallsGet(path: string, params: URLSearchParams) {
+  if (path !== '/wake-up-calls') return;
+  const reservationId = params.get('reservationId');
+  const propertyId = params.get('propertyId');
+  const scheduledDate = params.get('scheduledDate');
+  if (!reservationId && !propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId or reservationId is required',
+    });
+  }
+  return mockDb.wakeUpCalls
+    .filter((row: any) => {
+      if (reservationId) return row.reservationId === reservationId;
+      if (row.propertyId !== propertyId) return false;
+      if (scheduledDate && row.scheduledDate !== scheduledDate) return false;
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
+    );
+}
+
+function handleWakeUpCallsPost(path: string, body: any) {
+  const completeMatch = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)\/complete$/.exec(
+    path,
+  );
+  if (completeMatch) {
+    const row = mockDb.wakeUpCalls.find(
+      (item: any) => item.id === completeMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    if (row.status !== 'SCHEDULED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only scheduled wake-up calls can be updated',
+      });
+    }
+    row.status = 'COMPLETED';
+    row.completedAt = new Date().toISOString();
+    row.completedBy = body.completedBy;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  const missMatch = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)\/miss$/.exec(path);
+  if (missMatch) {
+    const row = mockDb.wakeUpCalls.find(
+      (item: any) => item.id === missMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    if (row.status !== 'SCHEDULED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only scheduled wake-up calls can be updated',
+      });
+    }
+    row.status = 'MISSED';
+    row.missedAt = new Date().toISOString();
+    row.missedBy = body.missedBy;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  const cancelMatch = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)\/cancel$/.exec(path);
+  if (cancelMatch) {
+    const row = mockDb.wakeUpCalls.find(
+      (item: any) => item.id === cancelMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    if (row.status !== 'SCHEDULED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only scheduled wake-up calls can be updated',
+      });
+    }
+    row.status = 'CANCELLED';
+    row.cancelledAt = new Date().toISOString();
+    row.cancelledBy = body.cancelledBy;
+    row.cancelReason = body.cancelReason || null;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  if (path !== '/wake-up-calls') return;
+
+  const reservation = mockDb.reservations.find(
+    (row: any) => row.id === body.reservationId,
+  );
+  if (!reservation) {
+    throw new APIError(404, 'Not Found', { message: 'Reservation not found' });
+  }
+  if (!['CONFIRMED', 'CHECKED_IN'].includes(reservation.status)) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'Wake-up calls can only be scheduled for confirmed or checked-in reservations',
+    });
+  }
+  if (!reservation.roomId || !reservation.room) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'Reservation must have a room assigned to schedule a wake-up call',
+    });
+  }
+
+  const scheduledAt = new Date(body.scheduledAt);
+  if (Number.isNaN(scheduledAt.getTime())) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'scheduledAt must be a valid date',
+    });
+  }
+  const scheduledDate = scheduledAt.toISOString().slice(0, 10);
+  const created = {
+    id: `wu_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    reservationId: reservation.id,
+    roomId: reservation.roomId,
+    scheduledAt: scheduledAt.toISOString(),
+    scheduledDate,
+    status: 'SCHEDULED',
+    notes: body.notes?.trim() || null,
+    scheduledBy: body.scheduledBy,
+    completedAt: null,
+    completedBy: null,
+    missedAt: null,
+    missedBy: null,
+    cancelledAt: null,
+    cancelledBy: null,
+    cancelReason: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    reservation: {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+      guest: reservation.guest
+        ? {
+            firstName: reservation.guest.firstName,
+            lastName: reservation.guest.lastName,
+          }
+        : undefined,
+    },
+    room: {
+      id: reservation.room.id,
+      number: reservation.room.number,
+    },
+    property: {
+      id: reservation.propertyId,
+      name:
+        mockDb.properties.find((p: any) => p.id === reservation.propertyId)
+          ?.name || 'Pura',
+    },
+  };
+  mockDb.wakeUpCalls.push(created);
+  return created;
+}
+
+function handleWakeUpCalls(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/wake-up-calls')) return;
+  if (method === 'GET') {
+    if (path === '/wake-up-calls') {
+      return handleWakeUpCallsGet(path, params);
+    }
+    const match = /^\/wake-up-calls\/([a-zA-Z0-9_-]+)$/.exec(path);
+    if (!match) return;
+    const row = mockDb.wakeUpCalls.find((item: any) => item.id === match[1]);
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Wake-up call not found',
+      });
+    }
+    return row;
+  }
+  if (method === 'POST') return handleWakeUpCallsPost(path, body);
+}
+
 function handleHardwareBridge(
   method: string,
   path: string,
@@ -3048,6 +3238,7 @@ export async function routeMockRequest<T>(
       () => handleHousekeeping(method, path, body, params),
       () => handleHardwareBridge(method, path, body, params),
       () => handleRegistrationCards(method, path, body, params),
+      () => handleWakeUpCalls(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

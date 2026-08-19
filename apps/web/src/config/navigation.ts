@@ -18,6 +18,7 @@ import {
   Layers,
   ClipboardCheck,
   Printer,
+  AlarmClock,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -133,6 +134,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.partnerHotels',
   },
   {
+    name: 'Wake-up calls',
+    href: '/wake-up-calls',
+    icon: AlarmClock,
+    labelKey: 'nav.wakeUpCalls',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -246,6 +253,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/hardware-bridge',
     icon: Printer,
     labelKey: 'nav.hardwareBridge',
+  },
+  {
+    name: 'Wake-up calls',
+    href: '/wake-up-calls',
+    icon: AlarmClock,
+    labelKey: 'nav.wakeUpCalls',
   },
   {
     name: 'Settings',

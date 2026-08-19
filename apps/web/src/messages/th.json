@@ -30,6 +30,7 @@
     "blocks": "บล็อก",
     "housekeeping": "แม่บ้าน",
     "hardwareBridge": "ฮาร์ดแวร์",
+    "wakeUpCalls": "ปลุกแขก",
     "settings": "ตั้งค่า",
     "more": "เพิ่มเติม"
   },
@@ -573,6 +574,12 @@
       "voidFailed": "ยกเลิกใบลงทะเบียนไม่สำเร็จ",
       "printJobSuccess": "ส่งคำสั่งพิมพ์แล้ว",
       "printJobFailed": "สร้างคำสั่งพิมพ์ไม่สำเร็จ"
+    },
+    "wakeUpCall": {
+      "title": "โทรปลุก",
+      "schedule": "ตั้งโทรปลุก",
+      "scheduleSuccess": "ตั้งโทรปลุกแล้ว",
+      "scheduleFailed": "ตั้งโทรปลุกไม่สำเร็จ"
     }
   },
   "registrationCard": {
@@ -604,5 +611,26 @@
     "print": "พิมพ์",
     "printViaBridge": "พิมพ์ผ่านฮาร์ดแวร์",
     "printPreview": "ตัวอย่างก่อนพิมพ์"
+  },
+  "wakeUpCalls": {
+    "title": "โทรปลุก",
+    "subtitle": "ตั้งเวลาปลุกแขกและยืนยันการโทรที่แผนกต้อนรับ",
+    "list": "คิววันนี้",
+    "scheduledDate": "วันที่",
+    "scheduledAt": "เวลาปลุก",
+    "notes": "หมายเหตุ",
+    "room": "ห้อง",
+    "empty": "ยังไม่มีโทรปลุกในวันนี้",
+    "statusScheduled": "กำหนดแล้ว",
+    "statusCompleted": "เสร็จสิ้น",
+    "statusMissed": "พลาด",
+    "statusCancelled": "ยกเลิกแล้ว",
+    "markCompleted": "โทรแล้ว",
+    "markMissed": "พลาด",
+    "cancel": "ยกเลิก",
+    "completeSuccess": "บันทึกว่าโทรแล้ว",
+    "missSuccess": "บันทึกว่าพลาด",
+    "cancelSuccess": "ยกเลิกโทรปลุกแล้ว",
+    "actionFailed": "อัปเดตโทรปลุกไม่สำเร็จ"
   }
 }
