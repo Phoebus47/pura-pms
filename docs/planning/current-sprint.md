@@ -1,32 +1,19 @@
-# Current Sprint — Phase 5 Wake-up Call
-
-**Status:** In progress
-**Branch:** `cursor/feat-wakeup-call-6a5d`
-**Base:** `dev`
-**Roles:** @PM → @Architect → @Backend → @Frontend → @QA
+# Current Sprint — Phase 5 DND / MUR
 
 ## Goal
 
-Manual wake-up call scheduling and FO delivery confirmation (no PBX in v1).
+Guest-request indicators on rooms: Do Not Disturb (DND) and Make Up Room (MUR),
+visible and toggleable from the housekeeping board.
 
-## Database
+## Scope
 
-- `WakeUpCall` with `SCHEDULED` / `COMPLETED` / `MISSED` / `CANCELLED`
-- Links property, reservation, room; `scheduledDate` for board filters
+- `GuestRoomRequest` on `Room` (`NONE` | `DND` | `MUR`)
+- `POST /housekeeping/rooms/:id/guest-request`
+- Block mark-clean while DND is active
+- HK board badges + actions (en/th)
 
-## API
+## Out of scope
 
-- `GET /wake-up-calls?propertyId=&scheduledDate=`
-- `GET /wake-up-calls?reservationId=`
-- `POST /wake-up-calls` — schedule
-- `POST /wake-up-calls/:id/complete|miss|cancel`
-
-## Web
-
-- `/wake-up-calls` board
-- Panel on reservation detail
-
-## Wait
-
-- PBX / Hardware Bridge dial
-- Auto-miss after scheduled time
+- Auto-clear on checkout
+- Door sensor / PBX integration
+- Separate DND/MUR board page

@@ -105,6 +105,7 @@ export const mockDb: any = {
       number: '101',
       status: 'VACANT_CLEAN',
       hkStage: 'READY',
+      guestRequest: 'NONE',
       condition: 'CLEAN',
     },
     {
@@ -114,6 +115,7 @@ export const mockDb: any = {
       number: '102',
       status: 'OCCUPIED_CLEAN',
       hkStage: 'CLEAN',
+      guestRequest: 'NONE',
       condition: 'DIRTY',
     },
     {
@@ -123,6 +125,7 @@ export const mockDb: any = {
       number: '201',
       status: 'VACANT_DIRTY',
       hkStage: 'DIRTY',
+      guestRequest: 'NONE',
       condition: 'DIRTY',
     },
   ],

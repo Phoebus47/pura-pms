@@ -1,5 +1,5 @@
 import { HK_CHECKLIST } from './hk-rules';
-import type { HkStage } from './hk-rules';
+import type { GuestRoomRequest, HkStage } from './hk-rules';
 
 export interface HkRoomRow {
   id: string;
@@ -7,6 +7,10 @@ export interface HkRoomRow {
   floor: number | null;
   status: string;
   hkStage: HkStage;
+  guestRequest: GuestRoomRequest;
+  guestRequestNote: string | null;
+  guestRequestUpdatedAt: Date | null;
+  guestRequestUpdatedBy: string | null;
   propertyId: string;
   roomType: { id: string; name: string; code: string };
   inspections: Array<{

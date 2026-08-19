@@ -11,6 +11,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   CreateInspectionDto,
   FindHousekeepingQueryDto,
+  SetGuestRequestDto,
 } from './dto/housekeeping.dto';
 import { HousekeepingService } from './housekeeping.service';
 
@@ -32,6 +33,11 @@ export class HousekeepingController {
   @Post('rooms/:id/clean')
   markClean(@Param('id') id: string) {
     return this.housekeepingService.markClean(id);
+  }
+
+  @Post('rooms/:id/guest-request')
+  setGuestRequest(@Param('id') id: string, @Body() dto: SetGuestRequestDto) {
+    return this.housekeepingService.setGuestRequest(id, dto);
   }
 
   @Get('rooms/:id/inspections')

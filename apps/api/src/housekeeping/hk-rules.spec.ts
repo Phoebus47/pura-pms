@@ -5,6 +5,7 @@ import {
   hasFullChecklist,
   hkStageForStatusChange,
   inspectionPassed,
+  isGuestRoomRequest,
   toCleanRoomStatus,
   toDirtyRoomStatus,
 } from './hk-rules';
@@ -37,5 +38,12 @@ describe('hk-rules', () => {
     expect(hasFullChecklist([{ itemCode: 'BED' }])).toBe(false);
     expect(HK_CHECKLIST_MESSAGE.length).toBeGreaterThan(0);
     expect(HK_NOT_CLEAN_MESSAGE.length).toBeGreaterThan(0);
+  });
+
+  it('validates guest room request values', () => {
+    expect(isGuestRoomRequest('DND')).toBe(true);
+    expect(isGuestRoomRequest('MUR')).toBe(true);
+    expect(isGuestRoomRequest('NONE')).toBe(true);
+    expect(isGuestRoomRequest('VIP')).toBe(false);
   });
 });

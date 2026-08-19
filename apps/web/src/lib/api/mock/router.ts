@@ -1461,9 +1461,38 @@ function handleHousekeeping(
     if (!room) {
       throw new APIError(404, 'Not Found', { message: 'Room not found' });
     }
+    if (room.guestRequest === 'DND') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Clear Do Not Disturb before marking the room clean',
+      });
+    }
     room.hkStage = 'CLEAN';
     if (room.status === 'VACANT_DIRTY') room.status = 'VACANT_CLEAN';
     if (room.status === 'OCCUPIED_DIRTY') room.status = 'OCCUPIED_CLEAN';
+    return room;
+  }
+
+  const guestRequestMatch =
+    /^\/housekeeping\/rooms\/([a-zA-Z0-9_-]+)\/guest-request$/.exec(path);
+  if (method === 'POST' && guestRequestMatch) {
+    const room = mockDb.rooms.find(
+      (row: any) => row.id === guestRequestMatch[1],
+    );
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    if (!['NONE', 'DND', 'MUR'].includes(body.request)) {
+      throw new APIError(400, 'Bad Request', {
+        message: 'request must be NONE, DND, or MUR',
+      });
+    }
+    room.guestRequest = body.request;
+    room.guestRequestNote =
+      body.request === 'NONE'
+        ? null
+        : body.note || room.guestRequestNote || null;
+    room.guestRequestUpdatedAt = new Date().toISOString();
+    room.guestRequestUpdatedBy = body.updatedBy;
     return room;
   }
 

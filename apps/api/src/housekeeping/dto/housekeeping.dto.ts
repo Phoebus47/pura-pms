@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsBoolean,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -36,4 +37,18 @@ export class CreateInspectionDto {
 
   @IsArray()
   lines!: InspectionLineDto[];
+}
+
+export class SetGuestRequestDto {
+  @IsString()
+  @IsIn(['NONE', 'DND', 'MUR'])
+  request!: 'NONE' | 'DND' | 'MUR';
+
+  @IsString()
+  @IsNotEmpty()
+  updatedBy!: string;
+
+  @IsString()
+  @IsOptional()
+  note?: string;
 }
