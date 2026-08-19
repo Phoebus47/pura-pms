@@ -1,0 +1,21 @@
+{
+  "name": "PURA PMS",
+  "install": "./scripts/cloud-agent-install.sh",
+  "start": "./scripts/cloud-agent-start.sh",
+  "terminals": [
+    {
+      "name": "api",
+      "command": "for i in $(seq 1 90); do [ -f .env ] && break; sleep 1; done; set -a && . ./.env && set +a && pnpm --filter api start:dev",
+      "description": "NestJS API on port 3001"
+    },
+    {
+      "name": "web",
+      "command": "for i in $(seq 1 90); do [ -f .env ] && break; sleep 1; done; set -a && . ./.env && set +a && cd apps/web && pnpm exec next dev --hostname 0.0.0.0 --port 3000",
+      "description": "Next.js web app on port 3000"
+    }
+  ],
+  "ports": [
+    { "name": "web", "port": 3000 },
+    { "name": "api", "port": 3001 }
+  ]
+}
