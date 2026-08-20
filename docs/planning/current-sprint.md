@@ -1,18 +1,18 @@
-# Current Sprint — Phase 6 Post-stay Feedback
+# Current Sprint — Phase 6 Guest Complaints
 
 ## Goal (@PM)
 
-Staff can record and review post-stay guest satisfaction scores from a property board.
+Staff can log guest complaints, track service recovery, and close cases from a property board.
 
 ## In scope
 
-- `GuestFeedback` + `GuestFeedbackStatus` (OPEN | REVIEWED | ARCHIVED)
-- `GET/POST /guest-feedback`, `POST :id/review`
-- `/feedback` staff board (en/th)
-- Score 1–5, optional comment; optional `reservationId`
+- `GuestComplaint` + severity/status enums
+- `GET/POST /guest-complaints`, `POST :id/start|resolve|close`
+- `/complaints` staff board (en/th)
+- Category, subject, description; optional guest/reservation
 
 ## Out of scope
 
-- Auto email survey after checkout
-- OTA review sync
+- Auto folio credit / compensation posting
 - Guest self-service portal
+- SLA escalation automation

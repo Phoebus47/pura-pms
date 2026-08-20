@@ -2515,6 +2515,128 @@ function handleGuestFeedback(
   if (method === 'POST') return handleGuestFeedbackPost(path, body);
 }
 
+function findGuestComplaint(id: string) {
+  const row = mockDb.guestComplaints.find((item: any) => item.id === id);
+  if (!row) {
+    throw new APIError(404, 'Not Found', {
+      message: `Guest complaint with ID ${id} not found`,
+    });
+  }
+  return row;
+}
+
+function handleGuestComplaintsGet(path: string, params: URLSearchParams) {
+  const match = /^\/guest-complaints\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (match) return findGuestComplaint(match[1]);
+  if (path !== '/guest-complaints') return;
+  const propertyId = params.get('propertyId');
+  if (!propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId is required',
+    });
+  }
+  const status = params.get('status');
+  return mockDb.guestComplaints
+    .filter((row: any) => {
+      if (row.propertyId !== propertyId) return false;
+      if (status && row.status !== status) return false;
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+}
+
+function handleGuestComplaintsPost(path: string, body: any) {
+  const startMatch = /^\/guest-complaints\/([a-zA-Z0-9_-]+)\/start$/.exec(path);
+  if (startMatch) {
+    const row = findGuestComplaint(startMatch[1]);
+    if (row.status === 'OPEN') {
+      row.status = 'IN_PROGRESS';
+      row.assignedTo = body.assignedTo || row.assignedTo;
+      row.updatedAt = new Date().toISOString();
+    }
+    return row;
+  }
+
+  const resolveMatch = /^\/guest-complaints\/([a-zA-Z0-9_-]+)\/resolve$/.exec(
+    path,
+  );
+  if (resolveMatch) {
+    const row = findGuestComplaint(resolveMatch[1]);
+    if (row.status === 'OPEN' || row.status === 'IN_PROGRESS') {
+      row.status = 'RESOLVED';
+      row.resolutionNote = body.resolutionNote;
+      row.resolvedAt = new Date().toISOString();
+      row.resolvedBy = body.resolvedBy;
+      row.updatedAt = new Date().toISOString();
+    }
+    return row;
+  }
+
+  const closeMatch = /^\/guest-complaints\/([a-zA-Z0-9_-]+)\/close$/.exec(path);
+  if (closeMatch) {
+    const row = findGuestComplaint(closeMatch[1]);
+    if (row.status === 'RESOLVED') {
+      row.status = 'CLOSED';
+      row.closedAt = new Date().toISOString();
+      row.closedBy = body.closedBy;
+      row.updatedAt = new Date().toISOString();
+    }
+    return row;
+  }
+
+  if (path !== '/guest-complaints') return;
+  const property = mockDb.properties.find((p: any) => p.id === body.propertyId);
+  if (!property) {
+    throw new APIError(404, 'Not Found', { message: 'Property not found' });
+  }
+  const guest = body.guestId
+    ? mockDb.guests.find((g: any) => g.id === body.guestId)
+    : null;
+  if (body.guestId && !guest) {
+    throw new APIError(404, 'Not Found', { message: 'Guest not found' });
+  }
+  const created = {
+    id: `gc_mock_${Date.now()}`,
+    propertyId: body.propertyId,
+    guestId: body.guestId || null,
+    reservationId: body.reservationId || null,
+    category: body.category,
+    severity: body.severity || 'MEDIUM',
+    subject: body.subject,
+    description: body.description,
+    status: 'OPEN',
+    openedBy: body.openedBy,
+    assignedTo: null,
+    resolutionNote: null,
+    resolvedAt: null,
+    resolvedBy: null,
+    closedAt: null,
+    closedBy: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    guest: guest
+      ? { id: guest.id, firstName: guest.firstName, lastName: guest.lastName }
+      : null,
+    property: { id: property.id, name: property.name },
+  };
+  mockDb.guestComplaints.push(created);
+  return created;
+}
+
+function handleGuestComplaints(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/guest-complaints')) return;
+  if (method === 'GET') return handleGuestComplaintsGet(path, params);
+  if (method === 'POST') return handleGuestComplaintsPost(path, body);
+}
+
 function handleHardwareBridge(
   method: string,
   path: string,
@@ -3834,6 +3956,7 @@ export async function routeMockRequest<T>(
       () => handleLostFound(method, path, body, params),
       () => handleGuestMessages(method, path, body, params),
       () => handleGuestFeedback(method, path, body, params),
+      () => handleGuestComplaints(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
