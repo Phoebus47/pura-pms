@@ -35,6 +35,7 @@ export interface MockData {
   lostFoundItems: any[];
   guestMessages: any[];
   guestFeedbacks: any[];
+  guestComplaints: any[];
   walks: any[];
 }
 
@@ -505,6 +506,34 @@ export const mockDb: any = {
       submittedAt: MOCK_NOW,
       reviewedAt: null,
       reviewedBy: null,
+      createdAt: MOCK_NOW,
+      updatedAt: MOCK_NOW,
+      guest: {
+        id: 'gst_mock_1',
+        firstName: 'Jane',
+        lastName: 'Doe',
+      },
+      property: { id: 'prop_mock_1', name: 'PURA Demo Hotel' },
+    },
+  ],
+  guestComplaints: [
+    {
+      id: 'gc_mock_1',
+      propertyId: 'prop_mock_1',
+      guestId: 'gst_mock_1',
+      reservationId: null,
+      category: 'Room',
+      severity: 'HIGH',
+      subject: 'Air conditioning not working',
+      description: 'Room 301 AC blows warm air since check-in',
+      status: 'OPEN',
+      openedBy: 'usr_mock_1',
+      assignedTo: null,
+      resolutionNote: null,
+      resolvedAt: null,
+      resolvedBy: null,
+      closedAt: null,
+      closedBy: null,
       createdAt: MOCK_NOW,
       updatedAt: MOCK_NOW,
       guest: {

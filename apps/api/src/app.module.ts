@@ -31,6 +31,7 @@ import { Tm30ReportsModule } from './tm30-reports/tm30-reports.module';
 import { LostFoundModule } from './lost-found/lost-found.module';
 import { GuestMessagesModule } from './guest-messages/guest-messages.module';
 import { GuestFeedbackModule } from './guest-feedback/guest-feedback.module';
+import { GuestComplaintsModule } from './guest-complaints/guest-complaints.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { GuestFeedbackModule } from './guest-feedback/guest-feedback.module';
     LostFoundModule,
     GuestMessagesModule,
     GuestFeedbackModule,
+    GuestComplaintsModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

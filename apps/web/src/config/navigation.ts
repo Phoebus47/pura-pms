@@ -23,6 +23,7 @@ import {
   PackageSearch,
   MessageSquare,
   Star,
+  AlertTriangle,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -168,6 +169,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.feedback',
   },
   {
+    name: 'Complaints',
+    href: '/complaints',
+    icon: AlertTriangle,
+    labelKey: 'nav.complaints',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -311,6 +318,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/feedback',
     icon: Star,
     labelKey: 'nav.feedback',
+  },
+  {
+    name: 'Complaints',
+    href: '/complaints',
+    icon: AlertTriangle,
+    labelKey: 'nav.complaints',
   },
   {
     name: 'Settings',
