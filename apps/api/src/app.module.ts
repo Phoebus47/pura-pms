@@ -28,6 +28,7 @@ import { HardwareBridgeModule } from './hardware-bridge/hardware-bridge.module';
 import { RegistrationCardsModule } from './registration-cards/registration-cards.module';
 import { WakeUpCallsModule } from './wake-up-calls/wake-up-calls.module';
 import { Tm30ReportsModule } from './tm30-reports/tm30-reports.module';
+import { LostFoundModule } from './lost-found/lost-found.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { Tm30ReportsModule } from './tm30-reports/tm30-reports.module';
     RegistrationCardsModule,
     WakeUpCallsModule,
     Tm30ReportsModule,
+    LostFoundModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

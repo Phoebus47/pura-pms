@@ -20,6 +20,7 @@ import {
   Printer,
   AlarmClock,
   Stamp,
+  PackageSearch,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -147,6 +148,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.tm30',
   },
   {
+    name: 'Lost & found',
+    href: '/lost-found',
+    icon: PackageSearch,
+    labelKey: 'nav.lostFound',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -272,6 +279,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/tm30',
     icon: Stamp,
     labelKey: 'nav.tm30',
+  },
+  {
+    name: 'Lost & found',
+    href: '/lost-found',
+    icon: PackageSearch,
+    labelKey: 'nav.lostFound',
   },
   {
     name: 'Settings',

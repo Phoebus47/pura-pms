@@ -63,6 +63,7 @@ model Property {
   registrationCards RegistrationCard[]
   wakeUpCalls    WakeUpCall[]
   tm30Reports    Tm30Report[]
+  lostFoundItems LostFoundItem[]
   createdAt      DateTime   @default(now())
 }
 
@@ -132,6 +133,7 @@ model Guest {
   totalRevenue Decimal       @default(0) @db.Decimal(12, 2)
   reservations Reservation[]
   tm30Reports  Tm30Report[]
+  lostFoundItems LostFoundItem[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -1003,6 +1005,40 @@ model Tm30Report {
   @@unique([reservationId, guestId])
   @@index([propertyId, status, arrivalDate])
   @@index([propertyId, dueAt, status])
+}
+
+enum LostFoundStatus {
+  FOUND
+  CLAIMED
+  RETURNED
+  DISPOSED
+}
+
+model LostFoundItem {
+  id               String          @id @default(cuid())
+  propertyId       String
+  property         Property        @relation(fields: [propertyId], references: [id])
+  itemDescription  String
+  locationFound    String
+  roomNumber       String?
+  foundBy          String
+  foundAt          DateTime
+  notes            String?
+  guestId          String?
+  guest            Guest?          @relation(fields: [guestId], references: [id])
+  status           LostFoundStatus @default(FOUND)
+  claimedAt        DateTime?
+  claimedBy        String?
+  returnedAt       DateTime?
+  returnedTo       String?
+  disposedAt       DateTime?
+  disposedBy       String?
+  disposeReason    String?
+  retentionDays    Int             @default(90)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([propertyId, status, foundAt])
 }
 
 // ==================== RATES ====================

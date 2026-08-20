@@ -32,6 +32,7 @@
     "hardwareBridge": "Hardware",
     "wakeUpCalls": "Wake-up calls",
     "tm30": "TM.30",
+    "lostFound": "Lost & found",
     "settings": "Settings",
     "more": "More"
   },
@@ -667,5 +668,33 @@
     "confirmSuccess": "Marked confirmed",
     "failSuccess": "Marked failed",
     "actionFailed": "Could not update TM.30 report"
+  },
+  "lostFound": {
+    "title": "Lost & found",
+    "subtitle": "Log found items, match claims, return them, or dispose after 90 days.",
+    "register": "Register found item",
+    "description": "Item description",
+    "location": "Location found",
+    "room": "Room",
+    "create": "Register item",
+    "list": "Items",
+    "empty": "No lost-and-found items yet",
+    "statusFound": "Found",
+    "statusClaimed": "Claimed",
+    "statusReturned": "Returned",
+    "statusDisposed": "Disposed",
+    "overdue": "Overdue",
+    "overdueAlert": "{count} item(s) past the 90-day retention window.",
+    "claim": "Mark claimed",
+    "return": "Mark returned",
+    "dispose": "Dispose",
+    "deskClaimant": "Front desk claimant",
+    "defaultDisposeReason": "Retention period expired",
+    "createSuccess": "Item registered",
+    "createFailed": "Could not register item",
+    "claimSuccess": "Marked claimed",
+    "returnSuccess": "Marked returned",
+    "disposeSuccess": "Item disposed",
+    "actionFailed": "Could not update lost-and-found item"
   }
 }

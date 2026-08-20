@@ -2163,6 +2163,158 @@ function handleTm30Reports(
   if (method === 'POST') return handleTm30ReportsPost(path, body);
 }
 
+function isLostFoundOverdueMock(row: any): boolean {
+  if (row.status !== 'FOUND') return false;
+  const end =
+    new Date(row.foundAt).getTime() + row.retentionDays * 24 * 60 * 60 * 1000;
+  return end < Date.now();
+}
+
+function findLostFoundItem(id: string) {
+  const row = mockDb.lostFoundItems.find((item: any) => item.id === id);
+  if (!row) {
+    throw new APIError(404, 'Not Found', {
+      message: `Lost-and-found item with ID ${id} not found`,
+    });
+  }
+  return row;
+}
+
+function handleLostFoundGet(path: string, params: URLSearchParams) {
+  if (path !== '/lost-found') return;
+  const propertyId = params.get('propertyId');
+  if (!propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId is required',
+    });
+  }
+  const status = params.get('status');
+  const overdue = params.get('overdue') === 'true';
+  return mockDb.lostFoundItems
+    .filter((row: any) => {
+      if (row.propertyId !== propertyId) return false;
+      if (status && row.status !== status) return false;
+      if (overdue && !isLostFoundOverdueMock(row)) return false;
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.foundAt).getTime() - new Date(a.foundAt).getTime(),
+    );
+}
+
+function handleLostFoundPost(path: string, body: any) {
+  const claimMatch = /^\/lost-found\/([a-zA-Z0-9_-]+)\/claim$/.exec(path);
+  if (claimMatch) {
+    const row = findLostFoundItem(claimMatch[1]);
+    if (row.status !== 'FOUND') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only found items can be claimed or disposed',
+      });
+    }
+    row.status = 'CLAIMED';
+    row.claimedAt = new Date().toISOString();
+    row.claimedBy = body.claimedBy;
+    row.guestId = body.guestId || row.guestId;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  const returnMatch = /^\/lost-found\/([a-zA-Z0-9_-]+)\/return$/.exec(path);
+  if (returnMatch) {
+    const row = findLostFoundItem(returnMatch[1]);
+    if (row.status !== 'CLAIMED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only claimed items can be returned',
+      });
+    }
+    row.status = 'RETURNED';
+    row.returnedAt = new Date().toISOString();
+    row.returnedTo = body.returnedTo;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  const disposeMatch = /^\/lost-found\/([a-zA-Z0-9_-]+)\/dispose$/.exec(path);
+  if (disposeMatch) {
+    const row = findLostFoundItem(disposeMatch[1]);
+    if (row.status !== 'FOUND') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only found items can be claimed or disposed',
+      });
+    }
+    row.status = 'DISPOSED';
+    row.disposedAt = new Date().toISOString();
+    row.disposedBy = body.disposedBy;
+    row.disposeReason = body.disposeReason;
+    row.updatedAt = new Date().toISOString();
+    return row;
+  }
+
+  if (path !== '/lost-found') return;
+  const property = mockDb.properties.find((p: any) => p.id === body.propertyId);
+  if (!property) {
+    throw new APIError(404, 'Not Found', { message: 'Property not found' });
+  }
+  const foundAt = body.foundAt ? new Date(body.foundAt) : new Date();
+  if (Number.isNaN(foundAt.getTime())) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'foundAt must be a valid date',
+    });
+  }
+  const guest = body.guestId
+    ? mockDb.guests.find((g: any) => g.id === body.guestId)
+    : null;
+  if (body.guestId && !guest) {
+    throw new APIError(404, 'Not Found', { message: 'Guest not found' });
+  }
+  const created = {
+    id: `lf_mock_${Date.now()}`,
+    propertyId: body.propertyId,
+    itemDescription: body.itemDescription,
+    locationFound: body.locationFound,
+    roomNumber: body.roomNumber || null,
+    foundBy: body.foundBy,
+    foundAt: foundAt.toISOString(),
+    notes: body.notes || null,
+    guestId: body.guestId || null,
+    status: 'FOUND',
+    claimedAt: null,
+    claimedBy: null,
+    returnedAt: null,
+    returnedTo: null,
+    disposedAt: null,
+    disposedBy: null,
+    disposeReason: null,
+    retentionDays: body.retentionDays ?? 90,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    guest: guest
+      ? { id: guest.id, firstName: guest.firstName, lastName: guest.lastName }
+      : null,
+    property: { id: property.id, name: property.name },
+  };
+  mockDb.lostFoundItems.push(created);
+  return created;
+}
+
+function handleLostFound(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/lost-found')) return;
+  if (method === 'GET') {
+    const listed = handleLostFoundGet(path, params);
+    if (listed !== undefined) return listed;
+    const match = /^\/lost-found\/([a-zA-Z0-9_-]+)$/.exec(path);
+    if (!match) return;
+    return findLostFoundItem(match[1]);
+  }
+  if (method === 'POST') return handleLostFoundPost(path, body);
+}
+
 function handleHardwareBridge(
   method: string,
   path: string,
@@ -3479,6 +3631,7 @@ export async function routeMockRequest<T>(
       () => handleRegistrationCards(method, path, body, params),
       () => handleWakeUpCalls(method, path, body, params),
       () => handleTm30Reports(method, path, body, params),
+      () => handleLostFound(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),
