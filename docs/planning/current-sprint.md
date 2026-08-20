@@ -1,13 +1,20 @@
-# Current Sprint — Phase 5 closed
+# Current Sprint — Phase 6 TM.30
 
-Phase 5 Advanced Features is complete on `dev` (PRs #93–#102 stack).
+## Goal
 
-## Shipped this closeout window
+Front office can generate TM.30 rows for foreign in-house guests, mark
+submission status, highlight overdue (24h), and export TSV for Immigration.
 
-- Digital Registration Card (#95)
-- Wake-up Call board (#101)
-- DND/MUR guest-request indicators (#102)
+## Scope
 
-## Next
+- `Tm30Report` + `Tm30Status`
+- `POST /tm30-reports/generate`
+- submit / confirm / fail
+- TSV export
+- `/tm30` board (en/th)
 
-Phase 6 #1 — TM30 Immigration Reporting (legal requirement).
+## Out of scope
+
+- Immigration API upload
+- Passport OCR extraction
+- Auto-create on check-in

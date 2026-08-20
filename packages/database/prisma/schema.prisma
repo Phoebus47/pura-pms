@@ -62,6 +62,7 @@ model Property {
   hardwareJobs   HardwareJob[]
   registrationCards RegistrationCard[]
   wakeUpCalls    WakeUpCall[]
+  tm30Reports    Tm30Report[]
   createdAt      DateTime   @default(now())
 }
 
@@ -130,6 +131,7 @@ model Guest {
   totalStays   Int           @default(0)
   totalRevenue Decimal       @default(0) @db.Decimal(12, 2)
   reservations Reservation[]
+  tm30Reports  Tm30Report[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -181,6 +183,7 @@ model Reservation {
   block          RoomBlock?        @relation(fields: [blockId], references: [id])
   registrationCards RegistrationCard[]
   wakeUpCalls    WakeUpCall[]
+  tm30Reports    Tm30Report[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -960,6 +963,46 @@ model WakeUpCall {
 
   @@index([propertyId, scheduledDate, status])
   @@index([reservationId, scheduledDate])
+}
+
+enum Tm30Status {
+  PENDING
+  SUBMITTED
+  CONFIRMED
+  FAILED
+}
+
+model Tm30Report {
+  id                String      @id @default(cuid())
+  propertyId        String
+  property          Property    @relation(fields: [propertyId], references: [id])
+  reservationId     String
+  reservation       Reservation @relation(fields: [reservationId], references: [id])
+  guestId           String
+  guest             Guest       @relation(fields: [guestId], references: [id])
+  passportNumber    String
+  fullName          String
+  nationality       String
+  dateOfBirth       DateTime?   @db.Date
+  roomNumber        String
+  arrivalDate       DateTime    @db.Date
+  departureDate     DateTime?   @db.Date
+  addressInThailand String?
+  status            Tm30Status  @default(PENDING)
+  dueAt             DateTime
+  submittedAt       DateTime?
+  confirmedAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+  referenceNo       String?
+  generatedBy       String
+  submittedBy       String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([reservationId, guestId])
+  @@index([propertyId, status, arrivalDate])
+  @@index([propertyId, dueAt, status])
 }
 
 // ==================== RATES ====================

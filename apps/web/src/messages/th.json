@@ -31,6 +31,7 @@
     "housekeeping": "แม่บ้าน",
     "hardwareBridge": "ฮาร์ดแวร์",
     "wakeUpCalls": "ปลุกแขก",
+    "tm30": "ตม.30",
     "settings": "ตั้งค่า",
     "more": "เพิ่มเติม"
   },
@@ -639,5 +640,32 @@
     "missSuccess": "บันทึกว่าพลาด",
     "cancelSuccess": "ยกเลิกโทรปลุกแล้ว",
     "actionFailed": "อัปเดตโทรปลุกไม่สำเร็จ"
+  },
+  "tm30": {
+    "title": "ตม.30",
+    "subtitle": "รายงานแขกต่างชาติให้ตรวจคนเข้าเมืองภายใน 24 ชั่วโมงหลังเช็คอิน",
+    "list": "รายการรายงาน",
+    "generate": "สร้างจากแขกที่เข้าพัก",
+    "export": "ส่งออก TSV",
+    "empty": "ยังไม่มีรายงาน ตม.30",
+    "room": "ห้อง",
+    "overdue": "เกินกำหนด",
+    "overdueAlert": "มี {count} รายการเกินกำหนด — ต้องส่งภายใน 24 ชั่วโมงหลังเช็คอิน",
+    "statusPending": "รอดำเนินการ",
+    "statusSubmitted": "ส่งแล้ว",
+    "statusConfirmed": "ยืนยันแล้ว",
+    "statusFailed": "ไม่สำเร็จ",
+    "submit": "บันทึกว่าส่งแล้ว",
+    "confirm": "ยืนยัน",
+    "fail": "บันทึกว่าไม่สำเร็จ",
+    "defaultFailReason": "ตม. ปฏิเสธ",
+    "generateSuccess": "สร้างรายงาน ตม.30 จำนวน {count} รายการ",
+    "generateFailed": "สร้างรายงาน ตม.30 ไม่สำเร็จ",
+    "exportSuccess": "ดาวน์โหลดไฟล์แล้ว",
+    "exportFailed": "ส่งออกไฟล์ ตม.30 ไม่สำเร็จ",
+    "submitSuccess": "บันทึกว่าส่งแล้ว",
+    "confirmSuccess": "ยืนยันแล้ว",
+    "failSuccess": "บันทึกว่าไม่สำเร็จ",
+    "actionFailed": "อัปเดตรายงาน ตม.30 ไม่สำเร็จ"
   }
 }

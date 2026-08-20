@@ -31,6 +31,7 @@ export interface MockData {
   hardwareJobs: any[];
   registrationCards: any[];
   wakeUpCalls: any[];
+  tm30Reports: any[];
   walks: any[];
 }
 
@@ -137,6 +138,7 @@ export const mockDb: any = {
       email: 'john@example.com',
       phone: '+123456789',
       nationality: 'US',
+      idNumber: 'P123456',
       isBlacklisted: false,
     },
     {
@@ -485,5 +487,6 @@ export const mockDb: any = {
   hardwareJobs: [],
   registrationCards: [],
   wakeUpCalls: [],
+  tm30Reports: [],
   walks: [],
 };
