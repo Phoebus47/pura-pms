@@ -1953,6 +1953,216 @@ function handleWakeUpCalls(
   if (method === 'POST') return handleWakeUpCallsPost(path, body);
 }
 
+function isThaiNationalityMock(value: string | undefined): boolean {
+  return ['TH', 'THA', 'THAI', 'THAILAND'].includes(
+    (value ?? '').trim().toUpperCase(),
+  );
+}
+
+function handleTm30ReportsGet(path: string, params: URLSearchParams) {
+  if (path === '/tm30-reports/export') {
+    const propertyId = params.get('propertyId') || '';
+    const rows = mockDb.tm30Reports.filter(
+      (row: any) => row.propertyId === propertyId,
+    );
+    const header =
+      'PASSPORT\tFULL_NAME\tNATIONALITY\tDOB\tROOM\tARRIVAL\tDEPARTURE\tADDRESS';
+    const lines = rows.map(
+      (row: any) =>
+        `${row.passportNumber}\t${row.fullName}\t${row.nationality}\t${String(row.dateOfBirth || '').slice(0, 10)}\t${row.roomNumber}\t${String(row.arrivalDate).slice(0, 10)}\t${String(row.departureDate || '').slice(0, 10)}\t${row.addressInThailand || ''}`,
+    );
+    return {
+      filename: `tm30-${propertyId}.tsv`,
+      text: [header, ...lines].join('\n'),
+    };
+  }
+  if (path !== '/tm30-reports') return;
+  const propertyId = params.get('propertyId');
+  if (!propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId is required',
+    });
+  }
+  const status = params.get('status');
+  const overdue = params.get('overdue') === 'true';
+  return mockDb.tm30Reports
+    .filter((row: any) => {
+      if (row.propertyId !== propertyId) return false;
+      if (status && row.status !== status) return false;
+      if (
+        overdue &&
+        (row.status !== 'PENDING' || new Date(row.dueAt) >= new Date())
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime(),
+    );
+}
+
+function handleTm30ReportsPost(path: string, body: any) {
+  if (path === '/tm30-reports/generate') {
+    const created: any[] = [];
+    const skipped: Array<{ reservationId: string; reason: string }> = [];
+    const stays = mockDb.reservations.filter(
+      (row: any) =>
+        row.status === 'CHECKED_IN' && row.propertyId === body.propertyId,
+    );
+    for (const stay of stays) {
+      const guest =
+        mockDb.guests.find((g: any) => g.id === stay.guestId) || stay.guest;
+      if (!guest?.nationality) {
+        skipped.push({ reservationId: stay.id, reason: 'MISSING_NATIONALITY' });
+        continue;
+      }
+      if (isThaiNationalityMock(guest.nationality)) {
+        skipped.push({ reservationId: stay.id, reason: 'THAI_NATIONAL' });
+        continue;
+      }
+      if (!guest.idNumber) {
+        skipped.push({ reservationId: stay.id, reason: 'MISSING_PASSPORT' });
+        continue;
+      }
+      const exists = mockDb.tm30Reports.find(
+        (row: any) =>
+          row.reservationId === stay.id && row.guestId === stay.guestId,
+      );
+      if (exists) {
+        skipped.push({ reservationId: stay.id, reason: 'ALREADY_EXISTS' });
+        continue;
+      }
+      const arrival = new Date(stay.checkIn);
+      const row = {
+        id: `tm_mock_${Date.now()}_${stay.id}`,
+        propertyId: stay.propertyId,
+        reservationId: stay.id,
+        guestId: stay.guestId,
+        passportNumber: guest.idNumber,
+        fullName: `${guest.firstName} ${guest.lastName}`.trim(),
+        nationality: guest.nationality,
+        dateOfBirth: guest.dateOfBirth || null,
+        roomNumber: stay.room?.number || '—',
+        arrivalDate: arrival.toISOString().slice(0, 10),
+        departureDate: stay.checkOut
+          ? new Date(stay.checkOut).toISOString().slice(0, 10)
+          : null,
+        addressInThailand:
+          mockDb.properties.find((p: any) => p.id === stay.propertyId)
+            ?.address || null,
+        status: 'PENDING',
+        dueAt: new Date(arrival.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        submittedAt: null,
+        confirmedAt: null,
+        failedAt: null,
+        failureReason: null,
+        referenceNo: null,
+        generatedBy: body.generatedBy,
+        submittedBy: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        reservation: {
+          id: stay.id,
+          confirmNumber: stay.confirmNumber,
+          status: stay.status,
+        },
+      };
+      mockDb.tm30Reports.push(row);
+      created.push(row);
+    }
+    return { created, skipped };
+  }
+
+  const submitMatch = /^\/tm30-reports\/([a-zA-Z0-9_-]+)\/submit$/.exec(path);
+  if (submitMatch) {
+    const row = mockDb.tm30Reports.find(
+      (item: any) => item.id === submitMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'TM.30 report not found',
+      });
+    }
+    if (row.status !== 'PENDING') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only pending TM.30 reports can be submitted',
+      });
+    }
+    row.status = 'SUBMITTED';
+    row.submittedAt = new Date().toISOString();
+    row.submittedBy = body.submittedBy;
+    row.referenceNo = body.referenceNo || row.referenceNo;
+    return row;
+  }
+
+  const confirmMatch = /^\/tm30-reports\/([a-zA-Z0-9_-]+)\/confirm$/.exec(path);
+  if (confirmMatch) {
+    const row = mockDb.tm30Reports.find(
+      (item: any) => item.id === confirmMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'TM.30 report not found',
+      });
+    }
+    if (row.status !== 'SUBMITTED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only submitted TM.30 reports can be confirmed or failed',
+      });
+    }
+    row.status = 'CONFIRMED';
+    row.confirmedAt = new Date().toISOString();
+    row.referenceNo = body.referenceNo || row.referenceNo;
+    return row;
+  }
+
+  const failMatch = /^\/tm30-reports\/([a-zA-Z0-9_-]+)\/fail$/.exec(path);
+  if (failMatch) {
+    const row = mockDb.tm30Reports.find(
+      (item: any) => item.id === failMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'TM.30 report not found',
+      });
+    }
+    if (row.status !== 'SUBMITTED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only submitted TM.30 reports can be confirmed or failed',
+      });
+    }
+    row.status = 'FAILED';
+    row.failedAt = new Date().toISOString();
+    row.failureReason = body.failureReason;
+    return row;
+  }
+}
+
+function handleTm30Reports(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/tm30-reports')) return;
+  if (method === 'GET') {
+    const listed = handleTm30ReportsGet(path, params);
+    if (listed !== undefined) return listed;
+    const match = /^\/tm30-reports\/([a-zA-Z0-9_-]+)$/.exec(path);
+    if (!match) return;
+    const row = mockDb.tm30Reports.find((item: any) => item.id === match[1]);
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'TM.30 report not found',
+      });
+    }
+    return row;
+  }
+  if (method === 'POST') return handleTm30ReportsPost(path, body);
+}
+
 function handleHardwareBridge(
   method: string,
   path: string,
@@ -3268,6 +3478,7 @@ export async function routeMockRequest<T>(
       () => handleHardwareBridge(method, path, body, params),
       () => handleRegistrationCards(method, path, body, params),
       () => handleWakeUpCalls(method, path, body, params),
+      () => handleTm30Reports(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

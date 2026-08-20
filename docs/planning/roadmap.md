@@ -804,7 +804,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 
 ### Phase 6: Compliance & Communication
 
-1. **TM30 Immigration Reporting** (บังคับตามกฎหมาย)
+1. **TM30 Immigration Reporting** — **shipped (manual v1)** (`Tm30Report` generate/submit/export TSV; no immigration API)
 2. Lost & Found Management
 3. Guest Communication Hub (In-app messaging)
 4. Post-stay Feedback & Review Management
@@ -825,4 +825,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–5 complete. Phase 6 (Compliance & Communication) is next. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
+**Status:** Phase 1–5 complete. Phase 6 in progress (TM.30 shipped). Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.

@@ -17,6 +17,7 @@ export * from './housekeeping';
 export * from './hardware-bridge';
 export * from './registration-cards';
 export * from './wake-up-calls';
+export * from './tm30-reports';
 export * from './tax-invoices';
 export * from './ar-accounts';
 export * from './card-preauths';
