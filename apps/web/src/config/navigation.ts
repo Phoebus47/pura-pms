@@ -19,6 +19,7 @@ import {
   ClipboardCheck,
   Printer,
   AlarmClock,
+  Stamp,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -140,6 +141,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.wakeUpCalls',
   },
   {
+    name: 'TM.30',
+    href: '/tm30',
+    icon: Stamp,
+    labelKey: 'nav.tm30',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -259,6 +266,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/wake-up-calls',
     icon: AlarmClock,
     labelKey: 'nav.wakeUpCalls',
+  },
+  {
+    name: 'TM.30',
+    href: '/tm30',
+    icon: Stamp,
+    labelKey: 'nav.tm30',
   },
   {
     name: 'Settings',

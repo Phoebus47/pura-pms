@@ -31,6 +31,7 @@
     "housekeeping": "Housekeeping",
     "hardwareBridge": "Hardware",
     "wakeUpCalls": "Wake-up calls",
+    "tm30": "TM.30",
     "settings": "Settings",
     "more": "More"
   },
@@ -639,5 +640,32 @@
     "missSuccess": "Wake-up marked missed",
     "cancelSuccess": "Wake-up cancelled",
     "actionFailed": "Could not update wake-up call"
+  },
+  "tm30": {
+    "title": "TM.30 immigration",
+    "subtitle": "Report foreign in-house guests to Immigration within 24 hours of check-in.",
+    "list": "Reports",
+    "generate": "Generate from in-house",
+    "export": "Export TSV",
+    "empty": "No TM.30 reports yet",
+    "room": "Room",
+    "overdue": "Overdue",
+    "overdueAlert": "{count} report(s) overdue — submit within 24 hours of check-in.",
+    "statusPending": "Pending",
+    "statusSubmitted": "Submitted",
+    "statusConfirmed": "Confirmed",
+    "statusFailed": "Failed",
+    "submit": "Mark submitted",
+    "confirm": "Mark confirmed",
+    "fail": "Mark failed",
+    "defaultFailReason": "Rejected by Immigration",
+    "generateSuccess": "Created {count} TM.30 report(s)",
+    "generateFailed": "Could not generate TM.30 reports",
+    "exportSuccess": "Export downloaded",
+    "exportFailed": "Could not export TM.30 file",
+    "submitSuccess": "Marked submitted",
+    "confirmSuccess": "Marked confirmed",
+    "failSuccess": "Marked failed",
+    "actionFailed": "Could not update TM.30 report"
   }
 }
