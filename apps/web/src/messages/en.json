@@ -34,6 +34,7 @@
     "tm30": "TM.30",
     "lostFound": "Lost & found",
     "messages": "Messages",
+    "feedback": "Feedback",
     "settings": "Settings",
     "more": "More"
   },
@@ -716,5 +717,30 @@
     "createFailed": "Could not save message",
     "readSuccess": "Marked read",
     "actionFailed": "Could not update message"
+  },
+  "feedback": {
+    "title": "Guest feedback",
+    "subtitle": "Record post-stay satisfaction scores for this property.",
+    "record": "Record feedback",
+    "guestId": "Guest ID",
+    "score": "Score",
+    "score1": "1 — Poor",
+    "score2": "2 — Fair",
+    "score3": "3 — Good",
+    "score4": "4 — Very good",
+    "score5": "5 — Excellent",
+    "scoreValue": "{score}/5",
+    "comment": "Comment",
+    "submit": "Submit feedback",
+    "list": "Feedback list",
+    "empty": "No feedback yet",
+    "statusOpen": "Open",
+    "statusReviewed": "Reviewed",
+    "statusArchived": "Archived",
+    "markReviewed": "Mark reviewed",
+    "createSuccess": "Feedback saved",
+    "createFailed": "Could not save feedback",
+    "reviewSuccess": "Marked reviewed",
+    "actionFailed": "Could not update feedback"
   }
 }

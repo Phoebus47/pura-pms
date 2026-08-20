@@ -2420,6 +2420,101 @@ function handleGuestMessages(
   if (method === 'POST') return handleGuestMessagesPost(path, body);
 }
 
+function findGuestFeedback(id: string) {
+  const row = mockDb.guestFeedbacks.find((item: any) => item.id === id);
+  if (!row) {
+    throw new APIError(404, 'Not Found', {
+      message: `Guest feedback with ID ${id} not found`,
+    });
+  }
+  return row;
+}
+
+function handleGuestFeedbackGet(path: string, params: URLSearchParams) {
+  if (path !== '/guest-feedback') return;
+  const propertyId = params.get('propertyId');
+  if (!propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId is required',
+    });
+  }
+  const guestId = params.get('guestId');
+  const status = params.get('status');
+  return mockDb.guestFeedbacks
+    .filter((row: any) => {
+      if (row.propertyId !== propertyId) return false;
+      if (guestId && row.guestId !== guestId) return false;
+      if (status && row.status !== status) return false;
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
+    );
+}
+
+function handleGuestFeedbackPost(path: string, body: any) {
+  const reviewMatch = /^\/guest-feedback\/([a-zA-Z0-9_-]+)\/review$/.exec(path);
+  if (reviewMatch) {
+    const row = findGuestFeedback(reviewMatch[1]);
+    if (row.status === 'OPEN') {
+      row.status = 'REVIEWED';
+      row.reviewedAt = new Date().toISOString();
+      row.reviewedBy = body.reviewedBy;
+      row.updatedAt = new Date().toISOString();
+    }
+    return row;
+  }
+
+  if (path !== '/guest-feedback') return;
+  if (!Number.isInteger(body.score) || body.score < 1 || body.score > 5) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Score must be between 1 and 5',
+    });
+  }
+  const property = mockDb.properties.find((p: any) => p.id === body.propertyId);
+  if (!property) {
+    throw new APIError(404, 'Not Found', { message: 'Property not found' });
+  }
+  const guest = mockDb.guests.find((g: any) => g.id === body.guestId);
+  if (!guest) {
+    throw new APIError(404, 'Not Found', { message: 'Guest not found' });
+  }
+  const created = {
+    id: `fb_mock_${Date.now()}`,
+    propertyId: body.propertyId,
+    guestId: body.guestId,
+    reservationId: body.reservationId || null,
+    score: body.score,
+    comment: body.comment || null,
+    status: 'OPEN',
+    submittedAt: new Date().toISOString(),
+    reviewedAt: null,
+    reviewedBy: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    guest: {
+      id: guest.id,
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+    },
+    property: { id: property.id, name: property.name },
+  };
+  mockDb.guestFeedbacks.push(created);
+  return created;
+}
+
+function handleGuestFeedback(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/guest-feedback')) return;
+  if (method === 'GET') return handleGuestFeedbackGet(path, params);
+  if (method === 'POST') return handleGuestFeedbackPost(path, body);
+}
+
 function handleHardwareBridge(
   method: string,
   path: string,
@@ -3738,6 +3833,7 @@ export async function routeMockRequest<T>(
       () => handleTm30Reports(method, path, body, params),
       () => handleLostFound(method, path, body, params),
       () => handleGuestMessages(method, path, body, params),
+      () => handleGuestFeedback(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

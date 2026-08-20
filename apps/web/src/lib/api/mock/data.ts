@@ -34,6 +34,7 @@ export interface MockData {
   tm30Reports: any[];
   lostFoundItems: any[];
   guestMessages: any[];
+  guestFeedbacks: any[];
   walks: any[];
 }
 
@@ -492,5 +493,27 @@ export const mockDb: any = {
   tm30Reports: [],
   lostFoundItems: [],
   guestMessages: [],
+  guestFeedbacks: [
+    {
+      id: 'fb_mock_1',
+      propertyId: 'prop_mock_1',
+      guestId: 'gst_mock_1',
+      reservationId: null,
+      score: 5,
+      comment: 'Excellent service and clean room',
+      status: 'OPEN',
+      submittedAt: MOCK_NOW,
+      reviewedAt: null,
+      reviewedBy: null,
+      createdAt: MOCK_NOW,
+      updatedAt: MOCK_NOW,
+      guest: {
+        id: 'gst_mock_1',
+        firstName: 'Jane',
+        lastName: 'Doe',
+      },
+      property: { id: 'prop_mock_1', name: 'PURA Demo Hotel' },
+    },
+  ],
   walks: [],
 };
