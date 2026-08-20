@@ -24,6 +24,7 @@ import {
   MessageSquare,
   Star,
   AlertTriangle,
+  MonitorSmartphone,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -175,6 +176,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.complaints',
   },
   {
+    name: 'Kiosk',
+    href: '/kiosk',
+    icon: MonitorSmartphone,
+    labelKey: 'nav.kiosk',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -324,6 +331,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/complaints',
     icon: AlertTriangle,
     labelKey: 'nav.complaints',
+  },
+  {
+    name: 'Kiosk',
+    href: '/kiosk',
+    icon: MonitorSmartphone,
+    labelKey: 'nav.kiosk',
   },
   {
     name: 'Settings',

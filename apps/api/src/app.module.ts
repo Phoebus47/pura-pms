@@ -32,6 +32,7 @@ import { LostFoundModule } from './lost-found/lost-found.module';
 import { GuestMessagesModule } from './guest-messages/guest-messages.module';
 import { GuestFeedbackModule } from './guest-feedback/guest-feedback.module';
 import { GuestComplaintsModule } from './guest-complaints/guest-complaints.module';
+import { KioskModule } from './kiosk/kiosk.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { GuestComplaintsModule } from './guest-complaints/guest-complaints.modul
     GuestMessagesModule,
     GuestFeedbackModule,
     GuestComplaintsModule,
+    KioskModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

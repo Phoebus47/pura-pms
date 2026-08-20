@@ -36,6 +36,7 @@
     "messages": "Messages",
     "feedback": "Feedback",
     "complaints": "Complaints",
+    "kiosk": "Kiosk",
     "settings": "Settings",
     "more": "More"
   },
@@ -776,5 +777,35 @@
     "resolveSuccess": "Marked resolved",
     "closeSuccess": "Case closed",
     "actionFailed": "Could not update complaint"
+  },
+  "kiosk": {
+    "title": "Lobby check-in",
+    "subtitle": "Enter your confirmation number to check in.",
+    "lookupTitle": "Find your reservation",
+    "confirmNumber": "Confirmation number",
+    "confirmNumberPlaceholder": "e.g. CN-DEMO-002",
+    "lookup": "Find reservation",
+    "startOver": "Start over",
+    "reservationDetails": "Your stay",
+    "guest": "Guest",
+    "noGuest": "Guest not linked",
+    "room": "Room",
+    "unassignedRoom": "Not assigned yet",
+    "checkInDate": "Arrival",
+    "checkOutDate": "Departure",
+    "status": "Status",
+    "statusTentative": "Tentative",
+    "statusConfirmed": "Confirmed",
+    "statusCheckedIn": "Checked in",
+    "statusCheckedOut": "Checked out",
+    "statusCancelled": "Cancelled",
+    "statusNoShow": "No-show",
+    "statusWalked": "Walked",
+    "confirmCheckIn": "Confirm check-in",
+    "alreadyCheckedIn": "You are already checked in. Welcome!",
+    "notEligible": "This reservation cannot be checked in from the kiosk.",
+    "lookupFailed": "Could not find a reservation with that number",
+    "checkInSuccess": "Check-in complete. Welcome!",
+    "checkInFailed": "Check-in could not be completed"
   }
 }

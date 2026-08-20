@@ -3736,6 +3736,18 @@ function handleReservationsGet(path: string, params?: URLSearchParams) {
           new Date(b.walkedAt).getTime() - new Date(a.walkedAt).getTime(),
       );
   }
+  const confirmMatch = /^\/reservations\/confirm\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (confirmMatch) {
+    const reservation = mockDb.reservations.find(
+      (r: any) => r.confirmNumber === confirmMatch[1],
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: `Reservation with confirmation number ${confirmMatch[1]} not found`,
+      });
+    }
+    return reservation;
+  }
   const match = /^\/reservations\/([a-zA-Z0-9_-]+)$/.exec(path);
   if (match) return mockDb.reservations.find((r: any) => r.id === match[1]);
 }
@@ -3827,6 +3839,40 @@ function handleReservationsDelete(path: string) {
       (r: any) => r.id !== match[1],
     );
     return { success: true };
+  }
+}
+
+function handleKiosk(method: string, path: string, body: any) {
+  if (!path.startsWith('/kiosk')) return;
+  if (method === 'POST' && path === '/kiosk/check-in') {
+    const confirmNumber = String(body?.confirmNumber ?? '').trim();
+    if (!confirmNumber) {
+      throw new APIError(400, 'Bad Request', {
+        message: 'confirmNumber is required',
+      });
+    }
+    const idx = mockDb.reservations.findIndex(
+      (r: any) => r.confirmNumber === confirmNumber,
+    );
+    if (idx === -1) {
+      throw new APIError(404, 'Not Found', {
+        message: `Reservation with confirmation number ${confirmNumber} not found`,
+      });
+    }
+    const reservation = mockDb.reservations[idx];
+    if (body?.propertyId && reservation.propertyId !== body.propertyId) {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Reservation does not belong to this property',
+      });
+    }
+    if (reservation.status !== 'CONFIRMED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only confirmed reservations can be checked in',
+      });
+    }
+    mockDb.reservations[idx].status = 'CHECKED_IN';
+    updateReservationRoomStatus(mockDb.reservations[idx], 'OCCUPIED_CLEAN');
+    return mockDb.reservations[idx];
   }
 }
 
@@ -3957,6 +4003,7 @@ export async function routeMockRequest<T>(
       () => handleGuestMessages(method, path, body, params),
       () => handleGuestFeedback(method, path, body, params),
       () => handleGuestComplaints(method, path, body, params),
+      () => handleKiosk(method, path, body),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

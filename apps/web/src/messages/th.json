@@ -36,6 +36,7 @@
     "messages": "ข้อความ",
     "feedback": "ความคิดเห็น",
     "complaints": "ข้อร้องเรียน",
+    "kiosk": "คีออสก์เช็คอิน",
     "settings": "ตั้งค่า",
     "more": "เพิ่มเติม"
   },
@@ -776,5 +777,35 @@
     "resolveSuccess": "ทำเครื่องหมายว่าแก้ไขแล้ว",
     "closeSuccess": "ปิดเคสแล้ว",
     "actionFailed": "อัปเดตข้อร้องเรียนไม่สำเร็จ"
+  },
+  "kiosk": {
+    "title": "เช็คอินที่ล็อบบี้",
+    "subtitle": "กรอกหมายเลขยืนยันการจองเพื่อเช็คอิน",
+    "lookupTitle": "ค้นหาการจอง",
+    "confirmNumber": "หมายเลขยืนยัน",
+    "confirmNumberPlaceholder": "เช่น CN-DEMO-002",
+    "lookup": "ค้นหาการจอง",
+    "startOver": "เริ่มใหม่",
+    "reservationDetails": "รายละเอียดการเข้าพัก",
+    "guest": "แขก",
+    "noGuest": "ไม่ได้เชื่อมแขก",
+    "room": "ห้อง",
+    "unassignedRoom": "ยังไม่ได้กำหนดห้อง",
+    "checkInDate": "วันเข้าพัก",
+    "checkOutDate": "วันออก",
+    "status": "สถานะ",
+    "statusTentative": "รอยืนยัน",
+    "statusConfirmed": "ยืนยันแล้ว",
+    "statusCheckedIn": "เช็คอินแล้ว",
+    "statusCheckedOut": "เช็คเอาท์แล้ว",
+    "statusCancelled": "ยกเลิกแล้ว",
+    "statusNoShow": "ไม่มาเข้าพัก",
+    "statusWalked": "ย้ายโรงแรม",
+    "confirmCheckIn": "ยืนยันเช็คอิน",
+    "alreadyCheckedIn": "เช็คอินแล้ว ยินดีต้อนรับ!",
+    "notEligible": "การจองนี้ไม่สามารถเช็คอินที่คีออสก์ได้",
+    "lookupFailed": "ไม่พบการจองด้วยหมายเลขนี้",
+    "checkInSuccess": "เช็คอินสำเร็จ ยินดีต้อนรับ!",
+    "checkInFailed": "เช็คอินไม่สำเร็จ"
   }
 }
