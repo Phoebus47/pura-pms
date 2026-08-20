@@ -66,6 +66,7 @@ model Property {
   lostFoundItems LostFoundItem[]
   guestMessages  GuestMessage[]
   guestFeedbacks GuestFeedback[]
+  guestComplaints GuestComplaint[]
   createdAt      DateTime   @default(now())
 }
 
@@ -138,6 +139,7 @@ model Guest {
   lostFoundItems LostFoundItem[]
   guestMessages  GuestMessage[]
   guestFeedbacks GuestFeedback[]
+  guestComplaints GuestComplaint[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -192,6 +194,7 @@ model Reservation {
   tm30Reports    Tm30Report[]
   guestMessages  GuestMessage[]
   guestFeedbacks GuestFeedback[]
+  guestComplaints GuestComplaint[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -1103,6 +1106,47 @@ model GuestFeedback {
   updatedAt     DateTime            @updatedAt
 
   @@index([propertyId, submittedAt])
+  @@index([guestId])
+}
+
+enum GuestComplaintSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum GuestComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model GuestComplaint {
+  id             String                 @id @default(cuid())
+  propertyId     String
+  property       Property               @relation(fields: [propertyId], references: [id])
+  guestId        String?
+  guest          Guest?                 @relation(fields: [guestId], references: [id])
+  reservationId  String?
+  reservation    Reservation?           @relation(fields: [reservationId], references: [id])
+  category       String
+  severity       GuestComplaintSeverity @default(MEDIUM)
+  subject        String
+  description    String
+  status         GuestComplaintStatus   @default(OPEN)
+  openedBy       String
+  assignedTo     String?
+  resolutionNote String?
+  resolvedAt     DateTime?
+  resolvedBy     String?
+  closedAt       DateTime?
+  closedBy       String?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@index([propertyId, status, createdAt])
   @@index([guestId])
 }
 

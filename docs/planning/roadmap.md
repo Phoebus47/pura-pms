@@ -816,7 +816,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 2. Lost & Found Management — **shipped (manual v1)** (`LostFoundItem` FOUND→CLAIMED→RETURNED or DISPOSED; 90-day retention; no photos)
 3. Guest Communication Hub (In-app messaging) — **shipped (in-app v1)** (`GuestMessage` IN_APP only; staff `/messages`)
 4. Post-stay Feedback & Review Management — **shipped (manual v1)** (`GuestFeedback` score 1–5; staff `/feedback`; no OTA/email)
-5. Guest Complaints / Service Recovery
+5. Guest Complaints / Service Recovery — **shipped (manual v1)** (`GuestComplaint` OPEN→IN_PROGRESS→RESOLVED→CLOSED; staff `/complaints`; no folio credit)
 6. Self-service Kiosk Integration
 
 ### Phase 7: i18n & Multi-Property
@@ -833,4 +833,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–5 complete. Phase 6 in progress (TM.30 + Lost & Found + Guest Messages + Guest Feedback shipped). Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
+**Status:** Phase 1–5 complete. Phase 6 in progress (TM.30 + Lost & Found + Guest Messages + Guest Feedback + Guest Complaints shipped). Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
