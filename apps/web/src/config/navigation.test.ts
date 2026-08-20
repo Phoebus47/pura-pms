@@ -26,6 +26,7 @@ import {
   Printer,
   AlarmClock,
   Stamp,
+  PackageSearch,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -196,6 +197,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(Stamp);
     });
 
+    it('should include Lost & found navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Lost & found',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/lost-found');
+      expect(item?.icon).toBe(PackageSearch);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -302,6 +312,7 @@ describe('navigation', () => {
         'Hardware',
         'Wake-up calls',
         'TM.30',
+        'Lost & found',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -320,6 +331,7 @@ describe('navigation', () => {
         '/hardware-bridge',
         '/wake-up-calls',
         '/tm30',
+        '/lost-found',
         '/settings',
       ]);
     });

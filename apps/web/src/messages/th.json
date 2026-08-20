@@ -32,6 +32,7 @@
     "hardwareBridge": "ฮาร์ดแวร์",
     "wakeUpCalls": "ปลุกแขก",
     "tm30": "ตม.30",
+    "lostFound": "ของหาย",
     "settings": "ตั้งค่า",
     "more": "เพิ่มเติม"
   },
@@ -667,5 +668,33 @@
     "confirmSuccess": "ยืนยันแล้ว",
     "failSuccess": "บันทึกว่าไม่สำเร็จ",
     "actionFailed": "อัปเดตรายงาน ตม.30 ไม่สำเร็จ"
+  },
+  "lostFound": {
+    "title": "ของหาย",
+    "subtitle": "บันทึกของที่พบ จับคู่การรับคืน หรือทำลายหลังครบ 90 วัน",
+    "register": "ลงทะเบียนของที่พบ",
+    "description": "รายละเอียดสิ่งของ",
+    "location": "สถานที่พบ",
+    "room": "ห้อง",
+    "create": "ลงทะเบียน",
+    "list": "รายการ",
+    "empty": "ยังไม่มีรายการของหาย",
+    "statusFound": "พบแล้ว",
+    "statusClaimed": "มีผู้มารับ",
+    "statusReturned": "คืนแล้ว",
+    "statusDisposed": "ทำลายแล้ว",
+    "overdue": "เกินกำหนด",
+    "overdueAlert": "มี {count} รายการเกินระยะเก็บ 90 วัน",
+    "claim": "บันทึกว่ามีผู้มารับ",
+    "return": "บันทึกว่าคืนแล้ว",
+    "dispose": "ทำลาย",
+    "deskClaimant": "ผู้รับที่เคาน์เตอร์",
+    "defaultDisposeReason": "หมดระยะเก็บรักษา",
+    "createSuccess": "ลงทะเบียนสิ่งของแล้ว",
+    "createFailed": "ลงทะเบียนสิ่งของไม่สำเร็จ",
+    "claimSuccess": "บันทึกว่ามีผู้มารับแล้ว",
+    "returnSuccess": "บันทึกว่าคืนแล้ว",
+    "disposeSuccess": "ทำลายสิ่งของแล้ว",
+    "actionFailed": "อัปเดตรายการของหายไม่สำเร็จ"
   }
 }

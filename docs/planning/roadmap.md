@@ -540,10 +540,10 @@
 
 ### Lost & Found Management (Module 4.20)
 
-- [ ] LostFoundItem model
-- [ ] Item registration with photo evidence
-- [ ] Guest notification & claim workflow
-- [ ] Disposition tracking (returned, donated, disposed)
+- [x] LostFoundItem model — shipped (manual v1)
+- [ ] Item registration with photo evidence — deferred (no object storage)
+- [x] Claim / return / dispose workflow — shipped (no guest notification)
+- [x] Disposition tracking (returned, disposed) — donated deferred
 
 ### Guest Communication Hub (Module 4.21)
 
@@ -805,7 +805,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ### Phase 6: Compliance & Communication
 
 1. **TM30 Immigration Reporting** — **shipped (manual v1)** (`Tm30Report` generate/submit/export TSV; no immigration API)
-2. Lost & Found Management
+2. Lost & Found Management — **shipped (manual v1)** (`LostFoundItem` FOUND→CLAIMED→RETURNED or DISPOSED; 90-day retention; no photos)
 3. Guest Communication Hub (In-app messaging)
 4. Post-stay Feedback & Review Management
 5. Guest Complaints / Service Recovery
