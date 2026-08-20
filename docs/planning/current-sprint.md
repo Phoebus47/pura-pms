@@ -1,20 +1,20 @@
-# Current Sprint — Phase 6 TM.30
+# Current Sprint — Phase 6 Lost & Found
 
 ## Goal
 
-Front office can generate TM.30 rows for foreign in-house guests, mark
-submission status, highlight overdue (24h), and export TSV for Immigration.
+Front office can register found items, mark claims, return to guests, or
+dispose after the 90-day retention window.
 
 ## Scope
 
-- `Tm30Report` + `Tm30Status`
-- `POST /tm30-reports/generate`
-- submit / confirm / fail
-- TSV export
-- `/tm30` board (en/th)
+- `LostFoundItem` + `LostFoundStatus`
+- `POST /lost-found` create
+- claim / return / dispose
+- `/lost-found` board (en/th)
+- Overdue = FOUND past retention
 
 ## Out of scope
 
-- Immigration API upload
-- Passport OCR extraction
-- Auto-create on check-in
+- Photo upload
+- Guest email/SMS
+- Donated as a separate status
