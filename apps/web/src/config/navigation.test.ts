@@ -30,6 +30,7 @@ import {
   MessageSquare,
   Star,
   AlertTriangle,
+  MonitorSmartphone,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -236,6 +237,13 @@ describe('navigation', () => {
       expect(item?.icon).toBe(AlertTriangle);
     });
 
+    it('should include Kiosk navigation item', () => {
+      const item = navigationItems.find((navItem) => navItem.name === 'Kiosk');
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/kiosk');
+      expect(item?.icon).toBe(MonitorSmartphone);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -346,6 +354,7 @@ describe('navigation', () => {
         'Messages',
         'Feedback',
         'Complaints',
+        'Kiosk',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -368,6 +377,7 @@ describe('navigation', () => {
         '/messages',
         '/feedback',
         '/complaints',
+        '/kiosk',
         '/settings',
       ]);
     });
