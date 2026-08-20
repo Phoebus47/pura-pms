@@ -22,6 +22,7 @@ import {
   Stamp,
   PackageSearch,
   MessageSquare,
+  Star,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -161,6 +162,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.messages',
   },
   {
+    name: 'Feedback',
+    href: '/feedback',
+    icon: Star,
+    labelKey: 'nav.feedback',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -298,6 +305,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/messages',
     icon: MessageSquare,
     labelKey: 'nav.messages',
+  },
+  {
+    name: 'Feedback',
+    href: '/feedback',
+    icon: Star,
+    labelKey: 'nav.feedback',
   },
   {
     name: 'Settings',

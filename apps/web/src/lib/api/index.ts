@@ -20,6 +20,7 @@ export * from './wake-up-calls';
 export * from './tm30-reports';
 export * from './lost-found';
 export * from './guest-messages';
+export * from './guest-feedback';
 export * from './tax-invoices';
 export * from './ar-accounts';
 export * from './card-preauths';
