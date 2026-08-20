@@ -64,6 +64,7 @@ model Property {
   wakeUpCalls    WakeUpCall[]
   tm30Reports    Tm30Report[]
   lostFoundItems LostFoundItem[]
+  guestMessages  GuestMessage[]
   createdAt      DateTime   @default(now())
 }
 
@@ -134,6 +135,7 @@ model Guest {
   reservations Reservation[]
   tm30Reports  Tm30Report[]
   lostFoundItems LostFoundItem[]
+  guestMessages  GuestMessage[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -186,6 +188,7 @@ model Reservation {
   registrationCards RegistrationCard[]
   wakeUpCalls    WakeUpCall[]
   tm30Reports    Tm30Report[]
+  guestMessages  GuestMessage[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -1039,6 +1042,38 @@ model LostFoundItem {
   updatedAt        DateTime        @updatedAt
 
   @@index([propertyId, status, foundAt])
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageChannel {
+  IN_APP
+  SMS
+  EMAIL
+  WHATSAPP
+}
+
+model GuestMessage {
+  id            String           @id @default(cuid())
+  propertyId    String
+  property      Property         @relation(fields: [propertyId], references: [id])
+  guestId       String
+  guest         Guest            @relation(fields: [guestId], references: [id])
+  reservationId String?
+  reservation   Reservation?     @relation(fields: [reservationId], references: [id])
+  direction     MessageDirection
+  channel       MessageChannel   @default(IN_APP)
+  content       String
+  sentBy        String?
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([propertyId, createdAt])
+  @@index([guestId, createdAt])
 }
 
 // ==================== RATES ====================

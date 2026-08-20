@@ -29,6 +29,7 @@ import { RegistrationCardsModule } from './registration-cards/registration-cards
 import { WakeUpCallsModule } from './wake-up-calls/wake-up-calls.module';
 import { Tm30ReportsModule } from './tm30-reports/tm30-reports.module';
 import { LostFoundModule } from './lost-found/lost-found.module';
+import { GuestMessagesModule } from './guest-messages/guest-messages.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { LostFoundModule } from './lost-found/lost-found.module';
     WakeUpCallsModule,
     Tm30ReportsModule,
     LostFoundModule,
+    GuestMessagesModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

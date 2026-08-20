@@ -21,6 +21,7 @@ import {
   AlarmClock,
   Stamp,
   PackageSearch,
+  MessageSquare,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -154,6 +155,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.lostFound',
   },
   {
+    name: 'Messages',
+    href: '/messages',
+    icon: MessageSquare,
+    labelKey: 'nav.messages',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -285,6 +292,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/lost-found',
     icon: PackageSearch,
     labelKey: 'nav.lostFound',
+  },
+  {
+    name: 'Messages',
+    href: '/messages',
+    icon: MessageSquare,
+    labelKey: 'nav.messages',
   },
   {
     name: 'Settings',
