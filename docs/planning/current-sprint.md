@@ -1,19 +1,21 @@
-# Current Sprint — Phase 6 Kiosk Check-in
+# Current Sprint — Phase 6 complete → Phase 7 next
 
-## Goal (@PM)
+## Phase 6 closeout (@PM)
 
-Lobby staff can run a touch-friendly self check-in flow on a tablet using the guest confirmation number.
+All six Phase 6 modules shipped (manual/mock v1 where noted):
 
-## In scope
+1. TM.30 immigration reporting
+2. Lost & Found
+3. Guest Communication Hub (in-app)
+4. Post-stay Feedback
+5. Guest Complaints / Service Recovery
+6. Lobby kiosk check-in mock
 
-- ADR `docs/adr/017-kiosk-checkin.md`
-- `POST /kiosk/check-in` delegating to `ReservationsService.checkIn`
-- `/kiosk` lobby UI (staff auth): lookup + confirm check-in
-- Mock routes: `GET /reservations/confirm/:confirmNumber`, `POST /kiosk/check-in`
-- i18n en/th, nav after Complaints
+## Next (Phase 7)
 
-## Out of scope
+Start with i18n foundation / Thai critical pages, or CRS — decide in next planning pass.
 
-- ID scan, payment capture, digital key
-- Guest-facing unauthenticated portal
-- New Prisma model
+## Deferred from Phase 6 v1
+
+- Immigration API, Lost & Found photos/notify, SMS/push, OTA reviews,
+  complaint folio credits, kiosk ID scan / payment / digital key

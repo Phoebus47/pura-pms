@@ -315,14 +315,17 @@ Ensure code passes:
 - **Phase 2:** ✅ Complete (Front Office Core)
 - **Phase 3:** ✅ Complete (Financial & Audit Module)
 - **Phase 4:** ✅ Complete (Operations Edge Cases)
-- **Phase 5:** 🎯 In Progress (Advanced Features)
+- **Phase 5:** ✅ Complete (Advanced Features)
+- **Phase 6:** ✅ Complete (Compliance & Communication)
+- **Phase 7:** 🎯 In Progress (i18n & Multi-Property)
 
 ### Key Features to Implement
-- Rate Derivation (Parent/Child Rates)
-- Dynamic Pricing / Yield Management
-- Allotment & Blocks
-- Housekeeping Inspection Workflow
-- PWA (Offline Capability)
+- i18n Foundation (next-intl)
+- Thai Translation (Critical Pages)
+- Thai Font Support (PDF Reports)
+- Thai Search (Guest Name Search)
+- Central Reservation System (Multi-property)
+- Guest Portal / Digital Key / Mobile Check-in
 
 ### Important Notes
 - All form fields must have `id` and `name` attributes for accessibility
