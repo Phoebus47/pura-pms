@@ -27,6 +27,7 @@ import {
   AlarmClock,
   Stamp,
   PackageSearch,
+  MessageSquare,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -206,6 +207,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(PackageSearch);
     });
 
+    it('should include Messages navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Messages',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/messages');
+      expect(item?.icon).toBe(MessageSquare);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -313,6 +323,7 @@ describe('navigation', () => {
         'Wake-up calls',
         'TM.30',
         'Lost & found',
+        'Messages',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -332,6 +343,7 @@ describe('navigation', () => {
         '/wake-up-calls',
         '/tm30',
         '/lost-found',
+        '/messages',
         '/settings',
       ]);
     });

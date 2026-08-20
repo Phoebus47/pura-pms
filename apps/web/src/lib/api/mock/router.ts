@@ -2315,6 +2315,111 @@ function handleLostFound(
   if (method === 'POST') return handleLostFoundPost(path, body);
 }
 
+function findGuestMessage(id: string) {
+  const row = mockDb.guestMessages.find((item: any) => item.id === id);
+  if (!row) {
+    throw new APIError(404, 'Not Found', {
+      message: `Guest message with ID ${id} not found`,
+    });
+  }
+  return row;
+}
+
+function handleGuestMessagesGet(path: string, params: URLSearchParams) {
+  if (path !== '/guest-messages') return;
+  const propertyId = params.get('propertyId');
+  if (!propertyId) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'propertyId is required',
+    });
+  }
+  const guestId = params.get('guestId');
+  const reservationId = params.get('reservationId');
+  const unread = params.get('unread') === 'true';
+  return mockDb.guestMessages
+    .filter((row: any) => {
+      if (row.propertyId !== propertyId) return false;
+      if (guestId && row.guestId !== guestId) return false;
+      if (reservationId && row.reservationId !== reservationId) return false;
+      if (unread && row.readAt) return false;
+      return true;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+}
+
+function handleGuestMessagesPost(path: string, body: any) {
+  const readMatch = /^\/guest-messages\/([a-zA-Z0-9_-]+)\/read$/.exec(path);
+  if (readMatch) {
+    const row = findGuestMessage(readMatch[1]);
+    if (!row.readAt) {
+      row.readAt = new Date().toISOString();
+      row.updatedAt = new Date().toISOString();
+    }
+    return row;
+  }
+
+  if (path !== '/guest-messages') return;
+  if (body.channel && body.channel !== 'IN_APP') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Only IN_APP channel is supported in v1',
+    });
+  }
+  if (body.direction === 'OUTBOUND' && !body.sentBy) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Outbound messages require sentBy',
+    });
+  }
+  const property = mockDb.properties.find((p: any) => p.id === body.propertyId);
+  if (!property) {
+    throw new APIError(404, 'Not Found', { message: 'Property not found' });
+  }
+  const guest = mockDb.guests.find((g: any) => g.id === body.guestId);
+  if (!guest) {
+    throw new APIError(404, 'Not Found', { message: 'Guest not found' });
+  }
+  const created = {
+    id: `msg_mock_${Date.now()}`,
+    propertyId: body.propertyId,
+    guestId: body.guestId,
+    reservationId: body.reservationId || null,
+    direction: body.direction,
+    channel: 'IN_APP',
+    content: body.content,
+    sentBy: body.sentBy || null,
+    readAt: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    guest: {
+      id: guest.id,
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+    },
+    property: { id: property.id, name: property.name },
+  };
+  mockDb.guestMessages.push(created);
+  return created;
+}
+
+function handleGuestMessages(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/guest-messages')) return;
+  if (method === 'GET') {
+    const listed = handleGuestMessagesGet(path, params);
+    if (listed !== undefined) return listed;
+    const match = /^\/guest-messages\/([a-zA-Z0-9_-]+)$/.exec(path);
+    if (!match) return;
+    return findGuestMessage(match[1]);
+  }
+  if (method === 'POST') return handleGuestMessagesPost(path, body);
+}
+
 function handleHardwareBridge(
   method: string,
   path: string,
@@ -3632,6 +3737,7 @@ export async function routeMockRequest<T>(
       () => handleWakeUpCalls(method, path, body, params),
       () => handleTm30Reports(method, path, body, params),
       () => handleLostFound(method, path, body, params),
+      () => handleGuestMessages(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

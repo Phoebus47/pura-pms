@@ -33,6 +33,7 @@
     "wakeUpCalls": "Wake-up calls",
     "tm30": "TM.30",
     "lostFound": "Lost & found",
+    "messages": "Messages",
     "settings": "Settings",
     "more": "More"
   },
@@ -696,5 +697,24 @@
     "returnSuccess": "Marked returned",
     "disposeSuccess": "Item disposed",
     "actionFailed": "Could not update lost-and-found item"
+  },
+  "messages": {
+    "title": "Guest messages",
+    "subtitle": "Log in-app guest conversations for this property.",
+    "compose": "Compose message",
+    "guestId": "Guest ID",
+    "direction": "Direction",
+    "inbound": "Inbound",
+    "outbound": "Outbound",
+    "content": "Message",
+    "send": "Send",
+    "list": "Inbox",
+    "empty": "No messages yet",
+    "unread": "Unread",
+    "markRead": "Mark read",
+    "createSuccess": "Message saved",
+    "createFailed": "Could not save message",
+    "readSuccess": "Marked read",
+    "actionFailed": "Could not update message"
   }
 }

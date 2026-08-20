@@ -1,20 +1,19 @@
-# Current Sprint — Phase 6 Lost & Found
+# Current Sprint — Phase 6 Guest Communication Hub
 
-## Goal
+## Goal (@PM)
 
-Front office can register found items, mark claims, return to guests, or
-dispose after the 90-day retention window.
+Staff can send and read in-app guest messages from a property inbox.
 
-## Scope
+## In scope
 
-- `LostFoundItem` + `LostFoundStatus`
-- `POST /lost-found` create
-- claim / return / dispose
-- `/lost-found` board (en/th)
-- Overdue = FOUND past retention
+- `GuestMessage` + `MessageDirection` + `MessageChannel` (IN_APP only in v1)
+- `GET/POST /guest-messages`, `POST :id/read`
+- `/messages` staff board (en/th)
+- Optional `reservationId`; required `propertyId` + `guestId`
 
 ## Out of scope
 
-- Photo upload
-- Guest email/SMS
-- Donated as a separate status
+- SMS / Email / WhatsApp
+- Automated pre-arrival messages
+- Push notifications
+- Guest-facing mobile app

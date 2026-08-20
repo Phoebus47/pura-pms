@@ -547,11 +547,11 @@
 
 ### Guest Communication Hub (Module 4.21)
 
-- [ ] GuestMessage model
-- [ ] In-app messaging (guest ↔ staff)
-- [ ] Automated pre-arrival messages
-- [ ] Post-stay satisfaction survey
-- [ ] Push notifications
+- [x] GuestMessage model — shipped (in-app v1)
+- [x] In-app messaging (guest ↔ staff) — staff inbox; inbound staff-logged
+- [ ] Automated pre-arrival messages — deferred
+- [ ] Post-stay satisfaction survey — see Feedback module
+- [ ] Push notifications — deferred
 
 ### Central Reservation System (Module 4.22)
 
@@ -806,7 +806,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 
 1. **TM30 Immigration Reporting** — **shipped (manual v1)** (`Tm30Report` generate/submit/export TSV; no immigration API)
 2. Lost & Found Management — **shipped (manual v1)** (`LostFoundItem` FOUND→CLAIMED→RETURNED or DISPOSED; 90-day retention; no photos)
-3. Guest Communication Hub (In-app messaging)
+3. Guest Communication Hub (In-app messaging) — **shipped (in-app v1)** (`GuestMessage` IN_APP only; staff `/messages`)
 4. Post-stay Feedback & Review Management
 5. Guest Complaints / Service Recovery
 6. Self-service Kiosk Integration
@@ -825,4 +825,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–5 complete. Phase 6 in progress (TM.30 shipped). Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
+**Status:** Phase 1–5 complete. Phase 6 in progress (TM.30 + Lost & Found + Guest Messages shipped). Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
