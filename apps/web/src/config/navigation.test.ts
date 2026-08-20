@@ -28,6 +28,7 @@ import {
   Stamp,
   PackageSearch,
   MessageSquare,
+  Star,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -216,6 +217,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(MessageSquare);
     });
 
+    it('should include Feedback navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Feedback',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/feedback');
+      expect(item?.icon).toBe(Star);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -324,6 +334,7 @@ describe('navigation', () => {
         'TM.30',
         'Lost & found',
         'Messages',
+        'Feedback',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -344,6 +355,7 @@ describe('navigation', () => {
         '/tm30',
         '/lost-found',
         '/messages',
+        '/feedback',
         '/settings',
       ]);
     });

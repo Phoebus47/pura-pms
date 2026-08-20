@@ -65,6 +65,7 @@ model Property {
   tm30Reports    Tm30Report[]
   lostFoundItems LostFoundItem[]
   guestMessages  GuestMessage[]
+  guestFeedbacks GuestFeedback[]
   createdAt      DateTime   @default(now())
 }
 
@@ -136,6 +137,7 @@ model Guest {
   tm30Reports  Tm30Report[]
   lostFoundItems LostFoundItem[]
   guestMessages  GuestMessage[]
+  guestFeedbacks GuestFeedback[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -189,6 +191,7 @@ model Reservation {
   wakeUpCalls    WakeUpCall[]
   tm30Reports    Tm30Report[]
   guestMessages  GuestMessage[]
+  guestFeedbacks GuestFeedback[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   checkedInAt    DateTime?
@@ -1074,6 +1077,33 @@ model GuestMessage {
 
   @@index([propertyId, createdAt])
   @@index([guestId, createdAt])
+}
+
+enum GuestFeedbackStatus {
+  OPEN
+  REVIEWED
+  ARCHIVED
+}
+
+model GuestFeedback {
+  id            String              @id @default(cuid())
+  propertyId    String
+  property      Property            @relation(fields: [propertyId], references: [id])
+  guestId       String
+  guest         Guest               @relation(fields: [guestId], references: [id])
+  reservationId String?
+  reservation   Reservation?        @relation(fields: [reservationId], references: [id])
+  score         Int
+  comment       String?
+  status        GuestFeedbackStatus @default(OPEN)
+  submittedAt   DateTime            @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([propertyId, submittedAt])
+  @@index([guestId])
 }
 
 // ==================== RATES ====================

@@ -1,19 +1,18 @@
-# Current Sprint — Phase 6 Guest Communication Hub
+# Current Sprint — Phase 6 Post-stay Feedback
 
 ## Goal (@PM)
 
-Staff can send and read in-app guest messages from a property inbox.
+Staff can record and review post-stay guest satisfaction scores from a property board.
 
 ## In scope
 
-- `GuestMessage` + `MessageDirection` + `MessageChannel` (IN_APP only in v1)
-- `GET/POST /guest-messages`, `POST :id/read`
-- `/messages` staff board (en/th)
-- Optional `reservationId`; required `propertyId` + `guestId`
+- `GuestFeedback` + `GuestFeedbackStatus` (OPEN | REVIEWED | ARCHIVED)
+- `GET/POST /guest-feedback`, `POST :id/review`
+- `/feedback` staff board (en/th)
+- Score 1–5, optional comment; optional `reservationId`
 
 ## Out of scope
 
-- SMS / Email / WhatsApp
-- Automated pre-arrival messages
-- Push notifications
-- Guest-facing mobile app
+- Auto email survey after checkout
+- OTA review sync
+- Guest self-service portal
