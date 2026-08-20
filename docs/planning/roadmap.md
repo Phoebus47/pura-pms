@@ -810,7 +810,7 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 8. Wake-up Call System — **shipped (manual v1)** (`WakeUpCall` board; complete/miss/cancel; no PBX)
 9. DND/MUR Status Indicators — **shipped** (`Room.guestRequest` NONE|DND|MUR; HK board; block clean while DND)
 
-### Phase 6: Compliance & Communication
+### Phase 6: Compliance & Communication — **complete**
 
 1. **TM30 Immigration Reporting** — **shipped (manual v1)** (`Tm30Report` generate/submit/export TSV; no immigration API)
 2. Lost & Found Management — **shipped (manual v1)** (`LostFoundItem` FOUND→CLAIMED→RETURNED or DISPOSED; 90-day retention; no photos)
@@ -833,4 +833,4 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–5 complete. Phase 6 in progress (TM.30 + Lost & Found + Guest Messages + Guest Feedback + Guest Complaints + Kiosk mock v1 shipped). Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
+**Status:** Phase 1–6 complete. Phase 7 (i18n & multi-property) is next. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.

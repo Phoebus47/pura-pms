@@ -1252,20 +1252,20 @@ graph LR
 - [x] Dynamic Pricing / Yield Management (AI)
 - [x] Allotment & Blocks
 - [x] Housekeeping Inspection (Workflow)
-- [ ] Hardware Bridge (Local Agent)
-- [ ] PWA (Offline Capability)
-- [ ] Digital Registration Card (Tablet Signature)
-- [ ] Wake-up Call System
-- [ ] DND/MUR Status Indicators
+- [x] Hardware Bridge (Local Agent) — mock v1
+- [x] PWA (Offline Capability) — read-only v1
+- [x] Digital Registration Card (Tablet Signature)
+- [x] Wake-up Call System — manual v1
+- [x] DND/MUR Status Indicators
 
-### Phase 6: Compliance & Communication
+### Phase 6: Compliance & Communication ✅ Complete
 
-- [ ] **TM30 Immigration Reporting** (บังคับตามกฎหมาย)
-- [ ] Lost & Found Management
-- [ ] Guest Communication Hub (In-app messaging)
-- [ ] Post-stay Feedback & Review Management
-- [ ] Guest Complaints / Service Recovery
-- [ ] Self-service Kiosk Integration
+- [x] **TM30 Immigration Reporting** — manual v1
+- [x] Lost & Found Management — manual v1
+- [x] Guest Communication Hub (In-app messaging) — in-app v1
+- [x] Post-stay Feedback & Review Management — manual v1
+- [x] Guest Complaints / Service Recovery — manual v1
+- [x] Self-service Kiosk Integration — lobby mock v1
 
 ### Phase 7: i18n & Multi-Property
 
