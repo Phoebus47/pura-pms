@@ -11,6 +11,11 @@
     "offlineBody": "This page is not available without a connection. Open a page you visited while online or try again when back online.",
     "offlineHome": "Back to dashboard"
   },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "th": "Thai"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "reservations": "Reservations",
