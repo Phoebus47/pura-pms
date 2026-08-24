@@ -9,6 +9,29 @@ import { ReservationStatusBadge } from '@/components/reservation-status-badge';
 import { PropertySelector } from '@/components/property-selector';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { expandCalendarOccupancy } from '@/lib/split-stay';
+import { formatMessage, t } from '@/lib/i18n';
+
+const MONTH_KEYS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+] as const;
+const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+const LEGEND_STATUSES = [
+  'CONFIRMED',
+  'CHECKED_IN',
+  'CHECKED_OUT',
+  'CANCELLED',
+] as const;
 
 export default function ReservationCalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -43,7 +66,7 @@ export default function ReservationCalendarPage() {
       const data = await reservationsAPI.getAll(filters);
       setReservations(data);
     } catch {
-      toast.error('Failed to load reservations');
+      toast.error(t('reservations.calendar.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -93,20 +116,7 @@ export default function ReservationCalendarPage() {
     });
   }
 
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
+  const monthLabel = t(`reservations.calendar.months.${MONTH_KEYS[month]}`);
 
   return (
     <div className="space-y-6">
@@ -114,23 +124,23 @@ export default function ReservationCalendarPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-bold text-3xl text-pura-blue">
-            Reservation Calendar
+            {t('reservations.calendar.title')}
           </h1>
           <p className="mt-1 text-slate-600">
-            {monthNames[month]} {year}
+            {monthLabel} {year}
           </p>
         </div>
 
         <div className="flex gap-3 items-center">
           <Button onClick={goToToday} variant="outline">
-            Today
+            {t('reservations.calendar.today')}
           </Button>
           <div className="flex gap-2 items-center">
             <Button
               onClick={previousMonth}
               variant="outline"
               className="p-2"
-              aria-label="Previous Month"
+              aria-label={t('reservations.calendar.previousMonth')}
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
@@ -138,7 +148,7 @@ export default function ReservationCalendarPage() {
               onClick={nextMonth}
               variant="outline"
               className="p-2"
-              aria-label="Next Month"
+              aria-label={t('reservations.calendar.nextMonth')}
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
@@ -155,7 +165,7 @@ export default function ReservationCalendarPage() {
               htmlFor="property-filter"
               className="block font-semibold mb-2 text-slate-700 text-sm"
             >
-              Filter by Property
+              {t('reservations.calendar.filterByProperty')}
             </label>
             <PropertySelector
               id="property-filter"
@@ -171,19 +181,21 @@ export default function ReservationCalendarPage() {
         <div className="flex h-96 items-center justify-center">
           <div className="text-center">
             <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-            <p className="mt-4 text-slate-600">Loading calendar...</p>
+            <p className="mt-4 text-slate-600">
+              {t('reservations.calendar.loading')}
+            </p>
           </div>
         </div>
       ) : (
         <div className="bg-white border border-slate-200 overflow-hidden p-6 rounded-xl shadow-sm">
           {/* Day Headers */}
           <div className="gap-2 grid grid-cols-7 mb-4">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            {WEEKDAY_KEYS.map((dayKey) => (
               <div
-                key={day}
+                key={dayKey}
                 className="font-bold py-2 text-center text-slate-700"
               >
-                {day}
+                {t(`reservations.calendar.weekdays.${dayKey}`)}
               </div>
             ))}
           </div>
@@ -228,7 +240,14 @@ export default function ReservationCalendarPage() {
                         <div
                           key={item.key}
                           className="bg-white border border-slate-200 cursor-pointer hover:bg-slate-50 p-1 rounded text-xs transition-colors truncate"
-                          title={`${item.guestName} - Room ${item.roomNumber ?? ''}`}
+                          title={formatMessage(
+                            'reservations.calendar.occupantTooltip',
+                            {
+                              guestName: item.guestName,
+                              roomLabel: t('common.roomLabel'),
+                              roomNumber: item.roomNumber ?? '',
+                            },
+                          )}
                         >
                           <ReservationStatusBadge
                             status={item.status as Reservation['status']}
@@ -244,7 +263,9 @@ export default function ReservationCalendarPage() {
                       ))}
                       {dayReservations.length > 3 && (
                         <div className="font-semibold text-slate-500 text-xs">
-                          +{dayReservations.length - 3} more
+                          {formatMessage('reservations.calendar.more', {
+                            count: dayReservations.length - 3,
+                          })}
                         </div>
                       )}
                     </div>
@@ -258,24 +279,18 @@ export default function ReservationCalendarPage() {
 
       {/* Legend */}
       <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-        <h3 className="font-bold mb-4 text-lg text-pura-blue">Legend</h3>
+        <h3 className="font-bold mb-4 text-lg text-pura-blue">
+          {t('reservations.calendar.legend')}
+        </h3>
         <div className="flex flex-wrap gap-4">
-          <div className="flex gap-2 items-center">
-            <ReservationStatusBadge status="CONFIRMED" />
-            <span className="text-slate-600 text-sm">Confirmed</span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <ReservationStatusBadge status="CHECKED_IN" />
-            <span className="text-slate-600 text-sm">Checked In</span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <ReservationStatusBadge status="CHECKED_OUT" />
-            <span className="text-slate-600 text-sm">Checked Out</span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <ReservationStatusBadge status="CANCELLED" />
-            <span className="text-slate-600 text-sm">Cancelled</span>
-          </div>
+          {LEGEND_STATUSES.map((status) => (
+            <div key={status} className="flex gap-2 items-center">
+              <ReservationStatusBadge status={status} />
+              <span className="text-slate-600 text-sm">
+                {t(`reservations.status.${status}`)}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

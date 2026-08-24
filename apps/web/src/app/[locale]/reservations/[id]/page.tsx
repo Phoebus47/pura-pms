@@ -23,7 +23,7 @@ import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayTable } from '@/components/split-stay-table';
 import { isSplitStay } from '@/lib/split-stay';
 import { isNonRevenueStay } from '@/lib/stay-purpose';
-import { t } from '@/lib/i18n';
+import { formatMessage, getDateLocale, t } from '@/lib/i18n';
 import { FolioDetail } from '@/components/folio-detail';
 import { RoomMovePanel } from '@/components/room-move-panel';
 import { WalkPanel } from '@/components/walk-panel';
@@ -50,7 +50,9 @@ export default function ReservationDetailPage() {
       setReservation(data);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to load reservation',
+        err instanceof Error
+          ? err.message
+          : t('reservations.detail.loadFailed'),
       );
     } finally {
       setLoading(false);
@@ -62,29 +64,37 @@ export default function ReservationDetailPage() {
   }, [loadReservation]);
 
   async function handleCheckIn() {
-    if (!confirm('Confirm check-in for this reservation?')) return;
+    if (!confirm(t('reservations.detail.confirmCheckIn'))) return;
 
     try {
       await reservationsAPI.checkIn(reservationId);
       loadReservation();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to check in');
+      alert(
+        err instanceof Error
+          ? err.message
+          : t('reservations.detail.checkInFailed'),
+      );
     }
   }
 
   async function handleCheckOut() {
-    if (!confirm('Confirm check-out for this reservation?')) return;
+    if (!confirm(t('reservations.detail.confirmCheckOut'))) return;
 
     try {
       await reservationsAPI.checkOut(reservationId);
       loadReservation();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to check out');
+      alert(
+        err instanceof Error
+          ? err.message
+          : t('reservations.detail.checkOutFailed'),
+      );
     }
   }
 
   async function handleCancel() {
-    const reason = prompt('Enter cancellation reason:');
+    const reason = prompt(t('reservations.detail.cancelReasonPrompt'));
     if (!reason) return;
 
     try {
@@ -92,26 +102,30 @@ export default function ReservationDetailPage() {
       loadReservation();
     } catch (err) {
       alert(
-        err instanceof Error ? err.message : 'Failed to cancel reservation',
+        err instanceof Error
+          ? err.message
+          : t('reservations.detail.cancelFailed'),
       );
     }
   }
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to delete this reservation?')) return;
+    if (!confirm(t('reservations.detail.deleteConfirm'))) return;
 
     try {
       await reservationsAPI.delete(reservationId);
       router.push('/reservations');
     } catch (err) {
       alert(
-        err instanceof Error ? err.message : 'Failed to delete reservation',
+        err instanceof Error
+          ? err.message
+          : t('reservations.detail.deleteFailed'),
       );
     }
   }
 
   function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(getDateLocale(), {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -124,7 +138,9 @@ export default function ReservationDetailPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading reservation...</p>
+          <p className="mt-4 text-slate-600">
+            {t('reservations.detail.loading')}
+          </p>
         </div>
       </div>
     );
@@ -134,11 +150,13 @@ export default function ReservationDetailPage() {
     return (
       <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">
-          Error loading reservation
+          {t('reservations.detail.errorTitle')}
         </h3>
-        <p className="mt-2 text-red-600">{error || 'Reservation not found'}</p>
+        <p className="mt-2 text-red-600">
+          {error || t('reservations.detail.notFound')}
+        </p>
         <Button onClick={() => router.back()} className="mt-4">
-          Go Back
+          {t('common.goBack')}
         </Button>
       </div>
     );
@@ -155,7 +173,7 @@ export default function ReservationDetailPage() {
         <div className="flex gap-4 items-center">
           <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="h-4 mr-2 w-4" />
-            Back
+            {t('common.back')}
           </Button>
           <div>
             <h1 className="font-bold text-3xl text-pura-blue">
@@ -179,7 +197,7 @@ export default function ReservationDetailPage() {
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <CheckCircle className="h-4 mr-2 w-4" />
-              Check In
+              {t('reservations.detail.checkIn')}
             </Button>
           )}
           <ReservationNoShowButton
@@ -192,7 +210,7 @@ export default function ReservationDetailPage() {
               className="bg-pura-blue hover:bg-pura-blue-dark"
             >
               <CheckCircle className="h-4 mr-2 w-4" />
-              Check Out
+              {t('reservations.detail.checkOut')}
             </Button>
           )}
           {canCancel && (
@@ -202,7 +220,7 @@ export default function ReservationDetailPage() {
               className="hover:bg-orange-50 text-orange-600"
             >
               <XCircle className="h-4 mr-2 w-4" />
-              Cancel
+              {t('reservations.detail.cancel')}
             </Button>
           )}
           <Button
@@ -210,7 +228,7 @@ export default function ReservationDetailPage() {
             onClick={() => router.push(`/reservations/${reservationId}/edit`)}
           >
             <Edit className="h-4 mr-2 w-4" />
-            Edit
+            {t('reservations.detail.edit')}
           </Button>
           <Button
             variant="outline"
@@ -218,7 +236,7 @@ export default function ReservationDetailPage() {
             className="hover:bg-red-50 text-red-600"
           >
             <Trash2 className="h-4 mr-2 w-4" />
-            Delete
+            {t('reservations.detail.delete')}
           </Button>
         </div>
       </div>
@@ -234,7 +252,7 @@ export default function ReservationDetailPage() {
               : 'border-transparent text-slate-400 hover:text-slate-600',
           )}
         >
-          Details
+          {t('reservations.detail.tabDetails')}
         </button>
         <button
           onClick={() => setActiveTab('billing')}
@@ -245,7 +263,7 @@ export default function ReservationDetailPage() {
               : 'border-transparent text-slate-400 hover:text-slate-600',
           )}
         >
-          Billing & Folio
+          {t('reservations.detail.tabBilling')}
         </button>
       </div>
 
@@ -256,13 +274,13 @@ export default function ReservationDetailPage() {
             {/* Main Info Card */}
             <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
               <h2 className="font-bold mb-6 text-pura-blue text-xl">
-                Reservation Details
+                {t('reservations.detail.reservationDetails')}
               </h2>
 
               <div className="gap-6 grid grid-cols-2">
                 <div>
                   <p className="font-semibold text-slate-600 text-sm">
-                    Confirmation Number
+                    {t('reservations.detail.confirmationNumber')}
                   </p>
                   <p className="font-mono font-semibold mt-1 text-lg text-pura-blue">
                     {reservation.confirmNumber}
@@ -270,14 +288,18 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">Status</p>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    {t('common.status')}
+                  </p>
                   <div className="mt-1">
                     <ReservationStatusBadge status={reservation.status} />
                   </div>
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">Guest</p>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    {t('reservations.detail.guest')}
+                  </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
                     {reservation.guest?.firstName} {reservation.guest?.lastName}
                   </p>
@@ -287,9 +309,11 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">Room</p>
+                  <p className="font-semibold text-slate-600 text-sm">
+                    {t('reservations.detail.room')}
+                  </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
-                    Room {reservation.room?.number}
+                    {t('common.roomLabel')} {reservation.room?.number}
                   </p>
                   <p className="text-slate-500 text-sm">
                     {reservation.room?.roomType.name}
@@ -298,7 +322,7 @@ export default function ReservationDetailPage() {
 
                 <div>
                   <p className="font-semibold text-slate-600 text-sm">
-                    Check-in Date
+                    {t('reservations.detail.checkInDate')}
                   </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
                     <Calendar className="h-4 inline mr-1 w-4" />
@@ -308,7 +332,7 @@ export default function ReservationDetailPage() {
 
                 <div>
                   <p className="font-semibold text-slate-600 text-sm">
-                    Check-out Date
+                    {t('reservations.detail.checkOutDate')}
                   </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
                     <Calendar className="h-4 inline mr-1 w-4" />
@@ -318,7 +342,7 @@ export default function ReservationDetailPage() {
 
                 <div>
                   <p className="font-semibold text-slate-600 text-sm">
-                    Number of Nights
+                    {t('reservations.detail.numberOfNights')}
                   </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
                     {reservation.isDayUse ? (
@@ -326,7 +350,9 @@ export default function ReservationDetailPage() {
                     ) : (
                       <>
                         {reservation.nights}{' '}
-                        {reservation.nights === 1 ? 'night' : 'nights'}
+                        {reservation.nights === 1
+                          ? t('common.night')
+                          : t('common.nightsCount')}
                       </>
                     )}
                   </p>
@@ -334,11 +360,13 @@ export default function ReservationDetailPage() {
 
                 <div>
                   <p className="font-semibold text-slate-600 text-sm">
-                    Number of Guests
+                    {t('reservations.detail.numberOfGuests')}
                   </p>
                   <p className="font-semibold mt-1 text-lg text-slate-800">
                     {reservation.numberOfGuests}{' '}
-                    {reservation.numberOfGuests === 1 ? 'guest' : 'guests'}
+                    {reservation.numberOfGuests === 1
+                      ? t('common.guestSingular')
+                      : t('common.guestsCount')}
                   </p>
                 </div>
               </div>
@@ -429,7 +457,7 @@ export default function ReservationDetailPage() {
               {reservation.specialRequests && (
                 <div className="border-slate-200 border-t mt-6 pt-6">
                   <p className="font-semibold text-slate-600 text-sm">
-                    Special Requests
+                    {t('reservations.detail.specialRequests')}
                   </p>
                   <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                     {reservation.specialRequests}
@@ -440,7 +468,7 @@ export default function ReservationDetailPage() {
               {reservation.cancellationReason && (
                 <div className="-m-6 bg-red-50 border-red-200 border-t mt-6 p-6 pt-6 rounded-b-xl">
                   <p className="font-semibold text-red-600 text-sm">
-                    Cancellation Reason
+                    {t('reservations.detail.cancellationReason')}
                   </p>
                   <p className="mt-2 text-red-700 whitespace-pre-wrap">
                     {reservation.cancellationReason}
@@ -451,11 +479,15 @@ export default function ReservationDetailPage() {
 
             {/* Pricing Card */}
             <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-              <h2 className="font-bold mb-6 text-pura-blue text-xl">Pricing</h2>
+              <h2 className="font-bold mb-6 text-pura-blue text-xl">
+                {t('reservations.detail.pricing')}
+              </h2>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Room Rate</span>
+                  <span className="text-slate-600">
+                    {t('reservations.detail.roomRate')}
+                  </span>
                   <span className="font-semibold text-slate-800">
                     ฿
                     {Number(
@@ -466,7 +498,9 @@ export default function ReservationDetailPage() {
 
                 <div className="flex items-center justify-between">
                   <span className="text-slate-600">
-                    {reservation.isDayUse ? 'Stay type' : 'Nights'}
+                    {reservation.isDayUse
+                      ? t('reservations.detail.stayType')
+                      : t('common.nights')}
                   </span>
                   <span className="font-semibold text-slate-800">
                     {reservation.isDayUse ? (
@@ -480,7 +514,7 @@ export default function ReservationDetailPage() {
                 <div className="border-slate-200 border-t pt-4">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-lg text-slate-700">
-                      Total Amount
+                      {t('reservations.detail.totalAmount')}
                     </span>
                     <span className="font-bold text-2xl text-pura-blue">
                       ฿{Number(reservation.totalAmount).toLocaleString()}
@@ -491,10 +525,12 @@ export default function ReservationDetailPage() {
                 {reservation.actualCheckIn && (
                   <div className="border-slate-200 border-t pt-4">
                     <p className="font-semibold text-slate-600 text-sm">
-                      Actual Check-in
+                      {t('reservations.detail.actualCheckIn')}
                     </p>
                     <p className="mt-1 text-slate-700">
-                      {new Date(reservation.actualCheckIn).toLocaleString()}
+                      {new Date(reservation.actualCheckIn).toLocaleString(
+                        getDateLocale(),
+                      )}
                     </p>
                   </div>
                 )}
@@ -502,10 +538,12 @@ export default function ReservationDetailPage() {
                 {reservation.actualCheckOut && (
                   <div className="border-slate-200 border-t pt-4">
                     <p className="font-semibold text-slate-600 text-sm">
-                      Actual Check-out
+                      {t('reservations.detail.actualCheckOut')}
                     </p>
                     <p className="mt-1 text-slate-700">
-                      {new Date(reservation.actualCheckOut).toLocaleString()}
+                      {new Date(reservation.actualCheckOut).toLocaleString(
+                        getDateLocale(),
+                      )}
                     </p>
                   </div>
                 )}
@@ -534,18 +572,28 @@ export default function ReservationDetailPage() {
 
           {/* Metadata */}
           <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-            <h2 className="font-bold mb-4 text-pura-blue text-xl">Metadata</h2>
+            <h2 className="font-bold mb-4 text-pura-blue text-xl">
+              {t('reservations.detail.metadata')}
+            </h2>
             <div className="gap-4 grid grid-cols-2 text-sm">
               <div>
-                <span className="text-slate-600">Created:</span>{' '}
+                <span className="text-slate-600">
+                  {t('reservations.detail.created')}
+                </span>{' '}
                 <span className="font-medium text-slate-800">
-                  {new Date(reservation.createdAt).toLocaleString()}
+                  {new Date(reservation.createdAt).toLocaleString(
+                    getDateLocale(),
+                  )}
                 </span>
               </div>
               <div>
-                <span className="text-slate-600">Last Updated:</span>{' '}
+                <span className="text-slate-600">
+                  {t('reservations.detail.lastUpdated')}
+                </span>{' '}
                 <span className="font-medium text-slate-800">
-                  {new Date(reservation.updatedAt).toLocaleString()}
+                  {new Date(reservation.updatedAt).toLocaleString(
+                    getDateLocale(),
+                  )}
                 </span>
               </div>
             </div>
@@ -560,7 +608,7 @@ export default function ReservationDetailPage() {
               className="border-pura-blue text-pura-blue"
             >
               <Link href={`/billing?reservationId=${reservationId}`}>
-                Open billing dashboard
+                {t('reservations.detail.openBillingDashboard')}
               </Link>
             </Button>
           </div>

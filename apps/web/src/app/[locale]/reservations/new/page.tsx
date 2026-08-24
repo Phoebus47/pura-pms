@@ -28,7 +28,7 @@ import { StayPurposeBadge } from '@/components/stay-purpose-badge';
 import { StayPurposeFields } from '@/components/stay-purpose-fields';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { SplitStayOptions } from '@/components/split-stay-options';
-import { t } from '@/lib/i18n';
+import { formatMessage, getDateLocale, t } from '@/lib/i18n';
 import { buildSplitStayPayload, calendarNights } from '@/lib/split-stay';
 import { isNonRevenueStay, type StayPurpose } from '@/lib/stay-purpose';
 import {
@@ -134,7 +134,7 @@ export default function NewReservationPage() {
 
   async function handleStep1Next() {
     if (!propertyId || !checkIn || !checkOut) {
-      toast.warning('Please select property and dates');
+      toast.warning(t('reservations.new.selectPropertyAndDates'));
       return;
     }
 
@@ -147,7 +147,7 @@ export default function NewReservationPage() {
       setAvailableRooms(rooms);
       setCurrentStep(2);
     } catch {
-      toast.error('Failed to load available rooms');
+      toast.error(t('reservations.new.loadRoomsFailed'));
     } finally {
       setLoadingRooms(false);
     }
@@ -155,7 +155,7 @@ export default function NewReservationPage() {
 
   function handleStep2Next() {
     if (!selectedRoom) {
-      toast.warning('Please select a room');
+      toast.warning(t('reservations.new.selectRoomFirst'));
       return;
     }
     if (isSplitStay) {
@@ -178,7 +178,7 @@ export default function NewReservationPage() {
 
   function handleStep3Next() {
     if (!selectedGuest) {
-      toast.warning('Please select a guest');
+      toast.warning(t('reservations.new.selectGuestFirst'));
       return;
     }
     setCurrentStep(4);
@@ -260,11 +260,13 @@ export default function NewReservationPage() {
       };
 
       const reservation = await reservationsAPI.create(reservationData);
-      toast.success('Reservation created successfully!');
+      toast.success(t('reservations.new.createSuccess'));
       router.push(`/reservations/${reservation.id}`);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to create reservation',
+        error instanceof Error
+          ? error.message
+          : t('reservations.new.createFailed'),
       );
     } finally {
       setSubmitting(false);
@@ -281,10 +283,18 @@ export default function NewReservationPage() {
   }
 
   const steps = [
-    { number: 1, title: 'Dates & Property', icon: Calendar },
-    { number: 2, title: 'Select Room', icon: CreditCard },
-    { number: 3, title: 'Guest Info', icon: User },
-    { number: 4, title: 'Confirm', icon: Check },
+    {
+      number: 1,
+      title: t('reservations.new.steps.datesProperty'),
+      icon: Calendar,
+    },
+    {
+      number: 2,
+      title: t('reservations.new.steps.selectRoom'),
+      icon: CreditCard,
+    },
+    { number: 3, title: t('reservations.new.steps.guestInfo'), icon: User },
+    { number: 4, title: t('reservations.new.steps.confirm'), icon: Check },
   ];
 
   const nights =
@@ -320,8 +330,10 @@ export default function NewReservationPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-bold text-3xl text-pura-blue">New Reservation</h1>
-        <p className="mt-1 text-slate-600">Create a new booking step by step</p>
+        <h1 className="font-bold text-3xl text-pura-blue">
+          {t('reservations.new.title')}
+        </h1>
+        <p className="mt-1 text-slate-600">{t('reservations.new.subtitle')}</p>
       </div>
 
       {/* Progress Steps */}
@@ -367,7 +379,7 @@ export default function NewReservationPage() {
         {currentStep === 1 && (
           <div className="space-y-6">
             <h2 className="font-bold text-2xl text-pura-blue">
-              Select Dates and Property
+              {t('reservations.new.step1Title')}
             </h2>
 
             <div>
@@ -375,7 +387,7 @@ export default function NewReservationPage() {
                 htmlFor="property-select"
                 className="block font-semibold mb-2 text-slate-700 text-sm"
               >
-                Property *
+                {t('reservations.new.propertyRequired')}
               </label>
               <PropertySelector
                 id="property-select"
@@ -404,11 +416,10 @@ export default function NewReservationPage() {
               />
               <span>
                 <span className="block font-semibold text-slate-700 text-sm">
-                  Day-use stay
+                  {t('reservations.new.dayUseLabel')}
                 </span>
                 <span className="block mt-1 text-slate-500 text-xs">
-                  Same-day check-in and check-out. Night Audit will not post a
-                  room charge.
+                  {t('reservations.new.dayUseHint')}
                 </span>
               </span>
             </label>
@@ -492,7 +503,7 @@ export default function NewReservationPage() {
                 onClick={handleStep1Next}
                 className="bg-pura-blue hover:bg-pura-blue-dark"
               >
-                {loadingRooms ? 'Loading...' : 'Next'}
+                {loadingRooms ? t('common.loadingEllipsis') : t('common.next')}
                 <ArrowRight className="h-4 ml-2 w-4" />
               </Button>
             </div>
@@ -505,12 +516,12 @@ export default function NewReservationPage() {
             <h2 className="font-bold text-2xl text-pura-blue">
               {isSplitStay
                 ? t('reservations.splitStay.firstRoom')
-                : 'Select a Room'}
+                : t('reservations.new.step2Title')}
             </h2>
 
             {availableRooms.length === 0 ? (
               <p className="py-8 text-center text-slate-500">
-                No available rooms for selected dates
+                {t('reservations.new.noAvailableRooms')}
               </p>
             ) : (
               <div className="gap-4 grid">
@@ -518,7 +529,7 @@ export default function NewReservationPage() {
                   <button
                     key={room.id}
                     type="button"
-                    aria-label={`Room ${room.number}`}
+                    aria-label={`${t('common.roomLabel')} ${room.number}`}
                     onClick={() => setSelectedRoom(room)}
                     className={`p-4 rounded-xl border-2 text-left transition-colors ${
                       selectedRoom?.id === room.id
@@ -529,13 +540,15 @@ export default function NewReservationPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-bold text-lg text-slate-800">
-                          Room {room.number}
+                          {t('common.roomLabel')} {room.number}
                         </h3>
                         <p className="text-slate-600 text-sm">
                           {room.roomType?.name}
                         </p>
                         <p className="mt-1 text-slate-500 text-xs">
-                          Max {room.roomType?.maxOccupancy} guests
+                          {formatMessage('reservations.new.maxOccupancy', {
+                            count: room.roomType?.maxOccupancy ?? 0,
+                          })}
                         </p>
                       </div>
                       <div className="text-right">
@@ -545,7 +558,9 @@ export default function NewReservationPage() {
                             room.roomType?.baseRate || 0,
                           ).toLocaleString()}
                         </p>
-                        <p className="text-slate-500 text-xs">per night</p>
+                        <p className="text-slate-500 text-xs">
+                          {t('common.perNight')}
+                        </p>
                       </div>
                     </div>
                   </button>
@@ -574,7 +589,7 @@ export default function NewReservationPage() {
                         }`}
                       >
                         <h3 className="font-bold text-lg text-slate-800">
-                          Room {room.number}
+                          {t('common.roomLabel')} {room.number}
                         </h3>
                         <p className="text-slate-600 text-sm">
                           {room.roomType?.name}
@@ -588,13 +603,13 @@ export default function NewReservationPage() {
             <div className="flex justify-between pt-4">
               <Button onClick={() => setCurrentStep(1)} variant="outline">
                 <ArrowLeft className="h-4 mr-2 w-4" />
-                Back
+                {t('common.back')}
               </Button>
               <Button
                 onClick={handleStep2Next}
                 className="bg-pura-blue hover:bg-pura-blue-dark"
               >
-                Next
+                {t('common.next')}
                 <ArrowRight className="h-4 ml-2 w-4" />
               </Button>
             </div>
@@ -604,7 +619,9 @@ export default function NewReservationPage() {
         {/* Step 3: Guest Selection */}
         {currentStep === 3 && (
           <div className="space-y-6">
-            <h2 className="font-bold text-2xl text-pura-blue">Select Guest</h2>
+            <h2 className="font-bold text-2xl text-pura-blue">
+              {t('reservations.new.step3Title')}
+            </h2>
 
             {selectedGuest ? (
               <div className="bg-pura-blue/5 border-2 border-pura-blue p-4 rounded-xl">
@@ -625,7 +642,7 @@ export default function NewReservationPage() {
                     variant="outline"
                     size="sm"
                   >
-                    Change
+                    {t('common.change')}
                   </Button>
                 </div>
               </div>
@@ -635,14 +652,14 @@ export default function NewReservationPage() {
                   onClick={() => setIsGuestSearchOpen(true)}
                   className="bg-pura-blue flex-1 hover:bg-pura-blue-dark"
                 >
-                  Search Existing Guest
+                  {t('reservations.new.searchExistingGuest')}
                 </Button>
                 <Button
                   onClick={() => setIsGuestFormOpen(true)}
                   variant="outline"
                   className="flex-1"
                 >
-                  Create New Guest
+                  {t('reservations.new.createNewGuest')}
                 </Button>
               </div>
             )}
@@ -650,13 +667,13 @@ export default function NewReservationPage() {
             <div className="flex justify-between pt-4">
               <Button onClick={() => setCurrentStep(2)} variant="outline">
                 <ArrowLeft className="h-4 mr-2 w-4" />
-                Back
+                {t('common.back')}
               </Button>
               <Button
                 onClick={handleStep3Next}
                 className="bg-pura-blue hover:bg-pura-blue-dark"
               >
-                Next
+                {t('common.next')}
                 <ArrowRight className="h-4 ml-2 w-4" />
               </Button>
             </div>
@@ -667,44 +684,54 @@ export default function NewReservationPage() {
         {currentStep === 4 && (
           <div className="space-y-6">
             <h2 className="font-bold text-2xl text-pura-blue">
-              Confirm Reservation
+              {t('reservations.new.step4Title')}
             </h2>
 
             {/* Summary */}
             <div className="space-y-4">
               <div className="bg-slate-50 p-4 rounded-xl">
                 <h3 className="font-semibold mb-2 text-slate-700">
-                  Booking Details
+                  {t('reservations.new.bookingDetails')}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Check-in:</span>
+                    <span className="text-slate-600">
+                      {t('reservations.new.checkInLabel')}
+                    </span>
                     <span className="font-semibold">
-                      {new Date(checkIn).toLocaleDateString()}
+                      {new Date(checkIn).toLocaleDateString(getDateLocale())}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Check-out:</span>
+                    <span className="text-slate-600">
+                      {t('reservations.new.checkOutLabel')}
+                    </span>
                     <span className="font-semibold">
-                      {new Date(checkOut).toLocaleDateString()}
+                      {new Date(checkOut).toLocaleDateString(getDateLocale())}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Nights:</span>
+                    <span className="text-slate-600">
+                      {t('reservations.new.nightsLabel')}
+                    </span>
                     <span className="font-semibold">
                       {isDayUse ? <DayUseBadge /> : nights}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Room:</span>
+                    <span className="text-slate-600">
+                      {t('reservations.new.roomLabel')}
+                    </span>
                     <span className="font-semibold">
-                      Room {selectedRoom?.number} -{' '}
+                      {t('common.roomLabel')} {selectedRoom?.number} -{' '}
                       {selectedRoom?.roomType?.name}
                       {isSplitStay ? <SplitStayBadge className="ml-2" /> : null}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Guest:</span>
+                    <span className="text-slate-600">
+                      {t('reservations.new.guestLabel')}
+                    </span>
                     <span className="font-semibold">
                       {selectedGuest?.firstName} {selectedGuest?.lastName}
                     </span>
@@ -777,7 +804,7 @@ export default function NewReservationPage() {
                   htmlFor="number-of-guests"
                   className="block font-semibold mb-2 text-slate-700 text-sm"
                 >
-                  Number of Guests
+                  {t('reservations.new.numberOfGuests')}
                 </label>
                 <input
                   id="number-of-guests"
@@ -798,7 +825,7 @@ export default function NewReservationPage() {
                   htmlFor="special-requests"
                   className="block font-semibold mb-2 text-slate-700 text-sm"
                 >
-                  Special Requests
+                  {t('reservations.new.specialRequests')}
                 </label>
                 <textarea
                   id="special-requests"
@@ -806,7 +833,7 @@ export default function NewReservationPage() {
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
                   rows={3}
-                  placeholder="Any special requests or notes..."
+                  placeholder={t('reservations.new.specialRequestsPlaceholder')}
                   className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full"
                 />
               </div>
@@ -814,7 +841,7 @@ export default function NewReservationPage() {
               <div className="bg-pura-blue/5 border-2 border-pura-blue p-4 rounded-xl">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-lg text-slate-700">
-                    Total Amount:
+                    {t('reservations.new.totalAmount')}
                   </span>
                   <span className="font-bold text-3xl text-pura-blue">
                     ฿{totalAmount.toLocaleString()}
@@ -825,9 +852,17 @@ export default function NewReservationPage() {
                   {Number(
                     selectedRoom?.roomType?.baseRate || 0,
                   ).toLocaleString()}{' '}
-                  × {isDayUse ? '1 day use' : `${nights} nights`}
+                  ×{' '}
+                  {isDayUse
+                    ? t('common.oneDayUse')
+                    : formatMessage('reservations.list.nightsLabel', {
+                        count: nights,
+                      })}
                   {isSplitStay && secondRoom
-                    ? ` + ฿${secondRate.toLocaleString()} × ${calendarNights(splitDate, checkOut)} nights`
+                    ? ` ${formatMessage('reservations.new.splitNightAddon', {
+                        rate: secondRate.toLocaleString(),
+                        count: calendarNights(splitDate, checkOut),
+                      })}`
                     : ''}
                 </p>
               </div>
@@ -840,14 +875,16 @@ export default function NewReservationPage() {
                 disabled={submitting}
               >
                 <ArrowLeft className="h-4 mr-2 w-4" />
-                Back
+                {t('common.back')}
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="bg-pura-blue hover:bg-pura-blue-dark"
               >
-                {submitting ? 'Creating...' : 'Confirm Reservation'}
+                {submitting
+                  ? t('common.creating')
+                  : t('reservations.new.confirmReservation')}
                 <Check className="h-4 ml-2 w-4" />
               </Button>
             </div>
