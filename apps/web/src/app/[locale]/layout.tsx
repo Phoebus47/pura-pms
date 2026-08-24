@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Sarabun } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
@@ -22,6 +22,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+const sarabun = Sarabun({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['thai', 'latin'],
+  variable: '--font-sarabun',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -121,7 +128,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="scheme-light">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${sarabun.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <I18nProvider locale={locale} messages={messages as typeof en}>

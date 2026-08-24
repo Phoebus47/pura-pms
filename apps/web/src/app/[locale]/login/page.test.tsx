@@ -1,32 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import LoginPage from './page';
 import { authAPI } from '@/lib/api';
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: vi.fn(),
+}));
+
+vi.mock('zustand/middleware', () => ({
+  persist: (fn: any) => fn,
 }));
 
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
 
   return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
       store[key] = value.toString();
-    },
-    removeItem: (key: string) => {
+    }),
+    removeItem: vi.fn((key: string) => {
       delete store[key];
-    },
-    clear: () => {
+    }),
+    clear: vi.fn(() => {
       store = {};
-    },
+    }),
   };
 })();
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
+  writable: true,
+});
+
+Object.defineProperty(globalThis, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
 });
 
 describe('LoginPage', () => {
