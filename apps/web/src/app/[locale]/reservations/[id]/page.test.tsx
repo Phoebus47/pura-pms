@@ -3,7 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ReservationDetailPage from './page';
 import { reservationsAPI } from '@/lib/api';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 
 vi.mock('@/lib/api', () => ({
   reservationsAPI: {
@@ -16,8 +17,16 @@ vi.mock('@/lib/api', () => ({
 }));
 
 vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(),
   useParams: vi.fn(),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  useRouter: vi.fn(),
+  Link: ({ href, children, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 vi.mock('@/components/reservation-status-badge', () => ({
@@ -446,29 +455,7 @@ describe('ReservationDetailPage', () => {
   it('renders split stay segments', async () => {
     (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
-      stays: [
-        {
-          sequence: 0,
-          startDate: '2024-01-01',
-          endDate: '2024-01-03',
-          roomId: 'room-1',
-          roomRate: 1000,
-          nights: 2,
-          room: { id: 'room-1', number: '101' },
-          roomType: { id: 'type-a', name: 'Deluxe' },
-        },
-        {
-          sequence: 1,
-          startDate: '2024-01-03',
-          endDate: '2024-01-05',
-          roomId: 'room-2',
-          roomRate: 1500,
-          nights: 2,
-          room: { id: 'room-2', number: '201' },
-          roomType: { id: 'type-b', name: 'Suite' },
-        },
-      ],
-    });
+      stays: [\n        {\n          sequence: 0,\n          startDate: '2024-01-01',\n          endDate: '2024-01-03',\n          roomId: 'room-1',\n          roomRate: 1000,\n          nights: 2,\n          room: { id: 'room-1', number: '101' },\n          roomType: { id: 'type-a', name: 'Deluxe' },\n        },\n        {\n          sequence: 1,\n          startDate: '2024-01-03',\n          endDate: '2024-01-05',\n          roomId: 'room-2',\n          roomRate: 1500,\n          nights: 2,\n          room: { id: 'room-2', number: '201' },\n          roomType: { id: 'type-b', name: 'Suite' },\n        },\n      ],\n    });
     render(<ReservationDetailPage />);
 
     await waitFor(() =>
@@ -510,10 +497,6 @@ describe('ReservationDetailPage', () => {
     await waitFor(() =>
       expect(window.alert).toHaveBeenCalledWith('Failed to check in'),
     );
-
-    // Check Out - reset and re-render or just use different test?
-    // Easier to make a separate block or clean up?
-    // We can do it in sequence if we reset properly, but separate tests are cleaner.
   });
 
   it('handles non-Error objects in check out', async () => {
@@ -576,9 +559,6 @@ describe('ReservationDetailPage', () => {
       expect(screen.getAllByText('CN-123')[0]).toBeInTheDocument(),
     );
 
-    // Should default baseRate to 0
-    // "Room Rate" section
-    // We look for the formatted price "฿0"
     expect(screen.getByText('฿0')).toBeInTheDocument();
   });
 });
