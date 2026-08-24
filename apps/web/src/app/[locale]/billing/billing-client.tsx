@@ -31,9 +31,7 @@ export function BillingClient() {
     } catch (err) {
       setReservation(null);
       setResError(
-        err instanceof Error
-          ? err.message
-          : t('billing.loadReservationFailed'),
+        err instanceof Error ? err.message : t('billing.loadReservationFailed'),
       );
     } finally {
       setLoadingRes(false);
@@ -72,7 +70,9 @@ export function BillingClient() {
       return (
         <div className="bg-white border border-slate-200 flex flex-col h-48 items-center justify-center rounded-xl">
           <div className="animate-spin border-b-2 border-pura-blue h-10 rounded-full w-10" />
-          <p className="mt-4 text-slate-600">{t('billing.loadingReservation')}</p>
+          <p className="mt-4 text-slate-600">
+            {t('billing.loadingReservation')}
+          </p>
         </div>
       );
     }
@@ -129,7 +129,9 @@ export function BillingClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-bold text-3xl text-pura-blue">{t('billing.title')}</h1>
+        <h1 className="font-bold text-3xl text-pura-blue">
+          {t('billing.title')}
+        </h1>
         <p className="mt-1 text-slate-600">{t('billing.subtitle')}</p>
       </div>
       {renderMain()}

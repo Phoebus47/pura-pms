@@ -46,7 +46,9 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
         setActiveFolioId(foliosData[0].id);
       }
     } catch (err) {
-      toast.error(`${t('billing.folioRefreshFailed')}: ${(err as Error).message}`);
+      toast.error(
+        `${t('billing.folioRefreshFailed')}: ${(err as Error).message}`,
+      );
     } finally {
       setLoading(false);
     }
