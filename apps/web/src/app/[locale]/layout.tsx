@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
@@ -10,19 +9,15 @@ import { PwaProvider } from '@/components/pwa/pwa-provider';
 import { Toaster } from '@/components/ui/toast';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { QueryProvider } from '@/lib/providers/query-provider';
+import {
+  fontVariableClassName,
+  geistMono,
+  geistSans,
+  promptThai,
+} from '@/lib/fonts';
 import { I18nProvider } from '@/lib/i18n-provider';
 import type en from '@/messages/en.json';
 import { routing } from '@/i18n/routing';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -119,10 +114,15 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="scheme-light">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html
+      lang={locale}
+      className={`scheme-light ${fontVariableClassName(
+        geistSans,
+        geistMono,
+        promptThai,
+      )}`}
+    >
+      <body className="antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <I18nProvider locale={locale} messages={messages as typeof en}>
             <PwaProvider>

@@ -53,7 +53,7 @@
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist-sans), var(--font-thai);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -102,6 +102,10 @@ html {
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
   background: var(--background);
+}
+
+html[lang='th'] {
+  --font-sans: var(--font-thai), var(--font-geist-sans);
 }
 
 .dark {
@@ -168,4 +172,17 @@ body {
 
 .scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
   background-color: rgb(255 255 255 / 0.4);
+}
+
+/* Browser print / Save as PDF: keep Prompt so Thai glyphs are not dropped. */
+@media print {
+  html:root {
+    --font-sans: var(--font-thai), var(--font-geist-sans);
+  }
+
+  html,
+  body,
+  .print-document {
+    font-family: var(--font-thai), var(--font-geist-sans), system-ui, sans-serif;
+  }
 }

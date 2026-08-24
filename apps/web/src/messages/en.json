@@ -95,6 +95,9 @@
     "en": "English",
     "th": "Thai"
   },
+  "print": {
+    "documentLabel": "Printable document"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "reservations": "Reservations",

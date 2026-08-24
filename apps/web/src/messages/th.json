@@ -95,6 +95,9 @@
     "en": "English",
     "th": "ไทย"
   },
+  "print": {
+    "documentLabel": "เอกสารสำหรับพิมพ์"
+  },
   "nav": {
     "dashboard": "แดชบอร์ด",
     "reservations": "การจอง",

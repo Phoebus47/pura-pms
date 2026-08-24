@@ -9,6 +9,9 @@ vi.mock('next/font/google', () => ({
   Geist_Mono: vi.fn(() => ({
     variable: '--font-geist-mono',
   })),
+  Prompt: vi.fn(() => ({
+    variable: '--font-thai',
+  })),
 }));
 
 vi.mock('next-intl/server', () => ({
@@ -97,6 +100,17 @@ describe('LocaleLayout', () => {
     render(Layout);
 
     expect(screen.getByTestId('app-layout')).toBeInTheDocument();
+  });
+
+  it('registers the Thai font CSS variable on the document root', async () => {
+    const Layout = await LocaleLayout({
+      children: <div>Test Content</div>,
+      params: Promise.resolve({ locale: 'th' }),
+    });
+
+    render(Layout);
+
+    expect(document.documentElement.className).toContain('--font-thai');
   });
 
   it('should render QueryProvider', async () => {

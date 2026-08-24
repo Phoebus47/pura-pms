@@ -51,5 +51,6 @@ describe('i18n bridge', () => {
     expect(t('housekeeping.title')).toBe('ตรวจห้องแม่บ้าน');
     expect(t('nightAudit.title')).toBe('ตรวจรอบคืน');
     expect(t('reservations.status.CHECKED_IN')).toBe('เช็คอินแล้ว');
+    expect(t('print.documentLabel')).toBe('เอกสารสำหรับพิมพ์');
   });
 });
