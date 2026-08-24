@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import GuestsPage from './page';
 import { useGuests } from '@/hooks/use-guests';
 import { useRouter } from 'next/navigation';
+import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -101,7 +102,7 @@ describe('GuestsPage', () => {
       loadGuestsRef: { current: mockLoadGuests },
     });
     render(<GuestsPage />);
-    expect(screen.getByText('Error loading guests')).toBeInTheDocument();
+    expect(screen.getByText(t('common.errorLoadingGuest'))).toBeInTheDocument();
 
     // Retry
     fireEvent.click(screen.getByText('Try Again'));
