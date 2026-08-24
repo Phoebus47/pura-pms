@@ -115,7 +115,7 @@ describe('ReportsService', () => {
       await service.getDailyRevenueReport('prop-1', testDate);
 
       const expectedDate = new Date('2025-01-15');
-      expectedDate.setHours(0, 0, 0, 0);
+      expectedDate.setUTCHours(0, 0, 0, 0);
 
       expect(prisma.folioTransaction.findMany).toHaveBeenCalledWith(
         expect.objectContaining({

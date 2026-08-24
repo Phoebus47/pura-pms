@@ -140,13 +140,35 @@ describe('GuestsService', () => {
       );
     });
 
-    it('should filter by search term', async () => {
+    it('should filter by single search term', async () => {
       await service.findAll('John');
       expect(prisma.guest.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             OR: expect.arrayContaining([
               { firstName: { contains: 'John', mode: 'insensitive' } },
+            ]),
+          }),
+        }),
+      );
+    });
+
+    it('should filter by multi-word search term (e.g. Thai name สมชาย ใจดี)', async () => {
+      await service.findAll('สมชาย ใจดี');
+      expect(prisma.guest.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              expect.objectContaining({
+                OR: expect.arrayContaining([
+                  { firstName: { contains: 'สมชาย', mode: 'insensitive' } },
+                ]),
+              }),
+              expect.objectContaining({
+                OR: expect.arrayContaining([
+                  { firstName: { contains: 'ใจดี', mode: 'insensitive' } },
+                ]),
+              }),
             ]),
           }),
         }),
