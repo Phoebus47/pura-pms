@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PropertySwitcher } from '@/components/property-switcher';
 
 export function Header() {
   const router = useRouter();
@@ -82,6 +83,7 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center lg:gap-3">
+        <PropertySwitcher className="hidden md:flex" />
         <Button
           variant="ghost"
           size="icon"

@@ -65,6 +65,13 @@ vi.mock('next/image', () => ({
   },
 }));
 
+vi.mock('next/font/google', () => ({
+  Geist: vi.fn(() => ({ variable: '--font-geist-sans' })),
+  Geist_Mono: vi.fn(() => ({ variable: '--font-geist-mono' })),
+  Sarabun: vi.fn(() => ({ variable: '--font-sarabun' })),
+  Prompt: vi.fn(() => ({ variable: '--font-prompt' })),
+}));
+
 if (typeof window !== 'undefined') {
   window.ResizeObserver = MockResizeObserver;
 

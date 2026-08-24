@@ -28,6 +28,14 @@ vi.mock('next/image', () => ({
   },
 }));
 
+vi.mock('@/components/property-switcher', () => ({
+  PropertySwitcher: () => <div data-testid="property-switcher" />,
+}));
+
+vi.mock('zustand/middleware', () => ({
+  persist: (fn: any) => fn,
+}));
+
 describe('Header', () => {
   const mockPush = vi.fn();
 
