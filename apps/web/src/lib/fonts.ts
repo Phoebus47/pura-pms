@@ -1,5 +1,4 @@
 import { Geist, Geist_Mono, Prompt } from 'next/font/google';
-import { FONT_THAI_VARIABLE } from './fonts.constants';
 
 export { FONT_THAI_VARIABLE, PRINT_DOCUMENT_CLASS } from './fonts.constants';
 
@@ -18,7 +17,7 @@ export const geistMono = Geist_Mono({
  * without a second webfont pipeline. Loaded on every locale.
  */
 export const promptThai = Prompt({
-  variable: FONT_THAI_VARIABLE,
+  variable: '--font-thai',
   subsets: ['latin', 'thai'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
