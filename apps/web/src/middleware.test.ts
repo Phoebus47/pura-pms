@@ -1,4 +1,5 @@
 import { routing } from '@/i18n/routing';
+import { middlewareMatcher } from '@/i18n/middleware-config';
 
 describe('next-intl routing config', () => {
   it('defines en and th locales with en as default', () => {
@@ -16,10 +17,8 @@ describe('next-intl routing config', () => {
 });
 
 describe('next-intl middleware matcher', () => {
-  it('matches app routes including locale prefixes', async () => {
-    const { config } = await import('@/middleware');
-
-    expect(config.matcher).toEqual([
+  it('matches app routes including locale prefixes', () => {
+    expect(middlewareMatcher).toEqual([
       '/',
       '/(th|en)/:path*',
       '/((?!api|_next|_vercel|serwist|.*\\..*).*)',
