@@ -1,8 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { Clock, FileText, MoonStar, Settings } from 'lucide-react';
 import { t } from '@/lib/i18n';
+import { Link } from '@/i18n/navigation';
+import { LocaleSwitcher } from '@/components/locale-switcher';
 
 export default function SettingsPage() {
   return (
@@ -14,6 +15,10 @@ export default function SettingsPage() {
           </h1>
           <p className="mt-1 text-slate-600">{t('settings.subtitle')}</p>
         </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 p-6 rounded-xl">
+        <LocaleSwitcher />
       </div>
 
       <div className="bg-white border border-slate-200 p-6 rounded-xl">

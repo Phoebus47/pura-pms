@@ -1,7 +1,9 @@
+ 
 import React from 'react';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import { t } from '@/lib/i18n';
 
 // Global ResizeObserver mock
 class MockResizeObserver {
@@ -20,6 +22,40 @@ vi.mock('next/navigation', () => ({
   }),
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/',
+  notFound: vi.fn(),
+}));
+
+vi.mock('next-intl', () => ({
+  useLocale: () => 'en',
+  useTranslations: (namespace?: string) => (key: string) =>
+    t(namespace ? `${namespace}.${key}` : key),
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+  hasLocale: (locales: readonly string[], locale: string) =>
+    locales.includes(locale),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+  usePathname: () => '/',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  redirect: vi.fn(),
+  getPathname: vi.fn(),
 }));
 
 vi.mock('next/image', () => ({

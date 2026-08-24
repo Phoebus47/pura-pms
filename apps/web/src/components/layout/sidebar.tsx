@@ -1,11 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { navigationItems } from '@/config/navigation';
 import { t } from '@/lib/i18n';
+import { Link, usePathname } from '@/i18n/navigation';
+import { LocaleSwitcher } from '@/components/locale-switcher';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -50,9 +50,12 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-white/10 p-4">
-        <p className="font-semibold text-white text-xs">PURA PMS</p>
-        <p className="mt-1 text-[10px] text-white/60">v1.0.0 • Enterprise</p>
+      <div className="border-t border-white/10 p-4 space-y-4">
+        <LocaleSwitcher className="[&_button]:min-h-9 [&_p]:text-white/70" />
+        <div>
+          <p className="font-semibold text-white text-xs">PURA PMS</p>
+          <p className="mt-1 text-[10px] text-white/60">v1.0.0 • Enterprise</p>
+        </div>
       </div>
     </div>
   );

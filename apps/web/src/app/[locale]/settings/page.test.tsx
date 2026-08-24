@@ -13,6 +13,7 @@ describe('SettingsPage', () => {
   it('should show day-close and master data links', () => {
     render(<SettingsPage />);
 
+    expect(screen.getByRole('group', { name: 'Language' })).toBeInTheDocument();
     expect(screen.getByText(t('settings.dayClose'))).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: new RegExp(t('settings.nightAudit')) }),

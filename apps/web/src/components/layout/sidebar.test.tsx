@@ -1,10 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { Sidebar } from './sidebar';
 
-vi.mock('next/navigation', () => ({
+vi.mock('next-intl', () => ({
+  useLocale: () => 'en',
+  useTranslations: (namespace: string) => (key: string) => {
+    const messages: Record<string, Record<string, string>> = {
+      locale: { label: 'Language', en: 'English', th: 'Thai' },
+    };
+    return messages[namespace]?.[key] ?? key;
+  },
+}));
+
+vi.mock('@/i18n/navigation', () => ({
   usePathname: vi.fn(),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  Link: ({
+    href,
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 vi.mock('next/image', () => ({
@@ -12,9 +37,7 @@ vi.mock('next/image', () => ({
   default: (
     props: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean },
   ) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { priority, ...imgProps } = props;
-    // eslint-disable-next-line @next/next/no-img-element
+    const { priority: _priority, ...imgProps } = props;
     return <img {...imgProps} alt={imgProps.alt || ''} />;
   },
 }));

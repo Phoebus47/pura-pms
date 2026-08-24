@@ -1,11 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { moreBottomNavItems, primaryBottomNavItems } from '@/config/navigation';
 import { t } from '@/lib/i18n';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
