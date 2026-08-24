@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { ExternalLink, Receipt } from 'lucide-react';
 import { FolioDetail } from '@/components/folio-detail';

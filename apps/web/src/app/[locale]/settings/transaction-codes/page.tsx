@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { transactionCodesAPI } from '@/lib/api/transaction-codes';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
