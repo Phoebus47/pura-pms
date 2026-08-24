@@ -1,6 +1,5 @@
- 
-import React from 'react';
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import React from 'react';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import { t } from '@/lib/i18n';
