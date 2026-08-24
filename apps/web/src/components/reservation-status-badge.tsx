@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { t } from '@/lib/i18n';
 import type { ReservationStatus } from '@/lib/api/reservations';
 
 interface ReservationStatusBadgeProps {
@@ -9,34 +10,34 @@ interface ReservationStatusBadgeProps {
 
 const statusConfig: Record<
   ReservationStatus,
-  { label: string; className: string }
+  { className: string; labelKey: string }
 > = {
   TENTATIVE: {
-    label: 'Tentative',
+    labelKey: 'reservations.status.TENTATIVE',
     className: 'bg-slate-100 text-slate-700 ring-slate-600/20',
   },
   CONFIRMED: {
-    label: 'Confirmed',
+    labelKey: 'reservations.status.CONFIRMED',
     className: 'bg-blue-100 text-blue-700 ring-blue-600/20',
   },
   CHECKED_IN: {
-    label: 'Checked In',
+    labelKey: 'reservations.status.CHECKED_IN',
     className: 'bg-emerald-100 text-emerald-700 ring-emerald-600/20',
   },
   CHECKED_OUT: {
-    label: 'Checked Out',
+    labelKey: 'reservations.status.CHECKED_OUT',
     className: 'bg-purple-100 text-purple-700 ring-purple-600/20',
   },
   CANCELLED: {
-    label: 'Cancelled',
+    labelKey: 'reservations.status.CANCELLED',
     className: 'bg-red-100 text-red-700 ring-red-600/20',
   },
   NO_SHOW: {
-    label: 'No Show',
+    labelKey: 'reservations.status.NO_SHOW',
     className: 'bg-amber-100 text-amber-700 ring-amber-600/20',
   },
   WALKED: {
-    label: 'Walked',
+    labelKey: 'reservations.status.WALKED',
     className: 'bg-orange-100 text-orange-700 ring-orange-600/20',
   },
 };
@@ -57,7 +58,7 @@ export function ReservationStatusBadge({
         className,
       )}
     >
-      {config.label}
+      {t(config.labelKey)}
     </span>
   );
 }

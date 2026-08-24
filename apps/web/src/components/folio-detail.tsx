@@ -46,7 +46,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
         setActiveFolioId(foliosData[0].id);
       }
     } catch (err) {
-      toast.error(`Failed to refresh folio: ${(err as Error).message}`);
+      toast.error(`${t('billing.folioRefreshFailed')}: ${(err as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
   if (loading) {
     return (
       <div className="p-8 text-center text-slate-500">
-        Loading billing data...
+        {t('billing.loadingFolio')}
       </div>
     );
   }
@@ -73,10 +73,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
     return (
       <div className="bg-white border border-slate-200 p-12 rounded-xl text-center">
         <Receipt className="h-12 mb-4 mx-auto text-slate-300 w-12" />
-        <h3 className="font-semibold text-slate-700 text-xl">No Folio Found</h3>
-        <p className="mt-2 text-slate-600">
-          This reservation doesn&apos;t have an active folio yet.
-        </p>
+        <h3 className="font-semibold text-slate-700 text-xl">
+          {t('billing.noFolioTitle')}
+        </h3>
+        <p className="mt-2 text-slate-600">{t('billing.noFolioBody')}</p>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50',
               )}
             >
-              Folio {folio.folioNumber} ({folio.type})
+              {t('billing.folioNumber')} {folio.folioNumber} ({folio.type})
               {folio.isInterim ? (
                 <span className="ml-1 text-indigo-200">
                   · {t('folios.interimLabel')}
@@ -113,7 +113,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
         <div className="bg-white border border-slate-200 flex gap-6 items-center px-6 py-3 rounded-xl shadow-sm">
           <div>
             <p className="font-bold text-slate-500 text-xs tracking-wider uppercase">
-              Total Balance
+              {t('billing.totalBalance')}
             </p>
             <p
               className={cn(
@@ -150,7 +150,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                   : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300',
               )}
             >
-              Window {num}
+              {t('billing.window')} {num}
               {window && window.balance !== 0 && (
                 <span className="-right-1 -top-1 absolute bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full text-[10px] text-red-600">
                   {Number(window.balance).toLocaleString()}
@@ -164,11 +164,13 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
       {/* Transactions Table */}
       <div className="bg-white border border-slate-200 overflow-hidden rounded-xl shadow-sm">
         <div className="flex items-center justify-between p-6">
-          <h3 className="font-bold text-pura-blue text-xl">Transactions</h3>
+          <h3 className="font-bold text-pura-blue text-xl">
+            {t('billing.transactions')}
+          </h3>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => setIsChargeDialogOpen(true)}>
               <Plus className="h-4 mr-2 w-4" />
-              Post Charge
+              {t('billing.postCharge')}
             </Button>
             <Button
               size="sm"
@@ -176,7 +178,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
               onClick={() => setIsPaymentDialogOpen(true)}
             >
               <CreditCard className="h-4 mr-2 w-4" />
-              Post Payment
+              {t('billing.postPayment')}
             </Button>
           </div>
         </div>
@@ -186,25 +188,25 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
             <thead>
               <tr className="bg-slate-50 border-slate-200 border-y">
                 <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
-                  Date
+                  {t('common.date')}
                 </th>
                 <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
-                  Code
+                  {t('common.code')}
                 </th>
                 <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
-                  Description
+                  {t('common.description')}
                 </th>
                 <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
-                  Net
+                  {t('common.net')}
                 </th>
                 <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
-                  Tax/Svc
+                  {t('common.taxSvc')}
                 </th>
                 <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
-                  Total
+                  {t('common.total')}
                 </th>
                 <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
-                  Actions
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>
@@ -266,7 +268,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                           setIsVoidDialogOpen(true);
                         }}
                       >
-                        Void
+                        {t('common.void')}
                       </Button>
                     </td>
                   </tr>
@@ -277,7 +279,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                     colSpan={7}
                     className="italic px-6 py-12 text-center text-slate-500"
                   >
-                    No transactions found in this window.
+                    {t('billing.noTransactions')}
                   </td>
                 </tr>
               )}
@@ -289,7 +291,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                     colSpan={5}
                     className="px-6 py-4 text-pura-blue text-right"
                   >
-                    Window Balance:
+                    {t('billing.windowBalance')}
                   </td>
                   <td
                     className={cn(
@@ -313,11 +315,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
         <AlertCircle className="h-5 mt-0.5 text-pura-blue w-5" />
         <div>
           <h4 className="font-bold text-pura-blue text-sm">
-            Billing Instructions
+            {t('billing.billingInstructions')}
           </h4>
           <p className="mt-1 text-slate-600 text-xs">
-            Select a window (1–4) before posting. Charges and payments apply to
-            the active window only.
+            {t('billing.billingInstructionsBody')}
           </p>
         </div>
       </div>
