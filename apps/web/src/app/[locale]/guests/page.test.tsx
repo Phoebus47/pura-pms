@@ -7,7 +7,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GuestsPage from './page';
+import { GuestsClient } from './guests-client';
 import { useGuests } from '@/hooks/use-guests';
 import { useRouter } from 'next/navigation';
 import { t } from '@/lib/i18n';
@@ -67,7 +67,7 @@ const mockGuests = [
   },
 ];
 
-describe('GuestsPage', () => {
+describe('GuestsClient', () => {
   const mockLoadGuests = vi.fn();
   const mockDeleteGuest = vi.fn();
   const mockPush = vi.fn();
@@ -90,7 +90,7 @@ describe('GuestsPage', () => {
       guests: [],
       loadGuests: mockLoadGuests,
     });
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     expect(screen.getByText(t('common.loadingGuests'))).toBeInTheDocument();
   });
 
@@ -102,7 +102,7 @@ describe('GuestsPage', () => {
       loadGuests: mockLoadGuests,
       loadGuestsRef: { current: mockLoadGuests },
     });
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     expect(screen.getByText(t('common.errorLoadingGuest'))).toBeInTheDocument();
 
     // Retry
@@ -116,7 +116,7 @@ describe('GuestsPage', () => {
       loading: false,
       loadGuests: mockLoadGuests,
     });
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     expect(screen.getByText(t('common.noGuestsFound'))).toBeInTheDocument();
   });
 
@@ -127,7 +127,7 @@ describe('GuestsPage', () => {
       loadGuests: mockLoadGuests,
     });
     const user = userEvent.setup();
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     const input = screen.getByPlaceholderText(/search/i);
     await user.type(input, 'TestSearchQuery');
 
@@ -149,7 +149,7 @@ describe('GuestsPage', () => {
       deleteGuest: mockDeleteGuest,
     });
 
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
 
     // Check fallback character for email
@@ -165,7 +165,7 @@ describe('GuestsPage', () => {
       loadGuests: mockLoadGuests,
       deleteGuest: mockDeleteGuest,
     });
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('US')).toBeInTheDocument();
     expect(screen.getByText(t('common.active'))).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe('GuestsPage', () => {
   });
 
   it('searches guests', async () => {
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     const input = screen.getByPlaceholderText(/search/i);
 
     // Typing updates state
@@ -196,7 +196,7 @@ describe('GuestsPage', () => {
   });
 
   it('opens create dialog', async () => {
-    render(<GuestsPage />);
+    render(<GuestsClient />);
     await userEvent.click(screen.getByText(t('common.addGuest')));
 
     expect(screen.getByText('Create Guest')).toBeInTheDocument();
@@ -211,7 +211,7 @@ describe('GuestsPage', () => {
   });
 
   it('handles edit guest', async () => {
-    render(<GuestsPage />);
+    render(<GuestsClient />);
 
     // Select John Doe's row details
     const row = screen.getByText('John Doe').closest('tr');
@@ -228,7 +228,7 @@ describe('GuestsPage', () => {
   });
 
   it('handles delete guest', async () => {
-    render(<GuestsPage />);
+    render(<GuestsClient />);
 
     const row = screen.getByText('John Doe').closest('tr');
     if (!row) throw new Error('Row not found');
