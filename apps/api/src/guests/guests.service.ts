@@ -37,13 +37,31 @@ export class GuestsService {
     const where: Prisma.GuestWhereInput = {};
 
     if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
-        { idNumber: { contains: search, mode: 'insensitive' } },
-      ];
+      const normalizedSearch = search.trim().normalize('NFC');
+      const tokens = normalizedSearch.split(/\s+/).filter(Boolean);
+
+      if (tokens.length > 1) {
+        where.AND = tokens.map((token) => ({
+          OR: [
+            { firstName: { contains: token, mode: 'insensitive' } },
+            { lastName: { contains: token, mode: 'insensitive' } },
+            { email: { contains: token, mode: 'insensitive' } },
+            { phone: { contains: token, mode: 'insensitive' } },
+            { idNumber: { contains: token, mode: 'insensitive' } },
+            { address: { contains: token, mode: 'insensitive' } },
+          ],
+        }));
+      } else if (tokens.length === 1) {
+        const token = tokens[0];
+        where.OR = [
+          { firstName: { contains: token, mode: 'insensitive' } },
+          { lastName: { contains: token, mode: 'insensitive' } },
+          { email: { contains: token, mode: 'insensitive' } },
+          { phone: { contains: token, mode: 'insensitive' } },
+          { idNumber: { contains: token, mode: 'insensitive' } },
+          { address: { contains: token, mode: 'insensitive' } },
+        ];
+      }
     }
 
     if (isBlacklist !== undefined) {

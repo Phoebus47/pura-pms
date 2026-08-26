@@ -2,12 +2,22 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from './header';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import * as clientAPI from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: vi.fn(),
+  usePathname: () => '/',
+  Link: ({
+    href,
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 vi.mock('next/image', () => ({
@@ -16,6 +26,14 @@ vi.mock('next/image', () => ({
     // eslint-disable-next-line @next/next/no-img-element
     return <img {...props} alt={props.alt || ''} />;
   },
+}));
+
+vi.mock('@/components/property-switcher', () => ({
+  PropertySwitcher: () => <div data-testid="property-switcher" />,
+}));
+
+vi.mock('zustand/middleware', () => ({
+  persist: (fn: any) => fn,
 }));
 
 describe('Header', () => {

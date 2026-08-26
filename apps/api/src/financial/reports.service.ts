@@ -167,7 +167,7 @@ export class ReportsService {
 
   private startOfDay(date: Date): Date {
     const startDate = new Date(date);
-    startDate.setHours(0, 0, 0, 0);
+    startDate.setUTCHours(0, 0, 0, 0);
     return startDate;
   }
 }

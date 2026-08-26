@@ -1,21 +1,20 @@
-# Current Sprint — Phase 6 complete → Phase 7 next
+# Current Sprint
 
-## Phase 6 closeout (@PM)
+## Sprint: Phase 7 — i18n & Multi-Property / CRS
 
-All six Phase 6 modules shipped (manual/mock v1 where noted):
+- Status: `DONE`
+- Dates: 2026-08-24 → 2026-08-26
+- Goal: Thai localisation, fonts/print, guest search, multi-property switcher, guest portal, digital key mock, mobile check-in.
 
-1. TM.30 immigration reporting
-2. Lost & Found
-3. Guest Communication Hub (in-app)
-4. Post-stay Feedback
-5. Guest Complaints / Service Recovery
-6. Lobby kiosk check-in mock
+## Deliverables
 
-## Next (Phase 7)
+1. [x] next-intl foundation (ADR 018)
+2. [x] Thai FO page translations
+3. [x] Sarabun fonts + PrintDocument (ADR 019)
+4. [x] Thai multi-token guest search (API)
+5. [x] PropertySwitcher / CRS UI v1
+6. [x] Guest portal (ADR 020)
+7. [x] Digital key mock (ADR 021)
+8. [x] Mobile check-in (ADR 022)
 
-Start with i18n foundation / Thai critical pages, or CRS — decide in next planning pass.
-
-## Deferred from Phase 6 v1
-
-- Immigration API, Lost & Found photos/notify, SMS/push, OTA reviews,
-  complaint folio credits, kiosk ID scan / payment / digital key
+See `docs/planning/phase-7-closeout.md`.

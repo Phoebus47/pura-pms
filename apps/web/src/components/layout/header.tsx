@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Bell, Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PropertySwitcher } from '@/components/property-switcher';
 
 export function Header() {
   const router = useRouter();
@@ -82,6 +83,7 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center lg:gap-3">
+        <PropertySwitcher className="hidden md:flex" />
         <Button
           variant="ghost"
           size="icon"

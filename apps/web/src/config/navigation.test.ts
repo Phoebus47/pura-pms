@@ -31,6 +31,7 @@ import {
   Star,
   AlertTriangle,
   MonitorSmartphone,
+  KeyRound,
 } from 'lucide-react';
 
 describe('navigation', () => {
@@ -244,6 +245,15 @@ describe('navigation', () => {
       expect(item?.icon).toBe(MonitorSmartphone);
     });
 
+    it('should include Digital keys navigation item', () => {
+      const item = navigationItems.find(
+        (navItem) => navItem.name === 'Digital keys',
+      );
+      expect(item).toBeDefined();
+      expect(item?.href).toBe('/digital-keys');
+      expect(item?.icon).toBe(KeyRound);
+    });
+
     it('should include Partner hotels navigation item', () => {
       const item = navigationItems.find(
         (navItem) => navItem.name === 'Partner hotels',
@@ -291,6 +301,7 @@ describe('navigation', () => {
         'Accounts receivable',
         'Card pre-auths',
         'Partner hotels',
+        'Digital keys',
         'Settings',
       ];
 
@@ -355,6 +366,7 @@ describe('navigation', () => {
         'Feedback',
         'Complaints',
         'Kiosk',
+        'Digital keys',
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
@@ -378,6 +390,7 @@ describe('navigation', () => {
         '/feedback',
         '/complaints',
         '/kiosk',
+        '/digital-keys',
         '/settings',
       ]);
     });

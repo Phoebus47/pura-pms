@@ -33,6 +33,9 @@ import { GuestMessagesModule } from './guest-messages/guest-messages.module';
 import { GuestFeedbackModule } from './guest-feedback/guest-feedback.module';
 import { GuestComplaintsModule } from './guest-complaints/guest-complaints.module';
 import { KioskModule } from './kiosk/kiosk.module';
+import { MobileCheckInModule } from './mobile-check-in/mobile-check-in.module';
+import { PortalModule } from './portal/portal.module';
+import { DigitalKeysModule } from './digital-keys/digital-keys.module';
 
 @Module({
   imports: [
@@ -65,6 +68,9 @@ import { KioskModule } from './kiosk/kiosk.module';
     GuestFeedbackModule,
     GuestComplaintsModule,
     KioskModule,
+    MobileCheckInModule,
+    PortalModule,
+    DigitalKeysModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',

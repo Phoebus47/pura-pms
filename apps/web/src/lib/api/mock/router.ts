@@ -3876,6 +3876,431 @@ function handleKiosk(method: string, path: string, body: any) {
   }
 }
 
+function toMobileCheckInView(reservation: any) {
+  return {
+    confirmNumber: reservation.confirmNumber,
+    status: reservation.status,
+    checkIn: reservation.checkIn,
+    checkOut: reservation.checkOut,
+    nights: reservation.nights ?? null,
+    adults: reservation.adults,
+    children: reservation.children,
+    guestFirstName: reservation.guest?.firstName ?? '',
+    guestLastName: reservation.guest?.lastName ?? '',
+    room: reservation.room
+      ? {
+          id: reservation.room.id,
+          number: reservation.room.number,
+          floor: reservation.room.floor ?? null,
+          roomType: {
+            id: reservation.room.roomType?.id ?? reservation.room.roomTypeId,
+            name: reservation.room.roomType?.name ?? '',
+            code: reservation.room.roomType?.code ?? '',
+          },
+        }
+      : null,
+    propertyId: reservation.propertyId,
+  };
+}
+
+function findMobileCheckInReservation(
+  confirmNumber: string,
+  lastName?: string,
+) {
+  const reservation = mockDb.reservations.find(
+    (r: any) => r.confirmNumber === confirmNumber,
+  );
+  if (!reservation) {
+    throw new APIError(404, 'Not Found', {
+      message: `Reservation with confirmation number ${confirmNumber} not found`,
+    });
+  }
+  if (
+    lastName &&
+    reservation.guest?.lastName?.trim().toLowerCase() !==
+      lastName.trim().toLowerCase()
+  ) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Last name does not match this reservation',
+    });
+  }
+  return reservation;
+}
+
+function assertMobileRoomChangeEligible(reservation: any) {
+  if (reservation.status !== 'CONFIRMED') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Rooms can only be changed before check-in',
+    });
+  }
+}
+
+function handleMobileCheckInGet(path: string, params?: URLSearchParams) {
+  const lastName = params?.get('lastName') || undefined;
+
+  const roomsMatch = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)\/rooms$/.exec(path);
+  if (roomsMatch) {
+    const reservation = findMobileCheckInReservation(roomsMatch[1], lastName);
+    assertMobileRoomChangeEligible(reservation);
+
+    const vacantStatuses = ['VACANT_CLEAN', 'VACANT_DIRTY'];
+    const candidateRooms = mockDb.rooms.filter(
+      (room: any) =>
+        room.propertyId === reservation.propertyId &&
+        vacantStatuses.includes(room.status) &&
+        room.id !== reservation.roomId,
+    );
+
+    const grouped: Record<string, any> = {};
+    for (const room of candidateRooms) {
+      const roomType = mockDb.roomTypes.find(
+        (rt: any) => rt.id === room.roomTypeId,
+      );
+      if (!grouped[room.roomTypeId]) {
+        grouped[room.roomTypeId] = {
+          roomType: roomType ?? { id: room.roomTypeId },
+          availableCount: 0,
+          rooms: [],
+        };
+      }
+      grouped[room.roomTypeId].availableCount += 1;
+      grouped[room.roomTypeId].rooms.push({
+        id: room.id,
+        number: room.number,
+        floor: room.floor ?? null,
+        status: room.status,
+      });
+    }
+    return Object.values(grouped);
+  }
+
+  const match = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (match) {
+    const reservation = findMobileCheckInReservation(match[1], lastName);
+    return toMobileCheckInView(reservation);
+  }
+}
+
+function handleMobileCheckInPost(path: string, body: any) {
+  const roomMatch = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)\/room$/.exec(path);
+  if (roomMatch) {
+    const reservation = findMobileCheckInReservation(
+      roomMatch[1],
+      body?.lastName,
+    );
+    assertMobileRoomChangeEligible(reservation);
+
+    const room = mockDb.rooms.find((r: any) => r.id === body?.roomId);
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    const roomType = mockDb.roomTypes.find(
+      (rt: any) => rt.id === room.roomTypeId,
+    );
+
+    const idx = mockDb.reservations.findIndex(
+      (r: any) => r.id === reservation.id,
+    );
+    mockDb.reservations[idx] = {
+      ...mockDb.reservations[idx],
+      roomId: room.id,
+      room: {
+        id: room.id,
+        number: room.number,
+        floor: room.floor ?? null,
+        roomType: roomType ?? {},
+      },
+    };
+    return toMobileCheckInView(mockDb.reservations[idx]);
+  }
+
+  const checkInMatch = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)\/check-in$/.exec(
+    path,
+  );
+  if (checkInMatch) {
+    const reservation = findMobileCheckInReservation(
+      checkInMatch[1],
+      body?.lastName,
+    );
+    if (reservation.status !== 'CONFIRMED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only confirmed reservations can be checked in',
+      });
+    }
+
+    const idx = mockDb.reservations.findIndex(
+      (r: any) => r.id === reservation.id,
+    );
+    mockDb.reservations[idx].status = 'CHECKED_IN';
+    updateReservationRoomStatus(mockDb.reservations[idx], 'OCCUPIED_CLEAN');
+
+    return {
+      reservation: toMobileCheckInView(mockDb.reservations[idx]),
+      digitalKey: {
+        status: 'UNAVAILABLE',
+        message:
+          'Digital key issuance is not available yet. Please collect a physical key at the front desk.',
+      },
+    };
+  }
+}
+
+function handleMobileCheckIn(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (!path.startsWith('/mobile-check-in')) return;
+  if (method === 'GET') return handleMobileCheckInGet(path, params);
+  if (method === 'POST') return handleMobileCheckInPost(path, body);
+}
+
+const PORTAL_NOT_FOUND_MESSAGE =
+  'Reservation not found or last name does not match';
+
+function findPortalReservation(confirmNumber: string, lastName: string) {
+  const reservation = mockDb.reservations.find(
+    (r: any) => r.confirmNumber === confirmNumber,
+  );
+  const guestLastName = reservation?.guest?.lastName;
+  if (
+    !reservation ||
+    !guestLastName ||
+    guestLastName.trim().toLowerCase() !== String(lastName).trim().toLowerCase()
+  ) {
+    throw new APIError(404, 'Not Found', {
+      message: PORTAL_NOT_FOUND_MESSAGE,
+    });
+  }
+  return reservation;
+}
+
+function handlePortalGet(path: string, params?: URLSearchParams) {
+  const lastName = params?.get('lastName') ?? '';
+
+  const folioMatch = /^\/portal\/reservations\/([a-zA-Z0-9_-]+)\/folio$/.exec(
+    path,
+  );
+  if (folioMatch) {
+    const reservation = findPortalReservation(folioMatch[1], lastName);
+    const folios = mockDb.folios.filter(
+      (f: any) => f.reservationId === reservation.id,
+    );
+    return folios.map(populateFolio).map((folio: any) => ({
+      id: folio.id,
+      folioNumber: folio.folioNumber,
+      status: folio.status,
+      balance: folio.balance,
+      transactions: folio.windows.flatMap((window: any) =>
+        window.transactions
+          .filter((trx: any) => !trx.isVoid)
+          .map((trx: any) => ({
+            id: trx.id,
+            businessDate: trx.businessDate,
+            description: trx.trxCode?.description ?? trx.remark ?? '',
+            amountTotal: trx.amountTotal,
+            sign: trx.sign,
+          })),
+      ),
+    }));
+  }
+
+  const reservationMatch = /^\/portal\/reservations\/([a-zA-Z0-9_-]+)$/.exec(
+    path,
+  );
+  if (reservationMatch) {
+    const reservation = findPortalReservation(reservationMatch[1], lastName);
+    return {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+      checkIn: reservation.checkIn,
+      checkOut: reservation.checkOut,
+      nights: reservation.nights,
+      room: reservation.room ? { number: reservation.room.number } : null,
+      guest: reservation.guest
+        ? {
+            firstName: reservation.guest.firstName,
+            lastName: reservation.guest.lastName,
+          }
+        : null,
+    };
+  }
+}
+
+function handlePortalPost(path: string, body: any) {
+  const messageMatch =
+    /^\/portal\/reservations\/([a-zA-Z0-9_-]+)\/messages$/.exec(path);
+  if (!messageMatch) return;
+
+  const reservation = findPortalReservation(
+    messageMatch[1],
+    body?.lastName ?? '',
+  );
+  const guest = mockDb.guests.find((g: any) => g.id === reservation.guestId);
+  const created = {
+    id: `msg_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    guestId: reservation.guestId,
+    reservationId: reservation.id,
+    direction: 'INBOUND',
+    channel: 'IN_APP',
+    content: body?.content,
+    sentBy: null,
+    readAt: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    guest: guest
+      ? { id: guest.id, firstName: guest.firstName, lastName: guest.lastName }
+      : reservation.guest,
+  };
+  mockDb.guestMessages.push(created);
+  return created;
+}
+
+function handlePortal(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (!path.startsWith('/portal')) return;
+  if (method === 'GET') return handlePortalGet(path, params);
+  if (method === 'POST') return handlePortalPost(path, body);
+}
+function mockDigitalKeyToken() {
+  return `DK-MOCK-${Math.random().toString(16).slice(2, 14).toUpperCase()}${Date.now()
+    .toString(16)
+    .toUpperCase()}`;
+}
+
+function issueMockDigitalKey(reservation: any, body: any) {
+  if (!['CONFIRMED', 'CHECKED_IN'].includes(reservation.status)) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'Digital keys can only be issued for confirmed or checked-in reservations',
+    });
+  }
+  if (!reservation.roomId || !reservation.room) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Reservation must have a room assigned to issue a digital key',
+    });
+  }
+  const created = {
+    id: `dk_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    reservationId: reservation.id,
+    roomNumber: reservation.room.number,
+    token: mockDigitalKeyToken(),
+    transport: body?.transport ?? 'BLE',
+    status: 'ACTIVE',
+    issuedBy: body?.issuedBy,
+    issuedAt: new Date().toISOString(),
+    expiresAt: reservation.checkOut,
+    revokedAt: null,
+    revokedBy: null,
+    revokedReason: null,
+    createdAt: new Date().toISOString(),
+    reservation: {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+    },
+  };
+  mockDb.digitalKeys.push(created);
+  return created;
+}
+
+function handleDigitalKeysGet(path: string, params: URLSearchParams) {
+  if (path === '/digital-keys') {
+    const propertyId = params.get('propertyId');
+    const reservationId = params.get('reservationId');
+    return mockDb.digitalKeys
+      .filter((row: any) => {
+        if (reservationId && row.reservationId !== reservationId) {
+          return false;
+        }
+        if (propertyId && row.propertyId !== propertyId) return false;
+        return true;
+      })
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+  }
+
+  const match = /^\/digital-keys\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const row = mockDb.digitalKeys.find((item: any) => item.id === match[1]);
+  if (!row) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Digital key not found',
+    });
+  }
+  return row;
+}
+
+function handleDigitalKeysPost(path: string, body: any) {
+  if (path === '/digital-keys/issue') {
+    const reservation = mockDb.reservations.find(
+      (row: any) => row.id === body.reservationId,
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Reservation not found',
+      });
+    }
+    return issueMockDigitalKey(reservation, body);
+  }
+
+  if (path === '/digital-keys/issue-by-confirm') {
+    const confirmNumber = String(body?.confirmNumber ?? '').trim();
+    const reservation = mockDb.reservations.find(
+      (row: any) => row.confirmNumber === confirmNumber,
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: `Reservation with confirmation number ${confirmNumber} not found`,
+      });
+    }
+    return issueMockDigitalKey(reservation, body);
+  }
+
+  const revokeMatch = /^\/digital-keys\/([a-zA-Z0-9_-]+)\/revoke$/.exec(path);
+  if (revokeMatch) {
+    const row = mockDb.digitalKeys.find(
+      (item: any) => item.id === revokeMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Digital key not found',
+      });
+    }
+    if (row.status !== 'ACTIVE') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only active digital keys can be revoked',
+      });
+    }
+    row.status = 'REVOKED';
+    row.revokedAt = new Date().toISOString();
+    row.revokedBy = body?.revokedBy;
+    row.revokedReason = body?.revokedReason ?? null;
+    return row;
+  }
+}
+
+function handleDigitalKeys(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/digital-keys')) return;
+  if (method === 'GET') return handleDigitalKeysGet(path, params);
+  if (method === 'POST') return handleDigitalKeysPost(path, body);
+}
+
 function handleReservations(
   method: string,
   path: string,
@@ -4004,6 +4429,9 @@ export async function routeMockRequest<T>(
       () => handleGuestFeedback(method, path, body, params),
       () => handleGuestComplaints(method, path, body, params),
       () => handleKiosk(method, path, body),
+      () => handleMobileCheckIn(method, path, body, params),
+      () => handlePortal(method, path, body, params),
+      () => handleDigitalKeys(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

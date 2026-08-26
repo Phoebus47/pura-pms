@@ -122,16 +122,28 @@ export class APIClient {
 export const apiClient = new APIClient();
 
 export function getAuthToken(): string | null {
-  if (globalThis.window === undefined) return null;
-  return globalThis.localStorage.getItem('token');
+  if (
+    typeof window === 'undefined' ||
+    typeof window.localStorage === 'undefined'
+  )
+    return null;
+  return window.localStorage.getItem('token');
 }
 
 export function setAuthToken(token: string): void {
-  if (globalThis.window === undefined) return;
-  globalThis.localStorage.setItem('token', token);
+  if (
+    typeof window === 'undefined' ||
+    typeof window.localStorage === 'undefined'
+  )
+    return;
+  window.localStorage.setItem('token', token);
 }
 
 export function clearAuthToken(): void {
-  if (globalThis.window === undefined) return;
-  globalThis.localStorage.removeItem('token');
+  if (
+    typeof window === 'undefined' ||
+    typeof window.localStorage === 'undefined'
+  )
+    return;
+  window.localStorage.removeItem('token');
 }

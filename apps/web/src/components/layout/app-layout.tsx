@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { OfflineBanner } from '@/components/pwa/offline-banner';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
@@ -13,7 +13,11 @@ export function AppLayout({
 }) {
   const pathname = usePathname();
 
-  if (pathname === '/login') {
+  if (
+    pathname === '/login' ||
+    pathname.startsWith('/mobile-check-in') ||
+    pathname.startsWith('/portal')
+  ) {
     return <>{children}</>;
   }
 

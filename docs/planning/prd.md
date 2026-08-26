@@ -1269,14 +1269,14 @@ graph LR
 
 ### Phase 7: i18n & Multi-Property
 
-- [ ] i18n Foundation (next-intl setup)
-- [ ] Thai Translation (Critical Pages)
-- [ ] Thai Font Support (PDF Reports)
-- [ ] Thai Search (Guest Name Search)
-- [ ] Central Reservation System (Multi-property)
-- [ ] Guest Portal (View folio, request services)
-- [ ] Digital Key (BLE/NFC)
-- [ ] Mobile Check-in
+- [x] i18n Foundation (next-intl setup)
+- [x] Thai Translation (Critical Pages)
+- [x] Thai Font Support (PDF Reports)
+- [x] Thai Search (Guest Name Search)
+- [x] Central Reservation System (Multi-property UI v1)
+- [x] Guest Portal (View folio, request services)
+- [x] Digital Key (BLE/NFC mock)
+- [x] Mobile Check-in
 
 ---
 

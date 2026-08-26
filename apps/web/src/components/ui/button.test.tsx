@@ -42,7 +42,7 @@ describe('Button', () => {
   it('should render as child when asChild is true', () => {
     render(
       <Button asChild>
-        <a href="/link">Link Button</a>
+        <span role="link">Link Button</span>
       </Button>,
     );
     const link = screen.getByRole('link', { name: /link button/i });

@@ -1,10 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react';
 import { AppLayout } from './app-layout';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   usePathname: vi.fn(),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  Link: ({
+    href,
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 vi.mock('./sidebar', () => ({
@@ -91,6 +106,36 @@ describe('AppLayout', () => {
     );
 
     expect(screen.getByText('Test Login Content')).toBeInTheDocument();
+    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('header')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
+  });
+
+  it('should only render children for the guest-facing mobile check-in route', () => {
+    (usePathname as any).mockReturnValue('/mobile-check-in');
+    render(
+      <AppLayout>
+        <div>Test Mobile Check-in Content</div>
+      </AppLayout>,
+    );
+
+    expect(
+      screen.getByText('Test Mobile Check-in Content'),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('header')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
+  });
+
+  it('should only render children when pathname starts with /portal', () => {
+    (usePathname as any).mockReturnValue('/portal');
+    render(
+      <AppLayout>
+        <div>Test Portal Content</div>
+      </AppLayout>,
+    );
+
+    expect(screen.getByText('Test Portal Content')).toBeInTheDocument();
     expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
     expect(screen.queryByTestId('header')).not.toBeInTheDocument();
     expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();

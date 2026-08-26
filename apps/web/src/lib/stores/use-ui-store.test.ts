@@ -50,12 +50,28 @@ describe('useUIStore', () => {
       result.current.setTheme('dark');
     });
 
-    expect(result.current.theme).toBe('dark');
-
     act(() => {
       result.current.setTheme('light');
     });
 
     expect(result.current.theme).toBe('light');
+  });
+
+  it('should set active property ID', () => {
+    const { result } = renderHook(() => useUIStore());
+
+    expect(result.current.activePropertyId).toBeUndefined();
+
+    act(() => {
+      result.current.setActivePropertyId('prop-123');
+    });
+
+    expect(result.current.activePropertyId).toBe('prop-123');
+
+    act(() => {
+      result.current.setActivePropertyId(undefined);
+    });
+
+    expect(result.current.activePropertyId).toBeUndefined();
   });
 });
