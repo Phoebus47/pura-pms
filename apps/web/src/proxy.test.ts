@@ -1,6 +1,6 @@
 import { routing } from '@/i18n/routing';
 
-export const expectedMiddlewareMatcher = [
+export const expectedProxyMatcher = [
   '/',
   '/(th|en)/:path*',
   '/((?!api|_next|_vercel|serwist|.*\\..*).*)',
@@ -21,9 +21,9 @@ describe('next-intl routing config', () => {
   });
 });
 
-describe('next-intl middleware matcher', () => {
+describe('next-intl proxy matcher', () => {
   it('documents static matcher patterns required by Next.js', () => {
-    expect(expectedMiddlewareMatcher).toEqual([
+    expect(expectedProxyMatcher).toEqual([
       '/',
       '/(th|en)/:path*',
       '/((?!api|_next|_vercel|serwist|.*\\..*).*)',

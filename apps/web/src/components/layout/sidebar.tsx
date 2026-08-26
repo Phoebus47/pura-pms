@@ -51,7 +51,7 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-white/10 p-4 space-y-4">
-        <LocaleSwitcher className="[&_button]:min-h-9 [&_p]:text-white/70" />
+        <LocaleSwitcher appearance="onDark" className="[&_button]:min-h-9" />
         <div>
           <p className="font-semibold text-white text-xs">PURA PMS</p>
           <p className="mt-1 text-[10px] text-white/60">v1.0.0 • Enterprise</p>

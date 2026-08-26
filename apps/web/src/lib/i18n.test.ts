@@ -47,9 +47,11 @@ describe('i18n bridge', () => {
     expect(t('dashboard.title')).toBe('แดชบอร์ด');
     expect(t('reservations.list.title')).toBe('การจอง');
     expect(t('guests.list.title')).toBe('แขก');
-    expect(t('billing.title')).toBe('บิลลิ่ง');
+    expect(t('billing.title')).toBe('โฟลิโอ');
     expect(t('housekeeping.title')).toBe('ตรวจห้องแม่บ้าน');
-    expect(t('nightAudit.title')).toBe('ตรวจรอบคืน');
+    expect(t('nightAudit.title')).toBe('ปิดยอดกลางคืน');
+    expect(t('nav.rates')).toBe('เรทห้อง');
+    expect(t('nav.yield')).toBe('บริหารรายได้');
     expect(t('reservations.status.CHECKED_IN')).toBe('เช็คอินแล้ว');
   });
 });
