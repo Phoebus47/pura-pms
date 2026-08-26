@@ -56,4 +56,8 @@ describe('API Index', () => {
   it('should export clearAuthToken', () => {
     expect(api.clearAuthToken).toBeDefined();
   });
+
+  it('should export mobileCheckInAPI', () => {
+    expect(api.mobileCheckInAPI).toBeDefined();
+  });
 });

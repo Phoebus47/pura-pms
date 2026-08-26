@@ -3876,6 +3876,186 @@ function handleKiosk(method: string, path: string, body: any) {
   }
 }
 
+function toMobileCheckInView(reservation: any) {
+  return {
+    confirmNumber: reservation.confirmNumber,
+    status: reservation.status,
+    checkIn: reservation.checkIn,
+    checkOut: reservation.checkOut,
+    nights: reservation.nights ?? null,
+    adults: reservation.adults,
+    children: reservation.children,
+    guestFirstName: reservation.guest?.firstName ?? '',
+    guestLastName: reservation.guest?.lastName ?? '',
+    room: reservation.room
+      ? {
+          id: reservation.room.id,
+          number: reservation.room.number,
+          floor: reservation.room.floor ?? null,
+          roomType: {
+            id: reservation.room.roomType?.id ?? reservation.room.roomTypeId,
+            name: reservation.room.roomType?.name ?? '',
+            code: reservation.room.roomType?.code ?? '',
+          },
+        }
+      : null,
+    propertyId: reservation.propertyId,
+  };
+}
+
+function findMobileCheckInReservation(
+  confirmNumber: string,
+  lastName?: string,
+) {
+  const reservation = mockDb.reservations.find(
+    (r: any) => r.confirmNumber === confirmNumber,
+  );
+  if (!reservation) {
+    throw new APIError(404, 'Not Found', {
+      message: `Reservation with confirmation number ${confirmNumber} not found`,
+    });
+  }
+  if (
+    lastName &&
+    reservation.guest?.lastName?.trim().toLowerCase() !==
+      lastName.trim().toLowerCase()
+  ) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Last name does not match this reservation',
+    });
+  }
+  return reservation;
+}
+
+function assertMobileRoomChangeEligible(reservation: any) {
+  if (reservation.status !== 'CONFIRMED') {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Rooms can only be changed before check-in',
+    });
+  }
+}
+
+function handleMobileCheckInGet(path: string, params?: URLSearchParams) {
+  const lastName = params?.get('lastName') || undefined;
+
+  const roomsMatch = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)\/rooms$/.exec(path);
+  if (roomsMatch) {
+    const reservation = findMobileCheckInReservation(roomsMatch[1], lastName);
+    assertMobileRoomChangeEligible(reservation);
+
+    const vacantStatuses = ['VACANT_CLEAN', 'VACANT_DIRTY'];
+    const candidateRooms = mockDb.rooms.filter(
+      (room: any) =>
+        room.propertyId === reservation.propertyId &&
+        vacantStatuses.includes(room.status) &&
+        room.id !== reservation.roomId,
+    );
+
+    const grouped: Record<string, any> = {};
+    for (const room of candidateRooms) {
+      const roomType = mockDb.roomTypes.find(
+        (rt: any) => rt.id === room.roomTypeId,
+      );
+      if (!grouped[room.roomTypeId]) {
+        grouped[room.roomTypeId] = {
+          roomType: roomType ?? { id: room.roomTypeId },
+          availableCount: 0,
+          rooms: [],
+        };
+      }
+      grouped[room.roomTypeId].availableCount += 1;
+      grouped[room.roomTypeId].rooms.push({
+        id: room.id,
+        number: room.number,
+        floor: room.floor ?? null,
+        status: room.status,
+      });
+    }
+    return Object.values(grouped);
+  }
+
+  const match = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (match) {
+    const reservation = findMobileCheckInReservation(match[1], lastName);
+    return toMobileCheckInView(reservation);
+  }
+}
+
+function handleMobileCheckInPost(path: string, body: any) {
+  const roomMatch = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)\/room$/.exec(path);
+  if (roomMatch) {
+    const reservation = findMobileCheckInReservation(
+      roomMatch[1],
+      body?.lastName,
+    );
+    assertMobileRoomChangeEligible(reservation);
+
+    const room = mockDb.rooms.find((r: any) => r.id === body?.roomId);
+    if (!room) {
+      throw new APIError(404, 'Not Found', { message: 'Room not found' });
+    }
+    const roomType = mockDb.roomTypes.find(
+      (rt: any) => rt.id === room.roomTypeId,
+    );
+
+    const idx = mockDb.reservations.findIndex(
+      (r: any) => r.id === reservation.id,
+    );
+    mockDb.reservations[idx] = {
+      ...mockDb.reservations[idx],
+      roomId: room.id,
+      room: {
+        id: room.id,
+        number: room.number,
+        floor: room.floor ?? null,
+        roomType: roomType ?? {},
+      },
+    };
+    return toMobileCheckInView(mockDb.reservations[idx]);
+  }
+
+  const checkInMatch = /^\/mobile-check-in\/([a-zA-Z0-9_-]+)\/check-in$/.exec(
+    path,
+  );
+  if (checkInMatch) {
+    const reservation = findMobileCheckInReservation(
+      checkInMatch[1],
+      body?.lastName,
+    );
+    if (reservation.status !== 'CONFIRMED') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only confirmed reservations can be checked in',
+      });
+    }
+
+    const idx = mockDb.reservations.findIndex(
+      (r: any) => r.id === reservation.id,
+    );
+    mockDb.reservations[idx].status = 'CHECKED_IN';
+    updateReservationRoomStatus(mockDb.reservations[idx], 'OCCUPIED_CLEAN');
+
+    return {
+      reservation: toMobileCheckInView(mockDb.reservations[idx]),
+      digitalKey: {
+        status: 'UNAVAILABLE',
+        message:
+          'Digital key issuance is not available yet. Please collect a physical key at the front desk.',
+      },
+    };
+  }
+}
+
+function handleMobileCheckIn(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (!path.startsWith('/mobile-check-in')) return;
+  if (method === 'GET') return handleMobileCheckInGet(path, params);
+  if (method === 'POST') return handleMobileCheckInPost(path, body);
+}
+
 function handleReservations(
   method: string,
   path: string,
@@ -4004,6 +4184,7 @@ export async function routeMockRequest<T>(
       () => handleGuestFeedback(method, path, body, params),
       () => handleGuestComplaints(method, path, body, params),
       () => handleKiosk(method, path, body),
+      () => handleMobileCheckIn(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

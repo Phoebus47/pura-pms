@@ -1764,4 +1764,61 @@ describe('Mock API Router', () => {
       expect(simulated.result).toEqual({ printed: true });
     });
   });
+
+  describe('Mobile check-in', () => {
+    it('looks up a confirmed reservation with an unassigned room', async () => {
+      const reservation: any = await routeMockRequest(
+        '/mobile-check-in/CN-DEMO-002',
+        { method: 'GET' },
+      );
+      expect(reservation.status).toBe('CONFIRMED');
+      expect(reservation.room).toBeNull();
+      expect(reservation.guestFirstName).toBe('Jane');
+    });
+
+    it('rejects lookup when the last name does not match', async () => {
+      await expect(
+        routeMockRequest('/mobile-check-in/CN-DEMO-002?lastName=Wrong', {
+          method: 'GET',
+        }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('rejects lookup for an unknown confirmation number', async () => {
+      await expect(
+        routeMockRequest('/mobile-check-in/CN-UNKNOWN', { method: 'GET' }),
+      ).rejects.toThrow(APIError);
+    });
+
+    it('lists available rooms, assigns one, then checks in with a digital key stub', async () => {
+      const rooms: any = await routeMockRequest(
+        '/mobile-check-in/CN-DEMO-002/rooms',
+        { method: 'GET' },
+      );
+      expect(rooms.length).toBeGreaterThan(0);
+      const roomId = rooms[0].rooms[0].id;
+
+      const withRoom: any = await routeMockRequest(
+        '/mobile-check-in/CN-DEMO-002/room',
+        { method: 'POST', body: JSON.stringify({ roomId }) },
+      );
+      expect(withRoom.room.id).toBe(roomId);
+
+      const result: any = await routeMockRequest(
+        '/mobile-check-in/CN-DEMO-002/check-in',
+        { method: 'POST', body: JSON.stringify({ lastName: 'Smith' }) },
+      );
+      expect(result.reservation.status).toBe('CHECKED_IN');
+      expect(result.digitalKey.status).toBe('UNAVAILABLE');
+    });
+
+    it('rejects room selection once the guest has already checked in', async () => {
+      await expect(
+        routeMockRequest('/mobile-check-in/CN-DEMO-001/room', {
+          method: 'POST',
+          body: JSON.stringify({ roomId: 'rm_mock_1' }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+  });
 });

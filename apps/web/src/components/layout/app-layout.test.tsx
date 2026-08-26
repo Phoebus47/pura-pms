@@ -110,4 +110,20 @@ describe('AppLayout', () => {
     expect(screen.queryByTestId('header')).not.toBeInTheDocument();
     expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
   });
+
+  it('should only render children for the guest-facing mobile check-in route', () => {
+    (usePathname as any).mockReturnValue('/mobile-check-in');
+    render(
+      <AppLayout>
+        <div>Test Mobile Check-in Content</div>
+      </AppLayout>,
+    );
+
+    expect(
+      screen.getByText('Test Mobile Check-in Content'),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('header')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
+  });
 });
