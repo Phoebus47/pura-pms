@@ -3876,6 +3876,120 @@ function handleKiosk(method: string, path: string, body: any) {
   }
 }
 
+const PORTAL_NOT_FOUND_MESSAGE =
+  'Reservation not found or last name does not match';
+
+function findPortalReservation(confirmNumber: string, lastName: string) {
+  const reservation = mockDb.reservations.find(
+    (r: any) => r.confirmNumber === confirmNumber,
+  );
+  const guestLastName = reservation?.guest?.lastName;
+  if (
+    !reservation ||
+    !guestLastName ||
+    guestLastName.trim().toLowerCase() !== String(lastName).trim().toLowerCase()
+  ) {
+    throw new APIError(404, 'Not Found', {
+      message: PORTAL_NOT_FOUND_MESSAGE,
+    });
+  }
+  return reservation;
+}
+
+function handlePortalGet(path: string, params?: URLSearchParams) {
+  const lastName = params?.get('lastName') ?? '';
+
+  const folioMatch = /^\/portal\/reservations\/([a-zA-Z0-9_-]+)\/folio$/.exec(
+    path,
+  );
+  if (folioMatch) {
+    const reservation = findPortalReservation(folioMatch[1], lastName);
+    const folios = mockDb.folios.filter(
+      (f: any) => f.reservationId === reservation.id,
+    );
+    return folios.map(populateFolio).map((folio: any) => ({
+      id: folio.id,
+      folioNumber: folio.folioNumber,
+      status: folio.status,
+      balance: folio.balance,
+      transactions: folio.windows.flatMap((window: any) =>
+        window.transactions
+          .filter((trx: any) => !trx.isVoid)
+          .map((trx: any) => ({
+            id: trx.id,
+            businessDate: trx.businessDate,
+            description: trx.trxCode?.description ?? trx.remark ?? '',
+            amountTotal: trx.amountTotal,
+            sign: trx.sign,
+          })),
+      ),
+    }));
+  }
+
+  const reservationMatch = /^\/portal\/reservations\/([a-zA-Z0-9_-]+)$/.exec(
+    path,
+  );
+  if (reservationMatch) {
+    const reservation = findPortalReservation(reservationMatch[1], lastName);
+    return {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+      checkIn: reservation.checkIn,
+      checkOut: reservation.checkOut,
+      nights: reservation.nights,
+      room: reservation.room ? { number: reservation.room.number } : null,
+      guest: reservation.guest
+        ? {
+            firstName: reservation.guest.firstName,
+            lastName: reservation.guest.lastName,
+          }
+        : null,
+    };
+  }
+}
+
+function handlePortalPost(path: string, body: any) {
+  const messageMatch =
+    /^\/portal\/reservations\/([a-zA-Z0-9_-]+)\/messages$/.exec(path);
+  if (!messageMatch) return;
+
+  const reservation = findPortalReservation(
+    messageMatch[1],
+    body?.lastName ?? '',
+  );
+  const guest = mockDb.guests.find((g: any) => g.id === reservation.guestId);
+  const created = {
+    id: `msg_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    guestId: reservation.guestId,
+    reservationId: reservation.id,
+    direction: 'INBOUND',
+    channel: 'IN_APP',
+    content: body?.content,
+    sentBy: null,
+    readAt: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    guest: guest
+      ? { id: guest.id, firstName: guest.firstName, lastName: guest.lastName }
+      : reservation.guest,
+  };
+  mockDb.guestMessages.push(created);
+  return created;
+}
+
+function handlePortal(
+  method: string,
+  path: string,
+  body: any,
+  params?: URLSearchParams,
+) {
+  if (!path.startsWith('/portal')) return;
+  if (method === 'GET') return handlePortalGet(path, params);
+  if (method === 'POST') return handlePortalPost(path, body);
+}
+
 function handleReservations(
   method: string,
   path: string,
@@ -4004,6 +4118,7 @@ export async function routeMockRequest<T>(
       () => handleGuestFeedback(method, path, body, params),
       () => handleGuestComplaints(method, path, body, params),
       () => handleKiosk(method, path, body),
+      () => handlePortal(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

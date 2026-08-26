@@ -110,4 +110,18 @@ describe('AppLayout', () => {
     expect(screen.queryByTestId('header')).not.toBeInTheDocument();
     expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
   });
+
+  it('should only render children when pathname starts with /portal', () => {
+    (usePathname as any).mockReturnValue('/portal');
+    render(
+      <AppLayout>
+        <div>Test Portal Content</div>
+      </AppLayout>,
+    );
+
+    expect(screen.getByText('Test Portal Content')).toBeInTheDocument();
+    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('header')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-navigation')).not.toBeInTheDocument();
+  });
 });
