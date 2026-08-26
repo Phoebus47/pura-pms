@@ -33,6 +33,7 @@ import { GuestMessagesModule } from './guest-messages/guest-messages.module';
 import { GuestFeedbackModule } from './guest-feedback/guest-feedback.module';
 import { GuestComplaintsModule } from './guest-complaints/guest-complaints.module';
 import { KioskModule } from './kiosk/kiosk.module';
+import { PortalModule } from './portal/portal.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { KioskModule } from './kiosk/kiosk.module';
     GuestFeedbackModule,
     GuestComplaintsModule,
     KioskModule,
+    PortalModule,
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',
