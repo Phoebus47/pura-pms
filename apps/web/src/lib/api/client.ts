@@ -24,7 +24,8 @@ export class APIClient {
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;
     this.defaultHeaders = {
-      'Content-Type': 'application/json',\n    };
+      'Content-Type': 'application/json',
+    };
   }
 
   private async request<T>(

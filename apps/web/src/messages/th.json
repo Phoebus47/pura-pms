@@ -16,6 +16,12 @@
     "en": "English",
     "th": "ไทย"
   },
+  "property": {
+    "label": "โรงแรม",
+    "select": "เลือกโรงแรม",
+    "all": "ทุกโรงแรม",
+    "switch": "เปลี่ยนโรงแรม"
+  },
   "nav": {
     "dashboard": "แดชบอร์ด",
     "reservations": "การจอง",
