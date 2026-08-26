@@ -10,6 +10,7 @@ import { DetailPageError } from '@/components/shared/detail-page-error';
 import { DetailPageHeader } from '@/components/shared/detail-page-header';
 import { MetadataCard } from '@/components/shared/metadata-card';
 import { DetailField } from '@/components/shared/detail-field';
+import { t } from '@/lib/i18n';
 
 export default function GuestDetailPage() {
   const params = useParams();
@@ -27,7 +28,9 @@ export default function GuestDetailPage() {
       const data = await guestsAPI.getById(guestId);
       setGuest(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load guest');
+      setError(
+        err instanceof Error ? err.message : t('common.failedToLoadGuest'),
+      );
     } finally {
       setLoading(false);
     }
@@ -38,13 +41,15 @@ export default function GuestDetailPage() {
   }, [loadGuest]);
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to delete this guest?')) return;
+    if (!confirm(t('common.deleteGuestConfirm'))) return;
 
     try {
       await guestsAPI.delete(guestId);
       router.push('/guests');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete guest');
+      alert(
+        err instanceof Error ? err.message : t('common.failedToDeleteGuest'),
+      );
     }
   }
 
@@ -56,20 +61,20 @@ export default function GuestDetailPage() {
       alert(
         err instanceof Error
           ? err.message
-          : 'Failed to update blacklist status',
+          : t('common.failedToUpdateBlacklist'),
       );
     }
   }
 
   if (loading) {
-    return <LoadingSpinner message="Loading guest profile..." />;
+    return <LoadingSpinner message={t('common.loadingGuestProfile')} />;
   }
 
   if (error || !guest) {
     return (
       <DetailPageError
-        title="Error loading guest"
-        message={error || 'Guest not found'}
+        title={t('common.errorLoadingGuest')}
+        message={error || t('common.guestNotFound')}
       />
     );
   }
@@ -83,12 +88,12 @@ export default function GuestDetailPage() {
             {guest.isBlacklist ? (
               <span className="font-semibold gap-1 inline-flex items-center text-red-600 text-sm">
                 <Ban className="h-4 w-4" />
-                Blacklisted
+                {t('common.blacklisted')}
               </span>
             ) : (
               <span className="font-semibold gap-1 inline-flex items-center text-emerald-600 text-sm">
                 <CheckCircle className="h-4 w-4" />
-                Active Guest
+                {t('common.activeGuest')}
               </span>
             )}
             {guest.vipLevel > 0 && (
@@ -117,12 +122,12 @@ export default function GuestDetailPage() {
               {guest.isBlacklist ? (
                 <>
                   <CheckCircle className="h-4 mr-2 w-4" />
-                  Remove from Blacklist
+                  {t('common.removeFromBlacklist')}
                 </>
               ) : (
                 <>
                   <Ban className="h-4 mr-2 w-4" />
-                  Add to Blacklist
+                  {t('common.addToBlacklist')}
                 </>
               )}
             </Button>
@@ -131,7 +136,7 @@ export default function GuestDetailPage() {
               onClick={() => router.push(`/guests/${guestId}/edit`)}
             >
               <Edit className="h-4 mr-2 w-4" />
-              Edit
+              {t('common.edit')}
             </Button>
             <Button
               variant="outline"
@@ -139,7 +144,7 @@ export default function GuestDetailPage() {
               className="hover:bg-red-50 text-red-600"
             >
               <Trash2 className="h-4 mr-2 w-4" />
-              Delete
+              {t('common.delete')}
             </Button>
           </>
         }
@@ -148,12 +153,12 @@ export default function GuestDetailPage() {
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
         <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
           <h2 className="font-bold mb-6 text-pura-blue text-xl">
-            Personal Information
+            {t('common.personalInfo')}
           </h2>
 
           <div className="gap-6 grid grid-cols-2">
             <DetailField
-              label="First Name"
+              label={t('common.firstName')}
               value={
                 <p className="font-semibold text-lg text-slate-800">
                   {guest.firstName}
@@ -162,7 +167,7 @@ export default function GuestDetailPage() {
             />
 
             <DetailField
-              label="Last Name"
+              label={t('common.lastName')}
               value={
                 <p className="font-semibold text-lg text-slate-800">
                   {guest.lastName}
@@ -171,31 +176,33 @@ export default function GuestDetailPage() {
             />
 
             <DetailField
-              label="Email"
+              label={t('common.email')}
               value={<p className="text-slate-700">{guest.email || '-'}</p>}
             />
 
             <DetailField
-              label="Phone"
+              label={t('common.phone')}
               value={<p className="text-slate-700">{guest.phone || '-'}</p>}
             />
 
             <DetailField
-              label="Nationality"
+              label={t('common.nationality')}
               value={
                 <p className="text-slate-700">{guest.nationality || '-'}</p>
               }
             />
 
             <DetailField
-              label="ID Number"
+              label={t('common.idNumber')}
               value={<p className="text-slate-700">{guest.idNumber || '-'}</p>}
             />
           </div>
 
           {guest.address && (
             <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">Address</p>
+              <p className="font-semibold text-slate-600 text-sm">
+                {t('common.address')}
+              </p>
               <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {guest.address}
               </p>
@@ -204,7 +211,9 @@ export default function GuestDetailPage() {
 
           {guest.notes && (
             <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">Notes</p>
+              <p className="font-semibold text-slate-600 text-sm">
+                {t('common.notes')}
+              </p>
               <p className="mt-2 text-slate-700 whitespace-pre-wrap">
                 {guest.notes}
               </p>
@@ -214,16 +223,18 @@ export default function GuestDetailPage() {
 
         <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
           <h2 className="font-bold mb-6 text-pura-blue text-xl">
-            Guest Statistics
+            {t('common.guestStatistics')}
           </h2>
 
           <div className="space-y-6">
             <DetailField
-              label="VIP Level"
+              label={t('common.vipLevel')}
               value={
                 <div className="flex gap-1 items-center">
                   {guest.vipLevel === 0 ? (
-                    <span className="text-slate-500">Standard Guest</span>
+                    <span className="text-slate-500">
+                      {t('common.standardGuest')}
+                    </span>
                   ) : (
                     Array.from({ length: guest.vipLevel }).map((_, i) => (
                       <Star
@@ -237,7 +248,7 @@ export default function GuestDetailPage() {
             />
 
             <DetailField
-              label="Total Stays"
+              label={t('common.totalStays')}
               value={
                 <p className="font-bold text-3xl text-pura-blue">
                   {guest.totalStays}
@@ -246,7 +257,7 @@ export default function GuestDetailPage() {
             />
 
             <DetailField
-              label="Total Revenue"
+              label={t('common.totalRevenue')}
               value={
                 <p className="font-bold text-3xl text-pura-blue">
                   ฿{Number(guest.totalRevenue).toLocaleString()}
@@ -255,18 +266,18 @@ export default function GuestDetailPage() {
             />
 
             <DetailField
-              label="Status"
+              label={t('common.status')}
               value={
                 <div>
                   {guest.isBlacklist ? (
                     <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-3 py-1.5 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-sm">
                       <Ban className="h-4 w-4" />
-                      Blacklisted
+                      {t('common.blacklisted')}
                     </span>
                   ) : (
                     <span className="bg-emerald-100 font-semibold gap-1 inline-flex items-center px-3 py-1.5 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-sm">
                       <CheckCircle className="h-4 w-4" />
-                      Active
+                      {t('common.active')}
                     </span>
                   )}
                 </div>

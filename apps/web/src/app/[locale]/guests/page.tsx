@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { GuestFormDialog } from '@/components/guest-form-dialog';
 import { useGuests } from '@/hooks/use-guests';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { formatMessage, t } from '@/lib/i18n';
 
 export default function GuestsPage() {
   const router = useRouter();
@@ -42,8 +43,8 @@ export default function GuestsPage() {
   function handleDelete(e: React.MouseEvent, id: string, name: string) {
     e.stopPropagation();
     confirm(
-      'Delete Guest',
-      `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      t('common.deleteGuest'),
+      formatMessage('common.deleteGuestNamedConfirm', { name }),
       async () => {
         await deleteGuest(id);
       },
@@ -59,7 +60,7 @@ export default function GuestsPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading guests...</p>
+          <p className="mt-4 text-slate-600">{t('common.loadingGuests')}</p>
         </div>
       </div>
     );
@@ -68,10 +69,12 @@ export default function GuestsPage() {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
-        <h3 className="font-semibold text-red-800">Error loading guests</h3>
+        <h3 className="font-semibold text-red-800">
+          {t('common.errorLoadingGuest')}
+        </h3>
         <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadGuests} className="mt-4">
-          Try Again
+          {t('common.tryAgain')}
         </Button>
       </div>
     );
@@ -81,47 +84,44 @@ export default function GuestsPage() {
     <>
       {Dialog}
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-bold text-3xl text-pura-blue">Guests</h1>
-            <p className="mt-1 text-slate-600">
-              Manage guest profiles and history
-            </p>
+            <h1 className="font-bold text-3xl text-pura-blue">
+              {t('guests.list.title')}
+            </h1>
+            <p className="mt-1 text-slate-600">{t('guests.list.subtitle')}</p>
           </div>
           <Button onClick={handleCreate}>
             <Plus className="h-4 mr-2 w-4" />
-            Add Guest
+            {t('common.addGuest')}
           </Button>
         </div>
 
-        {/* Search */}
         <div className="flex gap-3">
           <div className="flex-1 max-w-md relative">
             <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-slate-400 top-1/2 w-4" />
             <input
               type="search"
-              placeholder="Search by name, email, phone, or ID..."
+              placeholder={t('common.searchGuestsPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               className="bg-white border border-slate-200 focus:border-pura-blue/40 focus:outline-none focus:ring-4 focus:ring-pura-blue/10 pl-10 placeholder:text-slate-500 pr-4 py-2.5 rounded-lg text-sm transition-colors w-full"
             />
           </div>
-          <Button onClick={handleSearch}>Search</Button>
+          <Button onClick={handleSearch}>{t('common.search')}</Button>
         </div>
 
-        {/* Guests List */}
         {guests.length === 0 ? (
           <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
             <Users className="h-16 mx-auto text-slate-300 w-16" />
             <h3 className="font-semibold mt-4 text-lg text-slate-700">
-              No guests found
+              {t('common.noGuestsFound')}
             </h3>
             <p className="mt-2 text-slate-500">
               {searchQuery
-                ? 'Try a different search term'
-                : 'Get started by adding your first guest'}
+                ? t('common.tryDifferentSearch')
+                : t('common.addFirstGuest')}
             </p>
           </div>
         ) : (
@@ -131,25 +131,25 @@ export default function GuestsPage() {
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      Guest
+                      {t('common.guest')}
                     </th>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      Contact
+                      {t('common.contact')}
                     </th>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      VIP Level
+                      {t('common.vipLevel')}
                     </th>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      Stays
+                      {t('common.stays')}
                     </th>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      Revenue
+                      {t('common.revenue')}
                     </th>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      Status
+                      {t('common.status')}
                     </th>
                     <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                      Actions
+                      {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -202,7 +202,7 @@ export default function GuestsPage() {
                           )}
                           {guest.vipLevel === 0 && (
                             <span className="text-slate-400 text-xs">
-                              Standard
+                              {t('common.standard')}
                             </span>
                           )}
                         </div>
@@ -221,11 +221,11 @@ export default function GuestsPage() {
                         {guest.isBlacklist ? (
                           <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-2.5 py-1.5 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-xs whitespace-nowrap">
                             <Ban className="h-3 w-3" />
-                            Blacklisted
+                            {t('common.blacklisted')}
                           </span>
                         ) : (
                           <span className="bg-emerald-100 font-semibold inline-flex items-center px-2.5 py-1.5 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-xs whitespace-nowrap">
-                            Active
+                            {t('common.active')}
                           </span>
                         )}
                       </td>
@@ -236,6 +236,7 @@ export default function GuestsPage() {
                             size="sm"
                             className="hover:bg-blue-50 hover:text-blue-600"
                             onClick={(e) => handleEdit(e, guest)}
+                            aria-label={t('common.edit')}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -250,6 +251,7 @@ export default function GuestsPage() {
                                 `${guest.firstName} ${guest.lastName}`,
                               )
                             }
+                            aria-label={t('common.delete')}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -264,7 +266,6 @@ export default function GuestsPage() {
         )}
       </div>
 
-      {/* Guest Form Dialog */}
       <GuestFormDialog
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
