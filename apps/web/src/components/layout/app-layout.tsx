@@ -13,7 +13,7 @@ export function AppLayout({
 }) {
   const pathname = usePathname();
 
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname.startsWith('/mobile-check-in')) {
     return <>{children}</>;
   }
 
