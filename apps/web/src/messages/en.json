@@ -130,6 +130,7 @@
     "feedback": "Feedback",
     "complaints": "Complaints",
     "kiosk": "Kiosk",
+    "digitalKeys": "Digital keys",
     "settings": "Settings",
     "more": "More"
   },
@@ -693,6 +694,14 @@
       "scheduleSuccess": "Wake-up call scheduled",
       "scheduleFailed": "Could not schedule wake-up call"
     },
+    "digitalKey": {
+      "title": "Digital key",
+      "issue": "Issue digital key",
+      "issueSuccess": "Digital key issued",
+      "issueFailed": "Could not issue digital key",
+      "revokeSuccess": "Digital key revoked",
+      "revokeFailed": "Could not revoke digital key"
+    },
     "list": {
       "title": "Reservations",
       "subtitle": "Manage bookings and reservations",
@@ -897,6 +906,34 @@
     "missSuccess": "Wake-up marked missed",
     "cancelSuccess": "Wake-up cancelled",
     "actionFailed": "Could not update wake-up call"
+  },
+  "digitalKey": {
+    "title": "Digital keys",
+    "subtitle": "Issue mock BLE/NFC room keys and manage active credentials. No real radios are used (see ADR 021).",
+    "issueTitle": "Issue a digital key",
+    "confirmNumber": "Confirmation number",
+    "confirmNumberPlaceholder": "e.g. CN-DEMO-002",
+    "transport": "Transport",
+    "transportBle": "BLE",
+    "transportNfc": "NFC",
+    "issue": "Issue key",
+    "issueSuccess": "Digital key issued",
+    "issueFailed": "Could not issue digital key",
+    "list": "Issued keys",
+    "empty": "No digital keys issued yet",
+    "room": "Room",
+    "token": "Mock token",
+    "copyToken": "Copy token",
+    "copied": "Copied",
+    "expiresAt": "Expires",
+    "issuedAt": "Issued",
+    "statusActive": "Active",
+    "statusRevoked": "Revoked",
+    "statusExpired": "Expired",
+    "revoke": "Revoke",
+    "revokeReason": "Revoke reason",
+    "revokeSuccess": "Digital key revoked",
+    "revokeFailed": "Could not revoke digital key"
   },
   "tm30": {
     "title": "TM.30 immigration",

@@ -25,6 +25,7 @@ import {
   Star,
   AlertTriangle,
   MonitorSmartphone,
+  KeyRound,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -182,6 +183,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.kiosk',
   },
   {
+    name: 'Digital keys',
+    href: '/digital-keys',
+    icon: KeyRound,
+    labelKey: 'nav.digitalKeys',
+  },
+  {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -337,6 +344,12 @@ export const moreBottomNavItems: NavigationItem[] = [
     href: '/kiosk',
     icon: MonitorSmartphone,
     labelKey: 'nav.kiosk',
+  },
+  {
+    name: 'Digital keys',
+    href: '/digital-keys',
+    icon: KeyRound,
+    labelKey: 'nav.digitalKeys',
   },
   {
     name: 'Settings',
