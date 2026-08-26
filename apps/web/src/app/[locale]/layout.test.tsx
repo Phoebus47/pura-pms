@@ -5,7 +5,8 @@ import LocaleLayout, { viewport } from './layout';
 vi.mock('next/font/google', () => ({
   Geist: vi.fn(() => ({
     variable: '--font-geist-sans',
-  })),\n  Geist_Mono: vi.fn(() => ({
+  })),
+  Geist_Mono: vi.fn(() => ({
     variable: '--font-geist-mono',
   })),
   Sarabun: vi.fn(() => ({

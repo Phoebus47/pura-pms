@@ -455,7 +455,29 @@ describe('ReservationDetailPage', () => {
   it('renders split stay segments', async () => {
     (reservationsAPI.getById as any).mockResolvedValue({
       ...mockReservation,
-      stays: [\n        {\n          sequence: 0,\n          startDate: '2024-01-01',\n          endDate: '2024-01-03',\n          roomId: 'room-1',\n          roomRate: 1000,\n          nights: 2,\n          room: { id: 'room-1', number: '101' },\n          roomType: { id: 'type-a', name: 'Deluxe' },\n        },\n        {\n          sequence: 1,\n          startDate: '2024-01-03',\n          endDate: '2024-01-05',\n          roomId: 'room-2',\n          roomRate: 1500,\n          nights: 2,\n          room: { id: 'room-2', number: '201' },\n          roomType: { id: 'type-b', name: 'Suite' },\n        },\n      ],\n    });
+      stays: [
+        {
+          sequence: 0,
+          startDate: '2024-01-01',
+          endDate: '2024-01-03',
+          roomId: 'room-1',
+          roomRate: 1000,
+          nights: 2,
+          room: { id: 'room-1', number: '101' },
+          roomType: { id: 'type-a', name: 'Deluxe' },
+        },
+        {
+          sequence: 1,
+          startDate: '2024-01-03',
+          endDate: '2024-01-05',
+          roomId: 'room-2',
+          roomRate: 1500,
+          nights: 2,
+          room: { id: 'room-2', number: '201' },
+          roomType: { id: 'type-b', name: 'Suite' },
+        },
+      ],
+    });
     render(<ReservationDetailPage />);
 
     await waitFor(() =>

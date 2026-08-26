@@ -16,6 +16,12 @@
     "en": "English",
     "th": "Thai"
   },
+  "property": {
+    "label": "Property",
+    "select": "Select property",
+    "all": "All properties",
+    "switch": "Switch property"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "reservations": "Reservations",

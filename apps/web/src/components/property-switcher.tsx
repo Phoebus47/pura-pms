@@ -41,7 +41,8 @@ export function PropertySwitcher({
       role="group"
       aria-label={t('label')}
     >
-      {showLabel ? (\n        <label
+      {showLabel ? (
+        <label
           htmlFor="property-select"
           className="flex font-medium gap-1.5 items-center text-slate-600 text-xs"
         >
