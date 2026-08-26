@@ -10,10 +10,15 @@
   --pura-orange-light: #fbbf24;
   --pura-sky: #3b82f6;
 
+  /* Morning Harbor Desk surfaces */
+  --surface-harbor: oklch(0.975 0.012 247);
+  --surface-desk: oklch(0.995 0.004 247);
+  --rule-mist: oklch(0.9 0.015 247);
+
   /* Light Mode */
-  --card: oklch(1 0 0);
+  --card: var(--surface-desk);
   --card-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: var(--pura-blue);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -25,7 +30,7 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
-  --background: oklch(0.984 0.003 247.858);
+  --background: var(--surface-harbor);
   --foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -87,6 +92,9 @@
   --color-pura-orange-dark: var(--pura-orange-dark);
   --color-pura-orange-light: var(--pura-orange-light);
   --color-pura-sky: var(--pura-sky);
+  --color-surface-harbor: var(--surface-harbor);
+  --color-surface-desk: var(--surface-desk);
+  --color-rule-mist: var(--rule-mist);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -169,6 +177,47 @@ body {
 
 .scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
   background-color: rgb(255 255 255 / 0.4);
+}
+
+.surface-desk {
+  background: var(--surface-desk);
+  border-radius: var(--radius);
+}
+
+.motion-enter {
+  animation: shift-ops-enter 180ms ease-out both;
+}
+
+.motion-enter-delay-1 {
+  animation-delay: 40ms;
+}
+
+.motion-enter-delay-2 {
+  animation-delay: 80ms;
+}
+
+.motion-enter-delay-3 {
+  animation-delay: 120ms;
+}
+
+@keyframes shift-ops-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter,
+  .motion-enter-delay-1,
+  .motion-enter-delay-2,
+  .motion-enter-delay-3 {
+    animation: none;
+  }
 }
 
 @media print {

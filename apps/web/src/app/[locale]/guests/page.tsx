@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Users, Search, Star, Ban, Pencil, Trash2 } from 'lucide-react';
 import { type Guest } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,9 @@ import { formatMessage, t } from '@/lib/i18n';
 
 export default function GuestsPage() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get('q')?.trim() ?? '';
+  const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const { guests, loading, error, loadGuests, deleteGuest } = useGuests({
@@ -20,6 +22,10 @@ export default function GuestsPage() {
     limit: 50,
   });
   const { confirm, Dialog } = useConfirmDialog();
+
+  useEffect(() => {
+    setSearchQuery(urlQuery);
+  }, [urlQuery]);
 
   useEffect(() => {
     loadGuests();

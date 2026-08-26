@@ -48,7 +48,7 @@ describe('Header', () => {
     render(<Header />);
 
     const searchInput = screen.getByLabelText(
-      'Search guests, reservations, rooms',
+      'Search guests, reservations, and rooms',
     );
     expect(searchInput).toBeInTheDocument();
     expect(searchInput).toHaveAttribute('type', 'search');
@@ -76,7 +76,7 @@ describe('Header', () => {
     render(<Header />);
 
     const searchInput = screen.getByLabelText(
-      'Search guests, reservations, rooms',
+      'Search guests, reservations, and rooms',
     );
     expect(searchInput).toBeInTheDocument();
     expect(searchInput).toHaveAttribute('id', 'global-search');
@@ -89,6 +89,21 @@ describe('Header', () => {
 
     expect(searchInput.parentElement).toHaveClass('block');
     expect(searchInput).toHaveFocus();
+  });
+
+  it('should navigate to guests search on submit', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    const searchInput = screen.getByLabelText(
+      'Search guests, reservations, and rooms',
+    );
+    await user.type(searchInput, 'Ada Lovelace');
+    await user.keyboard('{Enter}');
+
+    expect(mockPush).toHaveBeenCalledWith(
+      `/guests?q=${encodeURIComponent('Ada Lovelace')}`,
+    );
   });
 
   it('should render user dropdown menu', async () => {
@@ -110,7 +125,7 @@ describe('Header', () => {
     render(<Header />);
 
     const searchInput = screen.getByLabelText(
-      'Search guests, reservations, rooms',
+      'Search guests, reservations, and rooms',
     );
     expect(searchInput).toHaveAttribute('aria-label');
   });

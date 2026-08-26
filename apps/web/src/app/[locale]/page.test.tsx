@@ -1,13 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useRouter } from 'next/navigation';
 import Dashboard from './page';
 import { reservationsAPI, roomsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
+const mockPush = vi.fn();
+
 vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(),
+  useRouter: () => ({ push: mockPush }),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+  usePathname: () => '/',
+  Link: ({
+    href,
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 vi.mock('@/lib/api', () => ({
@@ -25,24 +40,18 @@ vi.mock('@/lib/toast', () => ({
   },
 }));
 
-vi.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} alt={props.alt || ''} />;
-  },
-}));
-
-describe('Dashboard', () => {
-  const mockPush = vi.fn();
+describe('Shift Ops dashboard', () => {
   const mockReservations = [
     {
       id: '1',
       confirmNumber: 'RES001',
-      checkIn: '2024-01-15',
-      checkOut: '2024-01-17',
-      status: 'CHECKED_IN',
+      checkIn: '2024-01-15T14:00:00.000Z',
+      checkOut: '2024-01-16T12:00:00.000Z',
+      status: 'CONFIRMED',
       totalAmount: 2000,
+      paidAmount: 0,
+      roomId: '1',
+      guestId: '1',
       guest: {
         id: '1',
         firstName: 'John',
@@ -51,6 +60,41 @@ describe('Dashboard', () => {
       room: {
         id: '1',
         number: '101',
+        roomType: {
+          id: 't1',
+          name: 'Deluxe',
+          code: 'DLX',
+          baseRate: 2000,
+        },
+        property: { id: 'p1', name: 'Pura Resort' },
+      },
+    },
+    {
+      id: '2',
+      confirmNumber: 'RES002',
+      checkIn: '2024-01-14T14:00:00.000Z',
+      checkOut: '2024-01-15T12:00:00.000Z',
+      status: 'CHECKED_IN',
+      totalAmount: 3000,
+      paidAmount: 1000,
+      roomId: '2',
+      guestId: '2',
+      isRoomLocked: true,
+      guest: {
+        id: '2',
+        firstName: 'Jane',
+        lastName: 'Smith',
+      },
+      room: {
+        id: '2',
+        number: '102',
+        roomType: {
+          id: 't1',
+          name: 'Deluxe',
+          code: 'DLX',
+          baseRate: 2000,
+        },
+        property: { id: 'p1', name: 'Pura Resort' },
       },
     },
   ];
@@ -59,10 +103,22 @@ describe('Dashboard', () => {
     {
       id: '1',
       number: '101',
-      floor: 1,
       status: 'VACANT_CLEAN',
+      hkStage: 'READY',
       roomTypeId: 'type1',
       propertyId: 'prop1',
+      property: { id: 'p1', name: 'Pura Resort' },
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    },
+    {
+      id: '2',
+      number: '102',
+      status: 'OCCUPIED_DIRTY',
+      hkStage: 'DIRTY',
+      roomTypeId: 'type1',
+      propertyId: 'prop1',
+      property: { id: 'p1', name: 'Pura Resort' },
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
     },
@@ -71,7 +127,7 @@ describe('Dashboard', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2024-01-15T12:00:00.000Z'));
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    mockPush.mockClear();
     vi.clearAllMocks();
   });
 
@@ -79,163 +135,89 @@ describe('Dashboard', () => {
     vi.useRealTimers();
   });
 
-  it('should display loading state initially', () => {
+  it('shows loading state', () => {
     (reservationsAPI.getAll as any).mockReturnValue(new Promise(() => {}));
     (roomsAPI.getAll as any).mockReturnValue(new Promise(() => {}));
 
     render(<Dashboard />);
 
-    expect(screen.getByText('Loading dashboard...')).toBeInTheDocument();
+    expect(screen.getByText(/Loading Shift Ops/i)).toBeInTheDocument();
   });
 
-  it('should display dashboard stats after loading', async () => {
+  it('renders Shift Ops queues with remaining totals', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
     (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Pura Resort')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Total Reservations')).toBeInTheDocument();
-    expect(screen.getByText('Checked In')).toBeInTheDocument();
-    expect(screen.getByText('Available Rooms')).toBeInTheDocument();
-  });
-
-  it('should display recent reservations', async () => {
-    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
-
-    render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Recent Reservations')).toBeInTheDocument();
-    });
-
+    expect(screen.getByText('Arrivals')).toBeInTheDocument();
+    expect(screen.getByText('Departures')).toBeInTheDocument();
+    expect(screen.getByText("Today's work")).toBeInTheDocument();
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText(/Room 101/)).toBeInTheDocument();
-  });
-
-  it('should show a tone accent bar on each stat card for hover feedback', async () => {
-    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
-
-    const { container } = render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Total Reservations')).toBeInTheDocument();
-    });
-
-    const accentBars = Array.from(
-      container.querySelectorAll('[aria-hidden="true"]'),
-    ).filter((element) => element.classList.contains('w-1'));
-
-    expect(accentBars).toHaveLength(4);
-
-    for (const bar of accentBars) {
-      expect(bar).toHaveClass(
-        'absolute',
-        'left-0',
-        'top-4',
-        'bottom-4',
-        'w-1',
-        'rounded-full',
-        'bg-slate-200',
-        'transition-colors',
-      );
-      expect(bar.className).toContain('group-hover:bg-pura');
-      expect(bar.className).not.toContain('radial-gradient');
-    }
-  });
-
-  it('should keep dashboard metric labels such as occupancy on one line', async () => {
-    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
-    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
-
-    render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Today's check-ins")).toBeInTheDocument();
-    });
-
-    expect(screen.getByText("Today's check-ins")).toHaveClass(
-      'whitespace-nowrap',
+    expect(screen.getByRole('link', { name: 'Check-in' })).toHaveAttribute(
+      'href',
+      '/reservations/1',
     );
-    expect(screen.getByText('100% Occupancy')).toHaveClass('whitespace-nowrap');
   });
 
-  it('should navigate to new reservation page when button is clicked', async () => {
-    const user = userEvent.setup();
+  it('shows exception chips when dirty or VIP/locked', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
     (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText('New Reservation')).toBeInTheDocument();
+      expect(screen.getByText('Needs attention')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('New Reservation'));
-
-    expect(mockPush).toHaveBeenCalledWith('/reservations/new');
+    expect(screen.getByText('Dirty rooms')).toBeInTheDocument();
+    expect(screen.getByText('VIP / locked')).toBeInTheDocument();
   });
 
-  it('should display error message if data loading fails', async () => {
-    const errorMessage = 'Failed to load dashboard data';
-    (reservationsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
-    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
-
-    render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith(errorMessage);
-    });
-  });
-
-  it('should display "No recent reservations" when there are no reservations', async () => {
-    (reservationsAPI.getAll as any).mockResolvedValue([]);
-    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
-
-    render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText('No recent reservations')).toBeInTheDocument();
-    });
-  });
-
-  it('should display error message if data loading fails with non-Error', async () => {
-    (reservationsAPI.getAll as any).mockRejectedValue('String Error');
-    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
-
-    render(<Dashboard />);
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to load dashboard data');
-    });
-  });
-
-  it('should handle zero rooms for occupancy calculation', async () => {
+  it('links new reservation CTA', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
+
+    render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('link', { name: /New reservation/i }),
+      ).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByRole('link', { name: /New reservation/i }),
+    ).toHaveAttribute('href', '/reservations/new');
+  });
+
+  it('toasts when dashboard load fails', async () => {
+    (reservationsAPI.getAll as any).mockRejectedValue(new Error('boom'));
     (roomsAPI.getAll as any).mockResolvedValue([]);
 
     render(<Dashboard />);
+
     await waitFor(() => {
-      expect(screen.getByText('0% occupancy')).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith('boom');
     });
   });
 
-  it('should cover all available room statuses', async () => {
+  it('shows empty work list when nothing is due', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue([]);
-    (roomsAPI.getAll as any).mockResolvedValue([
-      { id: '1', status: 'VACANT_CLEAN' },
-      { id: '2', status: 'VACANT_DIRTY' },
-      { id: '3', status: 'OCCUPIED_CLEAN' },
-    ]);
+    (roomsAPI.getAll as any).mockResolvedValue(mockRooms);
 
     render(<Dashboard />);
+
     await waitFor(() => {
-      // 2 rooms are available (VACANT_CLEAN and VACANT_DIRTY)
-      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /No arrivals, departures, or unassigned stays need action/i,
+        ),
+      ).toBeInTheDocument();
     });
   });
 });

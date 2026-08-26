@@ -36,6 +36,12 @@ export interface NavigationItem {
   labelKey: string;
 }
 
+export interface NavigationGroup {
+  id: string;
+  labelKey: string;
+  items: NavigationItem[];
+}
+
 export const navigationItems: NavigationItem[] = [
   {
     name: 'Dashboard',
@@ -196,165 +202,79 @@ export const navigationItems: NavigationItem[] = [
   },
 ];
 
-export const primaryBottomNavItems: NavigationItem[] = [
+function itemsByHref(...hrefs: string[]): NavigationItem[] {
+  return hrefs
+    .map((href) => navigationItems.find((item) => item.href === href))
+    .filter((item): item is NavigationItem => Boolean(item));
+}
+
+export const navigationGroups: NavigationGroup[] = [
   {
-    name: 'Dashboard',
-    href: '/',
-    icon: LayoutDashboard,
-    labelKey: 'nav.dashboard',
+    id: 'front-office',
+    labelKey: 'shiftOps.navGroupFrontOffice',
+    items: itemsByHref(
+      '/',
+      '/reservations',
+      '/guests',
+      '/shifts',
+      '/night-audit',
+      '/wake-up-calls',
+      '/kiosk',
+      '/digital-keys',
+    ),
   },
   {
-    name: 'Reservations',
-    href: '/reservations',
-    icon: Calendar,
-    labelKey: 'nav.reservations',
+    id: 'rooms',
+    labelKey: 'shiftOps.navGroupRooms',
+    items: itemsByHref(
+      '/rooms',
+      '/housekeeping',
+      '/rates',
+      '/yield',
+      '/blocks',
+      '/hardware-bridge',
+    ),
   },
   {
-    name: 'Guests',
-    href: '/guests',
-    icon: Users,
-    labelKey: 'nav.guests',
+    id: 'finance',
+    labelKey: 'shiftOps.navGroupFinance',
+    items: itemsByHref(
+      '/billing',
+      '/reports',
+      '/exchange-rates',
+      '/tax-invoices',
+      '/ar-accounts',
+      '/card-preauths',
+    ),
   },
-  { name: 'Rooms', href: '/rooms', icon: Bed, labelKey: 'nav.rooms' },
   {
-    name: 'Billing',
-    href: '/billing',
-    icon: CreditCard,
-    labelKey: 'nav.billing',
+    id: 'guest',
+    labelKey: 'shiftOps.navGroupGuest',
+    items: itemsByHref(
+      '/tm30',
+      '/lost-found',
+      '/messages',
+      '/feedback',
+      '/complaints',
+      '/partner-hotels',
+    ),
+  },
+  {
+    id: 'settings',
+    labelKey: 'shiftOps.navGroupSettings',
+    items: itemsByHref('/settings'),
   },
 ];
 
-export const moreBottomNavItems: NavigationItem[] = [
-  {
-    name: 'Shifts',
-    href: '/shifts',
-    icon: Clock,
-    labelKey: 'nav.shifts',
-  },
-  {
-    name: 'Night Audit',
-    href: '/night-audit',
-    icon: MoonStar,
-    labelKey: 'nav.nightAudit',
-  },
-  {
-    name: 'Reports',
-    href: '/reports',
-    icon: FileText,
-    labelKey: 'nav.reports',
-  },
-  {
-    name: 'Exchange rates',
-    href: '/exchange-rates',
-    icon: ArrowLeftRight,
-    labelKey: 'nav.exchangeRates',
-  },
-  {
-    name: 'Tax invoices',
-    href: '/tax-invoices',
-    icon: Receipt,
-    labelKey: 'nav.taxInvoices',
-  },
-  {
-    name: 'Accounts receivable',
-    href: '/ar-accounts',
-    icon: Landmark,
-    labelKey: 'nav.arAccounts',
-  },
-  {
-    name: 'Card pre-auths',
-    href: '/card-preauths',
-    icon: Wallet,
-    labelKey: 'nav.cardPreauths',
-  },
-  {
-    name: 'Partner hotels',
-    href: '/partner-hotels',
-    icon: Building2,
-    labelKey: 'nav.partnerHotels',
-  },
-  {
-    name: 'Rates',
-    href: '/rates',
-    icon: Percent,
-    labelKey: 'nav.rates',
-  },
-  {
-    name: 'Yield',
-    href: '/yield',
-    icon: TrendingUp,
-    labelKey: 'nav.yield',
-  },
-  {
-    name: 'Blocks',
-    href: '/blocks',
-    icon: Layers,
-    labelKey: 'nav.blocks',
-  },
-  {
-    name: 'Housekeeping',
-    href: '/housekeeping',
-    icon: ClipboardCheck,
-    labelKey: 'nav.housekeeping',
-  },
-  {
-    name: 'Hardware',
-    href: '/hardware-bridge',
-    icon: Printer,
-    labelKey: 'nav.hardwareBridge',
-  },
-  {
-    name: 'Wake-up calls',
-    href: '/wake-up-calls',
-    icon: AlarmClock,
-    labelKey: 'nav.wakeUpCalls',
-  },
-  {
-    name: 'TM.30',
-    href: '/tm30',
-    icon: Stamp,
-    labelKey: 'nav.tm30',
-  },
-  {
-    name: 'Lost & found',
-    href: '/lost-found',
-    icon: PackageSearch,
-    labelKey: 'nav.lostFound',
-  },
-  {
-    name: 'Messages',
-    href: '/messages',
-    icon: MessageSquare,
-    labelKey: 'nav.messages',
-  },
-  {
-    name: 'Feedback',
-    href: '/feedback',
-    icon: Star,
-    labelKey: 'nav.feedback',
-  },
-  {
-    name: 'Complaints',
-    href: '/complaints',
-    icon: AlertTriangle,
-    labelKey: 'nav.complaints',
-  },
-  {
-    name: 'Kiosk',
-    href: '/kiosk',
-    icon: MonitorSmartphone,
-    labelKey: 'nav.kiosk',
-  },
-  {
-    name: 'Digital keys',
-    href: '/digital-keys',
-    icon: KeyRound,
-    labelKey: 'nav.digitalKeys',
-  },
-  {
-    name: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    labelKey: 'nav.settings',
-  },
-];
+export const primaryBottomNavItems: NavigationItem[] = itemsByHref(
+  '/',
+  '/reservations',
+  '/guests',
+  '/rooms',
+  '/billing',
+);
+
+export const moreBottomNavItems: NavigationItem[] = navigationItems.filter(
+  (item) =>
+    !primaryBottomNavItems.some((primary) => primary.href === item.href),
+);
