@@ -130,6 +130,7 @@
     "feedback": "ความคิดเห็น",
     "complaints": "ข้อร้องเรียน",
     "kiosk": "คีออสก์เช็คอิน",
+    "digitalKeys": "กุญแจดิจิทัล",
     "settings": "ตั้งค่า",
     "more": "เพิ่มเติม"
   },
@@ -693,6 +694,14 @@
       "scheduleSuccess": "ตั้งโทรปลุกแล้ว",
       "scheduleFailed": "ตั้งโทรปลุกไม่สำเร็จ"
     },
+    "digitalKey": {
+      "title": "กุญแจดิจิทัล",
+      "issue": "ออกกุญแจดิจิทัล",
+      "issueSuccess": "ออกกุญแจดิจิทัลแล้ว",
+      "issueFailed": "ออกกุญแจดิจิทัลไม่สำเร็จ",
+      "revokeSuccess": "ยกเลิกกุญแจดิจิทัลแล้ว",
+      "revokeFailed": "ยกเลิกกุญแจดิจิทัลไม่สำเร็จ"
+    },
     "list": {
       "title": "การจอง",
       "subtitle": "จัดการการจองและการเข้าพัก",
@@ -897,6 +906,34 @@
     "missSuccess": "บันทึกว่าพลาด",
     "cancelSuccess": "ยกเลิกโทรปลุกแล้ว",
     "actionFailed": "อัปเดตโทรปลุกไม่สำเร็จ"
+  },
+  "digitalKey": {
+    "title": "กุญแจดิจิทัล",
+    "subtitle": "ออกกุญแจห้องแบบ BLE/NFC จำลอง และจัดการกุญแจที่ใช้งานอยู่ ไม่ใช้คลื่นวิทยุจริง (ดู ADR 021)",
+    "issueTitle": "ออกกุญแจดิจิทัล",
+    "confirmNumber": "หมายเลขยืนยันการจอง",
+    "confirmNumberPlaceholder": "เช่น CN-DEMO-002",
+    "transport": "ช่องทางสัญญาณ",
+    "transportBle": "BLE",
+    "transportNfc": "NFC",
+    "issue": "ออกกุญแจ",
+    "issueSuccess": "ออกกุญแจดิจิทัลแล้ว",
+    "issueFailed": "ออกกุญแจดิจิทัลไม่สำเร็จ",
+    "list": "กุญแจที่ออกแล้ว",
+    "empty": "ยังไม่มีการออกกุญแจดิจิทัล",
+    "room": "ห้อง",
+    "token": "โทเคนจำลอง",
+    "copyToken": "คัดลอกโทเคน",
+    "copied": "คัดลอกแล้ว",
+    "expiresAt": "หมดอายุ",
+    "issuedAt": "ออกเมื่อ",
+    "statusActive": "ใช้งานอยู่",
+    "statusRevoked": "ยกเลิกแล้ว",
+    "statusExpired": "หมดอายุแล้ว",
+    "revoke": "ยกเลิก",
+    "revokeReason": "เหตุผลที่ยกเลิก",
+    "revokeSuccess": "ยกเลิกกุญแจดิจิทัลแล้ว",
+    "revokeFailed": "ยกเลิกกุญแจดิจิทัลไม่สำเร็จ"
   },
   "tm30": {
     "title": "ตม.30",

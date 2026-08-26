@@ -4169,6 +4169,138 @@ function handlePortal(
   if (method === 'GET') return handlePortalGet(path, params);
   if (method === 'POST') return handlePortalPost(path, body);
 }
+function mockDigitalKeyToken() {
+  return `DK-MOCK-${Math.random().toString(16).slice(2, 14).toUpperCase()}${Date.now()
+    .toString(16)
+    .toUpperCase()}`;
+}
+
+function issueMockDigitalKey(reservation: any, body: any) {
+  if (!['CONFIRMED', 'CHECKED_IN'].includes(reservation.status)) {
+    throw new APIError(400, 'Bad Request', {
+      message:
+        'Digital keys can only be issued for confirmed or checked-in reservations',
+    });
+  }
+  if (!reservation.roomId || !reservation.room) {
+    throw new APIError(400, 'Bad Request', {
+      message: 'Reservation must have a room assigned to issue a digital key',
+    });
+  }
+  const created = {
+    id: `dk_mock_${Date.now()}`,
+    propertyId: reservation.propertyId,
+    reservationId: reservation.id,
+    roomNumber: reservation.room.number,
+    token: mockDigitalKeyToken(),
+    transport: body?.transport ?? 'BLE',
+    status: 'ACTIVE',
+    issuedBy: body?.issuedBy,
+    issuedAt: new Date().toISOString(),
+    expiresAt: reservation.checkOut,
+    revokedAt: null,
+    revokedBy: null,
+    revokedReason: null,
+    createdAt: new Date().toISOString(),
+    reservation: {
+      id: reservation.id,
+      confirmNumber: reservation.confirmNumber,
+      status: reservation.status,
+    },
+  };
+  mockDb.digitalKeys.push(created);
+  return created;
+}
+
+function handleDigitalKeysGet(path: string, params: URLSearchParams) {
+  if (path === '/digital-keys') {
+    const propertyId = params.get('propertyId');
+    const reservationId = params.get('reservationId');
+    return mockDb.digitalKeys
+      .filter((row: any) => {
+        if (reservationId && row.reservationId !== reservationId) {
+          return false;
+        }
+        if (propertyId && row.propertyId !== propertyId) return false;
+        return true;
+      })
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+  }
+
+  const match = /^\/digital-keys\/([a-zA-Z0-9_-]+)$/.exec(path);
+  if (!match) return;
+  const row = mockDb.digitalKeys.find((item: any) => item.id === match[1]);
+  if (!row) {
+    throw new APIError(404, 'Not Found', {
+      message: 'Digital key not found',
+    });
+  }
+  return row;
+}
+
+function handleDigitalKeysPost(path: string, body: any) {
+  if (path === '/digital-keys/issue') {
+    const reservation = mockDb.reservations.find(
+      (row: any) => row.id === body.reservationId,
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Reservation not found',
+      });
+    }
+    return issueMockDigitalKey(reservation, body);
+  }
+
+  if (path === '/digital-keys/issue-by-confirm') {
+    const confirmNumber = String(body?.confirmNumber ?? '').trim();
+    const reservation = mockDb.reservations.find(
+      (row: any) => row.confirmNumber === confirmNumber,
+    );
+    if (!reservation) {
+      throw new APIError(404, 'Not Found', {
+        message: `Reservation with confirmation number ${confirmNumber} not found`,
+      });
+    }
+    return issueMockDigitalKey(reservation, body);
+  }
+
+  const revokeMatch = /^\/digital-keys\/([a-zA-Z0-9_-]+)\/revoke$/.exec(path);
+  if (revokeMatch) {
+    const row = mockDb.digitalKeys.find(
+      (item: any) => item.id === revokeMatch[1],
+    );
+    if (!row) {
+      throw new APIError(404, 'Not Found', {
+        message: 'Digital key not found',
+      });
+    }
+    if (row.status !== 'ACTIVE') {
+      throw new APIError(400, 'Bad Request', {
+        message: 'Only active digital keys can be revoked',
+      });
+    }
+    row.status = 'REVOKED';
+    row.revokedAt = new Date().toISOString();
+    row.revokedBy = body?.revokedBy;
+    row.revokedReason = body?.revokedReason ?? null;
+    return row;
+  }
+}
+
+function handleDigitalKeys(
+  method: string,
+  path: string,
+  body: any,
+  params: URLSearchParams,
+) {
+  if (!path.startsWith('/digital-keys')) return;
+  if (method === 'GET') return handleDigitalKeysGet(path, params);
+  if (method === 'POST') return handleDigitalKeysPost(path, body);
+}
+
 function handleReservations(
   method: string,
   path: string,
@@ -4299,6 +4431,7 @@ export async function routeMockRequest<T>(
       () => handleKiosk(method, path, body),
       () => handleMobileCheckIn(method, path, body, params),
       () => handlePortal(method, path, body, params),
+      () => handleDigitalKeys(method, path, body, params),
       () => handleFolios(method, path, body, params),
       () => handleProperties(method, path, body),
       () => handleRooms(method, path, body),

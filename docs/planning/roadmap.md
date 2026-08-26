@@ -821,16 +821,16 @@ Closeout P3-PR1–12 shipped. **Wait items:** AP, RD e-Tax, card gateway, P&L/ba
 
 ### Phase 7: i18n & Multi-Property
 
-1. i18n Foundation (next-intl setup)
-2. Thai Translation (Critical Pages)
-3. Thai Font Support (PDF Reports)
-4. Thai Search (Guest Name Search)
-5. Central Reservation System (Multi-property)
-6. Guest Portal (View folio, request services)
-7. Digital Key (BLE/NFC)
-8. Mobile Check-in
+1. i18n Foundation (next-intl setup) — **shipped**
+2. Thai Translation (Critical Pages) — **shipped**
+3. Thai Font Support (PDF Reports) — **shipped**
+4. Thai Search (Guest Name Search) — **shipped**
+5. Central Reservation System (Multi-property) — **shipped (PropertySwitcher UI v1)**
+6. Guest Portal (View folio, request services) — **shipped**
+7. Digital Key (BLE/NFC) — **shipped (mock v1)**
+8. Mobile Check-in — **shipped**
 
 ---
 
 **Last Updated:** August 2026
-**Status:** Phase 1–6 complete. Phase 7 (i18n & multi-property) is next. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
+**Status:** Phase 1–7 complete on `dev`. Phase 3 wait items (AP, e-Tax API, card gateway) remain parked.
