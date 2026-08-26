@@ -111,31 +111,31 @@
     "rooms": "ห้องพัก",
     "billing": "โฟลิโอ",
     "shifts": "กะแคชเชียร์",
-    "nightAudit": "ปิดยอดกลางคืน",
+    "nightAudit": "Night Audit",
     "reports": "รายงาน",
     "exchangeRates": "อัตราแลกเปลี่ยน",
     "taxInvoices": "ใบกำกับภาษี",
-    "arAccounts": "ลูกหนี้",
-    "cardPreauths": "กันวงเงินบัตร",
+    "arAccounts": "AR",
+    "cardPreauths": "Pre-auth",
     "partnerHotels": "โรงแรมคู่ค้า",
-    "rates": "เรทห้อง",
-    "yield": "บริหารรายได้",
-    "blocks": "บล็อก/โควตา",
+    "rates": "Rate",
+    "yield": "Yield",
+    "blocks": "Block",
     "housekeeping": "แม่บ้าน",
-    "hardwareBridge": "อุปกรณ์หน้าเคาน์เตอร์",
-    "wakeUpCalls": "โทรปลุก",
+    "hardwareBridge": "Hardware",
+    "wakeUpCalls": "Wake-up Call",
     "tm30": "ตม.30",
-    "lostFound": "ของหายของพบ",
+    "lostFound": "Lost & Found",
     "messages": "ข้อความแขก",
-    "feedback": "ความคิดเห็นแขก",
+    "feedback": "Feedback",
     "complaints": "ข้อร้องเรียน",
-    "kiosk": "ตู้เช็คอิน",
-    "digitalKeys": "กุญแจดิจิทัล",
+    "kiosk": "Kiosk",
+    "digitalKeys": "Digital Key",
     "settings": "ตั้งค่า",
     "more": "เพิ่มเติม"
   },
   "nightAudit": {
-    "title": "ปิดยอดกลางคืน",
+    "title": "Night Audit",
     "loading": "กำลังโหลดการตั้งค่าโรงแรม...",
     "businessDate": "วันที่ทางบัญชี",
     "currentStatus": "สถานะรอบปัจจุบัน",
@@ -145,20 +145,20 @@
     "startedAt": "เริ่มเมื่อ",
     "completedAt": "เสร็จเมื่อ",
     "processing": "กำลังประมวลผล...",
-    "completedTitle": "ปิดยอดกลางคืนเสร็จสมบูรณ์",
+    "completedTitle": "Night Audit เสร็จสมบูรณ์",
     "completedBody": "วันที่ทางบัญชีถูกเลื่อนแล้ว และรายงานถูกเก็บถาวร",
-    "failedTitle": "ปิดยอดกลางคืนล้มเหลว",
+    "failedTitle": "Night Audit ล้มเหลว",
     "failedBody": "กรุณาตรวจสอบข้อผิดพลาดด้านล่างแล้วลองอีกครั้ง",
-    "run": "เริ่มปิดยอดกลางคืน",
+    "run": "เริ่ม Night Audit",
     "starting": "กำลังเริ่ม...",
-    "inProgress": "กำลังปิดยอดกลางคืน",
+    "inProgress": "กำลังทำ Night Audit",
     "completedToday": "เสร็จแล้วสำหรับวันนี้",
-    "errors": "ข้อผิดพลาดของรอบปิดยอด",
+    "errors": "ข้อผิดพลาดของรอบ Night Audit",
     "reports": "รายงานที่เก็บถาวร",
     "view": "ดู",
     "noReports": "ยังไม่มีรายงานสำหรับรอบนี้",
-    "startSuccess": "เริ่มปิดยอดกลางคืนแล้ว",
-    "startFailed": "เริ่มปิดยอดกลางคืนไม่สำเร็จ",
+    "startSuccess": "เริ่ม Night Audit แล้ว",
+    "startFailed": "เริ่ม Night Audit ไม่สำเร็จ",
     "status": {
       "PENDING": "รอดำเนินการ",
       "IN_PROGRESS": "กำลังดำเนินการ",
@@ -173,8 +173,8 @@
     "transactionCodes": "รหัสรายการ",
     "transactionCodesHint": "ผังบัญชีที่ใช้ลงรายการ (ภาษี/บริการ/GL)",
     "dayClose": "ปิดวัน",
-    "nightAudit": "ปิดยอดกลางคืน",
-    "nightAuditHint": "ลงค่าห้อง เก็บรายงาน และเลื่อนวันที่ทางบัญชี",
+    "nightAudit": "Night Audit",
+    "nightAuditHint": "ลงค่าห้อง เก็บรายงาน และเลื่อนวันที่ทางบัญชี (Night Audit)",
     "shifts": "กะแคชเชียร์",
     "shiftsHint": "เปิด ปิด และส่งมอบกะแคชเชียร์ก่อนปิดยอดกลางคืน",
     "reports": "รายงาน",
@@ -197,7 +197,7 @@
     "current": "กะปัจจุบัน",
     "today": "กะวันนี้",
     "noOpenShift": "ไม่มีกะที่เปิดอยู่สำหรับผู้ใช้และโรงแรมนี้",
-    "nightAuditBlocked": "ไม่สามารถเริ่มปิดยอดกลางคืนได้ขณะที่ยังมีกะเปิดอยู่",
+    "nightAuditBlocked": "ไม่สามารถเริ่ม Night Audit ได้ขณะที่ยังมีกะเปิดอยู่",
     "openSuccess": "เปิดกะแล้ว",
     "closeSuccess": "ปิดกะแล้ว",
     "handoverSuccess": "ส่งมอบกะแล้ว",
@@ -303,8 +303,8 @@
     "notFound": "ไม่พบใบกำกับภาษี"
   },
   "ar": {
-    "title": "ลูกหนี้",
-    "subtitle": "บัญชีบริษัทซิตี้เลดเจอร์ เอจจิ้ง และการตัดชำระ ไม่รวมเจ้าหนี้",
+    "title": "AR",
+    "subtitle": "บัญชีลูกหนี้ (City Ledger) เอจจิ้ง และการตัดชำระ ไม่รวมเจ้าหนี้ (AP)",
     "create": "สร้างบัญชีลูกหนี้",
     "list": "บัญชีลูกหนี้",
     "companyName": "ชื่อบริษัท",
@@ -365,8 +365,8 @@
     "updateFailed": "อัปเดตโรงแรมคู่ค้าไม่สำเร็จ"
   },
   "rates": {
-    "title": "เรทห้อง",
-    "subtitle": "เรทแม่และเรทลูก เมื่อแก้เรทแม่ เรทลูกจะคำนวณตามสูตรทันที",
+    "title": "Rate",
+    "subtitle": "เรทแม่และเรทลูก (parent/child rate) เมื่อแก้เรทแม่ เรทลูกจะคำนวณตามสูตรทันที",
     "create": "เพิ่มเรท",
     "list": "เรทแพลน",
     "code": "รหัสเรท",
@@ -387,8 +387,8 @@
     "updateFailed": "อัปเดตเรทไม่สำเร็จ"
   },
   "yield": {
-    "title": "บริหารรายได้",
-    "subtitle": "เพซเทียบปีที่แล้ว คำแนะนำเรทตามกฎ และเรทคู่แข่ง การใช้คำแนะนำจะอัปเดตเรทแม่และเรทลูกที่ derive ตาม",
+    "title": "Yield",
+    "subtitle": "เพซเทียบปีที่แล้ว คำแนะนำเรทตามกฎ และเรทคู่แข่ง การใช้คำแนะนำจะอัปเดตเรทแม่และเรทลูก",
     "paceTitle": "เพซ",
     "paceEmpty": "ไม่มีข้อมูลเพซในช่วงนี้",
     "stayDate": "วันที่เข้าพัก",
@@ -421,7 +421,7 @@
     "allRoomTypes": "ทุกประเภทห้อง"
   },
   "blocks": {
-    "title": "บล็อกและโควตา",
+    "title": "Block / Allotment",
     "subtitle": "โควตาเอเยนต์/OTA และบล็อกกรุ๊ป ห้องที่ไม่ได้ pickup จะถูกปล่อยหลังวันตัดยอด",
     "create": "เพิ่มบล็อก",
     "list": "บล็อก",
@@ -484,7 +484,7 @@
     }
   },
   "hardwareBridge": {
-    "title": "อุปกรณ์หน้าเคาน์เตอร์",
+    "title": "Hardware",
     "subtitle": "ลงทะเบียนเครื่องที่เคาน์เตอร์ พิมพ์ใบเสร็จ เข้ารหัสคีย์การ์ด และสแกนพาสปอร์ตหรือบัตรประชาชน",
     "agents": "เครื่องเอเจนต์",
     "jobs": "คิวงานอุปกรณ์",
@@ -545,8 +545,8 @@
     "interimLabel": "ชั่วคราว"
   },
   "preauth": {
-    "title": "กันวงเงินบัตร",
-    "subtitle": "บันทึกการกันวงเงินด้วยมือเท่านั้น การตัดชำระจะลงบัญชีรหัส 9001 ยังไม่เชื่อมเกตเวย์",
+    "title": "Pre-auth",
+    "subtitle": "บันทึก hold ด้วยมือเท่านั้น Capture จะลงชำระโฟลิโอรหัส 9001 ยังไม่เชื่อมเกตเวย์",
     "hold": "บันทึกโฮลด์",
     "list": "รายการโฮลด์",
     "reservationId": "การจอง",
@@ -887,7 +887,7 @@
     "printPreview": "ตัวอย่างก่อนพิมพ์"
   },
   "wakeUpCalls": {
-    "title": "โทรปลุก",
+    "title": "Wake-up Call",
     "subtitle": "ตั้งเวลาปลุกแขกและยืนยันการโทรที่แผนกต้อนรับ",
     "list": "คิววันนี้",
     "scheduledDate": "วันที่",
@@ -908,7 +908,7 @@
     "actionFailed": "อัปเดตโทรปลุกไม่สำเร็จ"
   },
   "digitalKey": {
-    "title": "กุญแจดิจิทัล",
+    "title": "Digital Key",
     "subtitle": "ออกกุญแจห้องแบบ BLE/NFC จำลอง และจัดการกุญแจที่ใช้งานอยู่ ไม่ใช้คลื่นวิทยุจริง (ดู ADR 021)",
     "issueTitle": "ออกกุญแจดิจิทัล",
     "confirmNumber": "หมายเลขยืนยันการจอง",
@@ -963,7 +963,7 @@
     "actionFailed": "อัปเดตรายงาน ตม.30 ไม่สำเร็จ"
   },
   "lostFound": {
-    "title": "ของหายของพบ",
+    "title": "Lost & Found",
     "subtitle": "บันทึกของที่พบ จับคู่การรับคืน หรือทำลายหลังครบ 90 วัน",
     "register": "ลงทะเบียนของที่พบ",
     "description": "รายละเอียดสิ่งของ",
@@ -1010,7 +1010,7 @@
     "actionFailed": "อัปเดตข้อความไม่สำเร็จ"
   },
   "feedback": {
-    "title": "ความคิดเห็นแขก",
+    "title": "Feedback",
     "subtitle": "บันทึกคะแนนความพึงพอใจหลังเข้าพักสำหรับโรงแรมนี้",
     "record": "บันทึกความคิดเห็น",
     "guestId": "รหัสแขก",
@@ -1068,8 +1068,8 @@
     "actionFailed": "อัปเดตข้อร้องเรียนไม่สำเร็จ"
   },
   "kiosk": {
-    "title": "เช็คอินที่ล็อบบี้",
-    "subtitle": "กรอกหมายเลขยืนยันการจองเพื่อเช็คอิน",
+    "title": "Kiosk",
+    "subtitle": "กรอกหมายเลขยืนยันการจองเพื่อเช็คอินที่ล็อบบี้",
     "lookupTitle": "ค้นหาการจอง",
     "confirmNumber": "หมายเลขยืนยัน",
     "confirmNumberPlaceholder": "เช่น CN-DEMO-002",
@@ -1200,8 +1200,8 @@
     "detail": {}
   },
   "portal": {
-    "title": "พอร์ทัลแขก",
-    "subtitle": "ดูโฟลิโอของคุณและส่งคำขอโดยไม่ต้องโทรหาแผนกต้อนรับ",
+    "title": "Guest Portal",
+    "subtitle": "ดูโฟลิโอและส่งคำขอโดยไม่ต้องโทรหาแผนกต้อนรับ",
     "unlockTitle": "ค้นหาการจองของคุณ",
     "confirmNumber": "หมายเลขยืนยัน",
     "confirmNumberPlaceholder": "เช่น CN-DEMO-002",
