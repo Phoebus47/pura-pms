@@ -1822,7 +1822,7 @@ describe('Mock API Router', () => {
     });
   });
 
-describe('Digital Keys', () => {
+  describe('Digital Keys', () => {
     it('issues a key by reservationId, lists it, then revokes it', async () => {
       const reservation = mockDb.reservations.find(
         (row: any) => row.status === 'CHECKED_IN' && row.room,
@@ -1883,5 +1883,4 @@ describe('Digital Keys', () => {
       ).rejects.toThrow(APIError);
     });
   });
-
 });
