@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import { t } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
+import { PrintDocument } from '@/components/shared/print-document';
 import { useTaxInvoice } from '@/hooks/use-tax-invoices';
 
 function money(value: number): string {
@@ -26,7 +27,7 @@ export function TaxInvoicePrintClient() {
     invoice.buyerName || (guest ? `${guest.firstName} ${guest.lastName}` : '');
 
   return (
-    <article className="max-w-2xl mx-auto p-6 print:p-0 space-y-6">
+    <PrintDocument>
       <header className="space-y-1">
         <h1 className="font-bold text-2xl">{t('taxInvoice.printTitle')}</h1>
         <p>
@@ -90,6 +91,6 @@ export function TaxInvoicePrintClient() {
       >
         {t('taxInvoice.print')}
       </Button>
-    </article>
+    </PrintDocument>
   );
 }

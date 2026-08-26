@@ -172,7 +172,14 @@ body {
 }
 
 @media print {
-  body {
-    font-family: var(--font-thai), var(--font-sans), sans-serif !important;
+  html:root {
+    --font-sans: var(--font-thai), var(--font-geist-sans);
+  }
+
+  html,
+  body,
+  .print-document {
+    font-family: var(--font-thai), var(--font-geist-sans), system-ui,
+      sans-serif !important;
   }
 }

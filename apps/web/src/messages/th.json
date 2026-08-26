@@ -101,6 +101,9 @@
     "all": "ทุกโรงแรม",
     "switch": "เปลี่ยนโรงแรม"
   },
+  "print": {
+    "documentLabel": "เอกสารสำหรับพิมพ์"
+  },
   "nav": {
     "dashboard": "แดชบอร์ด",
     "reservations": "การจอง",

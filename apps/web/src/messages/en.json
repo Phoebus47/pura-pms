@@ -101,6 +101,9 @@
     "all": "All properties",
     "switch": "Switch property"
   },
+  "print": {
+    "documentLabel": "Printable document"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "reservations": "Reservations",

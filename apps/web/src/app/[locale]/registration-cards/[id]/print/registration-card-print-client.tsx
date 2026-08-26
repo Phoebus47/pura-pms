@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { PrintDocument } from '@/components/shared/print-document';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
@@ -47,7 +48,7 @@ export function RegistrationCardPrintClient() {
   }
 
   return (
-    <article className="max-w-2xl mx-auto p-6 print:p-0 space-y-6">
+    <PrintDocument>
       <header className="space-y-1">
         <h1 className="font-bold text-2xl">
           {t('registrationCard.printTitle')}
@@ -140,6 +141,6 @@ export function RegistrationCardPrintClient() {
           {t('registrationCard.printViaBridge')}
         </Button>
       </div>
-    </article>
+    </PrintDocument>
   );
 }
