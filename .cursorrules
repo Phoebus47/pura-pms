@@ -317,15 +317,11 @@ Ensure code passes:
 - **Phase 4:** ✅ Complete (Operations Edge Cases)
 - **Phase 5:** ✅ Complete (Advanced Features)
 - **Phase 6:** ✅ Complete (Compliance & Communication)
-- **Phase 7:** 🎯 In Progress (i18n & Multi-Property)
+- **Phase 7:** ✅ Complete (i18n & Multi-Property / Guest Self-Service)
 
 ### Key Features to Implement
-- i18n Foundation (next-intl)
-- Thai Translation (Critical Pages)
-- Thai Font Support (PDF Reports)
-- Thai Search (Guest Name Search)
-- Central Reservation System (Multi-property)
-- Guest Portal / Digital Key / Mobile Check-in
+
+_Phase 7 complete. See `docs/planning/phase-7-closeout.md` for deferred CRS/portal/key follow-ups._
 
 ### Important Notes
 - All form fields must have `id` and `name` attributes for accessibility

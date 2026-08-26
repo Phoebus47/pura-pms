@@ -10,23 +10,23 @@ datasource db {
 // ==================== USERS & AUTH ====================
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
-  firstName     String
-  lastName      String
-  roleId        String
-  role          Role      @relation(fields: [roleId], references: [id])
-  isActive      Boolean   @default(true)
-  shifts        Shift[]
-  auditLogs     AuditLog[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  firstName String
+  lastName  String
+  roleId    String
+  role      Role       @relation(fields: [roleId], references: [id])
+  isActive  Boolean    @default(true)
+  shifts    Shift[]
+  auditLogs AuditLog[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Role {
-  id          String       @id @default(cuid())
-  name        String       @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   permissions String[]
   users       User[]
 }
@@ -34,82 +34,84 @@ model Role {
 // ==================== PROPERTY ====================
 
 model Property {
-  id          String     @id @default(cuid())
-  name        String
-  address     String?
-  phone       String?
-  email       String?
-  taxId       String?
-  currency    String     @default("THB")
-  timezone    String     @default("Asia/Bangkok")
-  businessDate DateTime  @default(now()) @db.Date
-  defaultCreditLimit Decimal? @db.Decimal(12, 2)
-  roomTypes   RoomType[]
-  rooms       Room[]
-  rates       Rate[]
-  nightAudits    NightAudit[]
-  reportArchives ReportArchive[]
-  shifts         Shift[]
-  taxInvoices    TaxInvoice[]
-  journalEntries JournalEntry[]
-  arAccounts     ARAccount[]
-  partnerHotels  PartnerHotel[]
-  competitorRates CompetitorRate[]
-  yieldRecommendations YieldRecommendation[]
-  roomBlocks     RoomBlock[]
+  id                      String                   @id @default(cuid())
+  name                    String
+  address                 String?
+  phone                   String?
+  email                   String?
+  taxId                   String?
+  currency                String                   @default("THB")
+  timezone                String                   @default("Asia/Bangkok")
+  businessDate            DateTime                 @default(now()) @db.Date
+  defaultCreditLimit      Decimal?                 @db.Decimal(12, 2)
+  roomTypes               RoomType[]
+  rooms                   Room[]
+  rates                   Rate[]
+  nightAudits             NightAudit[]
+  reportArchives          ReportArchive[]
+  shifts                  Shift[]
+  taxInvoices             TaxInvoice[]
+  journalEntries          JournalEntry[]
+  arAccounts              ARAccount[]
+  partnerHotels           PartnerHotel[]
+  competitorRates         CompetitorRate[]
+  yieldRecommendations    YieldRecommendation[]
+  roomBlocks              RoomBlock[]
   housekeepingInspections HousekeepingInspection[]
-  hardwareAgents HardwareAgent[]
-  hardwareJobs   HardwareJob[]
-  registrationCards RegistrationCard[]
-  wakeUpCalls    WakeUpCall[]
-  tm30Reports    Tm30Report[]
-  lostFoundItems LostFoundItem[]
-  guestMessages  GuestMessage[]
-  guestFeedbacks GuestFeedback[]
-  guestComplaints GuestComplaint[]
-  createdAt      DateTime   @default(now())
+  hardwareAgents          HardwareAgent[]
+  hardwareJobs            HardwareJob[]
+  digitalKeys             DigitalKey[]
+  registrationCards       RegistrationCard[]
+  wakeUpCalls             WakeUpCall[]
+  tm30Reports             Tm30Report[]
+  lostFoundItems          LostFoundItem[]
+  guestMessages           GuestMessage[]
+  guestFeedbacks          GuestFeedback[]
+  guestComplaints         GuestComplaint[]
+  createdAt               DateTime                 @default(now())
 }
 
 model RoomType {
-  id          String   @id @default(cuid())
-  name        String
-  code        String
-  description String?
-  baseRate    Decimal  @db.Decimal(10, 2)
-  maxAdults   Int      @default(2)
-  maxChildren Int      @default(1)
-  amenities   String[]
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id])
-  rooms       Room[]
-  rates       Rate[]
-  reservationStays ReservationStay[]
-  competitorRates CompetitorRate[]
+  id                   String                @id @default(cuid())
+  name                 String
+  code                 String
+  description          String?
+  baseRate             Decimal               @db.Decimal(10, 2)
+  maxAdults            Int                   @default(2)
+  maxChildren          Int                   @default(1)
+  amenities            String[]
+  propertyId           String
+  property             Property              @relation(fields: [propertyId], references: [id])
+  rooms                Room[]
+  rates                Rate[]
+  reservationStays     ReservationStay[]
+  competitorRates      CompetitorRate[]
   yieldRecommendations YieldRecommendation[]
-  roomBlocks RoomBlock[]
+  roomBlocks           RoomBlock[]
 }
 
 model Room {
-  id           String             @id @default(cuid())
-  number       String
-  floor        Int?
-  status       RoomStatus         @default(VACANT_CLEAN)
-  roomTypeId   String
-  roomType     RoomType           @relation(fields: [roomTypeId], references: [id])
-  propertyId   String
-  property     Property           @relation(fields: [propertyId], references: [id])
-  reservations Reservation[]
-  reservationStays ReservationStay[]
-  hkStage      HkStage            @default(READY)
-  guestRequest GuestRoomRequest   @default(NONE)
-  guestRequestNote String?
+  id                    String                   @id @default(cuid())
+  number                String
+  floor                 Int?
+  status                RoomStatus               @default(VACANT_CLEAN)
+  roomTypeId            String
+  roomType              RoomType                 @relation(fields: [roomTypeId], references: [id])
+  propertyId            String
+  property              Property                 @relation(fields: [propertyId], references: [id])
+  reservations          Reservation[]
+  reservationStays      ReservationStay[]
+  hkStage               HkStage                  @default(READY)
+  guestRequest          GuestRoomRequest         @default(NONE)
+  guestRequestNote      String?
   guestRequestUpdatedAt DateTime?
   guestRequestUpdatedBy String?
-  housekeeping HousekeepingTask[]
-  inspections  HousekeepingInspection[]
-  movesFrom    RoomMove[]         @relation("RoomMoveFrom")
-  movesTo      RoomMove[]         @relation("RoomMoveTo")
-  wakeUpCalls  WakeUpCall[]
+  housekeeping          HousekeepingTask[]
+  inspections           HousekeepingInspection[]
+  movesFrom             RoomMove[]               @relation("RoomMoveFrom")
+  movesTo               RoomMove[]               @relation("RoomMoveTo")
+  wakeUpCalls           WakeUpCall[]
+
   @@unique([propertyId, number])
   @@index([propertyId, hkStage])
   @@index([propertyId, guestRequest])
@@ -118,87 +120,89 @@ model Room {
 // ==================== GUESTS ====================
 
 model Guest {
-  id           String        @id @default(cuid())
-  firstName    String
-  lastName     String
-  email        String?
-  phone        String?
-  idType       String?
-  idNumber     String?
-  nationality  String?
-  dateOfBirth  DateTime?
-  address      String?
-  vipLevel     Int           @default(0)
-  isBlacklist  Boolean       @default(false)
-  notes        String?
-  preferences  Json?
-  totalStays   Int           @default(0)
-  totalRevenue Decimal       @default(0) @db.Decimal(12, 2)
-  reservations Reservation[]
-  tm30Reports  Tm30Report[]
-  lostFoundItems LostFoundItem[]
-  guestMessages  GuestMessage[]
-  guestFeedbacks GuestFeedback[]
+  id              String           @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String?
+  idType          String?
+  idNumber        String?
+  nationality     String?
+  dateOfBirth     DateTime?
+  address         String?
+  vipLevel        Int              @default(0)
+  isBlacklist     Boolean          @default(false)
+  notes           String?
+  preferences     Json?
+  totalStays      Int              @default(0)
+  totalRevenue    Decimal          @default(0) @db.Decimal(12, 2)
+  reservations    Reservation[]
+  tm30Reports     Tm30Report[]
+  lostFoundItems  LostFoundItem[]
+  guestMessages   GuestMessage[]
+  guestFeedbacks  GuestFeedback[]
   guestComplaints GuestComplaint[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 // ==================== RESERVATIONS ====================
 
 model Reservation {
-  id             String            @id @default(cuid())
-  confirmNumber  String            @unique
-  checkIn        DateTime
-  checkOut       DateTime
-  nights         Int
-  adults         Int               @default(1)
-  children       Int               @default(0)
-  status         ReservationStatus @default(CONFIRMED)
-  source         String?
-  rateCode       String?
-  roomRate       Decimal           @db.Decimal(10, 2)
-  totalAmount    Decimal           @db.Decimal(12, 2)
-  paidAmount     Decimal           @default(0) @db.Decimal(12, 2)
-  notes          String?
-  specialRequest String?
-  isDayUse        Boolean           @default(false)
-  stayPurpose     StayPurpose       @default(STANDARD)
-  approvedBy      String?
-  stayPurposeNote String?
-  department      String?
-  billingCycle    BillingCycle      @default(NIGHTLY)
-  lastInterimBillingDate DateTime?   @db.Date
-  taxExempt              Boolean           @default(false)
+  id                     String             @id @default(cuid())
+  confirmNumber          String             @unique
+  checkIn                DateTime
+  checkOut               DateTime
+  nights                 Int
+  adults                 Int                @default(1)
+  children               Int                @default(0)
+  status                 ReservationStatus  @default(CONFIRMED)
+  source                 String?
+  rateCode               String?
+  roomRate               Decimal            @db.Decimal(10, 2)
+  totalAmount            Decimal            @db.Decimal(12, 2)
+  paidAmount             Decimal            @default(0) @db.Decimal(12, 2)
+  notes                  String?
+  specialRequest         String?
+  isDayUse               Boolean            @default(false)
+  stayPurpose            StayPurpose        @default(STANDARD)
+  approvedBy             String?
+  stayPurposeNote        String?
+  department             String?
+  billingCycle           BillingCycle       @default(NIGHTLY)
+  lastInterimBillingDate DateTime?          @db.Date
+  taxExempt              Boolean            @default(false)
   taxExemptReason        TaxExemptReason?
   taxExemptDocumentRef   String?
   taxExemptApprovedBy    String?
-  isRoomLocked           Boolean           @default(false)
+  isRoomLocked           Boolean            @default(false)
   roomLockNote           String?
-  roomId          String
-  room           Room              @relation(fields: [roomId], references: [id])
-  guestId        String
-  guest          Guest             @relation(fields: [guestId], references: [id])
-  stays          ReservationStay[]
-  folios         Folio[]
-  fixedCharges   FixedCharge[]
-  deposits       Deposit[]
-  taxInvoices    TaxInvoice[]
-  cardPreauths   CardPreauth[]
-  roomMoves      RoomMove[]
-  walks          Walk[]
-  blockId        String?
-  block          RoomBlock?        @relation(fields: [blockId], references: [id])
-  registrationCards RegistrationCard[]
-  wakeUpCalls    WakeUpCall[]
-  tm30Reports    Tm30Report[]
-  guestMessages  GuestMessage[]
-  guestFeedbacks GuestFeedback[]
-  guestComplaints GuestComplaint[]
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  checkedInAt    DateTime?
-  checkedOutAt   DateTime?
+  roomId                 String
+  room                   Room               @relation(fields: [roomId], references: [id])
+  guestId                String
+  guest                  Guest              @relation(fields: [guestId], references: [id])
+  stays                  ReservationStay[]
+  folios                 Folio[]
+  fixedCharges           FixedCharge[]
+  deposits               Deposit[]
+  taxInvoices            TaxInvoice[]
+  cardPreauths           CardPreauth[]
+  roomMoves              RoomMove[]
+  walks                  Walk[]
+  blockId                String?
+  block                  RoomBlock?         @relation(fields: [blockId], references: [id])
+  registrationCards      RegistrationCard[]
+  digitalKeys            DigitalKey[]
+  wakeUpCalls            WakeUpCall[]
+  tm30Reports            Tm30Report[]
+  guestMessages          GuestMessage[]
+  guestFeedbacks         GuestFeedback[]
+  guestComplaints        GuestComplaint[]
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  checkedInAt            DateTime?
+  checkedOutAt           DateTime?
+
   @@index([checkIn, checkOut])
   @@index([status])
   @@index([isDayUse])
@@ -300,7 +304,7 @@ model Folio {
   businessDate  DateTime?     @db.Date
   closedAt      DateTime?
   closedBy      String?
-  transactions  Transaction[]  // Legacy: Will be replaced by FolioTransaction
+  transactions  Transaction[] // Legacy: Will be replaced by FolioTransaction
   windows       FolioWindow[]
   taxInvoices   TaxInvoice[]
   invoices      Invoice[]
@@ -315,28 +319,28 @@ model Folio {
 
 // Transaction Code - ผังบัญชีฝั่ง PMS
 model TransactionCode {
-  id            String   @id @default(cuid())
-  code          String   @unique // e.g., "1000" (Room Charge), "9000" (Cash)
+  id            String          @id @default(cuid())
+  code          String          @unique // e.g., "1000" (Room Charge), "9000" (Cash)
   description   String
   descriptionTh String? // ภาษาไทย
   type          TransactionType // CHARGE, PAYMENT, ADJUSTMENT, etc.
   group         TrxGroup // ROOM, FOOD, BEVERAGE, SPA, MISC, TAX, SERVICE
-  
+
   // Tax & Service Charge Logic
-  hasTax        Boolean  @default(true)
-  hasService    Boolean  @default(true)
-  taxId         String?  // Link to Tax configuration
-  serviceRate   Decimal? @default(10.00) @db.Decimal(5, 2) // Service Charge %
-  
+  hasTax      Boolean  @default(true)
+  hasService  Boolean  @default(true)
+  taxId       String? // Link to Tax configuration
+  serviceRate Decimal? @default(10.00) @db.Decimal(5, 2) // Service Charge %
+
   // Mapping to GL (สำคัญสำหรับ Export บัญชี)
-  glAccountCode String   // e.g., "4000-01" (Revenue-Room)
+  glAccountCode  String // e.g., "4000-01" (Revenue-Room)
   departmentCode String? // สำหรับ USALI
-  
+
   transactions      FolioTransaction[]
   fixedCharges      FixedCharge[]
   packageSplitRules PackageSplitRule[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 // Package split at posting time (rateCode → USALI trx codes). Percents are 0–100.
@@ -358,53 +362,54 @@ model FolioWindow {
   id           String             @id @default(cuid())
   folioId      String
   folio        Folio              @relation(fields: [folioId], references: [id], onDelete: Cascade)
-  windowNumber Int                // 1, 2, 3, 4
-  description  String?            // e.g. "Personal Expenses", "Company Charges"
+  windowNumber Int // 1, 2, 3, 4
+  description  String? // e.g. "Personal Expenses", "Company Charges"
   balance      Decimal            @default(0.00) @db.Decimal(12, 2)
   transactions FolioTransaction[]
   createdAt    DateTime           @default(now())
+
   @@unique([folioId, windowNumber])
 }
 
 // Folio Transaction - Enhanced (replaces Transaction model)
 model FolioTransaction {
-  id            String   @id @default(cuid())
-  windowId      String
-  window        FolioWindow @relation(fields: [windowId], references: [id])
-  trxCodeId     String
-  trxCode       TransactionCode @relation(fields: [trxCodeId], references: [id])
-  
+  id        String          @id @default(cuid())
+  windowId  String
+  window    FolioWindow     @relation(fields: [windowId], references: [id])
+  trxCodeId String
+  trxCode   TransactionCode @relation(fields: [trxCodeId], references: [id])
+
   // Dates are Critical
-  businessDate  DateTime @db.Date // วันที่ทางบัญชีโรงแรม
-  createdAt     DateTime @default(now()) // วันที่บันทึกจริง (System timestamp)
-  
+  businessDate DateTime @db.Date // วันที่ทางบัญชีโรงแรม
+  createdAt    DateTime @default(now()) // วันที่บันทึกจริง (System timestamp)
+
   // Money (ต้องเก็บละเอียด แยก Vat/Service)
-  amountNet     Decimal  @db.Decimal(12, 2) // ราคาก่อนภาษี/Service
-  amountService Decimal  @default(0) @db.Decimal(12, 2) // Service Charge 10%
-  amountTax     Decimal  @default(0) @db.Decimal(12, 2) // VAT 7%
-  amountTotal   Decimal  @db.Decimal(12, 2) // Net + Svc + Tax
-  
+  amountNet     Decimal @db.Decimal(12, 2) // ราคาก่อนภาษี/Service
+  amountService Decimal @default(0) @db.Decimal(12, 2) // Service Charge 10%
+  amountTax     Decimal @default(0) @db.Decimal(12, 2) // VAT 7%
+  amountTotal   Decimal @db.Decimal(12, 2) // Net + Svc + Tax
+
   // Sign (Charge = +, Payment = -)
-  sign          Int      // 1 or -1
-  
+  sign Int // 1 or -1
+
   // Reference & Audit
-  reference     String?  // e.g., "Room 101", "Check #1234", "POS-001"
-  remark        String?
-  userId        String   // ใครเป็นคนทำรายการ
-  shiftId       String?  // ทำในกะไหน
-  shift         Shift?   @relation(fields: [shiftId], references: [id])
-  nightAuditId  String?  // ถูกปิดรอบไปหรือยัง (ถ้ามีค่า = ห้ามแตะต้องแล้ว)
-  
+  reference    String? // e.g., "Room 101", "Check #1234", "POS-001"
+  remark       String?
+  userId       String // ใครเป็นคนทำรายการ
+  shiftId      String? // ทำในกะไหน
+  shift        Shift?  @relation(fields: [shiftId], references: [id])
+  nightAuditId String? // ถูกปิดรอบไปหรือยัง (ถ้ามีค่า = ห้ามแตะต้องแล้ว)
+
   // Reason Code (บังคับสำหรับ Void/Adjustment)
-  reasonCodeId  String?
-  reasonCode    ReasonCode? @relation(fields: [reasonCodeId], references: [id])
-  
+  reasonCodeId String?
+  reasonCode   ReasonCode? @relation(fields: [reasonCodeId], references: [id])
+
   // Correction linkage
-  relatedTrxId  String?  // ถ้าเป็นการ Void, Link กลับไปที่รายการเดิม
-  isVoid        Boolean  @default(false)
-  voidedAt      DateTime?
-  voidedBy      String?
-  
+  relatedTrxId String? // ถ้าเป็นการ Void, Link กลับไปที่รายการเดิม
+  isVoid       Boolean   @default(false)
+  voidedAt     DateTime?
+  voidedBy     String?
+
   // Indexes for performance
   @@index([businessDate])
   @@index([windowId, businessDate])
@@ -418,90 +423,91 @@ model FolioTransaction {
 
 // Reason Code
 model ReasonCode {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  description String
+  id            String             @id @default(cuid())
+  code          String             @unique
+  description   String
   descriptionTh String?
-  category    ReasonCategory
-  isActive    Boolean  @default(true)
-  transactions FolioTransaction[]
-  createdAt   DateTime @default(now())
+  category      ReasonCategory
+  isActive      Boolean            @default(true)
+  transactions  FolioTransaction[]
+  createdAt     DateTime           @default(now())
 }
 
 // Routing Instructions - การโยนบิลอัตโนมัติ
 model RoutingInstruction {
-  id            String   @id @default(cuid())
+  id            String @id @default(cuid())
   sourceFolioId String
   targetFolioId String
   targetWindow  Int
-  
-  trxCodes      String[] // Array of TrxCodes to route (e.g. ["1000", "2000"])
-  dateFrom      DateTime @db.Date
-  dateTo        DateTime @db.Date
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
+
+  trxCodes  String[] // Array of TrxCodes to route (e.g. ["1000", "2000"])
+  dateFrom  DateTime @db.Date
+  dateTo    DateTime @db.Date
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 // Deposit Ledger
 model Deposit {
-  id            String   @id @default(cuid())
-  reservationId String
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
-  amount        Decimal  @db.Decimal(12, 2)
-  currency      String   @default("THB")
-  exchangeRate Decimal? @db.Decimal(10, 4) // ถ้าจ่ายด้วยสกุลอื่น
-  method        PaymentMethod
-  receivedAt    DateTime @default(now())
-  receivedBy    String
-  reference     String?
-  notes         String?
+  id                 String        @id @default(cuid())
+  reservationId      String
+  reservation        Reservation   @relation(fields: [reservationId], references: [id])
+  amount             Decimal       @db.Decimal(12, 2)
+  currency           String        @default("THB")
+  exchangeRate       Decimal?      @db.Decimal(10, 4) // ถ้าจ่ายด้วยสกุลอื่น
+  method             PaymentMethod
+  receivedAt         DateTime      @default(now())
+  receivedBy         String
+  reference          String?
+  notes              String?
   // เมื่อ Check-in จะโอนไปเป็น Payment ใน Folio
-  transferredToFolio Boolean @default(false)
+  transferredToFolio Boolean       @default(false)
   transferredAt      DateTime?
 }
 
 // Currency Exchange
 model ExchangeRate {
-  id            String   @id @default(cuid())
-  baseCurrency  String   @default("THB")
+  id             String   @id @default(cuid())
+  baseCurrency   String   @default("THB")
   targetCurrency String
-  rate          Decimal  @db.Decimal(10, 4)
-  effectiveDate DateTime @db.Date
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
+  rate           Decimal  @db.Decimal(10, 4)
+  effectiveDate  DateTime @db.Date
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
   @@unique([baseCurrency, targetCurrency, effectiveDate])
 }
 
 // Tax Invoice — internal running number. RD e-Tax API is out of scope.
 model TaxInvoice {
-  id            String         @id @default(cuid())
+  id            String       @id @default(cuid())
   invoiceNumber String
   propertyId    String
-  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  property      Property     @relation(fields: [propertyId], references: [id], onDelete: Restrict)
   folioId       String?
-  folio         Folio?         @relation(fields: [folioId], references: [id], onDelete: SetNull)
+  folio         Folio?       @relation(fields: [folioId], references: [id], onDelete: SetNull)
   reservationId String?
-  reservation   Reservation?   @relation(fields: [reservationId], references: [id])
-  businessDate  DateTime       @db.Date
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  businessDate  DateTime     @db.Date
 
-  taxId         String
-  branchNumber  String?
-  buyerName     String?
+  taxId        String
+  branchNumber String?
+  buyerName    String?
 
-  amountNet     Decimal        @db.Decimal(12, 2)
-  amountTax     Decimal        @db.Decimal(12, 2)
-  amountTotal   Decimal        @db.Decimal(12, 2)
+  amountNet   Decimal @db.Decimal(12, 2)
+  amountTax   Decimal @db.Decimal(12, 2)
+  amountTotal Decimal @db.Decimal(12, 2)
 
   eTaxInvoiceId String?
   qrCode        String?
 
-  status        InvoiceStatus  @default(OPEN)
-  issuedAt      DateTime?
-  issuedBy      String?
-  voidReason    String?
-  voidedAt      DateTime?
-  voidedBy      String?
-  createdAt     DateTime       @default(now())
+  status     InvoiceStatus @default(OPEN)
+  issuedAt   DateTime?
+  issuedBy   String?
+  voidReason String?
+  voidedAt   DateTime?
+  voidedBy   String?
+  createdAt  DateTime      @default(now())
 
   @@unique([propertyId, invoiceNumber])
   @@index([propertyId, businessDate])
@@ -510,18 +516,18 @@ model TaxInvoice {
 
 // Fixed Charges (Recurring)
 model FixedCharge {
-  id            String   @id @default(cuid())
+  id            String          @id @default(cuid())
   reservationId String
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  reservation   Reservation     @relation(fields: [reservationId], references: [id])
   trxCodeId     String
   trxCode       TransactionCode @relation(fields: [trxCodeId], references: [id])
-  amount        Decimal  @db.Decimal(12, 2)
+  amount        Decimal         @db.Decimal(12, 2)
   description   String
-  startDate     DateTime @db.Date
-  endDate       DateTime @db.Date
-  isActive      Boolean  @default(true)
-  posted        Boolean  @default(false) // ถูก Post แล้วหรือยัง
-  createdAt     DateTime @default(now())
+  startDate     DateTime        @db.Date
+  endDate       DateTime        @db.Date
+  isActive      Boolean         @default(true)
+  posted        Boolean         @default(false) // ถูก Post แล้วหรือยัง
+  createdAt     DateTime        @default(now())
 }
 
 // Legacy Transaction model (deprecated - will be removed after migration)
@@ -558,20 +564,20 @@ model Payment {
 // ==================== SHIFT MANAGEMENT ====================
 
 model Shift {
-  id                  String      @id @default(cuid())
-  shiftNumber         String      @unique
+  id                  String             @id @default(cuid())
+  shiftNumber         String             @unique
   userId              String
-  user                User        @relation(fields: [userId], references: [id])
+  user                User               @relation(fields: [userId], references: [id])
   propertyId          String
-  property            Property    @relation(fields: [propertyId], references: [id], onDelete: Restrict)
-  businessDate        DateTime    @db.Date
+  property            Property           @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  businessDate        DateTime           @db.Date
   startTime           DateTime
   endTime             DateTime?
-  openingCash         Decimal     @db.Decimal(12, 2)
-  closingCash         Decimal?    @db.Decimal(12, 2)
-  expectedCash        Decimal?    @db.Decimal(12, 2)
-  cashVariance        Decimal?    @db.Decimal(12, 2)
-  status              ShiftStatus @default(OPEN)
+  openingCash         Decimal            @db.Decimal(12, 2)
+  closingCash         Decimal?           @db.Decimal(12, 2)
+  expectedCash        Decimal?           @db.Decimal(12, 2)
+  cashVariance        Decimal?           @db.Decimal(12, 2)
+  status              ShiftStatus        @default(OPEN)
   closedBy            String?
   managerApprovedBy   String?
   managerApprovedAt   DateTime?
@@ -603,6 +609,7 @@ model NightAudit {
   notes         String?
   reports       ReportArchive[]
   errors        AuditError[]
+
   @@unique([propertyId, businessDate])
 }
 
@@ -635,6 +642,7 @@ model ReportArchive {
   nightAudit   NightAudit? @relation(fields: [nightAuditId], references: [id])
   generatedBy  String
   generatedAt  DateTime    @default(now())
+
   @@index([propertyId])
   @@index([reportType, businessDate])
   @@index([businessDate])
@@ -643,14 +651,14 @@ model ReportArchive {
 // ==================== FINANCIAL ====================
 
 model GLAccount {
-  id       String        @id @default(cuid())
-  code     String        @unique
-  name     String
-  type     AccountType
+  id         String        @id @default(cuid())
+  code       String        @unique
+  name       String
+  type       AccountType
   parentCode String?
-  isActive Boolean       @default(true)
-  balance  Decimal       @default(0) @db.Decimal(14, 2)
-  entries  JournalLine[]
+  isActive   Boolean       @default(true)
+  balance    Decimal       @default(0) @db.Decimal(14, 2)
+  entries    JournalLine[]
 }
 
 model JournalEntry {
@@ -796,29 +804,29 @@ enum InspectionResult {
 }
 
 model HousekeepingInspection {
-  id           String                         @id @default(cuid())
+  id           String                       @id @default(cuid())
   propertyId   String
-  property     Property                       @relation(fields: [propertyId], references: [id])
+  property     Property                     @relation(fields: [propertyId], references: [id])
   roomId       String
-  room         Room                           @relation(fields: [roomId], references: [id])
-  businessDate DateTime                       @db.Date
+  room         Room                         @relation(fields: [roomId], references: [id])
+  businessDate DateTime                     @db.Date
   result       InspectionResult
   inspectedBy  String
   notes        String?
   lines        HousekeepingInspectionLine[]
-  createdAt    DateTime                       @default(now())
+  createdAt    DateTime                     @default(now())
 
   @@index([propertyId, businessDate])
   @@index([roomId, createdAt])
 }
 
 model HousekeepingInspectionLine {
-  id            String                   @id @default(cuid())
-  inspectionId  String
-  inspection    HousekeepingInspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
-  itemCode      String
-  passed        Boolean
-  notes         String?
+  id           String                 @id @default(cuid())
+  inspectionId String
+  inspection   HousekeepingInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  itemCode     String
+  passed       Boolean
+  notes        String?
 
   @@index([inspectionId])
 }
@@ -855,48 +863,48 @@ enum HardwareJobStatus {
 }
 
 model HardwareAgent {
-  id         String            @id @default(cuid())
+  id         String           @id @default(cuid())
   propertyId String
-  property   Property          @relation(fields: [propertyId], references: [id])
+  property   Property         @relation(fields: [propertyId], references: [id])
   name       String
   machineId  String
-  isActive   Boolean           @default(true)
+  isActive   Boolean          @default(true)
   lastSeenAt DateTime?
   devices    HardwareDevice[]
   jobs       HardwareJob[]
-  createdAt  DateTime          @default(now())
+  createdAt  DateTime         @default(now())
 
   @@unique([propertyId, machineId])
   @@index([propertyId, isActive])
 }
 
 model HardwareDevice {
-  id         String              @id @default(cuid())
+  id         String             @id @default(cuid())
   agentId    String
-  agent      HardwareAgent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agent      HardwareAgent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
   type       HardwareDeviceType
-  vendor     HardwareVendor      @default(GENERIC)
+  vendor     HardwareVendor     @default(GENERIC)
   label      String
   externalId String?
-  isDefault  Boolean             @default(false)
-  isActive   Boolean             @default(true)
+  isDefault  Boolean            @default(false)
+  isActive   Boolean            @default(true)
   jobs       HardwareJob[]
-  createdAt  DateTime            @default(now())
+  createdAt  DateTime           @default(now())
 
   @@index([agentId, type])
 }
 
 model HardwareJob {
-  id             String             @id @default(cuid())
+  id             String            @id @default(cuid())
   propertyId     String
-  property       Property           @relation(fields: [propertyId], references: [id])
+  property       Property          @relation(fields: [propertyId], references: [id])
   agentId        String?
-  agent          HardwareAgent?     @relation(fields: [agentId], references: [id])
+  agent          HardwareAgent?    @relation(fields: [agentId], references: [id])
   deviceId       String?
-  device         HardwareDevice?    @relation(fields: [deviceId], references: [id])
+  device         HardwareDevice?   @relation(fields: [deviceId], references: [id])
   type           HardwareJobType
-  status         HardwareJobStatus  @default(PENDING)
-  idempotencyKey String?            @unique
+  status         HardwareJobStatus @default(PENDING)
+  idempotencyKey String?           @unique
   reservationId  String?
   requestedBy    String
   payload        Json
@@ -904,10 +912,43 @@ model HardwareJob {
   errorMessage   String?
   startedAt      DateTime?
   completedAt    DateTime?
-  createdAt      DateTime           @default(now())
+  createdAt      DateTime          @default(now())
 
   @@index([propertyId, status, createdAt])
   @@index([agentId, createdAt])
+}
+
+enum DigitalKeyTransport {
+  BLE
+  NFC
+}
+
+enum DigitalKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model DigitalKey {
+  id            String              @id @default(cuid())
+  propertyId    String
+  property      Property            @relation(fields: [propertyId], references: [id])
+  reservationId String
+  reservation   Reservation         @relation(fields: [reservationId], references: [id])
+  roomNumber    String
+  token         String              @unique
+  transport     DigitalKeyTransport @default(BLE)
+  status        DigitalKeyStatus    @default(ACTIVE)
+  issuedBy      String
+  issuedAt      DateTime            @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  revokedBy     String?
+  revokedReason String?
+  createdAt     DateTime            @default(now())
+
+  @@index([propertyId, status])
+  @@index([reservationId, status])
 }
 
 enum RegistrationCardStatus {
@@ -1024,28 +1065,28 @@ enum LostFoundStatus {
 }
 
 model LostFoundItem {
-  id               String          @id @default(cuid())
-  propertyId       String
-  property         Property        @relation(fields: [propertyId], references: [id])
-  itemDescription  String
-  locationFound    String
-  roomNumber       String?
-  foundBy          String
-  foundAt          DateTime
-  notes            String?
-  guestId          String?
-  guest            Guest?          @relation(fields: [guestId], references: [id])
-  status           LostFoundStatus @default(FOUND)
-  claimedAt        DateTime?
-  claimedBy        String?
-  returnedAt       DateTime?
-  returnedTo       String?
-  disposedAt       DateTime?
-  disposedBy       String?
-  disposeReason    String?
-  retentionDays    Int             @default(90)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  id              String          @id @default(cuid())
+  propertyId      String
+  property        Property        @relation(fields: [propertyId], references: [id])
+  itemDescription String
+  locationFound   String
+  roomNumber      String?
+  foundBy         String
+  foundAt         DateTime
+  notes           String?
+  guestId         String?
+  guest           Guest?          @relation(fields: [guestId], references: [id])
+  status          LostFoundStatus @default(FOUND)
+  claimedAt       DateTime?
+  claimedBy       String?
+  returnedAt      DateTime?
+  returnedTo      String?
+  disposedAt      DateTime?
+  disposedBy      String?
+  disposeReason   String?
+  retentionDays   Int             @default(90)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@index([propertyId, status, foundAt])
 }
@@ -1158,24 +1199,25 @@ enum RateDeriveMode {
 }
 
 model Rate {
-  id           String          @id @default(cuid())
-  code         String
-  name         String
-  roomTypeId   String
-  roomType     RoomType        @relation(fields: [roomTypeId], references: [id])
-  propertyId   String
-  property     Property        @relation(fields: [propertyId], references: [id])
-  amount       Decimal         @db.Decimal(10, 2)
-  startDate    DateTime        @db.Date
-  endDate      DateTime        @db.Date
-  daysOfWeek   Int[]
-  isActive     Boolean         @default(true)
-  parentRateId String?
-  parentRate   Rate?           @relation("RateDerivation", fields: [parentRateId], references: [id], onDelete: Restrict)
-  childRates   Rate[]          @relation("RateDerivation")
-  deriveMode   RateDeriveMode?
-  deriveValue  Decimal?        @db.Decimal(10, 4)
+  id                   String                @id @default(cuid())
+  code                 String
+  name                 String
+  roomTypeId           String
+  roomType             RoomType              @relation(fields: [roomTypeId], references: [id])
+  propertyId           String
+  property             Property              @relation(fields: [propertyId], references: [id])
+  amount               Decimal               @db.Decimal(10, 2)
+  startDate            DateTime              @db.Date
+  endDate              DateTime              @db.Date
+  daysOfWeek           Int[]
+  isActive             Boolean               @default(true)
+  parentRateId         String?
+  parentRate           Rate?                 @relation("RateDerivation", fields: [parentRateId], references: [id], onDelete: Restrict)
+  childRates           Rate[]                @relation("RateDerivation")
+  deriveMode           RateDeriveMode?
+  deriveValue          Decimal?              @db.Decimal(10, 4)
   yieldRecommendations YieldRecommendation[]
+
   @@index([roomTypeId, startDate, endDate])
   @@index([parentRateId])
   @@index([propertyId, code])
@@ -1194,39 +1236,39 @@ enum YieldRecommendReason {
 }
 
 model CompetitorRate {
-  id              String    @id @default(cuid())
-  propertyId      String
-  property        Property  @relation(fields: [propertyId], references: [id])
-  competitorName  String
-  roomTypeId      String?
-  roomType        RoomType? @relation(fields: [roomTypeId], references: [id])
-  stayDate        DateTime  @db.Date
-  amount          Decimal   @db.Decimal(10, 2)
-  notes           String?
-  capturedAt      DateTime  @default(now())
+  id             String    @id @default(cuid())
+  propertyId     String
+  property       Property  @relation(fields: [propertyId], references: [id])
+  competitorName String
+  roomTypeId     String?
+  roomType       RoomType? @relation(fields: [roomTypeId], references: [id])
+  stayDate       DateTime  @db.Date
+  amount         Decimal   @db.Decimal(10, 2)
+  notes          String?
+  capturedAt     DateTime  @default(now())
 
   @@index([propertyId, stayDate])
   @@index([roomTypeId, stayDate])
 }
 
 model YieldRecommendation {
-  id                 String                     @id @default(cuid())
-  propertyId         String
-  property           Property                   @relation(fields: [propertyId], references: [id])
-  roomTypeId         String
-  roomType           RoomType                   @relation(fields: [roomTypeId], references: [id])
-  rateId             String
-  rate               Rate                       @relation(fields: [rateId], references: [id])
-  stayDate           DateTime                   @db.Date
-  currentAmount      Decimal                    @db.Decimal(10, 2)
-  recommendedAmount  Decimal                    @db.Decimal(10, 2)
-  occupancyPct       Decimal                    @db.Decimal(5, 2)
-  paceDeltaPct       Decimal?                   @db.Decimal(6, 2)
-  competitorAmount   Decimal?                   @db.Decimal(10, 2)
-  reason             YieldRecommendReason
-  status             YieldRecommendationStatus  @default(PENDING)
-  appliedAt          DateTime?
-  createdAt          DateTime                   @default(now())
+  id                String                    @id @default(cuid())
+  propertyId        String
+  property          Property                  @relation(fields: [propertyId], references: [id])
+  roomTypeId        String
+  roomType          RoomType                  @relation(fields: [roomTypeId], references: [id])
+  rateId            String
+  rate              Rate                      @relation(fields: [rateId], references: [id])
+  stayDate          DateTime                  @db.Date
+  currentAmount     Decimal                   @db.Decimal(10, 2)
+  recommendedAmount Decimal                   @db.Decimal(10, 2)
+  occupancyPct      Decimal                   @db.Decimal(5, 2)
+  paceDeltaPct      Decimal?                  @db.Decimal(6, 2)
+  competitorAmount  Decimal?                  @db.Decimal(10, 2)
+  reason            YieldRecommendReason
+  status            YieldRecommendationStatus @default(PENDING)
+  appliedAt         DateTime?
+  createdAt         DateTime                  @default(now())
 
   @@index([propertyId, status])
   @@index([propertyId, stayDate])
@@ -1250,26 +1292,26 @@ enum BlockStatus {
 }
 
 model RoomBlock {
-  id             String             @id @default(cuid())
-  propertyId     String
-  property       Property           @relation(fields: [propertyId], references: [id])
-  roomTypeId     String
-  roomType       RoomType           @relation(fields: [roomTypeId], references: [id])
-  code           String
-  name           String
-  kind           BlockKind
-  inventoryMode  BlockInventoryMode @default(GENERAL)
-  channel        String?
-  startDate      DateTime           @db.Date
-  endDate        DateTime           @db.Date
-  cutoffDate     DateTime           @db.Date
-  allottedRooms  Int
-  releasedRooms  Int                @default(0)
-  status         BlockStatus        @default(OPEN)
-  notes          String?
-  reservations   Reservation[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  id            String             @id @default(cuid())
+  propertyId    String
+  property      Property           @relation(fields: [propertyId], references: [id])
+  roomTypeId    String
+  roomType      RoomType           @relation(fields: [roomTypeId], references: [id])
+  code          String
+  name          String
+  kind          BlockKind
+  inventoryMode BlockInventoryMode @default(GENERAL)
+  channel       String?
+  startDate     DateTime           @db.Date
+  endDate       DateTime           @db.Date
+  cutoffDate    DateTime           @db.Date
+  allottedRooms Int
+  releasedRooms Int                @default(0)
+  status        BlockStatus        @default(OPEN)
+  notes         String?
+  reservations  Reservation[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   @@unique([propertyId, code])
   @@index([propertyId, status])
@@ -1291,6 +1333,7 @@ model AuditLog {
   ipAddress  String?
   userAgent  String?
   timestamp  DateTime @default(now())
+
   @@index([entityType, entityId])
   @@index([userId, timestamp])
 }

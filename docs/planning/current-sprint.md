@@ -2,22 +2,19 @@
 
 ## Sprint: Phase 7 — i18n & Multi-Property / CRS
 
-- Status: `IN PROGRESS`
-- Dates: 2026-08-24 → ongoing
-- Goal: Deliver Thai localisation, Thai fonts/print, guest search, multi-property CRS, and guest self-service (portal / digital key / mobile check-in).
+- Status: `DONE`
+- Dates: 2026-08-24 → 2026-08-26
+- Goal: Thai localisation, fonts/print, guest search, multi-property switcher, guest portal, digital key mock, mobile check-in.
 
-## Sprint Backlog & Deliverables
+## Deliverables
 
-1. [x] **ADR 018 (`next-intl` foundation)**: App directory structure with `[locale]`, routing middleware, message catalogues (`en.json`, `th.json`), backward compatibility bridge with legacy `t()`. Merged to `dev` (PR #119).
-2. [x] **Thai Translation (Critical FO pages)**: Full `t()` coverage for dashboard / reservations / guests / billing / night audit (landed on `cursor/feat-thai-pages-land-6a5d` / PR #126).
-3. [x] **Thai Typography & Font Support**: Sarabun + `--font-thai`, `PrintDocument` wrapper, ADR 019 (on land branch).
-4. [x] **Thai Search & Collation**: Unicode NFC multi-token search in `GuestsService.findAll()` (on `dev`).
-5. [~] **Multi-Property / CRS**: Header `PropertySwitcher` + `activePropertyId` store on `dev` (UI switcher only; full CRS inventory/booking across properties not done).
-6. [ ] **Guest Portal** (view folio, request services)
-7. [ ] **Digital Key** (BLE/NFC mock)
-8. [ ] **Mobile Check-in**
-9. [ ] **Phase 7 closeout** (roadmap / prd / `.cursorrules`) + promote `dev` → `main`
+1. [x] next-intl foundation (ADR 018)
+2. [x] Thai FO page translations
+3. [x] Sarabun fonts + PrintDocument (ADR 019)
+4. [x] Thai multi-token guest search (API)
+5. [x] PropertySwitcher / CRS UI v1
+6. [x] Guest portal (ADR 020)
+7. [x] Digital key mock (ADR 021)
+8. [x] Mobile check-in (ADR 022)
 
-## Blockers / Fixes
-
-- [x] **Vercel Preview on `dev` failed** after Gemini commits: literal `\n` corruption in source + invalid `poolOptions` in Vitest 4 config (fixed on `cursor/fix-dev-vercel-6a5d`).
+See `docs/planning/phase-7-closeout.md`.

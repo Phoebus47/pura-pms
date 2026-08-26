@@ -1821,4 +1821,66 @@ describe('Mock API Router', () => {
       ).rejects.toThrow(APIError);
     });
   });
+
+  describe('Digital Keys', () => {
+    it('issues a key by reservationId, lists it, then revokes it', async () => {
+      const reservation = mockDb.reservations.find(
+        (row: any) => row.status === 'CHECKED_IN' && row.room,
+      );
+      const issued: any = await routeMockRequest('/digital-keys/issue', {
+        method: 'POST',
+        body: JSON.stringify({
+          reservationId: reservation.id,
+          issuedBy: 'usr_mock_1',
+        }),
+      });
+      expect(issued.token).toMatch(/^DK-MOCK-/);
+      expect(issued.roomNumber).toBe(reservation.room.number);
+      expect(issued.status).toBe('ACTIVE');
+
+      const list: any = await routeMockRequest(
+        `/digital-keys?reservationId=${reservation.id}`,
+        { method: 'GET' },
+      );
+      expect(list).toHaveLength(1);
+
+      const revoked: any = await routeMockRequest(
+        `/digital-keys/${issued.id}/revoke`,
+        { method: 'POST', body: JSON.stringify({ revokedBy: 'usr_mock_1' }) },
+      );
+      expect(revoked.status).toBe('REVOKED');
+    });
+
+    it('issues a key by confirmation number', async () => {
+      const reservation = mockDb.reservations.find(
+        (row: any) => row.status === 'CHECKED_IN' && row.room,
+      );
+      const issued: any = await routeMockRequest(
+        '/digital-keys/issue-by-confirm',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            confirmNumber: reservation.confirmNumber,
+            issuedBy: 'usr_mock_1',
+            transport: 'NFC',
+          }),
+        },
+      );
+      expect(issued.transport).toBe('NFC');
+      expect(issued.reservationId).toBe(reservation.id);
+    });
+
+    it('rejects issuing a key for a reservation without a room', async () => {
+      const reservation = mockDb.reservations.find((row: any) => !row.roomId);
+      await expect(
+        routeMockRequest('/digital-keys/issue', {
+          method: 'POST',
+          body: JSON.stringify({
+            reservationId: reservation.id,
+            issuedBy: 'usr_mock_1',
+          }),
+        }),
+      ).rejects.toThrow(APIError);
+    });
+  });
 });
