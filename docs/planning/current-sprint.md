@@ -9,8 +9,8 @@
 ## Sprint Backlog & Deliverables
 
 1. [x] **ADR 018 (`next-intl` foundation)**: App directory structure with `[locale]`, routing middleware, message catalogues (`en.json`, `th.json`), backward compatibility bridge with legacy `t()`. Merged to `dev` (PR #119).
-2. [ ] **Thai Translation (Critical FO pages)**: Full `t()` coverage for dashboard / reservations / guests / billing / night audit (PR #120 open — not merged; Gemini did not land these keys on `dev`).
-3. [~] **Thai Typography & Font Support**: Sarabun on layout + print CSS on `dev`; print wrapper / ADR work still on PR #122.
+2. [x] **Thai Translation (Critical FO pages)**: Full `t()` coverage for dashboard / reservations / guests / billing / night audit (landed on `cursor/feat-thai-pages-land-6a5d` / PR #126).
+3. [x] **Thai Typography & Font Support**: Sarabun + `--font-thai`, `PrintDocument` wrapper, ADR 019 (on land branch).
 4. [x] **Thai Search & Collation**: Unicode NFC multi-token search in `GuestsService.findAll()` (on `dev`).
 5. [~] **Multi-Property / CRS**: Header `PropertySwitcher` + `activePropertyId` store on `dev` (UI switcher only; full CRS inventory/booking across properties not done).
 6. [ ] **Guest Portal** (view folio, request services)

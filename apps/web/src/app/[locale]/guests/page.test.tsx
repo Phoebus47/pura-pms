@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import GuestsPage from './page';
 import { useGuests } from '@/hooks/use-guests';
 import { useRouter } from 'next/navigation';
+import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -89,7 +90,7 @@ describe('GuestsPage', () => {
       loadGuests: mockLoadGuests,
     });
     render(<GuestsPage />);
-    expect(screen.getByText('Loading guests...')).toBeInTheDocument();
+    expect(screen.getByText(t('common.loadingGuests'))).toBeInTheDocument();
   });
 
   it('renders error state', () => {
@@ -101,10 +102,10 @@ describe('GuestsPage', () => {
       loadGuestsRef: { current: mockLoadGuests },
     });
     render(<GuestsPage />);
-    expect(screen.getByText('Error loading guests')).toBeInTheDocument();
+    expect(screen.getByText(t('common.errorLoadingGuest'))).toBeInTheDocument();
 
     // Retry
-    fireEvent.click(screen.getByText('Try Again'));
+    fireEvent.click(screen.getByText(t('common.tryAgain')));
     expect(mockLoadGuests).toHaveBeenCalled();
   });
 
@@ -115,7 +116,7 @@ describe('GuestsPage', () => {
       loadGuests: mockLoadGuests,
     });
     render(<GuestsPage />);
-    expect(screen.getByText('No guests found')).toBeInTheDocument();
+    expect(screen.getByText(t('common.noGuestsFound'))).toBeInTheDocument();
   });
 
   it('renders empty state with search query', async () => {
@@ -132,7 +133,7 @@ describe('GuestsPage', () => {
     // We expect the 'Try a different search term' message to appear
     await waitFor(() => {
       expect(
-        screen.getByText('Try a different search term'),
+        screen.getByText(t('common.tryDifferentSearch')),
       ).toBeInTheDocument();
     });
   });
@@ -166,8 +167,8 @@ describe('GuestsPage', () => {
     render(<GuestsPage />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('US')).toBeInTheDocument();
-    expect(screen.getByText('Active')).toBeInTheDocument();
-    expect(screen.getByText('Blacklisted')).toBeInTheDocument();
+    expect(screen.getByText(t('common.active'))).toBeInTheDocument();
+    expect(screen.getByText(t('common.blacklisted'))).toBeInTheDocument();
 
     // Row click navigation
     await userEvent.click(screen.getByText('John Doe'));
@@ -182,7 +183,9 @@ describe('GuestsPage', () => {
     await userEvent.type(input, 'John');
 
     // Click Search button (Call 2: Mount + Click)
-    await userEvent.click(screen.getByText('Search', { selector: 'button' }));
+    await userEvent.click(
+      screen.getByText(t('common.search'), { selector: 'button' }),
+    );
     expect(mockLoadGuests).toHaveBeenCalled();
 
     // Enter key triggers search (Call 3: Mount + Click + Enter)
@@ -193,7 +196,7 @@ describe('GuestsPage', () => {
 
   it('opens create dialog', async () => {
     render(<GuestsPage />);
-    await userEvent.click(screen.getByText('Add Guest'));
+    await userEvent.click(screen.getByText(t('common.addGuest')));
 
     expect(screen.getByText('Create Guest')).toBeInTheDocument();
 

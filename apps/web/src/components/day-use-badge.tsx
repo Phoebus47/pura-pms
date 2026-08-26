@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { t } from '@/lib/i18n';
 
 interface DayUseBadgeProps {
   readonly className?: string;
@@ -14,7 +15,7 @@ export function DayUseBadge({ className, size = 'default' }: DayUseBadgeProps) {
         className,
       )}
     >
-      Day use
+      {t('common.dayUse')}
     </span>
   );
 }

@@ -24,7 +24,16 @@ import {
   Building2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { t } from '@/lib/i18n';
+import { getDateLocale, t } from '@/lib/i18n';
+
+function formatAuditStatus(status?: string): string {
+  if (!status) {
+    return t('nightAudit.status.PENDING');
+  }
+  const key = `nightAudit.status.${status}`;
+  const label = t(key);
+  return label === key ? status : label;
+}
 
 export default function NightAuditPage() {
   const queryClient = useQueryClient();
@@ -75,9 +84,10 @@ export default function NightAuditPage() {
   else if (isInProgress) badgeVariant = 'secondary';
   else if (isFailed) badgeVariant = 'destructive';
 
-  const businessDateLabel = new Date(
-    property.businessDate,
-  ).toLocaleDateString();
+  const dateLocale = getDateLocale();
+  const businessDateLabel = new Date(property.businessDate).toLocaleDateString(
+    dateLocale,
+  );
 
   return (
     <div className="container max-w-4xl mx-auto p-6">
@@ -119,7 +129,7 @@ export default function NightAuditPage() {
                 variant={badgeVariant}
                 className="font-bold px-4 py-1.5 rounded-full text-sm"
               >
-                {status?.status || 'PENDING'}
+                {formatAuditStatus(status?.status)}
               </Badge>
             </div>
           </CardHeader>
@@ -145,7 +155,7 @@ export default function NightAuditPage() {
                 </p>
                 <p className="font-medium text-sm">
                   {status?.startedAt
-                    ? new Date(status.startedAt).toLocaleTimeString()
+                    ? new Date(status.startedAt).toLocaleTimeString(dateLocale)
                     : '-'}
                 </p>
               </div>
@@ -155,7 +165,9 @@ export default function NightAuditPage() {
                 </p>
                 <p className="font-medium text-sm">
                   {status?.completedAt
-                    ? new Date(status.completedAt).toLocaleTimeString()
+                    ? new Date(status.completedAt).toLocaleTimeString(
+                        dateLocale,
+                      )
                     : '-'}
                 </p>
               </div>

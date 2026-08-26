@@ -401,7 +401,7 @@ describe('NightAuditPage', () => {
     render(<NightAuditPage />);
 
     // Default PENDING badge
-    expect(screen.getByText('PENDING')).toBeInTheDocument();
+    expect(screen.getByText('Pending')).toBeInTheDocument();
   });
 
   it('renders Starting... when mutation is pending', () => {

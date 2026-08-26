@@ -48,6 +48,22 @@ export function t(path: string, locale?: AppLocale): string {
   return resolveMessage(path, tree);
 }
 
+export function formatMessage(
+  path: string,
+  vars: Record<string, string | number>,
+  locale?: AppLocale,
+): string {
+  let message = t(path, locale);
+  for (const [key, value] of Object.entries(vars)) {
+    message = message.replaceAll(`{${key}}`, String(value));
+  }
+  return message;
+}
+
+export function getDateLocale(): string {
+  return getI18nLocale() === 'th' ? 'th-TH' : 'en-US';
+}
+
 export function tWithMessages(path: string, messages: MessageTree): string {
   return resolveMessage(path, messages);
 }

@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { Reservation } from '@/lib/api';
+import { getDateLocale, t } from '@/lib/i18n';
 
 export type CardTone = 'blue' | 'orange' | 'sky' | 'blueDark';
 
@@ -116,7 +117,8 @@ export function RecentReservationRow({
         <div className="min-w-0">
           <p className="font-semibold text-slate-800 truncate">{guestName}</p>
           <p className="text-slate-500 text-sm truncate">
-            Room {reservation.room?.number} • {reservation.confirmNumber}
+            {t('common.roomLabel')} {reservation.room?.number} •{' '}
+            {reservation.confirmNumber}
           </p>
         </div>
       </div>
@@ -125,8 +127,8 @@ export function RecentReservationRow({
           ฿{Number(reservation.totalAmount).toLocaleString()}
         </p>
         <p className="text-slate-500 text-sm">
-          {new Date(reservation.checkIn).toLocaleDateString()} -{' '}
-          {new Date(reservation.checkOut).toLocaleDateString()}
+          {new Date(reservation.checkIn).toLocaleDateString(getDateLocale())} -{' '}
+          {new Date(reservation.checkOut).toLocaleDateString(getDateLocale())}
         </p>
       </div>
     </div>

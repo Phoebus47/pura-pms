@@ -13,6 +13,7 @@ import { TaxExemptBadge } from '@/components/tax-exempt-badge';
 import { RoomLockBadge } from '@/components/room-lock-badge';
 import { SplitStayBadge } from '@/components/split-stay-badge';
 import { isSplitStay } from '@/lib/split-stay';
+import { formatMessage, getDateLocale, t } from '@/lib/i18n';
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -32,7 +33,7 @@ export default function ReservationsPage() {
       setReservations(data);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to load reservations',
+        err instanceof Error ? err.message : t('reservations.list.loadFailed'),
       );
     } finally {
       setLoading(false);
@@ -44,7 +45,9 @@ export default function ReservationsPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading reservations...</p>
+          <p className="mt-4 text-slate-600">
+            {t('reservations.list.loading')}
+          </p>
         </div>
       </div>
     );
@@ -54,11 +57,11 @@ export default function ReservationsPage() {
     return (
       <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
         <h3 className="font-semibold text-red-800">
-          Error loading reservations
+          {t('reservations.list.errorTitle')}
         </h3>
         <p className="mt-2 text-red-600">{error}</p>
         <Button onClick={loadReservations} className="mt-4">
-          Try Again
+          {t('common.tryAgain')}
         </Button>
       </div>
     );
@@ -69,10 +72,10 @@ export default function ReservationsPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-bold md:text-3xl text-2xl text-pura-blue">
-            Reservations
+            {t('reservations.list.title')}
           </h1>
           <p className="md:text-base mt-1 text-slate-600 text-sm">
-            Manage bookings and reservations
+            {t('reservations.list.subtitle')}
           </p>
         </div>
         <div className="flex gap-2 md:gap-3">
@@ -84,16 +87,22 @@ export default function ReservationsPage() {
             className="flex-1 md:flex-initial md:text-base text-sm"
           >
             <Calendar className="h-4 mr-2 w-4" />
-            <span className="hidden sm:inline">Calendar View</span>
-            <span className="sm:hidden">Calendar</span>
+            <span className="hidden sm:inline">
+              {t('reservations.list.calendarView')}
+            </span>
+            <span className="sm:hidden">
+              {t('reservations.list.calendarShort')}
+            </span>
           </Button>
           <Button
             className="bg-pura-blue flex-1 hover:bg-pura-blue-dark md:flex-initial md:text-base text-sm"
             onClick={() => router.push('/reservations/new')}
           >
             <Plus className="h-4 mr-2 w-4" />
-            <span className="hidden sm:inline">New Reservation</span>
-            <span className="sm:hidden">New</span>
+            <span className="hidden sm:inline">
+              {t('reservations.list.newReservation')}
+            </span>
+            <span className="sm:hidden">{t('reservations.list.newShort')}</span>
           </Button>
         </div>
       </div>
@@ -102,17 +111,17 @@ export default function ReservationsPage() {
         <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
           <Calendar className="h-16 mx-auto text-slate-300 w-16" />
           <h3 className="font-semibold mt-4 text-lg text-slate-700">
-            No reservations yet
+            {t('reservations.list.emptyTitle')}
           </h3>
           <p className="mt-2 text-slate-500">
-            Get started by creating your first reservation
+            {t('reservations.list.emptyBody')}
           </p>
           <Button
             className="bg-pura-blue hover:bg-pura-blue-dark mt-4"
             onClick={() => router.push('/reservations/new')}
           >
             <Plus className="h-4 mr-2 w-4" />
-            New Reservation
+            {t('reservations.list.newReservation')}
           </Button>
         </div>
       ) : (
@@ -124,28 +133,28 @@ export default function ReservationsPage() {
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Confirmation
+                        {t('reservations.list.table.confirmation')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Guest
+                        {t('reservations.list.table.guest')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Room
+                        {t('reservations.list.table.room')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Check-in
+                        {t('reservations.list.table.checkIn')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Check-out
+                        {t('reservations.list.table.checkOut')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Nights
+                        {t('reservations.list.table.nights')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Total
+                        {t('reservations.list.table.total')}
                       </th>
                       <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
-                        Status
+                        {t('reservations.list.table.status')}
                       </th>
                     </tr>
                   </thead>
@@ -174,7 +183,8 @@ export default function ReservationsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="font-semibold text-slate-800 whitespace-nowrap">
-                            Room {reservation.room?.number}
+                            {t('reservations.list.roomPrefix')}{' '}
+                            {reservation.room?.number}
                           </div>
                           <div className="max-w-40 text-slate-500 text-xs truncate">
                             {reservation.room?.roomType.name}
@@ -273,7 +283,8 @@ export default function ReservationsPage() {
                       </div>
                     </div>
                     <div className="mt-2 text-slate-600 text-xs">
-                      Room {reservation.room?.number} •{' '}
+                      {t('reservations.list.roomPrefix')}{' '}
+                      {reservation.room?.number} •{' '}
                       {reservation.room?.roomType.name}
                     </div>
                   </div>
@@ -283,15 +294,17 @@ export default function ReservationsPage() {
                     </div>
                     <div className="mt-1 text-slate-500 text-xs">
                       {reservation.isDayUse
-                        ? 'Day use'
-                        : `${reservation.nights} nights`}
+                        ? t('common.dayUse')
+                        : formatMessage('reservations.list.nightsLabel', {
+                            count: reservation.nights,
+                          })}
                     </div>
                   </div>
                 </div>
                 <div className="border-slate-200 border-t flex gap-4 items-center mt-3 pt-3">
                   <div className="flex-1">
                     <div className="text-[10px] text-slate-500 tracking-wide uppercase whitespace-nowrap">
-                      Check-in
+                      {t('reservations.list.table.checkIn')}
                     </div>
                     <div className="font-medium mt-0.5 text-slate-700 text-xs">
                       {formatDate(reservation.checkIn)}
@@ -299,7 +312,7 @@ export default function ReservationsPage() {
                   </div>
                   <div className="flex-1">
                     <div className="text-[10px] text-slate-500 tracking-wide uppercase whitespace-nowrap">
-                      Check-out
+                      {t('reservations.list.table.checkOut')}
                     </div>
                     <div className="font-medium mt-0.5 text-slate-700 text-xs">
                       {formatDate(reservation.checkOut)}
@@ -316,7 +329,7 @@ export default function ReservationsPage() {
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString(getDateLocale(), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
