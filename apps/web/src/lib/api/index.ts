@@ -24,6 +24,7 @@ export * from './guest-feedback';
 export * from './guest-complaints';
 export * from './kiosk';
 export * from './mobile-check-in';
+export * from './portal';
 export * from './tax-invoices';
 export * from './ar-accounts';
 export * from './card-preauths';
