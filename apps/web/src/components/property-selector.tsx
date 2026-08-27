@@ -40,7 +40,7 @@ export function PropertySelector({
     return (
       <div className="relative">
         <Building2 className="-translate-y-1/2 absolute h-5 left-3 text-muted-foreground top-1/2 w-5" />
-        <div className="bg-surface-inset border border-slate-300 pl-10 pr-4 py-3 rounded-lg text-muted-foreground w-full">
+        <div className="bg-surface-inset border border-input pl-10 pr-4 py-3 rounded-lg text-muted-foreground w-full">
           Loading properties...
         </div>
       </div>
@@ -55,7 +55,7 @@ export function PropertySelector({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="appearance-none bg-surface-desk border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-lg transition-colors w-full"
+        className="appearance-none bg-surface-desk border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring pl-10 pr-4 py-3 rounded-lg transition-colors w-full"
       >
         <option value="">Select a property</option>
         {properties.map((property) => (

@@ -91,7 +91,7 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
           {reservation.room?.number ?? reservation.roomId}
         </p>
         {roomLocked ? (
-          <p className="text-amber-800 text-sm">
+          <p className="text-sm text-status-caution-ink">
             {t('reservations.roomLock.moveBlocked')}
           </p>
         ) : null}

@@ -241,7 +241,7 @@ export function RoomTypeFormDialog({
                   }
                 }}
                 placeholder="e.g., WiFi, TV, Mini Bar"
-                className="border border-slate-300 flex-1 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors"
+                className="border border-input flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors"
               />
               <Button
                 type="button"
@@ -265,7 +265,7 @@ export function RoomTypeFormDialog({
                     <button
                       type="button"
                       onClick={() => removeAmenity(index)}
-                      className="hover:text-red-600 transition-colors"
+                      className="hover:text-status-critical-ink transition-colors"
                       aria-label={`Remove ${amenity}`}
                     >
                       <Trash2 className="h-3 w-3" />

@@ -2,7 +2,8 @@
 
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
-import { Button } from '@/components/ui/button';
+import { SectionHeading } from '@/components/shared/section-heading';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { useMarkRoomClean, useSetGuestRequest } from '@/hooks/use-housekeeping';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import type {
@@ -10,32 +11,15 @@ import type {
   HkBoardRoom,
   HkStage,
 } from '@/lib/api/housekeeping';
+import { HkRoomCard } from './hk-room-card';
+import { hkStageTone } from './hk-tone';
 
 const STAGES: HkStage[] = ['DIRTY', 'CLEAN', 'READY'];
-const buttonClass = 'min-h-11 w-full';
 
 function stageLabel(stage: HkStage) {
   if (stage === 'DIRTY') return t('housekeeping.stageDirty');
   if (stage === 'CLEAN') return t('housekeeping.stageClean');
   return t('housekeeping.stageReady');
-}
-
-function requestBadge(request: GuestRoomRequest | undefined) {
-  if (request === 'DND') {
-    return (
-      <span className="font-medium text-amber-800 text-xs">
-        {t('housekeeping.dnd')}
-      </span>
-    );
-  }
-  if (request === 'MUR') {
-    return (
-      <span className="font-medium text-sky-800 text-xs">
-        {t('housekeeping.mur')}
-      </span>
-    );
-  }
-  return null;
 }
 
 export function HkBoard({
@@ -78,79 +62,34 @@ export function HkBoard({
       {STAGES.map((stage) => {
         const column = rooms.filter((room) => room.hkStage === stage);
         return (
-          <section key={stage} className="space-y-2">
-            <h2 className="font-semibold text-foreground text-sm">
-              {stageLabel(stage)} ({column.length})
-            </h2>
+          <section key={stage} className="space-y-3">
+            <SectionHeading
+              title={stageLabel(stage)}
+              actions={
+                <StatusBadge
+                  tone={hkStageTone(stage)}
+                  label={String(column.length)}
+                  size="sm"
+                />
+              }
+            />
             {column.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-ink-subtle text-sm">
                 {t('housekeeping.empty')}
               </p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {column.map((room) => (
-                  <li key={room.id}>
-                    <div className="border border-rule-mist p-3 rounded-md space-y-2">
-                      <button
-                        type="button"
-                        className={`min-h-11 w-full rounded-md px-2 py-2 text-left text-sm ${
-                          selectedId === room.id
-                            ? 'bg-pura-blue/5 border border-pura-blue'
-                            : 'border border-transparent'
-                        }`}
-                        onClick={() => onSelect(room.id)}
-                      >
-                        <span className="flex flex-wrap gap-2 items-center">
-                          <span>
-                            {room.number} · {room.roomType?.name ?? room.status}
-                          </span>
-                          {requestBadge(room.guestRequest)}
-                        </span>
-                      </button>
-                      <div className="flex flex-wrap gap-2">
-                        {room.guestRequest !== 'DND' ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="min-h-11"
-                            onClick={() => void setRequest(room.id, 'DND')}
-                          >
-                            {t('housekeeping.setDnd')}
-                          </Button>
-                        ) : null}
-                        {room.guestRequest !== 'MUR' ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="min-h-11"
-                            onClick={() => void setRequest(room.id, 'MUR')}
-                          >
-                            {t('housekeeping.setMur')}
-                          </Button>
-                        ) : null}
-                        {room.guestRequest && room.guestRequest !== 'NONE' ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="min-h-11"
-                            onClick={() => void setRequest(room.id, 'NONE')}
-                          >
-                            {t('housekeeping.clearRequest')}
-                          </Button>
-                        ) : null}
-                      </div>
-                      {stage === 'DIRTY' ? (
-                        <Button
-                          type="button"
-                          className={buttonClass}
-                          disabled={room.guestRequest === 'DND'}
-                          onClick={() => void clean(room.id)}
-                        >
-                          {t('housekeeping.markClean')}
-                        </Button>
-                      ) : null}
-                    </div>
-                  </li>
+                  <HkRoomCard
+                    key={room.id}
+                    room={room}
+                    isSelected={selectedId === room.id}
+                    onSelect={onSelect}
+                    onSetRequest={(id, request) => void setRequest(id, request)}
+                    onMarkClean={
+                      stage === 'DIRTY' ? (id) => void clean(id) : undefined
+                    }
+                  />
                 ))}
               </ul>
             )}

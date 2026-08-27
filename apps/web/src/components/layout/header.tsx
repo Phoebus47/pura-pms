@@ -130,7 +130,7 @@ export function Header() {
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute bg-emerald-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
+                <div className="absolute bg-status-positive-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
               </div>
               <div className="hidden lg:block text-left">
                 <p className="font-semibold leading-tight text-foreground text-sm">
@@ -161,7 +161,7 @@ export function Header() {
             <DropdownMenuSeparator className="mx-2" />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-md text-red-600"
+              className="cursor-pointer focus:bg-status-critical-tint focus:text-status-critical-ink font-semibold my-0.5 p-2.5 rounded-md text-status-critical-ink"
             >
               Log out
             </DropdownMenuItem>

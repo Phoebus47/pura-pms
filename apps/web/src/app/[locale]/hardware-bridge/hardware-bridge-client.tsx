@@ -5,9 +5,11 @@ import { useQuery } from '@tanstack/react-query';
 import { propertiesAPI } from '@/lib/api/properties';
 import { DEFAULT_AGENT_URL, localBridge } from '@/lib/api/local-bridge';
 import { t } from '@/lib/i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { useHbAgents, useHbJobs } from '@/hooks/use-hardware-bridge';
 import type { HardwareAgent, HardwareJob } from '@/lib/api/hardware-bridge';
 import { HbAgentsPanel } from './hb-agents-panel';
@@ -17,7 +19,6 @@ import { HbJobsPanel } from './hb-jobs-panel';
 const EMPTY_AGENTS: HardwareAgent[] = [];
 const EMPTY_JOBS: HardwareJob[] = [];
 const DEFAULT_REQUESTED_BY = 'front-desk';
-const fieldClass = 'min-h-11';
 
 export function HardwareBridgeClient() {
   const { data: properties } = useQuery({
@@ -37,33 +38,35 @@ export function HardwareBridgeClient() {
   const agentOnline = Boolean(health?.ok);
 
   return (
-    <div className="max-w-5xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('hardwareBridge.title')}
-        </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t('hardwareBridge.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <PageHeader
+        title={t('hardwareBridge.title')}
+        subtitle={t('hardwareBridge.subtitle')}
+        actions={
+          <span role="status">
+            <StatusBadge
+              tone={agentOnline ? 'positive' : 'neutral'}
+              label={
+                agentOnline
+                  ? t('hardwareBridge.agentOnline')
+                  : t('hardwareBridge.agentOffline')
+              }
+            />
+          </span>
+        }
+      />
 
-      <Card>
-        <CardContent className="pt-6 space-y-4">
+      <Panel title={t('hardwareBridge.connection')}>
+        <div className="gap-4 grid sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="agentUrl">{t('hardwareBridge.agentUrl')}</Label>
             <Input
               id="agentUrl"
               name="agentUrl"
-              className={fieldClass}
               value={agentUrl}
               onChange={(event) => setAgentUrl(event.target.value)}
             />
           </div>
-          <p className="text-muted-foreground text-sm" role="status">
-            {agentOnline
-              ? t('hardwareBridge.agentOnline')
-              : t('hardwareBridge.agentOffline')}
-          </p>
           <div className="space-y-2">
             <Label htmlFor="requestedBy">
               {t('hardwareBridge.requestedBy')}
@@ -71,13 +74,12 @@ export function HardwareBridgeClient() {
             <Input
               id="requestedBy"
               name="requestedBy"
-              className={fieldClass}
               value={requestedBy}
               onChange={(event) => setRequestedBy(event.target.value)}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
       {propertyId ? (
         <HbAgentsPanel propertyId={propertyId} agents={agents} />
@@ -91,14 +93,9 @@ export function HardwareBridgeClient() {
         />
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('hardwareBridge.jobs')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <HbJobsPanel jobs={jobs} />
-        </CardContent>
-      </Card>
+      <Panel title={t('hardwareBridge.jobs')}>
+        <HbJobsPanel jobs={jobs} />
+      </Panel>
     </div>
   );
 }

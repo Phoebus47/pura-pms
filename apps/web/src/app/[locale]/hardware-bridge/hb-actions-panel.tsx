@@ -3,7 +3,7 @@
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Panel } from '@/components/shared/panel';
 import { localBridge } from '@/lib/api/local-bridge';
 import {
   useCompleteJob,
@@ -13,7 +13,7 @@ import {
 } from '@/hooks/use-hardware-bridge';
 import type { HardwareJobType } from '@/lib/api/hardware-bridge';
 
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 
 const PRINT_PAYLOAD: Record<string, unknown> = { jobType: 'receipt' };
 const ENCODE_PAYLOAD: Record<string, unknown> = {
@@ -87,8 +87,8 @@ export function HbActionsPanel({
   }
 
   return (
-    <Card>
-      <CardContent className="gap-4 grid md:grid-cols-2 pt-6">
+    <Panel title={t('hardwareBridge.deviceTests')}>
+      <div className="gap-4 grid md:grid-cols-2">
         <ActionGroup
           titleKey="hardwareBridge.testPrint"
           onSimulate={() => void simulate('PRINT', PRINT_PAYLOAD)}
@@ -137,8 +137,8 @@ export function HbActionsPanel({
             )
           }
         />
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 

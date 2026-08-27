@@ -1,4 +1,5 @@
 import type { GuestComplaint } from '@/lib/api/guest-complaints';
+import type { StatusTone } from '@/lib/design/status-tone';
 import { t } from '@/lib/i18n';
 
 export function complaintStatusLabel(status: GuestComplaint['status']): string {
@@ -15,4 +16,22 @@ export function complaintSeverityLabel(
   if (severity === 'MEDIUM') return t('complaints.severityMedium');
   if (severity === 'HIGH') return t('complaints.severityHigh');
   return t('complaints.severityCritical');
+}
+
+export function complaintStatusTone(
+  status: GuestComplaint['status'],
+): StatusTone {
+  if (status === 'OPEN') return 'caution';
+  if (status === 'IN_PROGRESS') return 'info';
+  if (status === 'RESOLVED') return 'positive';
+  return 'neutral';
+}
+
+export function complaintSeverityTone(
+  severity: GuestComplaint['severity'],
+): StatusTone {
+  if (severity === 'LOW') return 'neutral';
+  if (severity === 'MEDIUM') return 'info';
+  if (severity === 'HIGH') return 'caution';
+  return 'critical';
 }

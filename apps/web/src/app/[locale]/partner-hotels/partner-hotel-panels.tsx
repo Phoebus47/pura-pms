@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import { Hotel } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/shared/empty-state';
+import { StatusBadge } from '@/components/shared/status-badge';
 import {
   useCreatePartnerHotel,
   useUpdatePartnerHotel,
 } from '@/hooks/use-partner-hotels';
 import type { PartnerHotel } from '@/lib/api/partner-hotels';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 
 interface CreateFormProps {
   readonly propertyId: string;
@@ -57,33 +59,32 @@ export function CreatePartnerHotelForm({ propertyId }: CreateFormProps) {
         <Input
           id="partnerHotelName"
           name="name"
-          className={fieldClass}
           value={name}
           onChange={(event) => setName(event.target.value)}
           required
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="partnerHotelPhone">{t('partnerHotels.phone')}</Label>
-        <Input
-          id="partnerHotelPhone"
-          name="phone"
-          className={fieldClass}
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="partnerHotelAddress">
-          {t('partnerHotels.address')}
-        </Label>
-        <Input
-          id="partnerHotelAddress"
-          name="address"
-          className={fieldClass}
-          value={address}
-          onChange={(event) => setAddress(event.target.value)}
-        />
+      <div className="gap-4 grid sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="partnerHotelPhone">{t('partnerHotels.phone')}</Label>
+          <Input
+            id="partnerHotelPhone"
+            name="phone"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="partnerHotelAddress">
+            {t('partnerHotels.address')}
+          </Label>
+          <Input
+            id="partnerHotelAddress"
+            name="address"
+            value={address}
+            onChange={(event) => setAddress(event.target.value)}
+          />
+        </div>
       </div>
       <Button
         type="submit"
@@ -123,9 +124,10 @@ export function PartnerHotelList({ hotels }: ListProps) {
 
   if (hotels.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
-        {t('partnerHotels.empty')}
-      </p>
+      <EmptyState
+        icon={<Hotel className="h-10 w-10" />}
+        title={t('partnerHotels.empty')}
+      />
     );
   }
 
@@ -134,18 +136,28 @@ export function PartnerHotelList({ hotels }: ListProps) {
       {hotels.map((hotel) => (
         <li
           key={hotel.id}
-          className="border flex gap-3 items-center justify-between p-3 rounded-md text-sm"
+          className="border border-rule-mist flex gap-3 items-center justify-between p-4 rounded-lg text-sm"
         >
-          <div>
-            <p className="font-medium">{hotel.name}</p>
+          <div className="min-w-0">
+            <p className="flex flex-wrap font-semibold gap-2 items-center text-ink-strong">
+              {hotel.name}
+              <StatusBadge
+                tone={hotel.isActive ? 'positive' : 'neutral'}
+                label={
+                  hotel.isActive
+                    ? t('partnerHotels.statusActive')
+                    : t('partnerHotels.statusInactive')
+                }
+                size="sm"
+              />
+            </p>
             {hotel.phone ? (
-              <p className="text-muted-foreground">{hotel.phone}</p>
+              <p className="text-ink-subtle">{hotel.phone}</p>
             ) : null}
           </div>
           <Button
             type="button"
             variant="outline"
-            className="min-h-11"
             disabled={updateMutation.isPending}
             onClick={() => void toggleActive(hotel)}
           >

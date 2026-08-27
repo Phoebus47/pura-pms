@@ -11,11 +11,17 @@ export interface StatTileProps {
   readonly hint?: string;
   readonly tone?: StatusTone;
   readonly href?: string;
+  /** Turns the tile into a filter toggle. Ignored when `href` is set. */
+  readonly onClick?: () => void;
+  /** Pressed state for a filter toggle. */
+  readonly pressed?: boolean;
   readonly icon?: ReactNode;
   readonly className?: string;
 }
 
 const TILE_BASE = 'rounded-xl border border-rule-mist bg-surface-desk p-4';
+const TILE_INTERACTIVE =
+  'block w-full text-left transition-colors hover:border-pura-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 export function StatTile({
   label,
@@ -23,6 +29,8 @@ export function StatTile({
   hint,
   tone,
   href,
+  onClick,
+  pressed,
   icon,
   className,
 }: StatTileProps) {
@@ -48,16 +56,27 @@ export function StatTile({
 
   if (href) {
     return (
-      <Link
-        href={href}
+      <Link href={href} className={cn(TILE_BASE, TILE_INTERACTIVE, className)}>
+        {body}
+      </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={pressed}
         className={cn(
           TILE_BASE,
-          'block transition-colors hover:border-pura-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          TILE_INTERACTIVE,
+          pressed && 'border-pura-blue ring-1 ring-pura-blue/30',
           className,
         )}
       >
         {body}
-      </Link>
+      </button>
     );
   }
 

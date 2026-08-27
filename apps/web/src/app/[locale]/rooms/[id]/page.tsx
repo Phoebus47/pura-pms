@@ -11,6 +11,7 @@ import { DetailPageError } from '@/components/shared/detail-page-error';
 import { DetailPageHeader } from '@/components/shared/detail-page-header';
 import { MetadataCard } from '@/components/shared/metadata-card';
 import { DetailField } from '@/components/shared/detail-field';
+import { Panel } from '@/components/shared/panel';
 
 export default function RoomDetailPage() {
   const params = useParams();
@@ -62,6 +63,10 @@ export default function RoomDetailPage() {
     );
   }
 
+  const strongValue = (value: string | number) => (
+    <p className="font-semibold text-ink-strong text-lg">{value}</p>
+  );
+
   return (
     <div className="space-y-6">
       <DetailPageHeader
@@ -73,15 +78,15 @@ export default function RoomDetailPage() {
               variant="outline"
               onClick={() => router.push(`/rooms/${roomId}/edit`)}
             >
-              <Edit className="h-4 mr-2 w-4" />
+              <Edit className="h-4 w-4" />
               Edit
             </Button>
             <Button
               variant="outline"
               onClick={handleDelete}
-              className="hover:bg-red-50 text-red-600"
+              className="hover:bg-status-critical-tint text-status-critical-ink"
             >
-              <Trash2 className="h-4 mr-2 w-4" />
+              <Trash2 className="h-4 w-4" />
               Delete
             </Button>
           </>
@@ -89,29 +94,11 @@ export default function RoomDetailPage() {
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <div className="bg-surface-desk border border-rule-mist lg:col-span-2 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold mb-6 text-pura-blue text-xl">
-            Room Information
-          </h2>
-
+        <Panel title="Room Information" padding="lg" className="lg:col-span-2">
           <div className="gap-6 grid grid-cols-2">
-            <DetailField
-              label="Room Number"
-              value={
-                <p className="font-semibold text-foreground text-lg">
-                  {room.number}
-                </p>
-              }
-            />
+            <DetailField label="Room Number" value={strongValue(room.number)} />
 
-            <DetailField
-              label="Floor"
-              value={
-                <p className="font-semibold text-foreground text-lg">
-                  {room.floor}
-                </p>
-              }
-            />
+            <DetailField label="Floor" value={strongValue(room.floor ?? '-')} />
 
             <DetailField
               label="Status"
@@ -120,17 +107,13 @@ export default function RoomDetailPage() {
 
             <DetailField
               label="Room Type"
-              value={
-                <p className="font-semibold text-foreground text-lg">
-                  {room.roomType?.name || '-'}
-                </p>
-              }
+              value={strongValue(room.roomType?.name || '-')}
             />
 
             <DetailField
               label="Base Rate"
               value={
-                <p className="font-semibold text-lg text-pura-blue">
+                <p className="font-semibold tabular-nums text-lg text-pura-blue">
                   ฿{Number(room.roomType?.baseRate || 0).toLocaleString()}
                 </p>
               }
@@ -138,53 +121,43 @@ export default function RoomDetailPage() {
 
             <DetailField
               label="Max Occupancy"
-              value={
-                <p className="font-semibold text-foreground text-lg">
-                  {room.roomType?.maxOccupancy || '-'} guests
-                </p>
-              }
+              value={strongValue(
+                `${room.roomType?.maxOccupancy || '-'} guests`,
+              )}
             />
           </div>
 
           {room.notes && (
             <div className="border-rule-mist border-t mt-6 pt-6">
-              <p className="font-semibold text-muted-foreground text-sm">
-                Notes
-              </p>
-              <p className="mt-2 text-foreground whitespace-pre-wrap">
+              <p className="font-semibold text-ink-subtle text-sm">Notes</p>
+              <p className="mt-2 text-ink-default whitespace-pre-wrap">
                 {room.notes}
               </p>
             </div>
           )}
-        </div>
+        </Panel>
 
-        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold mb-6 text-pura-blue text-xl">
-            Room Type Details
-          </h2>
-
+        <Panel title="Room Type Details" padding="lg">
           <div className="space-y-4">
             <DetailField
               label="Type Name"
-              value={
-                <p className="font-semibold text-foreground text-lg">
-                  {room.roomType?.name || '-'}
-                </p>
-              }
+              value={strongValue(room.roomType?.name || '-')}
             />
 
             {room.roomType?.description && (
               <DetailField
                 label="Description"
                 value={
-                  <p className="text-foreground">{room.roomType.description}</p>
+                  <p className="text-ink-default">
+                    {room.roomType.description}
+                  </p>
                 }
               />
             )}
 
             {room.roomType?.amenities && room.roomType.amenities.length > 0 && (
               <div>
-                <p className="block font-semibold mb-2 text-muted-foreground text-sm">
+                <p className="block font-semibold mb-2 text-ink-subtle text-sm">
                   Amenities
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -200,7 +173,7 @@ export default function RoomDetailPage() {
               </div>
             )}
           </div>
-        </div>
+        </Panel>
       </div>
 
       <MetadataCard createdAt={room.createdAt} updatedAt={room.updatedAt} />

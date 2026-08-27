@@ -123,10 +123,45 @@ For core pages, use a **Hybrid** approach: **background full width, content with
 ### Styling Best Practices
 
 - **No Inline Styles:** Do not use `style={{ ... }}` props. Use Tailwind CSS utility classes.
-- **No Hardcoded Colors:** Do not hardcode color values (e.g. `#E53935`). Use CSS variables and theme from `globals.css` or Tailwind semantic classes (e.g. `text-brand-accent`). Add new colors to `:root` / `@theme` in `globals.css` when needed.
-- **Design tokens:** Prefer design tokens from `app/globals.css`.
+- **No Hardcoded Colors:** Do not hardcode color values (e.g. `#E53935`) and do not reach for raw Tailwind palette utilities (`bg-white`, `border-slate-200`, `text-red-600`). Use the tokens in `app/globals.css`.
 - **Dynamic Styles:** Use `cn()` (clsx + tailwind-merge) for conditional classes.
 - **Arbitrary Values:** **Avoid arbitrary values** (e.g., `w-[123px]`) whenever possible. Prefer standard Tailwind utilities.
+
+### Design tokens — Harbor Design System v2
+
+Tokens live in `apps/web/src/app/globals.css` in **three tiers**. A component may only read the middle tier.
+
+<<<<<<< Updated upstream
+| Tier | Examples | May components use it? |
+| ----------- | ----------------------------------------------------------- | --------------------------------------------------------------- |
+| 1 Primitive | `--harbor-300`, `--status-caution-500` | **No** — except `--pura-blue` / `--pura-orange` brand utilities |
+| 2 Semantic | `surface-desk`, `rule-mist`, `ink-subtle`, `action-primary` | **Yes** — this is the vocabulary |
+| 3 Component | `--panel-pad`, `--field-h`, `--table-row-h-*` | Yes, where the pattern owns the knob |
+=======
+| Tier | Examples | May components use it? |
+| ------------- | ----------------------------------------------- | ----------------------------------------- |
+| 1 Primitive | `--harbor-300`, `--status-caution-500` | **No** — except `--pura-blue` / `--pura-orange` brand utilities |
+| 2 Semantic | `surface-desk`, `rule-mist`, `ink-subtle`, `action-primary` | **Yes** — this is the vocabulary |
+| 3 Component | `--panel-pad`, `--field-h`, `--table-row-h-*` | Yes, where the pattern owns the knob |
+
+> > > > > > > Stashed changes
+
+Theming (including the night theme) happens by swapping Tier 2 only, so a component never knows which theme is active. Anything hardcoded bypasses that and breaks in dark mode.
+
+**Naming trap:** text colors are `--ink-*`, not `--text-*`. Tailwind 4 reserves the `--text-*` namespace for font sizes, so `--text-subtle` would emit a bogus `text-subtle` font-size utility.
+
+**Scales** (full detail in `docs/planning/harbor-design-system-v2.md`):
+
+- **Spacing:** panels `p-5 sm:p-6`; stack inside a panel `space-y-4`; between panels `space-y-6`; between page sections `space-y-8`. Page shell padding belongs to `AppLayout` — pages must not add their own.
+- **Type:** `text-sm` is body. `text-2xs` replaces `text-[10px]`. Page titles come only from `PageHeader`.
+- **Radius:** `rounded-md` controls · `rounded-lg` buttons · `rounded-xl` panels · `rounded-full` pills. Nothing else.
+- **Elevation:** `shadow-panel` for panels, `shadow-overlay` for dialogs and menus. No other shadows.
+- **Status color:** never per-component. Map the domain value to a `StatusTone` and use `statusToneClass` / `statusToneInk` / `statusToneSurface` from `@/lib/design/status-tone`.
+- **Interactive floor:** 44px, already built into `Button`, `Input`, and `Select` — do not re-patch call sites with `min-h-11`.
+
+**Use the shared patterns instead of rebuilding them:** `PageHeader`, `Panel`, `SectionHeading`, `StatTile`, `EmptyState`, `Toolbar`, `DataTable`, `StatusBadge`, `LoadingSpinner` (all in `@/components/shared`).
+
+**Contrast is measured, not eyeballed.** Adjacent surfaces must stay ≥1.075:1 apart and body text ≥4.5:1 on every surface it can land on, in both themes. If you change a ramp value, verify the pairings.
 
 ### Interactive component states (UI states)
 

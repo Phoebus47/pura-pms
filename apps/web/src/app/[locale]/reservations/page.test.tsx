@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import ReservationsPage from './page';
@@ -240,7 +240,7 @@ describe('ReservationsPage', () => {
     });
   });
 
-  it('should keep table headers such as Check-in on one line', async () => {
+  it('should render the list as a captioned table with every column in order', async () => {
     (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
 
     render(<ReservationsPage />);
@@ -249,13 +249,35 @@ describe('ReservationsPage', () => {
       expect(screen.getByText('Reservations')).toBeInTheDocument();
     });
 
-    const checkInHeader = screen.getByRole('columnheader', {
-      name: 'Check-in',
+    const table = screen.getByRole('table', {
+      name: /reservations with confirmation number/i,
     });
-    expect(checkInHeader).toHaveClass('whitespace-nowrap');
-    expect(screen.getByRole('columnheader', { name: 'Check-out' })).toHaveClass(
-      'whitespace-nowrap',
-    );
+    expect(
+      within(table)
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent),
+    ).toEqual([
+      'Confirmation',
+      'Guest',
+      'Room',
+      'Check-in',
+      'Check-out',
+      'Nights',
+      'Total',
+      'Status',
+    ]);
+  });
+
+  it('should keep stay dates on one line', async () => {
+    (reservationsAPI.getAll as any).mockResolvedValue(mockReservations);
+
+    render(<ReservationsPage />);
+
+    const table = await screen.findByRole('table', {
+      name: /reservations with confirmation number/i,
+    });
+    const [checkInCell] = within(table).getAllByText('Jan 15, 2024');
+    expect(checkInCell).toHaveClass('whitespace-nowrap');
   });
 
   it('should display a day-use badge for day-use reservations', async () => {

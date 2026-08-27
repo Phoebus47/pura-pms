@@ -1,99 +1,79 @@
 'use client';
 
-import { Clock, FileText, MoonStar, Settings } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Clock, FileText, MoonStar } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { Link } from '@/i18n/navigation';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+
+const LINK_CARD_CLASS =
+  'block border border-rule-mist focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:border-rule-strong p-4 rounded-lg transition-colors';
+
+interface SettingsLinkProps {
+  readonly href: string;
+  readonly label: string;
+  readonly hint: string;
+  readonly icon?: ReactNode;
+}
+
+function SettingsLink({ href, label, hint, icon }: SettingsLinkProps) {
+  return (
+    <Link href={href} className={LINK_CARD_CLASS}>
+      <p className="flex font-semibold gap-2 items-center text-pura-blue">
+        {icon}
+        {label}
+      </p>
+      <p className="mt-1 text-ink-subtle text-sm">{hint}</p>
+    </Link>
+  );
+}
 
 export default function SettingsPage() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-bold text-3xl text-pura-blue">
-            {t('settings.title')}
-          </h1>
-          <p className="mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
+      />
 
-      <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl">
+      <Panel>
         <LocaleSwitcher />
-      </div>
+      </Panel>
 
-      <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl">
-        <div className="flex gap-3 items-center">
-          <Clock className="h-6 text-muted-foreground w-6" aria-hidden="true" />
-          <h2 className="font-semibold text-foreground text-xl">
-            {t('settings.dayClose')}
-          </h2>
-        </div>
-
-        <div className="gap-4 grid grid-cols-1 mt-6 sm:grid-cols-2">
-          <Link
+      <Panel title={t('settings.dayClose')}>
+        <div className="gap-4 grid grid-cols-1 sm:grid-cols-2">
+          <SettingsLink
             href="/night-audit"
-            className="bg-surface-desk border border-rule-mist hover:border-slate-300 p-5 rounded-xl shadow-sm transition-colors"
-          >
-            <p className="flex font-semibold gap-2 items-center text-pura-blue">
-              <MoonStar className="h-4 w-4" aria-hidden="true" />
-              {t('settings.nightAudit')}
-            </p>
-            <p className="mt-1 text-muted-foreground text-sm">
-              {t('settings.nightAuditHint')}
-            </p>
-          </Link>
-          <Link
-            href="/shifts"
-            className="bg-surface-desk border border-rule-mist hover:border-slate-300 p-5 rounded-xl shadow-sm transition-colors"
-          >
-            <p className="flex font-semibold gap-2 items-center text-pura-blue">
-              <Clock className="h-4 w-4" aria-hidden="true" />
-              {t('settings.shifts')}
-            </p>
-            <p className="mt-1 text-muted-foreground text-sm">
-              {t('settings.shiftsHint')}
-            </p>
-          </Link>
-          <Link
-            href="/reports"
-            className="bg-surface-desk border border-rule-mist hover:border-slate-300 p-5 rounded-xl shadow-sm transition-colors"
-          >
-            <p className="flex font-semibold gap-2 items-center text-pura-blue">
-              <FileText className="h-4 w-4" aria-hidden="true" />
-              {t('settings.reports')}
-            </p>
-            <p className="mt-1 text-muted-foreground text-sm">
-              {t('settings.reportsHint')}
-            </p>
-          </Link>
-        </div>
-      </div>
-
-      <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl">
-        <div className="flex gap-3 items-center">
-          <Settings
-            className="h-6 text-muted-foreground w-6"
-            aria-hidden="true"
+            label={t('settings.nightAudit')}
+            hint={t('settings.nightAuditHint')}
+            icon={<MoonStar className="h-4 w-4" aria-hidden="true" />}
           />
-          <h2 className="font-semibold text-foreground text-xl">
-            {t('settings.masterData')}
-          </h2>
+          <SettingsLink
+            href="/shifts"
+            label={t('settings.shifts')}
+            hint={t('settings.shiftsHint')}
+            icon={<Clock className="h-4 w-4" aria-hidden="true" />}
+          />
+          <SettingsLink
+            href="/reports"
+            label={t('settings.reports')}
+            hint={t('settings.reportsHint')}
+            icon={<FileText className="h-4 w-4" aria-hidden="true" />}
+          />
         </div>
+      </Panel>
 
-        <div className="gap-4 grid grid-cols-1 mt-6 sm:grid-cols-2">
-          <Link
+      <Panel title={t('settings.masterData')}>
+        <div className="gap-4 grid grid-cols-1 sm:grid-cols-2">
+          <SettingsLink
             href="/settings/transaction-codes"
-            className="bg-surface-desk border border-rule-mist hover:border-slate-300 p-5 rounded-xl shadow-sm transition-colors"
-          >
-            <p className="font-semibold text-pura-blue">
-              {t('settings.transactionCodes')}
-            </p>
-            <p className="mt-1 text-muted-foreground text-sm">
-              {t('settings.transactionCodesHint')}
-            </p>
-          </Link>
+            label={t('settings.transactionCodes')}
+            hint={t('settings.transactionCodesHint')}
+          />
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

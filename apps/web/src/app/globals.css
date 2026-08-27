@@ -90,7 +90,8 @@
   --border: var(--rule-mist);
   --input: var(--rule-mist);
   --ring: color-mix(in oklab, var(--action-primary) 35%, transparent);
-  --destructive: var(--status-critical-500);
+  /* The 700 step, not 500: a white button label on 500 only reaches 4.29:1. */
+  --destructive: var(--status-critical-700);
   --destructive-foreground: var(--ink-onbrand);
 
   /* ── Tier 3: component tokens (use sparingly) ─────────────── */

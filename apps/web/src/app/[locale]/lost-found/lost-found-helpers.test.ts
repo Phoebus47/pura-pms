@@ -1,4 +1,8 @@
-import { isLostFoundOverdue, lostFoundStatusLabel } from './lost-found-helpers';
+import {
+  isLostFoundOverdue,
+  lostFoundStatusLabel,
+  lostFoundStatusTone,
+} from './lost-found-helpers';
 import type { LostFoundItem } from '@/lib/api/lost-found';
 import { t } from '@/lib/i18n';
 
@@ -39,6 +43,13 @@ describe('lost-found-helpers', () => {
     expect(lostFoundStatusLabel('DISPOSED')).toBe(
       t('lostFound.statusDisposed'),
     );
+  });
+
+  it('maps status to a design-system tone', () => {
+    expect(lostFoundStatusTone('FOUND')).toBe('info');
+    expect(lostFoundStatusTone('CLAIMED')).toBe('caution');
+    expect(lostFoundStatusTone('RETURNED')).toBe('positive');
+    expect(lostFoundStatusTone('DISPOSED')).toBe('neutral');
   });
 
   it('flags found items past retention', () => {

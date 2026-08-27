@@ -1,11 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
+import type { RoomType } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatTile } from '@/components/shared/stat-tile';
+import { Toolbar } from '@/components/shared/toolbar';
 import { useRoomTypes } from '@/hooks/use-room-types';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
+import { cn } from '@/lib/utils';
+import { RoomTypeCard } from './room-type-card';
 
 export default function RoomTypesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,12 +27,12 @@ export default function RoomTypesPage() {
     loadRoomTypes();
   }, [loadRoomTypes]);
 
-  function handleDelete(id: string, name: string) {
+  function handleDelete(roomType: RoomType) {
     confirm(
       'Delete Room Type',
-      `Are you sure you want to delete room type "${name}"? This action cannot be undone.`,
+      `Are you sure you want to delete room type "${roomType.name}"? This action cannot be undone.`,
       async () => {
-        await deleteRoomType(id);
+        await deleteRoomType(roomType.id);
       },
     );
   }
@@ -34,198 +44,103 @@ export default function RoomTypesPage() {
   );
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-muted-foreground">Loading room types...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading room types..." />;
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
-        <h3 className="font-semibold text-red-800">Error loading room types</h3>
-        <p className="mt-2 text-red-600">{error}</p>
+      <Panel className={cn('border', statusToneSurface.critical)}>
+        <h2 className={cn('font-semibold text-lg', statusToneInk.critical)}>
+          Error loading room types
+        </h2>
+        <p className={cn('mt-2 text-sm', statusToneInk.critical)}>{error}</p>
         <Button onClick={loadRoomTypes} className="mt-4">
           Retry
         </Button>
-      </div>
+      </Panel>
     );
   }
+
+  const averageBaseRate =
+    roomTypes.length > 0
+      ? Math.round(
+          roomTypes.reduce((sum, rt) => sum + Number(rt.baseRate), 0) /
+            roomTypes.length,
+        )
+      : 0;
+  const totalRooms = roomTypes.reduce(
+    (sum, rt) => sum + (rt._count?.rooms || 0),
+    0,
+  );
 
   return (
     <>
       {Dialog}
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-bold text-3xl text-pura-blue">Room Types</h1>
-            <p className="mt-1 text-muted-foreground">
-              Manage room type configurations and pricing
-            </p>
-          </div>
-          <Button>
-            <Plus className="h-4 mr-2 w-4" />
-            Add Room Type
-          </Button>
+        <PageHeader
+          title="Room Types"
+          subtitle="Manage room type configurations and pricing"
+          actions={
+            <Button>
+              <Plus className="h-4 w-4" />
+              Add Room Type
+            </Button>
+          }
+        />
+
+        <Toolbar
+          search={
+            <div className="relative">
+              <Search
+                className="-translate-y-1/2 absolute h-4 left-3.5 text-ink-disabled top-1/2 w-4"
+                aria-hidden="true"
+              />
+              <Input
+                id="room-type-search"
+                name="roomTypeSearch"
+                type="search"
+                aria-label="Search room types by name or code"
+                placeholder="Search room types by name or code..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          }
+        />
+
+        <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
+          <StatTile label="Total Types" value={roomTypes.length} />
+          <StatTile
+            label="Avg Base Rate"
+            value={`฿${averageBaseRate.toLocaleString()}`}
+          />
+          <StatTile label="Total Rooms" value={totalRooms} />
         </div>
 
-        {/* Search */}
-        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
-          <div className="relative">
-            <Search className="-translate-y-1/2 absolute h-5 left-4 text-muted-foreground top-1/2 w-5" />
-            <Input
-              type="search"
-              placeholder="Search room types by name or code..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-12 pl-12 pr-4 py-3 rounded-lg w-full"
-            />
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
-            <p className="font-semibold text-muted-foreground text-sm">
-              Total Types
-            </p>
-            <p className="font-bold mt-2 text-3xl text-pura-blue">
-              {roomTypes.length}
-            </p>
-          </div>
-          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
-            <p className="font-semibold text-muted-foreground text-sm">
-              Avg Base Rate
-            </p>
-            <p className="font-bold mt-2 text-3xl text-pura-blue">
-              ฿
-              {roomTypes.length > 0
-                ? Math.round(
-                    roomTypes.reduce(
-                      (sum, rt) => sum + Number(rt.baseRate),
-                      0,
-                    ) / roomTypes.length,
-                  ).toLocaleString()
-                : 0}
-            </p>
-          </div>
-          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
-            <p className="font-semibold text-muted-foreground text-sm">
-              Total Rooms
-            </p>
-            <p className="font-bold mt-2 text-3xl text-pura-blue">
-              {roomTypes.reduce((sum, rt) => sum + (rt._count?.rooms || 0), 0)}
-            </p>
-          </div>
-        </div>
-
-        {/* Room Types Grid */}
         {filteredRoomTypes.length === 0 ? (
-          <div className="bg-surface-desk border border-rule-mist p-12 rounded-xl shadow-sm text-center">
-            <p className="text-muted-foreground">
-              {searchTerm
-                ? 'No room types found matching your search'
-                : 'No room types yet. Create your first room type to get started.'}
-            </p>
-          </div>
+          <Panel padding="none">
+            <EmptyState
+              title={
+                searchTerm
+                  ? 'No room types found matching your search'
+                  : 'No room types yet'
+              }
+              description={
+                searchTerm
+                  ? undefined
+                  : 'Create your first room type to get started.'
+              }
+            />
+          </Panel>
         ) : (
           <div className="gap-6 grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2">
             {filteredRoomTypes.map((roomType) => (
-              <div
+              <RoomTypeCard
                 key={roomType.id}
-                className="bg-surface-desk border border-rule-mist group hover:border-slate-300 p-6 rounded-xl shadow-sm transition-colors"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-pura-blue text-xl">
-                      {roomType.name}
-                    </h3>
-                    <p className="font-mono mt-1 text-muted-foreground text-sm">
-                      {roomType.code}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 group-hover:opacity-100 opacity-0 transition-opacity">
-                    <button
-                      className="hover:bg-muted p-2 rounded-lg transition-colors"
-                      title="Edit"
-                    >
-                      <Edit className="h-4 text-muted-foreground w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(roomType.id, roomType.name)}
-                      className="hover:bg-red-50 p-2 rounded-lg transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 text-red-600 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Description */}
-                {roomType.description && (
-                  <p className="line-clamp-2 mb-4 text-muted-foreground text-sm">
-                    {roomType.description}
-                  </p>
-                )}
-
-                {/* Details */}
-                <div className="mb-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
-                      Base Rate
-                    </span>
-                    <span className="font-bold text-lg text-pura-blue">
-                      ฿{Number(roomType.baseRate).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
-                      Max Occupancy
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      {roomType.maxOccupancy} guests
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
-                      Total Rooms
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      {roomType._count?.rooms || 0}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Amenities */}
-                {roomType.amenities && roomType.amenities.length > 0 && (
-                  <div>
-                    <p className="font-semibold mb-2 text-muted-foreground text-xs">
-                      Amenities
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {roomType.amenities.slice(0, 3).map((amenity) => (
-                        <span
-                          key={amenity}
-                          className="bg-pura-blue/10 font-semibold inline-flex items-center px-2 py-1 ring-1 ring-inset ring-pura-blue/20 rounded-full text-pura-blue text-xs"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                      {roomType.amenities.length > 3 && (
-                        <span className="bg-slate-100 font-semibold inline-flex items-center px-2 py-1 rounded-full text-muted-foreground text-xs">
-                          +{roomType.amenities.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+                roomType={roomType}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}

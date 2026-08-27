@@ -6,7 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { propertiesAPI } from '@/lib/api/properties';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatTile } from '@/components/shared/stat-tile';
+import { buttonVariants } from '@/components/ui/button';
 import {
   useArAccounts,
   useArAging,
@@ -33,83 +36,75 @@ export function ArAccountsClient() {
   const { data: aging } = useArAging(selectedId);
 
   return (
-    <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-3xl text-pura-blue">{t('ar.title')}</h1>
-        <p className="mt-1 text-muted-foreground text-sm">{t('ar.subtitle')}</p>
-      </header>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader title={t('ar.title')} subtitle={t('ar.subtitle')} />
 
       {propertyId ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('ar.create')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CreateArAccountForm propertyId={propertyId} />
-          </CardContent>
-        </Card>
+        <Panel title={t('ar.create')}>
+          <CreateArAccountForm propertyId={propertyId} />
+        </Panel>
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('ar.transfer')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TransferFolioForm
-            userId={userId}
-            propertyId={propertyId}
-            accounts={accounts}
-          />
-        </CardContent>
-      </Card>
+      <Panel title={t('ar.transfer')}>
+        <TransferFolioForm
+          userId={userId}
+          propertyId={propertyId}
+          accounts={accounts}
+        />
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('ar.list')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ArAccountList
-            accounts={accounts}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        </CardContent>
-      </Card>
+      <Panel title={t('ar.list')}>
+        <ArAccountList
+          accounts={accounts}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+        />
+      </Panel>
 
       {selectedId && aging ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('ar.aging')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p>
-              {t('ar.current')} {aging.current.toFixed(2)} · {t('ar.days30')}{' '}
-              {aging.days30.toFixed(2)} · {t('ar.days60')}{' '}
-              {aging.days60.toFixed(2)} · {t('ar.days90')}{' '}
-              {aging.days90.toFixed(2)}
-            </p>
+        <Panel
+          title={t('ar.aging')}
+          actions={
             <Link
               href={`/ar-accounts/${selectedId}/statement`}
-              className="border inline-flex items-center justify-center min-h-11 px-4 rounded-md text-sm"
+              className={buttonVariants({ variant: 'outline' })}
             >
               {t('ar.printStatement')}
             </Link>
-          </CardContent>
-        </Card>
+          }
+        >
+          <div className="gap-4 grid lg:grid-cols-4 sm:grid-cols-2">
+            <StatTile
+              label={t('ar.current')}
+              value={aging.current.toFixed(2)}
+              tone="positive"
+            />
+            <StatTile
+              label={t('ar.days30')}
+              value={aging.days30.toFixed(2)}
+              tone="caution"
+            />
+            <StatTile
+              label={t('ar.days60')}
+              value={aging.days60.toFixed(2)}
+              tone="caution"
+            />
+            <StatTile
+              label={t('ar.days90')}
+              value={aging.days90.toFixed(2)}
+              tone="critical"
+            />
+          </div>
+        </Panel>
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('ar.invoices')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ArInvoicePanel
-            invoices={invoices}
-            paidBy={userId}
-            businessDate={businessDate || '2026-08-14'}
-          />
-        </CardContent>
-      </Card>
+      <Panel title={t('ar.invoices')} padding="none">
+        <ArInvoicePanel
+          invoices={invoices}
+          paidBy={userId}
+          businessDate={businessDate || '2026-08-14'}
+        />
+      </Panel>
     </div>
   );
 }

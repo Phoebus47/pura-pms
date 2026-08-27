@@ -41,7 +41,7 @@ export function BottomNavigation() {
               <item.icon className="h-5 w-5" />
               <span
                 className={cn(
-                  'max-w-full text-[10px] font-medium truncate',
+                  'max-w-full text-2xs font-medium truncate',
                   isActive && 'font-semibold',
                 )}
               >
@@ -66,7 +66,7 @@ export function BottomNavigation() {
               <MoreHorizontal className="h-5 w-5" />
               <span
                 className={cn(
-                  'max-w-full text-[10px] font-medium truncate',
+                  'max-w-full text-2xs font-medium truncate',
                   isMoreActive && 'font-semibold',
                 )}
               >

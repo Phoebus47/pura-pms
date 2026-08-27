@@ -185,7 +185,35 @@
     "shifts": "กะแคชเชียร์",
     "shiftsHint": "เปิด ปิด และส่งมอบกะแคชเชียร์ก่อนปิดยอดกลางคืน",
     "reports": "รายงาน",
-    "reportsHint": "รายงานรายได้รายวัน Daily Flash สมุดรายวัน และงบทดลอง"
+    "reportsHint": "รายงานรายได้รายวัน Daily Flash สมุดรายวัน และงบทดลอง",
+    "transactionCodesPage": {
+      "subtitle": "จัดการผังบัญชีที่ใช้ลงรายการในระบบ PMS",
+      "newCode": "เพิ่มรหัสรายการ",
+      "refresh": "รีเฟรช",
+      "searchPlaceholder": "ค้นหาด้วยรหัสหรือรายละเอียด...",
+      "caption": "รหัสรายการ",
+      "empty": "ไม่พบรหัสรายการ",
+      "loadFailed": "โหลดรหัสรายการไม่สำเร็จ",
+      "saveFailed": "บันทึกรหัสรายการไม่สำเร็จ",
+      "type": "ประเภท",
+      "group": "กลุ่ม",
+      "tax": "ภาษี",
+      "service": "ค่าบริการ",
+      "gl": "GL",
+      "yes": "ใช่",
+      "no": "ไม่",
+      "glAccount": "บัญชี GL",
+      "codePlaceholder": "เช่น 1000",
+      "glPlaceholder": "เช่น 4000-01",
+      "descriptionPlaceholder": "เช่น ค่าห้องพัก",
+      "applyVat": "คิด VAT",
+      "applyService": "คิดค่าบริการ",
+      "servicePercent": "ค่าบริการ %",
+      "editTitle": "แก้ไขรหัสรายการ",
+      "newTitle": "เพิ่มรหัสรายการ",
+      "saveChanges": "บันทึกการแก้ไข",
+      "createCode": "สร้างรหัสรายการ"
+    }
   },
   "shifts": {
     "title": "กะแคชเชียร์",
@@ -217,6 +245,7 @@
     "submitClose": "ปิดกะ",
     "submitHandover": "ส่งมอบกะ",
     "submitApprove": "อนุมัติผลต่าง",
+    "shiftNumber": "เลขที่กะ",
     "property": "โรงแรม",
     "cashier": "แคชเชียร์",
     "notes": "หมายเหตุ"
@@ -246,6 +275,7 @@
     "postJournals": "ลงบัญชีสมุดรายวัน",
     "journalsPosted": "ลงบัญชีสมุดรายวันแล้ว",
     "journalsEmpty": "ไม่มีรายการสมุดรายวันในวันนี้",
+    "journalsSource": "แหล่งที่มา",
     "tbTitle": "งบทดลอง",
     "tbAccount": "บัญชี",
     "tbDebit": "เดบิต",
@@ -277,6 +307,8 @@
     "createSuccess": "บันทึกอัตราแลกเปลี่ยนแล้ว",
     "updateSuccess": "อัปเดตอัตราแลกเปลี่ยนแล้ว",
     "empty": "ยังไม่มีอัตราแลกเปลี่ยน",
+    "pair": "คู่สกุลเงิน",
+    "inactive": "ไม่ใช้งาน",
     "deactivate": "ปิดใช้งาน",
     "activate": "เปิดใช้งาน"
   },
@@ -369,7 +401,9 @@
     "deactivate": "ปิดใช้งาน",
     "activated": "เปิดใช้งานโรงแรมคู่ค้าแล้ว",
     "deactivated": "ปิดใช้งานโรงแรมคู่ค้าแล้ว",
-    "updateFailed": "อัปเดตโรงแรมคู่ค้าไม่สำเร็จ"
+    "updateFailed": "อัปเดตโรงแรมคู่ค้าไม่สำเร็จ",
+    "statusActive": "ใช้งาน",
+    "statusInactive": "ไม่ใช้งาน"
   },
   "rates": {
     "title": "Rate",
@@ -425,7 +459,8 @@
     "competitorFailed": "บันทึกเรทคู่แข่งไม่สำเร็จ",
     "competitorEmpty": "ยังไม่มีเรทคู่แข่ง",
     "roomType": "ประเภทห้อง",
-    "allRoomTypes": "ทุกประเภทห้อง"
+    "allRoomTypes": "ทุกประเภทห้อง",
+    "paceCaption": "เพซการจองตามวันที่เข้าพัก"
   },
   "blocks": {
     "title": "Block / Allotment",
@@ -521,7 +556,9 @@
     "completeSuccess": "งานเสร็จสมบูรณ์",
     "scanResult": "ผลสแกน",
     "printSuccess": "พิมพ์สำเร็จ",
-    "encodeSuccess": "เข้ารหัสคีย์การ์ดสำเร็จ"
+    "encodeSuccess": "เข้ารหัสคีย์การ์ดสำเร็จ",
+    "connection": "การเชื่อมต่อ",
+    "deviceTests": "ทดสอบอุปกรณ์"
   },
   "folios": {
     "checkout": "เช็คเอาต์โฟลิโอ",
@@ -564,6 +601,7 @@
     "manualRef": "เลขอ้างอิง",
     "holdSubmit": "โฮลด์",
     "holdSuccess": "บันทึกการกันวงเงินแล้ว",
+    "status": "สถานะ",
     "empty": "ยังไม่มีโฮลด์บัตร",
     "increment": "เพิ่มวงเงินโฮลด์",
     "incrementAmount": "วงเงินโฮลด์ใหม่",
@@ -731,6 +769,7 @@
         "total": "รวม",
         "status": "สถานะ"
       },
+      "tableCaption": "รายการจอง พร้อมเลขยืนยัน แขก ห้อง วันเข้าพัก จำนวนคืน ยอดรวม และสถานะ",
       "roomPrefix": "ห้อง",
       "nightsLabel": "{count} คืน",
       "nightsLabelOne": "{count} คืน"
@@ -827,6 +866,7 @@
       "dayUseHint": "เช็คอินและเช็คเอาต์วันเดียวกัน Night Audit จะไม่ลงค่าห้อง",
       "step2Title": "เลือกห้อง",
       "noAvailableRooms": "ไม่มีห้องว่างในช่วงวันที่เลือก",
+      "noAvailableRoomsHint": "ลองเปลี่ยนวันที่หรือเลือกที่พักอื่น",
       "step3Title": "เลือกแขก",
       "searchExistingGuest": "ค้นหาแขกที่มีอยู่",
       "createNewGuest": "สร้างแขกใหม่",
@@ -967,7 +1007,8 @@
     "submitSuccess": "บันทึกว่าส่งแล้ว",
     "confirmSuccess": "ยืนยันแล้ว",
     "failSuccess": "บันทึกว่าไม่สำเร็จ",
-    "actionFailed": "อัปเดตรายงาน ตม.30 ไม่สำเร็จ"
+    "actionFailed": "อัปเดตรายงาน ตม.30 ไม่สำเร็จ",
+    "totalReports": "รายงานทั้งหมด"
   },
   "lostFound": {
     "title": "Lost & Found",
@@ -1202,7 +1243,8 @@
   "guests": {
     "list": {
       "title": "แขก",
-      "subtitle": "จัดการโปรไฟล์และประวัติแขก"
+      "subtitle": "จัดการโปรไฟล์และประวัติแขก",
+      "tableCaption": "ทะเบียนแขก พร้อมข้อมูลติดต่อ ระดับ VIP จำนวนการเข้าพัก รายได้ และสถานะ"
     },
     "detail": {}
   },

@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { propertiesAPI } from '@/lib/api/properties';
 import type { GuestMessage } from '@/lib/api/guest-messages';
 import { t } from '@/lib/i18n';
@@ -16,6 +22,9 @@ import {
   useGuestMessages,
   useMarkGuestMessageRead,
 } from '@/hooks/use-guest-messages';
+
+const CONTROL_CLASS =
+  'h-(--field-h) w-full rounded-md border border-input bg-surface-desk px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 function directionLabel(direction: GuestMessage['direction']): string {
   return direction === 'INBOUND'
@@ -57,37 +66,29 @@ export function MessagesClient() {
   }
 
   return (
-    <div className="max-w-4xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('messages.title')}
-        </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t('messages.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={t('messages.title')}
+        subtitle={t('messages.subtitle')}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('messages.compose')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
+      <Panel title={t('messages.compose')}>
+        <div className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="msg-guest">{t('messages.guestId')}</Label>
             <Input
               id="msg-guest"
               name="guestId"
-              className="mt-1"
               value={guestId}
               onChange={(event) => setGuestId(event.target.value)}
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="msg-direction">{t('messages.direction')}</Label>
             <select
               id="msg-direction"
               name="direction"
-              className="border border-rule-mist min-h-11 mt-1 px-3 rounded-md w-full"
+              className={CONTROL_CLASS}
               value={direction}
               onChange={(event) =>
                 setDirection(event.target.value as 'OUTBOUND' | 'INBOUND')
@@ -97,19 +98,18 @@ export function MessagesClient() {
               <option value="INBOUND">{t('messages.inbound')}</option>
             </select>
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="msg-content">{t('messages.content')}</Label>
-            <textarea
+            <Textarea
               id="msg-content"
               name="content"
-              className="border border-rule-mist min-h-24 mt-1 p-3 rounded-md w-full"
+              className="min-h-24"
               value={content}
               onChange={(event) => setContent(event.target.value)}
             />
           </div>
           <Button
             type="button"
-            className="min-h-11"
             disabled={
               !guestId.trim() || !content.trim() || createMessage.isPending
             }
@@ -117,55 +117,61 @@ export function MessagesClient() {
           >
             {t('messages.send')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('messages.list')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {isLoading ? <p>{t('common.loading')}</p> : null}
-          {!isLoading && rows.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              {t('messages.empty')}
-            </p>
-          ) : null}
-          <ul className="space-y-3">
-            {rows.map((row) => (
-              <li
-                key={row.id}
-                className="border border-rule-mist p-3 rounded-md"
-              >
-                <p className="font-semibold text-foreground">
+      <Panel title={t('messages.list')}>
+        {isLoading ? <LoadingSpinner message={t('common.loading')} /> : null}
+        {!isLoading && rows.length === 0 ? (
+          <EmptyState
+            icon={<MessageSquare className="h-10 w-10" />}
+            title={t('messages.empty')}
+          />
+        ) : null}
+        <ul className="space-y-3">
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className="border border-rule-mist p-4 rounded-lg space-y-2"
+            >
+              <div className="flex flex-wrap gap-2 items-center">
+                <p className="font-semibold text-ink-strong">
                   {row.guest
                     ? `${row.guest.firstName} ${row.guest.lastName}`
                     : row.guestId}
-                  {' · '}
-                  {directionLabel(row.direction)}
-                  {!row.readAt ? ` · ${t('messages.unread')}` : ''}
                 </p>
-                <p className="mt-1 text-foreground text-sm">{row.content}</p>
+                <StatusBadge
+                  tone={row.direction === 'INBOUND' ? 'info' : 'neutral'}
+                  label={directionLabel(row.direction)}
+                  size="sm"
+                />
                 {!row.readAt ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11 mt-2"
-                    onClick={() =>
-                      void markRead
-                        .mutateAsync(row.id)
-                        .then(() => toast.success(t('messages.readSuccess')))
-                        .catch(() => toast.error(t('messages.actionFailed')))
-                    }
-                  >
-                    {t('messages.markRead')}
-                  </Button>
+                  <StatusBadge
+                    tone="caution"
+                    label={t('messages.unread')}
+                    size="sm"
+                  />
                 ) : null}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+              </div>
+              <p className="text-ink-default text-sm">{row.content}</p>
+              {!row.readAt ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    void markRead
+                      .mutateAsync(row.id)
+                      .then(() => toast.success(t('messages.readSuccess')))
+                      .catch(() => toast.error(t('messages.actionFailed')))
+                  }
+                >
+                  {t('messages.markRead')}
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }

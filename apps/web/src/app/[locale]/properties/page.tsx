@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Building2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Building2 } from 'lucide-react';
 import { type Property } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { PropertyFormDialog } from '@/components/property-form-dialog';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import { useProperties } from '@/hooks/use-properties';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
+import { cn } from '@/lib/utils';
+import { PropertyCard } from './property-card';
 
 export default function PropertiesPage() {
   const router = useRouter();
@@ -33,12 +40,12 @@ export default function PropertiesPage() {
     setIsFormOpen(true);
   }
 
-  function handleDelete(id: string, name: string) {
+  function handleDelete(property: Property) {
     confirm(
       'Delete Property',
-      `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      `Are you sure you want to delete "${property.name}"? This action cannot be undone.`,
       async () => {
-        await deleteProperty(id);
+        await deleteProperty(property.id);
       },
     );
   }
@@ -48,25 +55,20 @@ export default function PropertiesPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-muted-foreground">Loading properties...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading properties..." />;
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
-        <h3 className="font-semibold text-red-800">Error loading properties</h3>
-        <p className="mt-2 text-red-600">{error}</p>
+      <Panel className={cn('border', statusToneSurface.critical)}>
+        <h2 className={cn('font-semibold text-lg', statusToneInk.critical)}>
+          Error loading properties
+        </h2>
+        <p className={cn('mt-2 text-sm', statusToneInk.critical)}>{error}</p>
         <Button onClick={loadProperties} className="mt-4">
           Try Again
         </Button>
-      </div>
+      </Panel>
     );
   }
 
@@ -74,125 +76,46 @@ export default function PropertiesPage() {
     <>
       {Dialog}
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-bold text-3xl text-pura-blue">Properties</h1>
-            <p className="mt-1 text-muted-foreground">
-              Manage your hotel properties and locations
-            </p>
-          </div>
-          <Button onClick={handleCreate}>
-            <Plus className="h-4 mr-2 w-4" />
-            Add Property
-          </Button>
-        </div>
-
-        {/* Properties Grid */}
-        {properties.length === 0 ? (
-          <div className="bg-surface-desk border border-rule-mist py-12 rounded-xl text-center">
-            <Building2 className="h-16 mx-auto text-muted-foreground/40 w-16" />
-            <h3 className="font-semibold mt-4 text-foreground text-lg">
-              No properties yet
-            </h3>
-            <p className="mt-2 text-muted-foreground">
-              Get started by adding your first property
-            </p>
-            <Button onClick={handleCreate} className="mt-6">
-              <Plus className="h-4 mr-2 w-4" />
+        <PageHeader
+          title="Properties"
+          subtitle="Manage your hotel properties and locations"
+          actions={
+            <Button onClick={handleCreate}>
+              <Plus className="h-4 w-4" />
               Add Property
             </Button>
-          </div>
+          }
+        />
+
+        {properties.length === 0 ? (
+          <Panel padding="none">
+            <EmptyState
+              icon={<Building2 className="h-12 w-12" />}
+              title="No properties yet"
+              description="Get started by adding your first property"
+              action={
+                <Button onClick={handleCreate}>
+                  <Plus className="h-4 w-4" />
+                  Add Property
+                </Button>
+              }
+            />
+          </Panel>
         ) : (
           <div className="gap-6 grid lg:grid-cols-3 md:grid-cols-2">
             {properties.map((property) => (
-              <div
+              <PropertyCard
                 key={property.id}
-                className="bg-surface-desk border border-rule-mist group hover:border-slate-300 overflow-hidden p-6 relative rounded-xl shadow-sm transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex gap-3 items-center">
-                      <div className="bg-pura-blue/10 p-3 rounded-lg">
-                        <Building2 className="h-6 text-pura-blue w-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-foreground text-lg">
-                          {property.name}
-                        </h3>
-                        <p className="text-muted-foreground text-xs">
-                          {property.currency} • {property.timezone}
-                        </p>
-                      </div>
-                    </div>
-
-                    {property.address && (
-                      <p className="line-clamp-2 mt-4 text-muted-foreground text-sm">
-                        {property.address}
-                      </p>
-                    )}
-
-                    <div className="flex gap-4 mt-4">
-                      {property._count && (
-                        <>
-                          <div className="text-center">
-                            <div className="font-bold text-2xl text-pura-blue">
-                              {property._count.rooms}
-                            </div>
-                            <div className="text-muted-foreground text-xs">
-                              Rooms
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-bold text-2xl text-pura-orange">
-                              {property._count.roomTypes}
-                            </div>
-                            <div className="text-muted-foreground text-xs">
-                              Types
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 mt-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => {
-                      router.push(`/properties/${property.id}`);
-                    }}
-                  >
-                    View Details
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-blue-50 hover:text-blue-600"
-                    onClick={() => handleEdit(property)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-red-50 hover:text-red-600"
-                    onClick={() => handleDelete(property.id, property.name)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+                property={property}
+                onView={(target) => router.push(`/properties/${target.id}`)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
       </div>
 
-      {/* Property Form Dialog */}
       <PropertyFormDialog
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}

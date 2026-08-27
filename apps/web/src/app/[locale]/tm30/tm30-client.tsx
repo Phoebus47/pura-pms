@@ -1,10 +1,16 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { FileWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatTile } from '@/components/shared/stat-tile';
 import { propertiesAPI } from '@/lib/api/properties';
-import { tm30ReportsAPI, type Tm30Report } from '@/lib/api/tm30-reports';
+import { tm30ReportsAPI } from '@/lib/api/tm30-reports';
+import { statusToneSurface } from '@/lib/design/status-tone';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
@@ -15,17 +21,7 @@ import {
   useSubmitTm30Report,
   useTm30Reports,
 } from '@/hooks/use-tm30-reports';
-
-function statusLabel(status: Tm30Report['status']): string {
-  if (status === 'PENDING') return t('tm30.statusPending');
-  if (status === 'SUBMITTED') return t('tm30.statusSubmitted');
-  if (status === 'CONFIRMED') return t('tm30.statusConfirmed');
-  return t('tm30.statusFailed');
-}
-
-function isOverdue(row: Tm30Report): boolean {
-  return row.status === 'PENDING' && new Date(row.dueAt).getTime() < Date.now();
-}
+import { isTm30Overdue, Tm30ReportCard } from './tm30-report-card';
 
 export function Tm30ReportsClient() {
   const userId = useAuthStore((state) => state.user?.id) ?? 'usr_mock_1';
@@ -39,7 +35,8 @@ export function Tm30ReportsClient() {
   const submit = useSubmitTm30Report();
   const confirm = useConfirmTm30Report();
   const fail = useFailTm30Report();
-  const overdueCount = reports.filter(isOverdue).length;
+  const overdueCount = reports.filter(isTm30Overdue).length;
+  const pendingCount = reports.filter((row) => row.status === 'PENDING').length;
 
   async function handleGenerate() {
     if (!propertyId) return;
@@ -77,116 +74,92 @@ export function Tm30ReportsClient() {
   }
 
   return (
-    <div className="max-w-4xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('tm30.title')}
-        </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t('tm30.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={t('tm30.title')}
+        subtitle={t('tm30.subtitle')}
+        actions={
+          <>
+            <Button
+              type="button"
+              disabled={!propertyId || generate.isPending}
+              onClick={() => void handleGenerate()}
+            >
+              {t('tm30.generate')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!propertyId}
+              onClick={() => void handleExport()}
+            >
+              {t('tm30.export')}
+            </Button>
+          </>
+        }
+      />
+
+      <div className="gap-4 grid grid-cols-2 sm:grid-cols-3">
+        <StatTile
+          label={t('tm30.overdue')}
+          value={overdueCount}
+          tone={overdueCount > 0 ? 'critical' : 'neutral'}
+        />
+        <StatTile
+          label={t('tm30.statusPending')}
+          value={pendingCount}
+          tone={pendingCount > 0 ? 'caution' : 'neutral'}
+        />
+        <StatTile label={t('tm30.totalReports')} value={reports.length} />
+      </div>
 
       {overdueCount > 0 ? (
-        <p className="font-medium text-amber-800 text-sm" role="status">
+        <p
+          className={`${statusToneSurface.critical} border font-medium p-4 rounded-xl text-ink-default text-sm`}
+          role="status"
+        >
           {t('tm30.overdueAlert').replace('{count}', String(overdueCount))}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          className="min-h-11"
-          disabled={!propertyId || generate.isPending}
-          onClick={() => void handleGenerate()}
-        >
-          {t('tm30.generate')}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-11"
-          disabled={!propertyId}
-          onClick={() => void handleExport()}
-        >
-          {t('tm30.export')}
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('tm30.list')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {isLoading ? <p>{t('common.loading')}</p> : null}
-          {!isLoading && reports.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t('tm30.empty')}</p>
-          ) : null}
-          <ul className="space-y-3">
-            {reports.map((row) => (
-              <li
-                key={row.id}
-                className="border border-rule-mist p-3 rounded-md"
-              >
-                <p className="font-semibold text-foreground">
-                  {row.fullName} · {t('tm30.room')} {row.roomNumber}
-                  {isOverdue(row) ? ` · ${t('tm30.overdue')}` : ''}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {row.nationality} · {row.passportNumber} ·{' '}
-                  {statusLabel(row.status)}
-                </p>
-                {row.status === 'PENDING' ? (
-                  <Button
-                    type="button"
-                    className="min-h-11 mt-2"
-                    onClick={() =>
-                      void submit
-                        .mutateAsync({ id: row.id, submittedBy: userId })
-                        .then(() => toast.success(t('tm30.submitSuccess')))
-                        .catch(() => toast.error(t('tm30.actionFailed')))
-                    }
-                  >
-                    {t('tm30.submit')}
-                  </Button>
-                ) : null}
-                {row.status === 'SUBMITTED' ? (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Button
-                      type="button"
-                      className="min-h-11"
-                      onClick={() =>
-                        void confirm
-                          .mutateAsync(row.id)
-                          .then(() => toast.success(t('tm30.confirmSuccess')))
-                          .catch(() => toast.error(t('tm30.actionFailed')))
-                      }
-                    >
-                      {t('tm30.confirm')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="min-h-11"
-                      onClick={() =>
-                        void fail
-                          .mutateAsync({
-                            id: row.id,
-                            failureReason: t('tm30.defaultFailReason'),
-                          })
-                          .then(() => toast.success(t('tm30.failSuccess')))
-                          .catch(() => toast.error(t('tm30.actionFailed')))
-                      }
-                    >
-                      {t('tm30.fail')}
-                    </Button>
-                  </div>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <Panel title={t('tm30.list')}>
+        {isLoading ? <LoadingSpinner message={t('common.loading')} /> : null}
+        {!isLoading && reports.length === 0 ? (
+          <EmptyState
+            icon={<FileWarning className="h-10 w-10" />}
+            title={t('tm30.empty')}
+          />
+        ) : null}
+        <ul className="space-y-3">
+          {reports.map((row) => (
+            <Tm30ReportCard
+              key={row.id}
+              report={row}
+              onSubmit={(id) =>
+                void submit
+                  .mutateAsync({ id, submittedBy: userId })
+                  .then(() => toast.success(t('tm30.submitSuccess')))
+                  .catch(() => toast.error(t('tm30.actionFailed')))
+              }
+              onConfirm={(id) =>
+                void confirm
+                  .mutateAsync(id)
+                  .then(() => toast.success(t('tm30.confirmSuccess')))
+                  .catch(() => toast.error(t('tm30.actionFailed')))
+              }
+              onFail={(id) =>
+                void fail
+                  .mutateAsync({
+                    id,
+                    failureReason: t('tm30.defaultFailReason'),
+                  })
+                  .then(() => toast.success(t('tm30.failSuccess')))
+                  .catch(() => toast.error(t('tm30.actionFailed')))
+              }
+            />
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }

@@ -67,7 +67,24 @@ describe('ArAccountsPage', () => {
   it('renders the AR title', async () => {
     renderPage();
     expect(
-      await screen.findByRole('heading', { name: t('ar.title') }),
+      await screen.findByRole('heading', { level: 1, name: t('ar.title') }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(t('ar.subtitle'))).toBeInTheDocument();
+  });
+
+  it('renders each AR section as a panel heading', async () => {
+    renderPage();
+    expect(
+      await screen.findByRole('heading', { name: t('ar.create') }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('ar.transfer') }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('ar.list') }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('ar.invoices') }),
     ).toBeInTheDocument();
   });
 

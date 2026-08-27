@@ -40,6 +40,37 @@ describe('TransactionCodesSettingsPage', () => {
       expect(screen.getByText('1000')).toBeInTheDocument();
     });
     expect(screen.getByText('Room Charge')).toBeInTheDocument();
+    expect(
+      screen.getByRole('table', { name: 'Transaction codes' }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows an empty state when no codes match', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    (
+      transactionCodesAPI.list as unknown as ReturnType<typeof vi.fn>
+    ).mockResolvedValue([
+      {
+        id: 'tc-1',
+        code: '1000',
+        description: 'Room Charge',
+        type: 'CHARGE',
+        group: 'ROOM',
+        hasTax: true,
+        hasService: true,
+        serviceRate: 10,
+        glAccountCode: '4000-01',
+      },
+    ]);
+
+    render(<TransactionCodesSettingsPage />);
+    await screen.findByText('1000');
+
+    await user.type(screen.getByLabelText('Search'), 'zzz');
+
+    expect(
+      screen.getByRole('heading', { name: 'No transaction codes found.' }),
+    ).toBeInTheDocument();
   });
 
   it('renders tax/service columns for edge values', async () => {

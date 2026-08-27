@@ -147,7 +147,7 @@ export function WakeUpCallPanel({ reservation }: WakeUpCallPanelProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11 text-red-600"
+                    className="min-h-11 text-status-critical-ink"
                     onClick={() =>
                       void cancelCall
                         .mutateAsync({ id: call.id, cancelledBy: userId })

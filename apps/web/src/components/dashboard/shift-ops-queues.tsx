@@ -16,7 +16,7 @@ function QueueCard({ title, metric, href, tone = 'default' }: QueueCardProps) {
     <Link
       href={href}
       className={cn(
-        'surface-desk motion-enter motion-enter-delay-1 block border border-border/80 p-4 transition-colors duration-200 hover:border-pura-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue',
+        'surface-desk motion-enter motion-enter-delay-1 block border border-border/80 p-4 transition-colors duration-200 hover:border-pura-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         tone === 'signal' && metric.remaining > 0 && 'border-pura-orange/40',
       )}
     >

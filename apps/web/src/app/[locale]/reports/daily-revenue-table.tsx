@@ -1,3 +1,8 @@
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/shared/data-table';
+import { EmptyState } from '@/components/shared/empty-state';
 import { t } from '@/lib/i18n';
 import type { RevenueBucket } from '@/lib/api/reports';
 
@@ -8,8 +13,40 @@ function formatMoney(value: number): string {
   });
 }
 
+type RevenueRow = readonly [string, RevenueBucket];
+
+function revenueColumns(): DataTableColumn<RevenueRow>[] {
+  return [
+    { id: 'group', header: t('reports.group'), cell: ([group]) => group },
+    {
+      id: 'net',
+      header: t('reports.net'),
+      numeric: true,
+      cell: ([, bucket]) => formatMoney(bucket.net),
+    },
+    {
+      id: 'service',
+      header: t('reports.service'),
+      numeric: true,
+      cell: ([, bucket]) => formatMoney(bucket.service),
+    },
+    {
+      id: 'tax',
+      header: t('reports.tax'),
+      numeric: true,
+      cell: ([, bucket]) => formatMoney(bucket.tax),
+    },
+    {
+      id: 'total',
+      header: t('reports.total'),
+      numeric: true,
+      cell: ([, bucket]) => formatMoney(bucket.total),
+    },
+  ];
+}
+
 interface DailyRevenueTableProps {
-  readonly groups: ReadonlyArray<readonly [string, RevenueBucket]>;
+  readonly groups: ReadonlyArray<RevenueRow>;
   readonly totalRevenue: number;
 }
 
@@ -18,65 +55,28 @@ export function DailyRevenueTable({
   totalRevenue,
 }: DailyRevenueTableProps) {
   if (groups.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.empty')}</p>
-    );
+    return <EmptyState title={t('reports.empty')} />;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="text-left text-sm w-full">
-        <caption className="sr-only">{t('reports.drrTitle')}</caption>
-        <thead>
-          <tr className="border-b">
-            <th scope="col" className="pr-4 py-2">
-              {t('reports.group')}
-            </th>
-            <th scope="col" className="pr-4 py-2 text-right">
-              {t('reports.net')}
-            </th>
-            <th scope="col" className="pr-4 py-2 text-right">
-              {t('reports.service')}
-            </th>
-            <th scope="col" className="pr-4 py-2 text-right">
-              {t('reports.tax')}
-            </th>
-            <th scope="col" className="py-2 text-right">
-              {t('reports.total')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {groups.map(([group, bucket]) => (
-            <tr key={group} className="border-b border-border">
-              <th scope="row" className="font-medium pr-4 py-2">
-                {group}
-              </th>
-              <td className="pr-4 py-2 text-right">
-                {formatMoney(bucket.net)}
-              </td>
-              <td className="pr-4 py-2 text-right">
-                {formatMoney(bucket.service)}
-              </td>
-              <td className="pr-4 py-2 text-right">
-                {formatMoney(bucket.tax)}
-              </td>
-              <td className="py-2 text-right">{formatMoney(bucket.total)}</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <th scope="row" className="pr-4 pt-3">
-              {t('reports.totalRevenue')}
-            </th>
-            <td colSpan={3} />
-            <td className="font-bold pt-3 text-right">
-              {formatMoney(totalRevenue)}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+    <div className="space-y-4">
+      <DataTable
+        caption={t('reports.drrTitle')}
+        columns={revenueColumns()}
+        rows={[...groups]}
+        rowKey={([group]) => group}
+        density="compact"
+        stickyHeader
+      />
+      {/* DataTable has no footer slot, so the report total sits below the table. */}
+      <div className="border-rule-strong border-t flex gap-4 items-baseline justify-between pt-3">
+        <span className="font-semibold text-ink-strong text-sm">
+          {t('reports.totalRevenue')}
+        </span>
+        <span className="font-bold tabular-nums text-ink-strong text-sm">
+          {formatMoney(totalRevenue)}
+        </span>
+      </div>
     </div>
   );
 }

@@ -30,7 +30,7 @@ function FieldWrapper({
       </label>
       {children}
       {error && (
-        <p className="mt-1 text-red-600 text-sm" role="alert">
+        <p className="mt-1 text-sm text-status-critical-ink" role="alert">
           {error}
         </p>
       )}
@@ -73,7 +73,7 @@ export function TextInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className={`border border-slate-300 focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full ${className}`}
+        className={`border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-4 py-3 rounded-xl transition-all w-full ${className}`}
       />
     </FieldWrapper>
   );
@@ -124,7 +124,7 @@ export function NumberInput({
         max={max}
         step={step}
         disabled={disabled}
-        className={`border border-slate-300 focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full disabled:bg-surface-inset disabled:text-muted-foreground disabled:cursor-not-allowed ${className}`}
+        className={`border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-4 py-3 rounded-xl transition-all w-full disabled:bg-surface-inset disabled:text-muted-foreground disabled:cursor-not-allowed ${className}`}
       />
     </FieldWrapper>
   );
@@ -165,7 +165,7 @@ export function Textarea({
         placeholder={placeholder}
         required={required}
         rows={rows}
-        className={`border border-slate-300 focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 resize-none rounded-xl transition-all w-full ${className}`}
+        className={`border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-4 py-3 resize-none rounded-xl transition-all w-full ${className}`}
       />
     </FieldWrapper>
   );
@@ -212,7 +212,7 @@ export function Select({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         disabled={disabled}
-        className={`appearance-none bg-surface-desk border border-slate-300 disabled:bg-surface-inset disabled:text-muted-foreground focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full ${className}`}
+        className={`appearance-none bg-surface-desk border border-input disabled:bg-surface-inset disabled:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-4 py-3 rounded-xl transition-all w-full ${className}`}
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (

@@ -112,7 +112,7 @@ export function PropertyFormDialog({
                 }
                 required
                 placeholder="e.g., Grand Hotel Bangkok"
-                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
+                className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
               />
             </div>
 
@@ -132,7 +132,7 @@ export function PropertyFormDialog({
                 }
                 placeholder="Full address"
                 rows={3}
-                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 resize-none rounded-lg transition-colors w-full"
+                className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 resize-none rounded-lg transition-colors w-full"
               />
             </div>
 
@@ -153,7 +153,7 @@ export function PropertyFormDialog({
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="+66 2 123 4567"
-                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
+                  className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
 
@@ -173,15 +173,15 @@ export function PropertyFormDialog({
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="contact@property.com"
-                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
+                  className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="bg-status-critical-tint border border-status-critical-line/30 p-4 rounded-xl">
+                <p className="text-sm text-status-critical-ink">{error}</p>
               </div>
             )}
           </div>

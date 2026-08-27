@@ -19,9 +19,9 @@ export function DetailPageError({
   const handleBack = onBack || (() => router.back());
 
   return (
-    <div className="bg-red-50 border border-red-200 p-6 rounded-lg">
-      <h3 className="font-semibold text-red-800">{title}</h3>
-      <p className="mt-2 text-red-600">{message}</p>
+    <div className="bg-status-critical-tint border border-status-critical-line/30 p-6 rounded-lg">
+      <h3 className="font-semibold text-status-critical-ink">{title}</h3>
+      <p className="mt-2 text-status-critical-ink">{message}</p>
       <Button onClick={handleBack} className="mt-4">
         Go Back
       </Button>

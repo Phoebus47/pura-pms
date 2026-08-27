@@ -46,7 +46,7 @@ export function StayPurposeFields({
             name="approvedBy"
             value={approvedBy}
             onChange={(event) => onApprovedByChange(event.target.value)}
-            className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+            className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
             required
           />
         </div>
@@ -62,7 +62,7 @@ export function StayPurposeFields({
             name="stayPurposeNote"
             value={stayPurposeNote}
             onChange={(event) => onStayPurposeNoteChange(event.target.value)}
-            className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+            className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
           />
         </div>
         {stayPurpose === 'HOUSE_USE' ? (
@@ -78,7 +78,7 @@ export function StayPurposeFields({
               name="department"
               value={department}
               onChange={(event) => onDepartmentChange(event.target.value)}
-              className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+              className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
               required
             />
           </div>
@@ -102,7 +102,7 @@ export function StayPurposeFields({
         onChange={(event) =>
           onStayPurposeChange(event.target.value as StayPurpose)
         }
-        className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+        className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
       >
         <option value="STANDARD">
           {t('reservations.stayPurpose.standard')}

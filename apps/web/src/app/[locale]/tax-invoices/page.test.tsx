@@ -61,11 +61,20 @@ describe('TaxInvoicesPage', () => {
   it('renders the tax invoice title', async () => {
     renderPage();
     expect(
-      await screen.findByRole('heading', { name: t('taxInvoice.title') }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: t('taxInvoice.title'),
+      }),
     ).toBeInTheDocument();
-    expect(screen.getByText(t('taxInvoice.subtitle'))).toHaveClass(
-      'text-muted-foreground',
-    );
+    expect(screen.getByText(t('taxInvoice.subtitle'))).toBeInTheDocument();
+  });
+
+  it('renders an empty state until invoices exist', async () => {
+    renderPage();
+    expect(
+      await screen.findByRole('heading', { name: t('taxInvoice.empty') }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('renders labeled issue form fields', async () => {

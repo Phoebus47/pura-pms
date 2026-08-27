@@ -28,7 +28,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-4 scrollbar-sidebar space-y-4">
         {navigationGroups.map((group) => (
           <div key={group.id} className="space-y-1">
-            <p className="font-semibold pb-1 px-4 text-[10px] text-white/45 tracking-wider uppercase">
+            <p className="font-semibold pb-1 px-4 text-2xs text-white/45 tracking-wider uppercase">
               {t(group.labelKey)}
             </p>
             {group.items.map((item) => {
@@ -63,7 +63,7 @@ export function Sidebar() {
         <ThemeToggle appearance="onDark" className="justify-center w-full" />
         <div>
           <p className="font-semibold text-white text-xs">PURA PMS</p>
-          <p className="mt-1 text-[10px] text-white/60">v1.0.0 • Enterprise</p>
+          <p className="mt-1 text-2xs text-white/60">v1.0.0 • Enterprise</p>
         </div>
       </div>
     </div>

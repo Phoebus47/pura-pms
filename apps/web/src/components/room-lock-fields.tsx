@@ -35,7 +35,7 @@ export function RoomLockFields({
           name="roomLockNote"
           value={roomLockNote}
           onChange={(event) => onRoomLockNoteChange(event.target.value)}
-          className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+          className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
           required
         />
       </div>
@@ -51,7 +51,7 @@ export function RoomLockFields({
         checked={isRoomLocked}
         disabled={disabled}
         onChange={(event) => onIsRoomLockedChange(event.target.checked)}
-        className="border-slate-300 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
+        className="border-input disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-4 mt-1 rounded text-pura-blue w-4"
       />
       <span>
         <span className="block font-semibold text-foreground text-sm">

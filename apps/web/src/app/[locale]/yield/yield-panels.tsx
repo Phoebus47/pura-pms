@@ -1,8 +1,15 @@
 'use client';
 
+import { LineChart, Sparkles } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/shared/data-table';
+import { EmptyState } from '@/components/shared/empty-state';
+import { StatusBadge } from '@/components/shared/status-badge';
 import {
   useApplyYieldRecommendation,
   useDismissYieldRecommendation,
@@ -14,7 +21,7 @@ import type {
   YieldRecommendReason,
 } from '@/lib/api/yield';
 
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 
 const REASON_KEYS: Record<YieldRecommendReason, string> = {
   HIGH_DEMAND: 'yield.reasonHighDemand',
@@ -23,47 +30,58 @@ const REASON_KEYS: Record<YieldRecommendReason, string> = {
 };
 
 export function PaceTable({ days }: { readonly days: YieldPaceDay[] }) {
-  if (days.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('yield.paceEmpty')}</p>
-    );
-  }
+  const columns: DataTableColumn<YieldPaceDay>[] = [
+    {
+      id: 'stayDate',
+      header: t('yield.stayDate'),
+      cell: (day) => day.stayDate,
+    },
+    {
+      id: 'occupancy',
+      header: t('yield.occupancy'),
+      numeric: true,
+      cell: (day) => `${day.occupied}/${day.capacity} (${day.occupancyPct}%)`,
+    },
+    {
+      id: 'lastYear',
+      header: t('yield.lastYear'),
+      numeric: true,
+      hideOnMobile: true,
+      cell: (day) => `${day.lastYearOccupancyPct}%`,
+    },
+    {
+      id: 'paceDelta',
+      header: t('yield.paceDelta'),
+      align: 'end',
+      cell: (day) => (
+        <span className="flex gap-2 items-center justify-end">
+          <span className="tabular-nums">{day.paceDeltaPct}%</span>
+          {day.alert ? (
+            <StatusBadge
+              tone="caution"
+              label={t('yield.paceAlert')}
+              size="sm"
+            />
+          ) : null}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="overflow-x-auto">
-      <table className="text-left text-sm w-full">
-        <thead>
-          <tr className="border-b border-rule-mist text-foreground">
-            <th scope="col" className="font-medium pr-3 py-2">
-              {t('yield.stayDate')}
-            </th>
-            <th scope="col" className="font-medium pr-3 py-2">
-              {t('yield.occupancy')}
-            </th>
-            <th scope="col" className="font-medium pr-3 py-2">
-              {t('yield.lastYear')}
-            </th>
-            <th scope="col" className="font-medium py-2">
-              {t('yield.paceDelta')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {days.map((day) => (
-            <tr key={day.stayDate} className="border-b border-slate-100">
-              <td className="pr-3 py-2">{day.stayDate}</td>
-              <td className="pr-3 py-2">
-                {day.occupied}/{day.capacity} ({day.occupancyPct}%)
-              </td>
-              <td className="pr-3 py-2">{day.lastYearOccupancyPct}%</td>
-              <td className="py-2">
-                {day.paceDeltaPct}%
-                {day.alert ? ` · ${t('yield.paceAlert')}` : ''}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption={t('yield.paceCaption')}
+      columns={columns}
+      rows={days}
+      rowKey={(day) => day.stayDate}
+      stickyHeader
+      emptyState={
+        <EmptyState
+          icon={<LineChart className="h-10 w-10" />}
+          title={t('yield.paceEmpty')}
+        />
+      }
+    />
   );
 }
 
@@ -74,12 +92,6 @@ export function RecommendationList({
 }) {
   const applyMutation = useApplyYieldRecommendation();
   const dismissMutation = useDismissYieldRecommendation();
-
-  if (recommendations.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('yield.recEmpty')}</p>
-    );
-  }
 
   async function apply(id: string) {
     try {
@@ -99,17 +111,26 @@ export function RecommendationList({
     }
   }
 
+  if (recommendations.length === 0) {
+    return (
+      <EmptyState
+        icon={<Sparkles className="h-10 w-10" />}
+        title={t('yield.recEmpty')}
+      />
+    );
+  }
+
   return (
     <ul className="space-y-3">
       {recommendations.map((row) => (
         <li
           key={row.id}
-          className="border border-rule-mist p-3 rounded-md space-y-2"
+          className="border border-rule-mist p-4 rounded-lg space-y-2"
         >
-          <p className="font-medium text-foreground">
+          <p className="font-semibold text-ink-strong">
             {row.rate?.code ?? row.rateId} · {row.stayDate}
           </p>
-          <p className="text-muted-foreground text-sm">
+          <p className="tabular-nums text-ink-subtle text-sm">
             {t(REASON_KEYS[row.reason])} · {row.currentAmount} →{' '}
             {row.recommendedAmount} ({row.occupancyPct}%)
           </p>

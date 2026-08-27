@@ -1,8 +1,21 @@
 import type { Shift, ShiftStatus } from '@/lib/api/shifts';
 import { t } from '@/lib/i18n';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/shared/data-table';
+import { EmptyState } from '@/components/shared/empty-state';
+import { Panel } from '@/components/shared/panel';
+import { StatTile } from '@/components/shared/stat-tile';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { statusToneInk, type StatusTone } from '@/lib/design/status-tone';
+
+const STATUS_TONE: Record<ShiftStatus, StatusTone> = {
+  OPEN: 'info',
+  CLOSED: 'caution',
+  BALANCED: 'positive',
+};
 
 export function statusLabel(status: ShiftStatus): string {
   if (status === 'OPEN') return t('shifts.openStatus');
@@ -14,44 +27,53 @@ export function formatMoney(value: number | null | undefined): string {
   return Number(value ?? 0).toLocaleString();
 }
 
+/** A non-zero drawer variance is the thing a manager must act on. */
+function varianceTone(variance: number | null | undefined): StatusTone {
+  return Number(variance ?? 0) === 0 ? 'positive' : 'critical';
+}
+
 interface CurrentShiftCardProps {
   readonly shift: Shift | null | undefined;
 }
 
 export function CurrentShiftCard({ shift }: CurrentShiftCardProps) {
+  if (!shift) {
+    return (
+      <Panel title={t('shifts.current')}>
+        <p className="text-ink-subtle text-sm">{t('shifts.noShiftHint')}</p>
+      </Panel>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('shifts.current')}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {shift ? (
-          <>
-            <div className="flex flex-wrap gap-4 items-center">
-              <Badge>{statusLabel(shift.status)}</Badge>
-              <p>
-                {t('shifts.openingCash')}: {formatMoney(shift.openingCash)}
-              </p>
-              <p>
-                {t('shifts.expectedCash')}: {formatMoney(shift.expectedCash)}
-              </p>
-              <p>
-                {t('shifts.cashier')}: {shift.userId}
-              </p>
-            </div>
-            {shift.status === 'OPEN' ? (
-              <p className="text-muted-foreground text-sm">
-                {t('shifts.nightAuditBlocked')}
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <p className="text-muted-foreground text-sm">
-            {t('shifts.noShiftHint')}
+    <Panel
+      title={t('shifts.current')}
+      actions={
+        <StatusBadge
+          tone={STATUS_TONE[shift.status]}
+          label={statusLabel(shift.status)}
+        />
+      }
+    >
+      <div className="space-y-4">
+        <div className="gap-4 grid sm:grid-cols-3">
+          <StatTile
+            label={t('shifts.openingCash')}
+            value={formatMoney(shift.openingCash)}
+          />
+          <StatTile
+            label={t('shifts.expectedCash')}
+            value={formatMoney(shift.expectedCash)}
+          />
+          <StatTile label={t('shifts.cashier')} value={shift.userId} />
+        </div>
+        {shift.status === 'OPEN' ? (
+          <p className="text-ink-subtle text-sm">
+            {t('shifts.nightAuditBlocked')}
           </p>
-        )}
-      </CardContent>
-    </Card>
+        ) : null}
+      </div>
+    </Panel>
   );
 }
 
@@ -66,45 +88,64 @@ export function TodayShiftList({
   onApprove,
   approvePending = false,
 }: TodayShiftListProps) {
+  const columns: DataTableColumn<Shift>[] = [
+    {
+      id: 'shiftNumber',
+      header: t('shifts.shiftNumber'),
+      cell: (shift) => shift.shiftNumber,
+    },
+    {
+      id: 'status',
+      header: t('shifts.status'),
+      cell: (shift) => (
+        <StatusBadge
+          tone={STATUS_TONE[shift.status]}
+          label={statusLabel(shift.status)}
+          size="sm"
+        />
+      ),
+    },
+    {
+      id: 'variance',
+      header: t('shifts.variance'),
+      numeric: true,
+      cell: (shift) => (
+        <span className={statusToneInk[varianceTone(shift.cashVariance)]}>
+          {formatMoney(shift.cashVariance)}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('common.actions'),
+      cell: (shift) =>
+        shift.status === 'CLOSED' && onApprove ? (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => onApprove(shift.id)}
+            disabled={approvePending}
+          >
+            {t('shifts.submitApprove')}
+          </Button>
+        ) : null,
+    },
+  ];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('shifts.today')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {shifts.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {t('shifts.noShiftHint')}
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {shifts.map((shift) => (
-              <li
-                key={shift.id}
-                className="border-b border-border flex flex-wrap gap-2 justify-between pb-3"
-              >
-                <span>{shift.shiftNumber}</span>
-                <span>
-                  {t('shifts.status')}: {statusLabel(shift.status)}
-                </span>
-                <span>
-                  {t('shifts.variance')}: {formatMoney(shift.cashVariance)}
-                </span>
-                {shift.status === 'CLOSED' && onApprove ? (
-                  <Button
-                    type="button"
-                    className="min-h-11"
-                    onClick={() => onApprove(shift.id)}
-                    disabled={approvePending}
-                  >
-                    {t('shifts.submitApprove')}
-                  </Button>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+    <Panel title={t('shifts.today')} padding="none">
+      {shifts.length === 0 ? (
+        <EmptyState title={t('shifts.noShiftHint')} />
+      ) : (
+        <DataTable
+          caption={t('shifts.today')}
+          columns={columns}
+          rows={shifts}
+          rowKey={(shift) => shift.id}
+          density="compact"
+          stickyHeader
+        />
+      )}
+    </Panel>
   );
 }

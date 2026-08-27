@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/shared/data-table';
+import { EmptyState } from '@/components/shared/empty-state';
+import { SectionHeading } from '@/components/shared/section-heading';
+import { statusToneInk } from '@/lib/design/status-tone';
 import { t } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import type { JournalEntry, TrialBalanceReport } from '@/lib/api/reports';
 
 interface TrialBalancePanelProps {
@@ -10,13 +18,44 @@ interface TrialBalancePanelProps {
   readonly loading: boolean;
 }
 
+interface DrillLine {
+  readonly id: string;
+  readonly source: string;
+  readonly debit: number;
+  readonly credit: number;
+}
+
+type TrialBalanceRow = TrialBalanceReport['rows'][number];
+
+function drillColumns(): DataTableColumn<DrillLine>[] {
+  return [
+    {
+      id: 'source',
+      header: t('reports.journalsSource'),
+      cell: (line) => line.source,
+    },
+    {
+      id: 'debit',
+      header: t('reports.tbDebit'),
+      numeric: true,
+      cell: (line) => line.debit.toFixed(2),
+    },
+    {
+      id: 'credit',
+      header: t('reports.tbCredit'),
+      numeric: true,
+      cell: (line) => line.credit.toFixed(2),
+    },
+  ];
+}
+
 export function TrialBalancePanel({
   report,
   journals,
   loading,
 }: TrialBalancePanelProps) {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
-  const drillLines = journals.flatMap((entry) =>
+  const drillLines: DrillLine[] = journals.flatMap((entry) =>
     entry.lines
       .filter((line) => line.account?.code === selectedCode)
       .map((line) => ({
@@ -28,74 +67,91 @@ export function TrialBalancePanel({
   );
 
   if (loading) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.loading')}</p>
-    );
+    return <p className="text-ink-subtle text-sm">{t('reports.loading')}</p>;
   }
   if (!report || report.rows.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.tbEmpty')}</p>
-    );
+    return <EmptyState title={t('reports.tbEmpty')} />;
   }
+
+  const columns: DataTableColumn<TrialBalanceRow>[] = [
+    {
+      id: 'account',
+      header: t('reports.tbAccount'),
+      cell: (row) => (
+        <button
+          type="button"
+          className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring min-h-11 rounded-md text-left underline"
+          onClick={() => setSelectedCode(row.accountCode)}
+        >
+          {row.accountCode} {row.accountName}
+        </button>
+      ),
+    },
+    {
+      id: 'debit',
+      header: t('reports.tbDebit'),
+      numeric: true,
+      cell: (row) => row.debit.toFixed(2),
+    },
+    {
+      id: 'credit',
+      header: t('reports.tbCredit'),
+      numeric: true,
+      cell: (row) => row.credit.toFixed(2),
+    },
+  ];
 
   return (
     <div className="space-y-4">
-      <table className="text-left text-sm w-full">
-        <caption className="sr-only">{t('reports.tbTitle')}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{t('reports.tbAccount')}</th>
-            <th scope="col" className="text-right">
+      <DataTable
+        caption={t('reports.tbTitle')}
+        columns={columns}
+        rows={report.rows}
+        rowKey={(row) => row.accountCode}
+        density="compact"
+        stickyHeader
+      />
+      {/* DataTable has no footer slot, so the balance totals sit below the table. */}
+      <div className="border-rule-strong border-t flex flex-wrap gap-6 items-baseline pt-3 text-sm">
+        <p className="font-semibold text-ink-strong">{t('reports.total')}</p>
+        <dl className="flex flex-wrap gap-6 items-baseline ml-auto">
+          <div className="flex gap-2 items-baseline">
+            <dt className="font-semibold text-ink-strong">
               {t('reports.tbDebit')}
-            </th>
-            <th scope="col" className="text-right">
+            </dt>
+            <dd className={cn('font-bold tabular-nums', statusToneInk.info)}>
+              {report.totalDebit.toFixed(2)}
+            </dd>
+          </div>
+          <div className="flex gap-2 items-baseline">
+            <dt className="font-semibold text-ink-strong">
               {t('reports.tbCredit')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {report.rows.map((row) => (
-            <tr key={row.accountCode}>
-              <td>
-                <button
-                  type="button"
-                  className="min-h-11 text-left underline"
-                  onClick={() => setSelectedCode(row.accountCode)}
-                >
-                  {row.accountCode} {row.accountName}
-                </button>
-              </td>
-              <td className="text-right">{row.debit.toFixed(2)}</td>
-              <td className="text-right">{row.credit.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <th scope="row">{t('reports.total')}</th>
-            <td className="text-right">{report.totalDebit.toFixed(2)}</td>
-            <td className="text-right">{report.totalCredit.toFixed(2)}</td>
-          </tr>
-        </tfoot>
-      </table>
+            </dt>
+            <dd
+              className={cn('font-bold tabular-nums', statusToneInk.positive)}
+            >
+              {report.totalCredit.toFixed(2)}
+            </dd>
+          </div>
+        </dl>
+      </div>
       {selectedCode ? (
-        <div>
-          <h3 className="font-semibold text-sm">
-            {t('reports.tbDrilldown')}: {selectedCode}
-          </h3>
+        <div className="space-y-2">
+          <SectionHeading
+            title={`${t('reports.tbDrilldown')}: ${selectedCode}`}
+          />
           {drillLines.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-ink-subtle text-sm">
               {t('reports.journalsEmpty')}
             </p>
           ) : (
-            <ul className="mt-2 space-y-1 text-sm">
-              {drillLines.map((line) => (
-                <li key={line.id}>
-                  {line.source} · {line.debit.toFixed(2)} /{' '}
-                  {line.credit.toFixed(2)}
-                </li>
-              ))}
-            </ul>
+            <DataTable
+              caption={t('reports.tbDrilldown')}
+              columns={drillColumns()}
+              rows={drillLines}
+              rowKey={(line) => line.id}
+              density="compact"
+            />
           )}
         </div>
       ) : null}

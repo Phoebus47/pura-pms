@@ -188,7 +188,7 @@ export function GuestFormDialog({
                   className={`flex items-center gap-1 px-4 py-2 rounded-xl border-2 transition-colors ${
                     formData.vipLevel === level
                       ? 'border-pura-orange bg-pura-orange/10'
-                      : 'border-rule-mist hover:border-slate-300'
+                      : 'border-rule-mist hover:border-rule-strong'
                   }`}
                 >
                   {level === 0 ? (

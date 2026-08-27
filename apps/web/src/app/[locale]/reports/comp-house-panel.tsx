@@ -3,6 +3,12 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { reservationsAPI, type Reservation } from '@/lib/api/reservations';
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/shared/data-table';
+import { EmptyState } from '@/components/shared/empty-state';
+import { StatTile } from '@/components/shared/stat-tile';
 import { StayPurposeBadge } from '@/components/stay-purpose-badge';
 import { t } from '@/lib/i18n';
 
@@ -41,6 +47,51 @@ function revenueLost(reservation: Reservation): number {
   );
 }
 
+function compHouseColumns(): DataTableColumn<Reservation>[] {
+  return [
+    {
+      id: 'room',
+      header: t('reports.compHouseRoom'),
+      cell: (reservation) => (
+        <div className="flex flex-wrap gap-1 items-center">
+          <span>{reservation.room?.number}</span>
+          <StayPurposeBadge stayPurpose={reservation.stayPurpose} size="xs" />
+        </div>
+      ),
+    },
+    {
+      id: 'guest',
+      header: t('reports.compHouseGuest'),
+      cell: (reservation) =>
+        reservation.guest
+          ? `${reservation.guest.firstName} ${reservation.guest.lastName}`
+          : '—',
+    },
+    {
+      id: 'nights',
+      header: t('reports.compHouseNights'),
+      numeric: true,
+      cell: (reservation) => billedNights(reservation),
+    },
+    {
+      id: 'authority',
+      header: t('reports.compHouseAuthority'),
+      cell: (reservation) => reservation.approvedBy || '—',
+    },
+    {
+      id: 'purpose',
+      header: t('reports.compHousePurpose'),
+      cell: (reservation) => reservation.stayPurposeNote || '—',
+    },
+    {
+      id: 'department',
+      header: t('reports.compHouseDepartment'),
+      hideOnMobile: true,
+      cell: (reservation) => reservation.department || '—',
+    },
+  ];
+}
+
 export function CompHousePanel({ propertyId, date }: CompHousePanelProps) {
   const { data: complimentary = [], isLoading: loadingComp } = useQuery({
     queryKey: ['reservations', 'comp', propertyId],
@@ -77,83 +128,32 @@ export function CompHousePanel({ propertyId, date }: CompHousePanelProps) {
   const lost = rows.reduce((sum, row) => sum + revenueLost(row), 0);
 
   if (loading) {
-    return (
-      <p className="text-muted-foreground text-sm">{t('reports.loading')}</p>
-    );
+    return <p className="text-ink-subtle text-sm">{t('reports.loading')}</p>;
   }
 
   if (rows.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        {t('reports.compHouseEmpty')}
-      </p>
-    );
+    return <EmptyState title={t('reports.compHouseEmpty')} />;
   }
 
   return (
     <div className="space-y-4">
-      <dl className="gap-4 grid sm:grid-cols-3">
-        <div>
-          <dt className="text-muted-foreground text-sm">
-            {t('reports.compHouseTotalComp')}
-          </dt>
-          <dd className="font-semibold text-foreground">{totalComp}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground text-sm">
-            {t('reports.compHouseTotalHouse')}
-          </dt>
-          <dd className="font-semibold text-foreground">{totalHouse}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground text-sm">
-            {t('reports.compHouseRevenueLost')}
-          </dt>
-          <dd className="font-semibold text-foreground">
-            ฿{lost.toLocaleString()}
-          </dd>
-        </div>
-      </dl>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-rule-mist text-muted-foreground">
-              <th className="pr-4 py-2">{t('reports.compHouseRoom')}</th>
-              <th className="pr-4 py-2">{t('reports.compHouseGuest')}</th>
-              <th className="pr-4 py-2">{t('reports.compHouseNights')}</th>
-              <th className="pr-4 py-2">{t('reports.compHouseAuthority')}</th>
-              <th className="pr-4 py-2">{t('reports.compHousePurpose')}</th>
-              <th className="py-2">{t('reports.compHouseDepartment')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((reservation) => (
-              <tr key={reservation.id} className="border-b border-slate-100">
-                <td className="pr-4 py-2">
-                  <div className="flex flex-wrap gap-1 items-center">
-                    <span>{reservation.room?.number}</span>
-                    <StayPurposeBadge
-                      stayPurpose={reservation.stayPurpose}
-                      size="xs"
-                    />
-                  </div>
-                </td>
-                <td className="pr-4 py-2">
-                  {reservation.guest
-                    ? `${reservation.guest.firstName} ${reservation.guest.lastName}`
-                    : '—'}
-                </td>
-                <td className="pr-4 py-2">{billedNights(reservation)}</td>
-                <td className="pr-4 py-2">{reservation.approvedBy || '—'}</td>
-                <td className="pr-4 py-2">
-                  {reservation.stayPurposeNote || '—'}
-                </td>
-                <td className="py-2">{reservation.department || '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="gap-4 grid sm:grid-cols-3">
+        <StatTile label={t('reports.compHouseTotalComp')} value={totalComp} />
+        <StatTile label={t('reports.compHouseTotalHouse')} value={totalHouse} />
+        <StatTile
+          label={t('reports.compHouseRevenueLost')}
+          value={`฿${lost.toLocaleString()}`}
+          tone="critical"
+        />
       </div>
+      <DataTable
+        caption={t('reports.compHouseTitle')}
+        columns={compHouseColumns()}
+        rows={rows}
+        rowKey={(reservation) => reservation.id}
+        density="compact"
+        stickyHeader
+      />
     </div>
   );
 }

@@ -93,7 +93,7 @@ export function RegistrationCardPanel({
       <CardContent className="space-y-4">
         {showWarning ? (
           <p
-            className="bg-amber-50 border border-amber-200 p-3 rounded-md text-amber-900 text-sm"
+            className="bg-status-caution-tint border border-status-caution-line/30 p-3 rounded-md text-sm text-status-caution-ink"
             role="status"
           >
             {t('reservations.regCard.unsignedWarning')}
@@ -189,7 +189,7 @@ export function RegistrationCardPanel({
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11 self-end text-red-600"
+                    className="min-h-11 self-end text-status-critical-ink"
                     onClick={() => void handleVoid(card.id)}
                   >
                     {t('reservations.regCard.void')}

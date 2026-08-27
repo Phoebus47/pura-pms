@@ -43,11 +43,17 @@ describe('ExchangeRatesPage', () => {
   it('renders the exchange rates title', async () => {
     renderPage();
     expect(
-      await screen.findByRole('heading', { name: t('fx.title') }),
+      await screen.findByRole('heading', { level: 1, name: t('fx.title') }),
     ).toBeInTheDocument();
-    expect(screen.getByText(t('fx.subtitle'))).toHaveClass(
-      'text-muted-foreground',
-    );
+    expect(screen.getByText(t('fx.subtitle'))).toBeInTheDocument();
+  });
+
+  it('renders an empty state until rates exist', async () => {
+    renderPage();
+    expect(
+      await screen.findByRole('heading', { name: t('fx.empty') }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('renders labeled create form fields', async () => {

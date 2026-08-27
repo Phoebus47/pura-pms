@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { propertiesAPI } from '@/lib/api/properties';
 import { roomTypesAPI } from '@/lib/api/room-types';
 import { t } from '@/lib/i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import {
   useYieldCompetitors,
   useYieldPace,
@@ -29,49 +30,29 @@ export function YieldClient() {
   const { data: competitors = [] } = useYieldCompetitors(propertyId);
 
   return (
-    <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('yield.title')}
-        </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t('yield.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader title={t('yield.title')} subtitle={t('yield.subtitle')} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('yield.paceTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PaceTable days={pace?.days ?? []} />
-        </CardContent>
-      </Card>
+      <Panel title={t('yield.paceTitle')} padding="none">
+        <PaceTable days={pace?.days ?? []} />
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('yield.recTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {propertyId ? <GenerateButton propertyId={propertyId} /> : null}
-          <RecommendationList recommendations={recommendations} />
-        </CardContent>
-      </Card>
+      <Panel
+        title={t('yield.recTitle')}
+        actions={propertyId ? <GenerateButton propertyId={propertyId} /> : null}
+      >
+        <RecommendationList recommendations={recommendations} />
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('yield.competitorTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {propertyId ? (
-            <CompetitorPanel
-              propertyId={propertyId}
-              roomTypes={roomTypes}
-              competitors={competitors}
-            />
-          ) : null}
-        </CardContent>
-      </Card>
+      <Panel title={t('yield.competitorTitle')}>
+        {propertyId ? (
+          <CompetitorPanel
+            propertyId={propertyId}
+            roomTypes={roomTypes}
+            competitors={competitors}
+          />
+        ) : null}
+      </Panel>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { StatusTone } from '@/lib/design/status-tone';
 import { StatusBadge } from './shared/status-badge';
 
 interface TaxExemptBadgeProps {
+  readonly size?: 'default' | 'xs';
   readonly taxExempt?: boolean | null;
   readonly className?: string;
 }
@@ -11,6 +12,7 @@ export const taxExemptTone: StatusTone = 'caution';
 
 export function TaxExemptBadge({
   taxExempt,
+  size = 'default',
   className = '',
 }: TaxExemptBadgeProps) {
   if (!taxExempt) {
@@ -21,6 +23,7 @@ export function TaxExemptBadge({
     <StatusBadge
       tone={taxExemptTone}
       label={t('reservations.taxExempt.badge')}
+      size={size === 'xs' ? 'sm' : 'md'}
       className={className}
     />
   );

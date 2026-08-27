@@ -49,7 +49,10 @@ describe('CompHousePanel', () => {
 
     renderPanel();
 
-    expect(await screen.findByText('201')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('table', { name: t('reports.compHouseTitle') }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('201')).toBeInTheDocument();
     expect(screen.getByText('Ann Lee')).toBeInTheDocument();
     expect(screen.getByText('GM')).toBeInTheDocument();
     expect(

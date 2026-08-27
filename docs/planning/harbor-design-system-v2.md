@@ -1,6 +1,6 @@
 # Harbor Design System v2 — Redesign Plan
 
-**Status:** Ready to implement
+**Status:** Waves 0–1 shipped · Wave 2 adoption in progress (PR #136)
 **Base branch:** `cursor/feat-harbor-ds-v2-6a5d` (on top of Shift Ops PR #135)
 **Scope:** `apps/web` only. No API/database changes. No new runtime dependencies.
 **Goal:** Make PURA feel like a tool an FO agent _wants_ to use for an 8-hour shift — predictable rhythm, readable density, one visual language.
@@ -46,7 +46,10 @@ v2 fixes the **middle tier**: a real semantic token layer plus a small set of la
 ### Don't
 
 - No Framer Motion / animation libraries.
-- No dark-mode rollout in v2 (tokens stay dark-ready; UI stays light).
+- ~~No dark-mode rollout in v2~~ — **changed mid-flight.** The night auditor works
+  23:00–07:00, the token layer already supported it, and the cost was a store
+  flag plus a boot script. The night theme ships in v2; see §12 for what that
+  required beyond swapping semantics.
 - No component tokens except where a component genuinely needs an override.
 - No renaming `--pura-blue` / `--pura-orange` (brand primitives stay).
 - Don't touch `login`, `portal`, `kiosk`, `mobile-check-in`, or `*print*` routes in v2 — guest-facing and print surfaces are a later wave.
@@ -58,6 +61,13 @@ v2 fixes the **middle tier**: a real semantic token layer plus a small set of la
 ### 4.1 Tier 1 — Primitives (raw values; never used in components)
 
 Keep the existing brand primitives, add a Harbor neutral ramp and a status ramp. All in `oklch` for perceptual evenness.
+
+> **Shipped values differ from the first draft below.** The initial ramp put the
+> page wash, panels, and inset wells within 1.045–1.058:1 of each other, which
+> is effectively invisible on a cheap panel under bright lobby light. The ramp
+> was re-spaced (and `--harbor-600` darkened so small uppercase labels on an
+> inset still clear AA) to reach: panel/wash **1.191**, wash/inset **1.079**,
+> `ink-subtle` on inset **4.59**. `globals.css` is the source of truth.
 
 ```css
 :root {
@@ -362,15 +372,40 @@ AC per package: `pnpm --filter web test -- <its routes>` green; `pnpm --filter w
 - [ ] `pnpm --filter web test` and `pnpm type-check` green; `pnpm --filter web build` green.
 - [ ] Lighthouse a11y unchanged or better on home, one list page, one detail page.
 
-## 12. Out of scope for v2
+## 12. Night theme (added to v2)
 
-- Dark-mode rollout (tokens remain dark-ready).
+Swapping Tier 2 got most of the way, but three things needed more than an alias flip:
+
+1. **Brand blue is unusable as ink on a dark desk.** `#1e4b8e` measures 1.4:1
+   against `--harbor-800`. Dark mode re-points `--action-primary` to
+   `oklch(0.68 0.12 262)`, which clears AA both as link text on the desk (4.7:1)
+   and as a filled button carrying dark ink (5.8:1).
+2. **`--ink-onbrand` has to invert.** Brand fills are light in dark mode, so text
+   on them becomes `--harbor-900` instead of near-white.
+3. **Status tints invert their roles.** A light tint on a dark panel flips the
+   contrast relationship, so `--status-*-100` becomes a dark tint and
+   `--status-*-700` a light ink. All four tones land at 7.8–8.5:1.
+
+Mechanics: `.dark` on `<html>`, driven by a persisted flag in `use-ui-store`
+(key `pura-ui`). `ThemeProvider` syncs it on change and an inline boot script in
+the locale layout applies it before first paint so the shell does not flash
+light. Form controls carry `scheme-light dark:scheme-dark` so native widgets
+follow. `viewport.colorScheme` advertises `light dark`.
+
+**Caveat:** a route still carrying raw palette utilities will look wrong in the
+night theme. That is why Wave 2 adoption is a hard prerequisite for calling dark
+mode done, and why the acceptance criteria ban raw palette utilities outright.
+
+## 13. Out of scope for v2
+
 - Guest-facing (`portal`, `kiosk`, `mobile-check-in`), `login`, and print routes.
 - Property Pulse / charts (no `chart-*` tokens are re-introduced until a charting decision exists).
 - Persisted per-user density preference.
 - Framer Motion (still requires an ADR).
+- Sidebar de-saturation (moving the nav slab to `harbor-900` so brand blue is
+  reserved for actions) — a deliberate follow-up, not a v2 item.
 
-## 13. References
+## 14. References
 
 - `docs/planning/shift-ops-ui-brief.md` — Shift Ops (v1) brief and phases A–D
 - `docs/guidelines/coding_standards.md` — i18n + design-token rules

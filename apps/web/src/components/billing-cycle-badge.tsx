@@ -4,6 +4,7 @@ import { isExtendedBillingCycle, type BillingCycle } from '@/lib/billing-cycle';
 import { StatusBadge } from './shared/status-badge';
 
 interface BillingCycleBadgeProps {
+  readonly size?: 'default' | 'xs';
   readonly billingCycle?: BillingCycle | null;
   readonly className?: string;
 }
@@ -16,6 +17,7 @@ export const billingCycleTone: Record<BillingCycle, StatusTone> = {
 
 export function BillingCycleBadge({
   billingCycle,
+  size = 'default',
   className = '',
 }: BillingCycleBadgeProps) {
   if (!isExtendedBillingCycle(billingCycle)) {
@@ -32,6 +34,7 @@ export function BillingCycleBadge({
           ? t('reservations.billingCycle.badgeWeekly')
           : t('reservations.billingCycle.badgeMonthly')
       }
+      size={size === 'xs' ? 'sm' : 'md'}
       className={className}
     />
   );

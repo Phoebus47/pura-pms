@@ -5,7 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { propertiesAPI } from '@/lib/api/properties';
 import { reportsAPI } from '@/lib/api/reports';
 import { t } from '@/lib/i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { Toolbar } from '@/components/shared/toolbar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DailyRevenueTable } from './daily-revenue-table';
@@ -65,97 +67,68 @@ export function ReportsClient() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-bold text-3xl text-pura-blue">
-            {t('reports.title')}
-          </h1>
-          <p className="mt-1 text-muted-foreground">{t('reports.subtitle')}</p>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="reportDate">{t('reports.businessDate')}</Label>
-          <Input
-            id="reportDate"
-            name="reportDate"
-            type="date"
-            className="min-h-11"
-            value={selectedDate}
-            onChange={(event) => setDate(event.target.value)}
-          />
-        </div>
-      </header>
+      <PageHeader title={t('reports.title')} subtitle={t('reports.subtitle')} />
 
-      {property ? (
-        <p className="text-muted-foreground text-sm">
-          {t('reports.property')}: {property.name}
-        </p>
-      ) : null}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('reports.flashTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DailyFlashPanel flash={flash} loading={flashLoading} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('reports.drrTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p className="text-muted-foreground text-sm">
-              {t('reports.loading')}
-            </p>
-          ) : (
-            <DailyRevenueTable
-              groups={groups}
-              totalRevenue={report?.totalRevenue ?? 0}
+      <Toolbar
+        filters={
+          <div className="space-y-2">
+            <Label htmlFor="reportDate">{t('reports.businessDate')}</Label>
+            <Input
+              id="reportDate"
+              name="reportDate"
+              type="date"
+              value={selectedDate}
+              onChange={(event) => setDate(event.target.value)}
             />
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        }
+        actions={
+          property ? (
+            <p className="text-ink-subtle text-sm">
+              {t('reports.property')}: {property.name}
+            </p>
+          ) : null
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('reports.journalsTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <JournalsPanel
-            propertyId={property?.id}
-            date={selectedDate}
-            journals={journals}
-            loading={journalsLoading}
-            onPosted={() => {
-              void refetch();
-            }}
+      <Panel title={t('reports.flashTitle')}>
+        <DailyFlashPanel flash={flash} loading={flashLoading} />
+      </Panel>
+
+      <Panel title={t('reports.drrTitle')}>
+        {isLoading ? (
+          <p className="text-ink-subtle text-sm">{t('reports.loading')}</p>
+        ) : (
+          <DailyRevenueTable
+            groups={groups}
+            totalRevenue={report?.totalRevenue ?? 0}
           />
-        </CardContent>
-      </Card>
+        )}
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('reports.tbTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TrialBalancePanel
-            report={trialBalance}
-            journals={journals}
-            loading={tbLoading}
-          />
-        </CardContent>
-      </Card>
+      <Panel title={t('reports.journalsTitle')}>
+        <JournalsPanel
+          propertyId={property?.id}
+          date={selectedDate}
+          journals={journals}
+          loading={journalsLoading}
+          onPosted={() => {
+            void refetch();
+          }}
+        />
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('reports.compHouseTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CompHousePanel propertyId={property?.id} date={selectedDate} />
-        </CardContent>
-      </Card>
+      <Panel title={t('reports.tbTitle')}>
+        <TrialBalancePanel
+          report={trialBalance}
+          journals={journals}
+          loading={tbLoading}
+        />
+      </Panel>
+
+      <Panel title={t('reports.compHouseTitle')}>
+        <CompHousePanel propertyId={property?.id} date={selectedDate} />
+      </Panel>
     </div>
   );
 }

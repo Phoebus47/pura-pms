@@ -169,7 +169,7 @@ export function VoidTransactionDialog({
             type="button"
             onClick={handleConfirm}
             disabled={disableConfirm}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive hover:opacity-90"
           >
             {submitting ? 'Voiding...' : 'Confirm Void'}
           </Button>

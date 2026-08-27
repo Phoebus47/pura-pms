@@ -110,7 +110,7 @@ export function PostPaymentDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent aria-describedby={undefined} className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle className="font-bold text-2xl text-emerald-700">
+          <DialogTitle className="font-bold text-2xl text-status-positive-ink">
             {t('folios.postPayment')}
           </DialogTitle>
         </DialogHeader>
@@ -201,7 +201,7 @@ export function PostPaymentDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-status-positive-ink hover:opacity-90"
             >
               {loading ? t('folios.posting') : t('folios.postPaymentSubmit')}
             </Button>

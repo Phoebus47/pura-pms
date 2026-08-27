@@ -5,9 +5,11 @@ import { useQuery } from '@tanstack/react-query';
 import { propertiesAPI } from '@/lib/api/properties';
 import { roomTypesAPI } from '@/lib/api/room-types';
 import { t } from '@/lib/i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import { useBlocks } from '@/hooks/use-blocks';
-import { BlockList, CreateBlockForm } from './block-panels';
+import { BlockList } from './block-list';
+import { CreateBlockForm } from './block-create-form';
 import { PickupPanel } from './block-pickup-panel';
 
 export function BlocksClient() {
@@ -25,49 +27,27 @@ export function BlocksClient() {
   const [selectedId, setSelectedId] = useState<string>();
 
   return (
-    <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('blocks.title')}
-        </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t('blocks.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader title={t('blocks.title')} subtitle={t('blocks.subtitle')} />
 
       {propertyId ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('blocks.create')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CreateBlockForm propertyId={propertyId} roomTypes={roomTypes} />
-          </CardContent>
-        </Card>
+        <Panel title={t('blocks.create')}>
+          <CreateBlockForm propertyId={propertyId} roomTypes={roomTypes} />
+        </Panel>
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('blocks.list')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <BlockList
-            blocks={blocks}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        </CardContent>
-      </Card>
+      <Panel title={t('blocks.list')}>
+        <BlockList
+          blocks={blocks}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+        />
+      </Panel>
 
       {selectedId ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('blocks.pickupTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PickupPanel blockId={selectedId} />
-          </CardContent>
-        </Card>
+        <Panel title={t('blocks.pickupTitle')}>
+          <PickupPanel blockId={selectedId} />
+        </Panel>
       ) : null}
     </div>
   );
