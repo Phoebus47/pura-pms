@@ -93,7 +93,7 @@ export function RegistrationCardPanel({
       <CardContent className="space-y-4">
         {showWarning ? (
           <p
-            className="bg-amber-50 border border-amber-200 p-3 rounded-md text-amber-900 text-sm"
+            className="bg-status-caution-tint border border-status-caution-line/30 p-3 rounded-md text-sm text-status-caution-ink"
             role="status"
           >
             {t('reservations.regCard.unsignedWarning')}
@@ -146,7 +146,7 @@ export function RegistrationCardPanel({
         </div>
 
         {cards.length === 0 && !isLoading ? (
-          <p className="text-slate-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             {t('reservations.regCard.empty')}
           </p>
         ) : null}
@@ -155,20 +155,20 @@ export function RegistrationCardPanel({
           {cards.map((card) => (
             <li
               key={card.id}
-              className="border border-slate-200 p-3 rounded-md text-sm"
+              className="border border-rule-mist p-3 rounded-md text-sm"
             >
-              <p className="font-semibold text-slate-800">
+              <p className="font-semibold text-foreground">
                 {t('reservations.regCard.version')} {card.version} ·{' '}
                 {statusLabel(card.status)}
               </p>
               {card.signedAt ? (
-                <p className="text-slate-600">
+                <p className="text-muted-foreground">
                   {t('reservations.regCard.signedAt')}:{' '}
                   {new Date(card.signedAt).toLocaleString()}
                 </p>
               ) : null}
               {card.signedByGuestName ? (
-                <p className="text-slate-600">
+                <p className="text-muted-foreground">
                   {t('reservations.regCard.signedBy')}: {card.signedByGuestName}
                 </p>
               ) : null}
@@ -189,7 +189,7 @@ export function RegistrationCardPanel({
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11 self-end text-red-600"
+                    className="min-h-11 self-end text-status-critical-ink"
                     onClick={() => void handleVoid(card.id)}
                   >
                     {t('reservations.regCard.void')}

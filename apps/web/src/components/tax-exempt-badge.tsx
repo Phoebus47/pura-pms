@@ -1,12 +1,18 @@
 import { t } from '@/lib/i18n';
+import type { StatusTone } from '@/lib/design/status-tone';
+import { StatusBadge } from './shared/status-badge';
 
 interface TaxExemptBadgeProps {
+  readonly size?: 'default' | 'xs';
   readonly taxExempt?: boolean | null;
   readonly className?: string;
 }
 
+export const taxExemptTone: StatusTone = 'caution';
+
 export function TaxExemptBadge({
   taxExempt,
+  size = 'default',
   className = '',
 }: TaxExemptBadgeProps) {
   if (!taxExempt) {
@@ -14,10 +20,11 @@ export function TaxExemptBadge({
   }
 
   return (
-    <span
-      className={`inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-900 text-xs ${className}`}
-    >
-      {t('reservations.taxExempt.badge')}
-    </span>
+    <StatusBadge
+      tone={taxExemptTone}
+      label={t('reservations.taxExempt.badge')}
+      size={size === 'xs' ? 'sm' : 'md'}
+      className={className}
+    />
   );
 }

@@ -7,7 +7,8 @@ import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import {
   useApproveShift,
   useCloseShift,
@@ -116,79 +117,59 @@ export function ShiftsClient() {
   }
 
   return (
-    <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-3xl text-pura-blue">
-          {t('shifts.title')}
-        </h1>
-        {property ? (
-          <p className="mt-1 text-slate-600 text-sm">
-            {t('shifts.property')}: {property.name}
-          </p>
-        ) : null}
-      </header>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader
+        title={t('shifts.title')}
+        subtitle={
+          property ? `${t('shifts.property')}: ${property.name}` : undefined
+        }
+      />
 
       <CurrentShiftCard shift={current} />
 
       {!current || current.status !== 'OPEN' ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('shifts.open')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <OpenShiftForm
-              openingCash={openingCash}
-              onOpeningCashChange={setOpeningCash}
-              onSubmit={handleOpen}
-              pending={openMutation.isPending}
-            />
-          </CardContent>
-        </Card>
+        <Panel title={t('shifts.open')}>
+          <OpenShiftForm
+            openingCash={openingCash}
+            onOpeningCashChange={setOpeningCash}
+            onSubmit={handleOpen}
+            pending={openMutation.isPending}
+          />
+        </Panel>
       ) : null}
 
       {current?.status === 'OPEN' ? (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('shifts.close')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CloseShiftForm
-                closingCash={closingCash}
-                varianceReason={varianceReason}
-                notes={closeNotes}
-                onClosingCashChange={setClosingCash}
-                onVarianceReasonChange={setVarianceReason}
-                onNotesChange={setCloseNotes}
-                onSubmit={handleClose}
-                pending={closeMutation.isPending}
-              />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('shifts.handover')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <HandoverShiftForm
-                toUserId={toUserId}
-                countedCash={countedCash}
-                notes={handoverNotes}
-                onToUserIdChange={setToUserId}
-                onCountedCashChange={setCountedCash}
-                onNotesChange={setHandoverNotes}
-                onSubmit={handleHandover}
-                pending={handoverMutation.isPending}
-              />
-            </CardContent>
-          </Card>
+          <Panel title={t('shifts.close')}>
+            <CloseShiftForm
+              closingCash={closingCash}
+              varianceReason={varianceReason}
+              notes={closeNotes}
+              onClosingCashChange={setClosingCash}
+              onVarianceReasonChange={setVarianceReason}
+              onNotesChange={setCloseNotes}
+              onSubmit={handleClose}
+              pending={closeMutation.isPending}
+            />
+          </Panel>
+          <Panel title={t('shifts.handover')}>
+            <HandoverShiftForm
+              toUserId={toUserId}
+              countedCash={countedCash}
+              notes={handoverNotes}
+              onToUserIdChange={setToUserId}
+              onCountedCashChange={setCountedCash}
+              onNotesChange={setHandoverNotes}
+              onSubmit={handleHandover}
+              pending={handoverMutation.isPending}
+            />
+          </Panel>
         </>
       ) : null}
 
       {current?.status === 'CLOSED' ? (
         <Button
           type="button"
-          className="min-h-11"
           onClick={() => handleApprove()}
           disabled={approveMutation.isPending}
         >

@@ -12,7 +12,7 @@ PURA web used a custom `t()` helper (`apps/web/src/lib/i18n.ts`) that always rea
 
 Constraints:
 
-- Next.js 16 App Router + Serwist PWA middleware
+- Next.js 16 App Router + Serwist PWA
 - Must not migrate every call site to `useTranslations` in one PR (Phase 7B covers Thai parity)
 - URLs should stay familiar for default English (`localePrefix: 'as-needed'`)
 
@@ -20,11 +20,11 @@ Constraints:
 
 1. **Install next-intl** and configure via `apps/web/src/i18n/request.ts` + Next plugin in `next.config.ts`.
 2. **Locale routing**: App routes live under `apps/web/src/app/[locale]/`. Supported locales: `en` (default), `th`.
-3. **Middleware**: `apps/web/src/middleware.ts` uses `createMiddleware(routing)` with `localePrefix: 'as-needed'` so `/dashboard` stays English and `/th/dashboard` serves Thai.
+3. **Proxy (Next.js 16)**: `apps/web/src/proxy.ts` uses `createMiddleware(routing)` from next-intl with `localePrefix: 'as-needed'` so `/dashboard` stays English and `/th/dashboard` serves Thai. (Formerly `middleware.ts`; renamed per Next.js 16 file convention.)
 4. **Navigation**: Export `Link`, `useRouter`, `usePathname`, `redirect` from `apps/web/src/i18n/navigation.ts`.
 5. **Bridge for legacy `t()`**: Keep `@/lib/i18n` exports. `I18nProvider` calls `setActiveMessages()` with the active locale's message tree from `NextIntlClientProvider`. Existing components continue using `t('nav.dashboard')` without edits.
-6. **Locale switcher**: `LocaleSwitcher` in sidebar footer and Settings uses `router.replace(pathname, { locale })`.
-7. **Persistence**: next-intl middleware sets locale cookie automatically on navigation.
+6. **Locale switcher**: `LocaleSwitcher` in sidebar footer and Settings uses `router.replace(pathname, { locale })`. Sidebar uses `appearance="onDark"` for contrast.
+7. **Persistence**: next-intl proxy sets locale cookie automatically on navigation.
 
 ## Rationale
 
@@ -50,8 +50,8 @@ Constraints:
 ### Mitigations
 
 - Document bridge in coding standards; Phase 7B fills Thai gaps on critical pages.
-- Co-located tests for middleware, locale switcher, and i18n bridge.
-- Serwist/static assets excluded via middleware matcher.
+- Co-located tests for proxy, locale switcher, and i18n bridge.
+- Serwist/static assets excluded via proxy matcher.
 
 ## Alternatives considered
 
@@ -63,7 +63,7 @@ Constraints:
 
 - **Files**:
   - `apps/web/src/i18n/routing.ts`, `request.ts`, `navigation.ts`
-  - `apps/web/src/middleware.ts`
+  - `apps/web/src/proxy.ts` (Next.js 16; replaces deprecated `middleware.ts`)
   - `apps/web/src/app/[locale]/layout.tsx`
   - `apps/web/src/lib/i18n.ts`, `i18n-provider.tsx`
   - `apps/web/src/components/locale-switcher.tsx`

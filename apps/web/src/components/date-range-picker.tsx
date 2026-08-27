@@ -49,12 +49,12 @@ export function DateRangePicker({
         <div>
           <label
             htmlFor="check-in-date"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             Check-in Date
           </label>
           <div className="relative">
-            <Calendar className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
+            <Calendar className="-translate-y-1/2 absolute h-5 left-3 text-muted-foreground top-1/2 w-5" />
             <input
               id="check-in-date"
               name="checkIn"
@@ -63,7 +63,7 @@ export function DateRangePicker({
               onChange={(e) => handleCheckInChange(e.target.value)}
               min={today}
               required
-              className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
+              className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring pl-10 pr-4 py-3 rounded-xl transition-all w-full"
             />
           </div>
         </div>
@@ -72,12 +72,12 @@ export function DateRangePicker({
         <div>
           <label
             htmlFor="check-out-date"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             Check-out Date
           </label>
           <div className="relative">
-            <Calendar className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
+            <Calendar className="-translate-y-1/2 absolute h-5 left-3 text-muted-foreground top-1/2 w-5" />
             <input
               id="check-out-date"
               name="checkOut"
@@ -88,7 +88,7 @@ export function DateRangePicker({
               required
               disabled={sameDayStay}
               aria-disabled={sameDayStay}
-              className="border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-xl transition-all w-full"
+              className="border border-input disabled:bg-surface-inset disabled:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring pl-10 pr-4 py-3 rounded-xl transition-all w-full"
             />
           </div>
         </div>
@@ -96,8 +96,10 @@ export function DateRangePicker({
 
       {/* Nights Display */}
       {sameDayStay && checkIn && checkOut ? (
-        <div className="bg-amber-50 border border-amber-200 flex items-center justify-center p-3 rounded-xl">
-          <p className="font-semibold text-amber-800 text-sm">Day use</p>
+        <div className="bg-status-caution-tint border border-status-caution-line/30 flex items-center justify-center p-3 rounded-xl">
+          <p className="font-semibold text-sm text-status-caution-ink">
+            Day use
+          </p>
         </div>
       ) : (
         nights > 0 && (

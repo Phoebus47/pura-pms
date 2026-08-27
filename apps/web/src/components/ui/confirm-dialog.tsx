@@ -70,19 +70,19 @@ export function useConfirmDialog() {
 
   const Dialog = dialog ? (
     <dialog
-      className="bg-black/50 border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
+      className="bg-ink-strong/50 border-0 fixed flex h-full inset-0 items-center justify-center w-full z-50"
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
       open
     >
-      <div className="bg-white border border-slate-200 max-w-md mx-4 p-6 rounded-lg shadow-lg w-full">
+      <div className="bg-popover border border-border max-w-md mx-4 p-(--panel-pad-lg) rounded-xl shadow-overlay text-popover-foreground w-full">
         <h3
           id="confirm-dialog-title"
-          className="font-semibold mb-2 text-lg text-slate-900"
+          className="font-semibold mb-2 text-ink-strong text-lg"
         >
           {dialog.title}
         </h3>
-        <p id="confirm-dialog-description" className="mb-6 text-slate-600">
+        <p id="confirm-dialog-description" className="mb-6 text-ink-subtle">
           {dialog.message}
         </p>
         <div className="flex gap-3 justify-end">

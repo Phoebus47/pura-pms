@@ -2,12 +2,19 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { propertiesAPI } from '@/lib/api/properties';
 import type { GuestFeedback } from '@/lib/api/guest-feedback';
+import type { StatusTone } from '@/lib/design/status-tone';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
@@ -17,10 +24,26 @@ import {
   useReviewGuestFeedback,
 } from '@/hooks/use-guest-feedback';
 
+const CONTROL_CLASS =
+  'h-(--field-h) w-full rounded-md border border-input bg-surface-desk px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
 function statusLabel(status: GuestFeedback['status']): string {
   if (status === 'OPEN') return t('feedback.statusOpen');
   if (status === 'REVIEWED') return t('feedback.statusReviewed');
   return t('feedback.statusArchived');
+}
+
+function statusTone(status: GuestFeedback['status']): StatusTone {
+  if (status === 'OPEN') return 'caution';
+  if (status === 'REVIEWED') return 'positive';
+  return 'neutral';
+}
+
+/** 1–2 reads as a service failure, 3 as a watch item, 4–5 as a win. */
+function scoreTone(score: number): StatusTone {
+  if (score <= 2) return 'critical';
+  if (score === 3) return 'caution';
+  return 'positive';
 }
 
 export function FeedbackClient() {
@@ -58,35 +81,29 @@ export function FeedbackClient() {
   }
 
   return (
-    <div className="max-w-4xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('feedback.title')}
-        </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('feedback.subtitle')}</p>
-      </header>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={t('feedback.title')}
+        subtitle={t('feedback.subtitle')}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('feedback.record')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
+      <Panel title={t('feedback.record')}>
+        <div className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="fb-guest">{t('feedback.guestId')}</Label>
             <Input
               id="fb-guest"
               name="guestId"
-              className="mt-1"
               value={guestId}
               onChange={(event) => setGuestId(event.target.value)}
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="fb-score">{t('feedback.score')}</Label>
             <select
               id="fb-score"
               name="score"
-              className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md w-full"
+              className={CONTROL_CLASS}
               value={score}
               onChange={(event) => setScore(event.target.value)}
             >
@@ -97,77 +114,81 @@ export function FeedbackClient() {
               ))}
             </select>
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="fb-comment">{t('feedback.comment')}</Label>
-            <textarea
+            <Textarea
               id="fb-comment"
               name="comment"
-              className="border border-slate-200 min-h-24 mt-1 p-3 rounded-md w-full"
+              className="min-h-24"
               value={comment}
               onChange={(event) => setComment(event.target.value)}
             />
           </div>
           <Button
             type="button"
-            className="min-h-11"
             disabled={!guestId.trim() || createFeedback.isPending}
             onClick={() => void handleCreate()}
           >
             {t('feedback.submit')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('feedback.list')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {isLoading ? <p>{t('common.loading')}</p> : null}
-          {!isLoading && rows.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('feedback.empty')}</p>
-          ) : null}
-          <ul className="space-y-3">
-            {rows.map((row) => (
-              <li
-                key={row.id}
-                className="border border-slate-200 p-3 rounded-md"
-              >
-                <p className="font-semibold text-slate-800">
+      <Panel title={t('feedback.list')}>
+        {isLoading ? <LoadingSpinner message={t('common.loading')} /> : null}
+        {!isLoading && rows.length === 0 ? (
+          <EmptyState
+            icon={<Star className="h-10 w-10" />}
+            title={t('feedback.empty')}
+          />
+        ) : null}
+        <ul className="space-y-3">
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className="border border-rule-mist p-4 rounded-lg space-y-2"
+            >
+              <div className="flex flex-wrap gap-2 items-center">
+                <p className="font-semibold text-ink-strong">
                   {row.guest
                     ? `${row.guest.firstName} ${row.guest.lastName}`
                     : row.guestId}
-                  {' · '}
-                  {t('feedback.scoreValue').replace(
+                </p>
+                <StatusBadge
+                  tone={scoreTone(row.score)}
+                  label={t('feedback.scoreValue').replace(
                     '{score}',
                     String(row.score),
                   )}
-                  {' · '}
-                  {statusLabel(row.status)}
-                </p>
-                {row.comment ? (
-                  <p className="mt-1 text-slate-700 text-sm">{row.comment}</p>
-                ) : null}
-                {row.status === 'OPEN' ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11 mt-2"
-                    onClick={() =>
-                      void reviewFeedback
-                        .mutateAsync({ id: row.id, reviewedBy: userId })
-                        .then(() => toast.success(t('feedback.reviewSuccess')))
-                        .catch(() => toast.error(t('feedback.actionFailed')))
-                    }
-                  >
-                    {t('feedback.markReviewed')}
-                  </Button>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+                  size="sm"
+                />
+                <StatusBadge
+                  tone={statusTone(row.status)}
+                  label={statusLabel(row.status)}
+                  size="sm"
+                />
+              </div>
+              {row.comment ? (
+                <p className="text-ink-default text-sm">{row.comment}</p>
+              ) : null}
+              {row.status === 'OPEN' ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    void reviewFeedback
+                      .mutateAsync({ id: row.id, reviewedBy: userId })
+                      .then(() => toast.success(t('feedback.reviewSuccess')))
+                      .catch(() => toast.error(t('feedback.actionFailed')))
+                  }
+                >
+                  {t('feedback.markReviewed')}
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }

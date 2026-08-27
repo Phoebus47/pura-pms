@@ -82,7 +82,7 @@ export function DigitalKeyPanel({ reservation }: DigitalKeyPanelProps) {
             <select
               id="digital-key-transport"
               name="transport"
-              className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md"
+              className="border border-rule-mist min-h-11 mt-1 px-3 rounded-md"
               value={transport}
               onChange={(event) =>
                 setTransport(event.target.value as DigitalKeyTransport)
@@ -103,16 +103,18 @@ export function DigitalKeyPanel({ reservation }: DigitalKeyPanelProps) {
         </div>
 
         {keys.length === 0 ? (
-          <p className="text-slate-600 text-sm">{t('digitalKey.empty')}</p>
+          <p className="text-muted-foreground text-sm">
+            {t('digitalKey.empty')}
+          </p>
         ) : null}
 
         <ul className="space-y-3">
           {keys.map((key) => (
             <li
               key={key.id}
-              className="border border-slate-200 p-3 rounded-md text-sm"
+              className="border border-rule-mist p-3 rounded-md text-sm"
             >
-              <p className="font-semibold text-slate-800">
+              <p className="font-semibold text-foreground">
                 {t('digitalKey.room')} {key.roomNumber} · {key.transport} ·{' '}
                 {statusLabel(key.status)}
               </p>
@@ -136,7 +138,7 @@ export function DigitalKeyPanel({ reservation }: DigitalKeyPanelProps) {
                     : t('digitalKey.copyToken')}
                 </Button>
               </div>
-              <p className="mt-2 text-slate-600">
+              <p className="mt-2 text-muted-foreground">
                 {t('digitalKey.expiresAt')}:{' '}
                 {new Date(key.expiresAt).toLocaleString()}
               </p>
@@ -145,7 +147,7 @@ export function DigitalKeyPanel({ reservation }: DigitalKeyPanelProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11 text-red-600"
+                    className="min-h-11 text-status-critical-ink"
                     onClick={() => void handleRevoke(key.id)}
                   >
                     {t('digitalKey.revoke')}

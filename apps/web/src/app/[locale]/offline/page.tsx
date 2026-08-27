@@ -8,7 +8,9 @@ export default function OfflinePage() {
       <h1 className="font-bold text-(--pura-blue) text-2xl">
         {t('pwa.offlineTitle')}
       </h1>
-      <p className="max-w-md text-slate-600 text-sm">{t('pwa.offlineBody')}</p>
+      <p className="max-w-md text-muted-foreground text-sm">
+        {t('pwa.offlineBody')}
+      </p>
       <Button asChild className="min-h-11">
         <Link href="/">{t('pwa.offlineHome')}</Link>
       </Button>

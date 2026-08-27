@@ -2,16 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  ArrowLeft,
-  Building2,
-  MapPin,
-  Phone,
-  Mail,
-  FileText,
-} from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, FileText } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { propertiesAPI, type Property } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatTile } from '@/components/shared/stat-tile';
+import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
+import { cn } from '@/lib/utils';
+
+function ContactRow({
+  icon,
+  label,
+  value,
+}: {
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly value: string;
+}) {
+  return (
+    <div className="flex gap-3">
+      <span className="mt-0.5 shrink-0 text-ink-subtle" aria-hidden="true">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="font-semibold text-ink-strong text-sm">{label}</div>
+        <div className="mt-1 text-ink-default text-sm">{value}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -40,142 +62,94 @@ export default function PropertyDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading property...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading property..." />;
   }
 
   if (error || !property) {
     return (
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 mr-2 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
-          <h3 className="font-semibold text-red-800">Error loading property</h3>
-          <p className="mt-2 text-red-600">{error || 'Property not found'}</p>
-        </div>
+        <Panel className={cn('border', statusToneSurface.critical)}>
+          <h2 className={cn('font-semibold text-lg', statusToneInk.critical)}>
+            Error loading property
+          </h2>
+          <p className={cn('mt-2 text-sm', statusToneInk.critical)}>
+            {error || 'Property not found'}
+          </p>
+        </Panel>
       </div>
     );
   }
 
+  const iconClass = 'h-5 w-5';
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex gap-4 items-center">
-        <Button variant="ghost" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 mr-2 w-4" />
-          Back
-        </Button>
-      </div>
+      <PageHeader
+        title={property.name}
+        subtitle={`${property.currency} • ${property.timezone}`}
+        onBack={() => router.back()}
+        actions={<Button>Edit Property</Button>}
+      />
 
-      {/* Property Info Card */}
-      <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
-        <div className="flex items-start justify-between">
-          <div className="flex gap-4 items-center">
-            <div className="bg-pura-blue/10 p-4 rounded-lg">
-              <Building2 className="h-10 text-pura-blue w-10" />
-            </div>
-            <div>
-              <h1 className="font-bold text-3xl text-pura-blue">
-                {property.name}
-              </h1>
-              <p className="mt-1 text-slate-600">
-                {property.currency} • {property.timezone}
-              </p>
-            </div>
-          </div>
-          <Button>Edit Property</Button>
-        </div>
-
-        {/* Details Grid */}
-        <div className="gap-6 grid md:grid-cols-2 mt-8">
+      <Panel padding="lg">
+        <div className="gap-6 grid md:grid-cols-2">
           {property.address && (
-            <div className="flex gap-3">
-              <MapPin className="h-5 mt-0.5 text-slate-400 w-5" />
-              <div>
-                <div className="font-semibold text-slate-700 text-sm">
-                  Address
-                </div>
-                <div className="mt-1 text-slate-600">{property.address}</div>
-              </div>
-            </div>
+            <ContactRow
+              icon={<MapPin className={iconClass} />}
+              label="Address"
+              value={property.address}
+            />
           )}
-
           {property.phone && (
-            <div className="flex gap-3">
-              <Phone className="h-5 mt-0.5 text-slate-400 w-5" />
-              <div>
-                <div className="font-semibold text-slate-700 text-sm">
-                  Phone
-                </div>
-                <div className="mt-1 text-slate-600">{property.phone}</div>
-              </div>
-            </div>
+            <ContactRow
+              icon={<Phone className={iconClass} />}
+              label="Phone"
+              value={property.phone}
+            />
           )}
-
           {property.email && (
-            <div className="flex gap-3">
-              <Mail className="h-5 mt-0.5 text-slate-400 w-5" />
-              <div>
-                <div className="font-semibold text-slate-700 text-sm">
-                  Email
-                </div>
-                <div className="mt-1 text-slate-600">{property.email}</div>
-              </div>
-            </div>
+            <ContactRow
+              icon={<Mail className={iconClass} />}
+              label="Email"
+              value={property.email}
+            />
           )}
-
           {property.taxId && (
-            <div className="flex gap-3">
-              <FileText className="h-5 mt-0.5 text-slate-400 w-5" />
-              <div>
-                <div className="font-semibold text-slate-700 text-sm">
-                  Tax ID
-                </div>
-                <div className="mt-1 text-slate-600">{property.taxId}</div>
-              </div>
-            </div>
+            <ContactRow
+              icon={<FileText className={iconClass} />}
+              label="Tax ID"
+              value={property.taxId}
+            />
           )}
         </div>
+      </Panel>
 
-        {/* Stats */}
-        {property._count && (
-          <div className="border-slate-200 border-t flex gap-8 mt-8 pt-6">
-            <div>
-              <div className="font-bold text-3xl text-pura-blue">
-                {property._count.rooms}
-              </div>
-              <div className="mt-1 text-slate-600 text-sm">Total Rooms</div>
-            </div>
-            <div>
-              <div className="font-bold text-3xl text-pura-orange">
-                {property._count.roomTypes}
-              </div>
-              <div className="mt-1 text-slate-600 text-sm">Room Types</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Rooms & Room Types sections would go here */}
-      <div className="gap-6 grid lg:grid-cols-2">
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold text-slate-800 text-xl">Rooms</h2>
-          <p className="mt-2 text-slate-600">Room management coming soon...</p>
+      {property._count && (
+        <div className="gap-4 grid grid-cols-2 md:grid-cols-4">
+          <StatTile label="Total Rooms" value={property._count.rooms} />
+          <StatTile
+            label="Room Types"
+            value={property._count.roomTypes}
+            tone="caution"
+          />
         </div>
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold text-slate-800 text-xl">Room Types</h2>
-          <p className="mt-2 text-slate-600">
+      )}
+
+      <div className="gap-6 grid lg:grid-cols-2">
+        <Panel title="Rooms" padding="lg">
+          <p className="text-ink-subtle text-sm">
+            Room management coming soon...
+          </p>
+        </Panel>
+        <Panel title="Room Types" padding="lg">
+          <p className="text-ink-subtle text-sm">
             Room type management coming soon...
           </p>
-        </div>
+        </Panel>
       </div>
     </div>
   );

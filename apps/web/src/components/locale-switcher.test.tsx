@@ -66,4 +66,19 @@ describe('LocaleSwitcher', () => {
 
     expect(mockReplace).toHaveBeenCalledWith('/settings', { locale: 'th' });
   });
+
+  it('keeps readable contrast on dark surfaces', () => {
+    render(<LocaleSwitcher appearance="onDark" />);
+
+    const active = screen.getByRole('button', {
+      name: 'English',
+      pressed: true,
+    });
+    const inactive = screen.getByRole('button', { name: 'Thai' });
+
+    expect(active).toHaveClass('bg-white', 'text-pura-blue');
+    expect(inactive).toHaveClass('text-white');
+    expect(inactive.className).toMatch(/hover:bg-white\/15/);
+    expect(inactive.className).toMatch(/hover:text-white/);
+  });
 });

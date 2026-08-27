@@ -19,12 +19,12 @@ export function MetadataCard({ createdAt, updatedAt }: MetadataCardProps) {
       <CardContent>
         <div className="gap-4 grid grid-cols-2 text-sm">
           <div>
-            <span className="text-slate-600">Created:</span>{' '}
-            <span className="font-medium text-slate-800">{createdDate}</span>
+            <span className="text-muted-foreground">Created:</span>{' '}
+            <span className="font-medium text-foreground">{createdDate}</span>
           </div>
           <div>
-            <span className="text-slate-600">Last Updated:</span>{' '}
-            <span className="font-medium text-slate-800">{updatedDate}</span>
+            <span className="text-muted-foreground">Last Updated:</span>{' '}
+            <span className="font-medium text-foreground">{updatedDate}</span>
           </div>
         </div>
       </CardContent>

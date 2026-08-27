@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 
 interface OpenShiftFormProps {
   readonly openingCash: string;
@@ -36,7 +35,6 @@ export function OpenShiftForm({
           min={0}
           step="0.01"
           inputMode="decimal"
-          className={fieldClass}
           value={openingCash}
           onChange={(event) => onOpeningCashChange(event.target.value)}
           required
@@ -87,7 +85,6 @@ export function CloseShiftForm({
           min={0}
           step="0.01"
           inputMode="decimal"
-          className={fieldClass}
           value={closingCash}
           onChange={(event) => onClosingCashChange(event.target.value)}
           required
@@ -98,7 +95,6 @@ export function CloseShiftForm({
         <Input
           id="varianceReason"
           name="varianceReason"
-          className={fieldClass}
           value={varianceReason}
           onChange={(event) => onVarianceReasonChange(event.target.value)}
         />
@@ -108,7 +104,6 @@ export function CloseShiftForm({
         <Input
           id="closeNotes"
           name="closeNotes"
-          className={fieldClass}
           value={notes}
           onChange={(event) => onNotesChange(event.target.value)}
         />
@@ -154,7 +149,6 @@ export function HandoverShiftForm({
         <Input
           id="toUserId"
           name="toUserId"
-          className={fieldClass}
           value={toUserId}
           onChange={(event) => onToUserIdChange(event.target.value)}
           required
@@ -169,7 +163,6 @@ export function HandoverShiftForm({
           min={0}
           step="0.01"
           inputMode="decimal"
-          className={fieldClass}
           value={countedCash}
           onChange={(event) => onCountedCashChange(event.target.value)}
           required
@@ -180,7 +173,6 @@ export function HandoverShiftForm({
         <Input
           id="handoverNotes"
           name="handoverNotes"
-          className={fieldClass}
           value={notes}
           onChange={(event) => onNotesChange(event.target.value)}
         />

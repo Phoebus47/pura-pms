@@ -1,29 +1,41 @@
 import { t } from '@/lib/i18n';
+import type { StatusTone } from '@/lib/design/status-tone';
 import { isExtendedBillingCycle, type BillingCycle } from '@/lib/billing-cycle';
+import { StatusBadge } from './shared/status-badge';
 
 interface BillingCycleBadgeProps {
+  readonly size?: 'default' | 'xs';
   readonly billingCycle?: BillingCycle | null;
   readonly className?: string;
 }
 
+export const billingCycleTone: Record<BillingCycle, StatusTone> = {
+  NIGHTLY: 'neutral',
+  WEEKLY: 'info',
+  MONTHLY: 'info',
+};
+
 export function BillingCycleBadge({
   billingCycle,
+  size = 'default',
   className = '',
 }: BillingCycleBadgeProps) {
   if (!isExtendedBillingCycle(billingCycle)) {
     return null;
   }
 
-  const label =
-    billingCycle === 'WEEKLY'
-      ? t('reservations.billingCycle.badgeWeekly')
-      : t('reservations.billingCycle.badgeMonthly');
+  const isWeekly = billingCycle === 'WEEKLY';
 
   return (
-    <span
-      className={`inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 font-semibold text-indigo-800 text-xs ${className}`}
-    >
-      {label}
-    </span>
+    <StatusBadge
+      tone={billingCycleTone[isWeekly ? 'WEEKLY' : 'MONTHLY']}
+      label={
+        isWeekly
+          ? t('reservations.billingCycle.badgeWeekly')
+          : t('reservations.billingCycle.badgeMonthly')
+      }
+      size={size === 'xs' ? 'sm' : 'md'}
+      className={className}
+    />
   );
 }

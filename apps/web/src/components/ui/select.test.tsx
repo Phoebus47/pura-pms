@@ -57,4 +57,40 @@ describe('Select', () => {
     expect(screen.getByText('Banana')).toBeInTheDocument();
     expect(screen.getByText('Orange')).toBeInTheDocument();
   });
+
+  it('renders the trigger as a field and the content as an overlay', async () => {
+    render(
+      <Select>
+        <SelectTrigger aria-label="options">
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent position="popper">
+          <SelectItem value="apple">Apple</SelectItem>
+        </SelectContent>
+      </Select>,
+    );
+
+    const trigger = screen.getByRole('combobox');
+    expect(trigger).toHaveClass(
+      'h-(--field-h)',
+      'rounded-md',
+      'bg-surface-desk',
+      'border-input',
+      'focus-visible:ring-ring',
+    );
+
+    await userEvent.click(trigger);
+
+    expect(screen.getByRole('listbox')).toHaveClass(
+      'shadow-overlay',
+      'bg-popover',
+      'text-popover-foreground',
+      'border-border',
+    );
+    expect(screen.getByRole('option', { name: 'Apple' })).toHaveClass(
+      'rounded-md',
+      'focus:bg-muted',
+      'focus:text-foreground',
+    );
+  });
 });

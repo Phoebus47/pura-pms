@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/shared/empty-state';
 import { EntitySelect } from '@/components/shared/entity-select';
 import { useOpenFolios } from '@/hooks/use-folios';
 import { arAccountOptionLabel, folioOptionLabel } from '@/lib/entity-labels';
@@ -15,8 +17,7 @@ import {
 } from '@/hooks/use-ar-accounts';
 import type { ArAccount } from '@/lib/api/ar-accounts';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 
 interface CreateFormProps {
   readonly propertyId: string;
@@ -56,7 +57,6 @@ export function CreateArAccountForm({ propertyId }: CreateFormProps) {
         <Input
           id="arCompanyName"
           name="companyName"
-          className={fieldClass}
           value={companyName}
           onChange={(event) => setCompanyName(event.target.value)}
           required
@@ -71,7 +71,6 @@ export function CreateArAccountForm({ propertyId }: CreateFormProps) {
           min={0}
           step="0.01"
           inputMode="decimal"
-          className={fieldClass}
           value={creditLimit}
           onChange={(event) => setCreditLimit(event.target.value)}
           required
@@ -84,7 +83,6 @@ export function CreateArAccountForm({ propertyId }: CreateFormProps) {
           name="paymentTerms"
           type="number"
           min={0}
-          className={fieldClass}
           value={paymentTerms}
           onChange={(event) => setPaymentTerms(event.target.value)}
           required
@@ -185,7 +183,7 @@ export function ArAccountList({
   onSelect,
 }: AccountListProps) {
   if (accounts.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('ar.empty')}</p>;
+    return <EmptyState title={t('ar.empty')} />;
   }
 
   return (
@@ -194,12 +192,19 @@ export function ArAccountList({
         <li key={account.id}>
           <button
             type="button"
-            className="border min-h-11 px-3 py-2 rounded-md text-left text-sm w-full"
+            className={cn(
+              'border border-rule-mist focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring min-h-11 px-3 py-2 rounded-md text-left text-sm w-full',
+              account.id === selectedId
+                ? 'bg-pura-blue/10 border-pura-blue/30 text-ink-strong'
+                : 'bg-surface-desk text-ink-default hover:bg-surface-sunken',
+            )}
             aria-pressed={account.id === selectedId}
             onClick={() => onSelect(account.id)}
           >
             {account.accountNumber} · {account.companyName} · {t('ar.balance')}{' '}
-            {Number(account.currentBalance).toFixed(2)}
+            <span className="tabular-nums">
+              {Number(account.currentBalance).toFixed(2)}
+            </span>
           </button>
         </li>
       ))}

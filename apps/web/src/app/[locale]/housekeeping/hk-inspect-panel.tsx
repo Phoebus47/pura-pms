@@ -9,7 +9,7 @@ import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { useHkChecklist, useInspectRoom } from '@/hooks/use-housekeeping';
 import type { HkBoardRoom, HkChecklistItem } from '@/lib/api/housekeeping';
 
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 const EMPTY_CHECKLIST: HkChecklistItem[] = [];
 
 export function HkInspectPanel({ room }: { readonly room: HkBoardRoom }) {
@@ -20,7 +20,7 @@ export function HkInspectPanel({ room }: { readonly room: HkBoardRoom }) {
 
   if (room.hkStage !== 'CLEAN') {
     return (
-      <p className="text-slate-600 text-sm">{t('housekeeping.inspectHint')}</p>
+      <p className="text-ink-subtle text-sm">{t('housekeeping.inspectHint')}</p>
     );
   }
 
@@ -42,7 +42,7 @@ export function HkInspectPanel({ room }: { readonly room: HkBoardRoom }) {
 
   return (
     <form
-      className="space-y-3"
+      className="space-y-4"
       onSubmit={(event) => {
         event.preventDefault();
         void submit();

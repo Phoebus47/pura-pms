@@ -148,7 +148,7 @@ export function MobileCheckInClient() {
         <h1 className="font-bold md:text-5xl text-(--pura-blue) text-4xl">
           {t('mobileCheckIn.title')}
         </h1>
-        <p className="mt-2 text-lg text-slate-600">
+        <p className="mt-2 text-lg text-muted-foreground">
           {t('mobileCheckIn.subtitle')}
         </p>
       </header>
@@ -202,7 +202,7 @@ export function MobileCheckInClient() {
                   className="h-12"
                   autoComplete="family-name"
                 />
-                <p className="text-slate-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {t('mobileCheckIn.lastNameHint')}
                 </p>
               </div>
@@ -233,14 +233,14 @@ export function MobileCheckInClient() {
               {reservation ? (
                 <section
                   aria-live="polite"
-                  className="bg-slate-50 border p-6 rounded-lg space-y-4"
+                  className="bg-surface-inset border p-6 rounded-lg space-y-4"
                 >
                   <h2 className="font-semibold text-(--pura-blue) text-xl">
                     {t('mobileCheckIn.reservationDetails')}
                   </h2>
                   <dl className="gap-3 grid sm:grid-cols-2 text-lg">
                     <div>
-                      <dt className="text-slate-500 text-sm">
+                      <dt className="text-muted-foreground text-sm">
                         {t('mobileCheckIn.guest')}
                       </dt>
                       <dd className="font-medium">
@@ -248,7 +248,7 @@ export function MobileCheckInClient() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500 text-sm">
+                      <dt className="text-muted-foreground text-sm">
                         {t('mobileCheckIn.room')}
                       </dt>
                       <dd className="font-medium">
@@ -257,7 +257,7 @@ export function MobileCheckInClient() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500 text-sm">
+                      <dt className="text-muted-foreground text-sm">
                         {t('mobileCheckIn.checkInDate')}
                       </dt>
                       <dd className="font-medium">
@@ -265,7 +265,7 @@ export function MobileCheckInClient() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500 text-sm">
+                      <dt className="text-muted-foreground text-sm">
                         {t('mobileCheckIn.checkOutDate')}
                       </dt>
                       <dd className="font-medium">
@@ -273,7 +273,7 @@ export function MobileCheckInClient() {
                       </dd>
                     </div>
                     <div className="sm:col-span-2">
-                      <dt className="text-slate-500 text-sm">
+                      <dt className="text-muted-foreground text-sm">
                         {t('mobileCheckIn.status')}
                       </dt>
                       <dd className="font-medium">
@@ -322,7 +322,7 @@ export function MobileCheckInClient() {
 
           {step === 'room-select' && reservation ? (
             <section aria-live="polite" className="space-y-4">
-              <p className="text-slate-600">
+              <p className="text-muted-foreground">
                 {t('mobileCheckIn.roomSelectSubtitle')}
               </p>
 
@@ -370,11 +370,11 @@ export function MobileCheckInClient() {
                   name: guestDisplayName(reservation),
                 })}
               </p>
-              <div className="bg-slate-50 border-2 border-dashed p-8 rounded-lg space-y-2">
+              <div className="bg-surface-inset border-2 border-dashed p-8 rounded-lg space-y-2">
                 <h2 className="font-semibold text-lg">
                   {t('mobileCheckIn.digitalKeyTitle')}
                 </h2>
-                <p className="text-slate-600">
+                <p className="text-muted-foreground">
                   {digitalKey?.message ?? t('mobileCheckIn.digitalKeyPending')}
                 </p>
               </div>

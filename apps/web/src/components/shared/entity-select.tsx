@@ -43,8 +43,8 @@ export function EntitySelect({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
-          'flex min-h-11 w-full rounded-md border border-slate-200',
-          'bg-white px-3 py-2 text-sm text-slate-800 scheme-light',
+          'flex min-h-11 w-full rounded-md border border-rule-mist',
+          'bg-surface-desk px-3 py-2 text-sm text-foreground scheme-light dark:scheme-dark',
           'focus-visible:outline-none focus-visible:ring-2',
           'focus-visible:ring-(--pura-blue)/20 focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',

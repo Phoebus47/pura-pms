@@ -31,7 +31,7 @@ describe('BottomNavigation', () => {
   it('should render primary navigation items including Billing', () => {
     render(<BottomNavigation />);
 
-    expect(screen.getByLabelText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByLabelText('Shift Ops')).toBeInTheDocument();
     expect(screen.getByLabelText('Reservations')).toBeInTheDocument();
     expect(screen.getByLabelText('Guests')).toBeInTheDocument();
     expect(screen.getByLabelText('Rooms')).toBeInTheDocument();
@@ -108,8 +108,8 @@ describe('BottomNavigation', () => {
   it('should have accessible labels for navigation items', () => {
     render(<BottomNavigation />);
 
-    const dashboardLink = screen.getByLabelText('Dashboard');
+    const dashboardLink = screen.getByLabelText('Shift Ops');
     expect(dashboardLink).toBeInTheDocument();
-    expect(dashboardLink).toHaveAttribute('aria-label', 'Dashboard');
+    expect(dashboardLink).toHaveAttribute('aria-label', 'Shift Ops');
   });
 });

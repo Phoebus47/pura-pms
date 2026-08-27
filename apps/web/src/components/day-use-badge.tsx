@@ -1,21 +1,22 @@
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
+import type { StatusTone } from '@/lib/design/status-tone';
+import { StatusBadge } from './shared/status-badge';
 
 interface DayUseBadgeProps {
   readonly className?: string;
   readonly size?: 'default' | 'xs';
 }
 
+export const dayUseTone: StatusTone = 'caution';
+
 export function DayUseBadge({ className, size = 'default' }: DayUseBadgeProps) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full font-semibold ring-1 ring-inset bg-amber-100 text-amber-800 ring-amber-600/20 shrink-0 whitespace-nowrap',
-        size === 'xs' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
-        className,
-      )}
-    >
-      {t('common.dayUse')}
-    </span>
+    <StatusBadge
+      tone={dayUseTone}
+      label={t('common.dayUse')}
+      size={size === 'xs' ? 'sm' : 'md'}
+      className={cn('shrink-0', className)}
+    />
   );
 }

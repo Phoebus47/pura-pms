@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { DayUseBadge } from './day-use-badge';
+import { DayUseBadge, dayUseTone } from './day-use-badge';
+import { statusToneClass } from '@/lib/design/status-tone';
 
 describe('DayUseBadge', () => {
   it('renders the day-use label', () => {
@@ -7,12 +8,19 @@ describe('DayUseBadge', () => {
     expect(screen.getByText('Day use')).toBeInTheDocument();
   });
 
+  it('renders with the caution tone', () => {
+    render(<DayUseBadge />);
+    expect(screen.getByText('Day use')).toHaveClass(
+      ...statusToneClass[dayUseTone].split(' '),
+    );
+  });
+
   it('applies the xs size classes', () => {
     render(<DayUseBadge size="xs" />);
     expect(screen.getByText('Day use')).toHaveClass(
-      'px-1.5',
+      'px-2',
       'py-0.5',
-      'text-[10px]',
+      'text-2xs',
     );
   });
 

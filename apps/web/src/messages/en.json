@@ -95,6 +95,13 @@
     "en": "English",
     "th": "Thai"
   },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "switchToLight": "Switch to light appearance",
+    "switchToDark": "Switch to dark appearance"
+  },
   "property": {
     "label": "Property",
     "select": "Select property",
@@ -105,7 +112,7 @@
     "documentLabel": "Printable document"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Shift Ops",
     "reservations": "Reservations",
     "guests": "Guests",
     "rooms": "Rooms",
@@ -178,7 +185,35 @@
     "shifts": "Shifts",
     "shiftsHint": "Open, close, and handover cashier shifts before night audit.",
     "reports": "Reports",
-    "reportsHint": "Daily Revenue Report, Daily Flash, journals, and Trial Balance."
+    "reportsHint": "Daily Revenue Report, Daily Flash, journals, and Trial Balance.",
+    "transactionCodesPage": {
+      "subtitle": "Manage the PMS chart of accounts mapping used for posting.",
+      "newCode": "New Code",
+      "refresh": "Refresh",
+      "searchPlaceholder": "Search by code or description...",
+      "caption": "Transaction codes",
+      "empty": "No transaction codes found.",
+      "loadFailed": "Failed to load transaction codes",
+      "saveFailed": "Failed to save transaction code",
+      "type": "Type",
+      "group": "Group",
+      "tax": "Tax",
+      "service": "Service",
+      "gl": "GL",
+      "yes": "Yes",
+      "no": "No",
+      "glAccount": "GL Account",
+      "codePlaceholder": "e.g. 1000",
+      "glPlaceholder": "e.g. 4000-01",
+      "descriptionPlaceholder": "e.g. Room Charge",
+      "applyVat": "Apply VAT",
+      "applyService": "Apply Service Charge",
+      "servicePercent": "Service %",
+      "editTitle": "Edit Transaction Code",
+      "newTitle": "New Transaction Code",
+      "saveChanges": "Save Changes",
+      "createCode": "Create Code"
+    }
   },
   "shifts": {
     "title": "Shifts",
@@ -210,6 +245,7 @@
     "submitClose": "Close shift",
     "submitHandover": "Handover",
     "submitApprove": "Approve variance",
+    "shiftNumber": "Shift number",
     "property": "Property",
     "cashier": "Cashier",
     "notes": "Notes"
@@ -239,6 +275,7 @@
     "postJournals": "Post journals",
     "journalsPosted": "Journals posted",
     "journalsEmpty": "No journal entries for this date",
+    "journalsSource": "Source",
     "tbTitle": "Trial Balance",
     "tbAccount": "Account",
     "tbDebit": "Debit",
@@ -270,6 +307,8 @@
     "createSuccess": "Exchange rate saved",
     "updateSuccess": "Exchange rate updated",
     "empty": "No exchange rates yet",
+    "pair": "Currency pair",
+    "inactive": "Inactive",
     "deactivate": "Deactivate",
     "activate": "Activate"
   },
@@ -362,7 +401,9 @@
     "deactivate": "Deactivate",
     "activated": "Partner hotel activated",
     "deactivated": "Partner hotel deactivated",
-    "updateFailed": "Failed to update partner hotel"
+    "updateFailed": "Failed to update partner hotel",
+    "statusActive": "Active",
+    "statusInactive": "Inactive"
   },
   "rates": {
     "title": "Rates",
@@ -418,7 +459,8 @@
     "competitorFailed": "Failed to save competitor rate",
     "competitorEmpty": "No competitor rates yet",
     "roomType": "Room type",
-    "allRoomTypes": "All room types"
+    "allRoomTypes": "All room types",
+    "paceCaption": "Booking pace by stay date"
   },
   "blocks": {
     "title": "Allotments & blocks",
@@ -514,7 +556,9 @@
     "completeSuccess": "Job completed",
     "scanResult": "Scan result",
     "printSuccess": "Print succeeded",
-    "encodeSuccess": "Key card encoded"
+    "encodeSuccess": "Key card encoded",
+    "connection": "Connection",
+    "deviceTests": "Device tests"
   },
   "folios": {
     "checkout": "Check out folio",
@@ -557,6 +601,7 @@
     "manualRef": "Manual reference",
     "holdSubmit": "Hold",
     "holdSuccess": "Pre-authorization held",
+    "status": "Status",
     "empty": "No card holds yet",
     "increment": "Increase hold",
     "incrementAmount": "New hold amount",
@@ -724,6 +769,7 @@
         "total": "Total",
         "status": "Status"
       },
+      "tableCaption": "Reservations with confirmation number, guest, room, stay dates, nights, total and status",
       "roomPrefix": "Room",
       "nightsLabel": "{count} nights",
       "nightsLabelOne": "{count} night"
@@ -820,6 +866,7 @@
       "dayUseHint": "Same-day check-in and check-out. Night Audit will not post a room charge.",
       "step2Title": "Select a Room",
       "noAvailableRooms": "No available rooms for selected dates",
+      "noAvailableRoomsHint": "Try different dates or another property.",
       "step3Title": "Select Guest",
       "searchExistingGuest": "Search Existing Guest",
       "createNewGuest": "Create New Guest",
@@ -960,7 +1007,8 @@
     "submitSuccess": "Marked submitted",
     "confirmSuccess": "Marked confirmed",
     "failSuccess": "Marked failed",
-    "actionFailed": "Could not update TM.30 report"
+    "actionFailed": "Could not update TM.30 report",
+    "totalReports": "Total reports"
   },
   "lostFound": {
     "title": "Lost & found",
@@ -1141,10 +1189,10 @@
     "welcomeBack": "Welcome, {name}!"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome back, {name}! Here's your property overview.",
+    "title": "Shift Ops",
+    "welcome": "Clear today's arrivals and departures before the lobby fills.",
     "adminName": "Admin",
-    "loading": "Loading dashboard...",
+    "loading": "Loading Shift Ops…",
     "loadFailed": "Failed to load dashboard data",
     "newReservation": "New Reservation",
     "recentReservations": "Recent Reservations",
@@ -1195,7 +1243,8 @@
   "guests": {
     "list": {
       "title": "Guests",
-      "subtitle": "Manage guest profiles and history"
+      "subtitle": "Manage guest profiles and history",
+      "tableCaption": "Guest directory with contact details, VIP level, stays, revenue and status"
     },
     "detail": {}
   },
@@ -1237,5 +1286,53 @@
     "requestSubmitting": "Sending...",
     "requestSuccess": "Request sent. Front desk will follow up shortly.",
     "requestFailed": "Could not send your request. Please try again."
+  },
+  "shiftOps": {
+    "title": "Shift Ops",
+    "nowStripLabel": "Today at the property",
+    "queuesLabel": "Work queues",
+    "queuesTitle": "Work queues",
+    "exceptionsLabel": "Exceptions",
+    "exceptionsTitle": "Needs attention",
+    "workListLabel": "Today's work list",
+    "workListTitle": "Today's work",
+    "workListEmpty": "No arrivals, departures, or unassigned stays need action right now.",
+    "loading": "Loading Shift Ops…",
+    "propertyFallback": "Property",
+    "businessDate": "Business date {date}",
+    "occupancy": "Occupancy",
+    "occupancyValue": "{rate}%",
+    "readyToSell": "Ready to sell",
+    "readyToSellValue": "{ready} / {total}",
+    "newReservation": "New reservation",
+    "openCalendar": "Calendar",
+    "arrivals": "Arrivals",
+    "departures": "Departures",
+    "unassigned": "Unassigned",
+    "remainingHint": "{remaining} remaining · {done} done",
+    "exceptionDirty": "Dirty rooms",
+    "exceptionVip": "VIP / locked",
+    "exceptionBalance": "Balance due",
+    "exceptionCount": "{count}",
+    "viewAll": "All reservations",
+    "kindArrival": "Arrival",
+    "kindDeparture": "Departure",
+    "kindUnassigned": "Unassigned",
+    "actionCheckIn": "Check-in",
+    "actionCheckOut": "Check-out",
+    "actionOpen": "Open",
+    "blockerUnassigned": "No room",
+    "blockerVip": "VIP",
+    "blockerDirty": "Dirty",
+    "blockerBalance": "Balance due",
+    "navGroupFrontOffice": "Front Office",
+    "navGroupRooms": "Rooms & HK",
+    "navGroupFinance": "Finance",
+    "navGroupGuest": "Guest",
+    "navGroupSettings": "Settings"
+  },
+  "header": {
+    "searchPlaceholder": "Search guests, confirmation, rooms…",
+    "searchLabel": "Search guests, reservations, and rooms"
   }
 }

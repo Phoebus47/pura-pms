@@ -92,11 +92,11 @@ describe('ShiftsPage', () => {
   it('renders the shifts title', async () => {
     renderPage();
     expect(
-      await screen.findByRole('heading', { name: t('shifts.title') }),
+      await screen.findByRole('heading', { level: 1, name: t('shifts.title') }),
     ).toBeInTheDocument();
     expect(
       await screen.findByText(`${t('shifts.property')}: ${property.name}`),
-    ).toHaveClass('text-slate-600');
+    ).toBeInTheDocument();
   });
 
   it('renders a labeled open form when there is no current shift', async () => {

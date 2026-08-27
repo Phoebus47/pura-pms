@@ -38,6 +38,26 @@ describe('useConfirmDialog', () => {
     expect(screen.getByText('Test Message')).toBeInTheDocument();
   });
 
+  it('should render the panel on overlay tokens', async () => {
+    const user = userEvent.setup();
+
+    render(<TestComponent />);
+    await user.click(screen.getByText('Open Dialog'));
+
+    const title = await screen.findByText('Test Title');
+    const panel = title.parentElement;
+    expect(panel).toHaveClass(
+      'bg-popover',
+      'text-popover-foreground',
+      'border-border',
+      'shadow-overlay',
+      'rounded-xl',
+      'p-(--panel-pad-lg)',
+    );
+    expect(title).toHaveClass('text-lg', 'font-semibold', 'text-ink-strong');
+    expect(screen.getByText('Test Message')).toHaveClass('text-ink-subtle');
+  });
+
   it('should call onConfirm when confirm button is clicked', async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();

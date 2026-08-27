@@ -1,35 +1,42 @@
 import { render, screen } from '@testing-library/react';
-import { RoomStatusBadge } from './room-status-badge';
+import { RoomStatusBadge, roomStatusTone } from './room-status-badge';
+import { statusToneClass } from '@/lib/design/status-tone';
 import type { RoomStatus } from '@/lib/api/rooms';
 
 describe('RoomStatusBadge', () => {
-  const statuses: RoomStatus[] = [
-    'VACANT_CLEAN',
-    'VACANT_DIRTY',
-    'OCCUPIED_CLEAN',
-    'OCCUPIED_DIRTY',
-    'OUT_OF_ORDER',
-    'OUT_OF_SERVICE',
-  ];
+  const labels: Record<RoomStatus, string> = {
+    VACANT_CLEAN: 'Vacant Clean',
+    VACANT_DIRTY: 'Vacant Dirty',
+    OCCUPIED_CLEAN: 'Occupied Clean',
+    OCCUPIED_DIRTY: 'Occupied Dirty',
+    OUT_OF_ORDER: 'Out of Order',
+    OUT_OF_SERVICE: 'Out of Service',
+  };
+
+  const statuses = Object.keys(labels) as RoomStatus[];
 
   it.each(statuses)('should render %s status correctly', (status) => {
     render(<RoomStatusBadge status={status} />);
 
-    const badge = screen.getByText(
-      status === 'VACANT_CLEAN'
-        ? 'Vacant Clean'
-        : status === 'VACANT_DIRTY'
-          ? 'Vacant Dirty'
-          : status === 'OCCUPIED_CLEAN'
-            ? 'Occupied Clean'
-            : status === 'OCCUPIED_DIRTY'
-              ? 'Occupied Dirty'
-              : status === 'OUT_OF_ORDER'
-                ? 'Out of Order'
-                : 'Out of Service',
-    );
+    expect(screen.getByText(labels[status])).toBeInTheDocument();
+  });
 
-    expect(badge).toBeInTheDocument();
+  it.each(statuses)('should apply the %s tone classes', (status) => {
+    render(<RoomStatusBadge status={status} />);
+
+    expect(screen.getByText(labels[status])).toHaveClass(
+      ...statusToneClass[roomStatusTone[status]].split(' '),
+    );
+  });
+
+  it('maps a sellable room to positive and an out-of-order room to critical', () => {
+    expect(roomStatusTone.VACANT_CLEAN).toBe('positive');
+    expect(roomStatusTone.OUT_OF_ORDER).toBe('critical');
+  });
+
+  it('maps every dirty room to caution', () => {
+    expect(roomStatusTone.VACANT_DIRTY).toBe('caution');
+    expect(roomStatusTone.OCCUPIED_DIRTY).toBe('caution');
   });
 
   it('should apply custom className', () => {

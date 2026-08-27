@@ -117,7 +117,7 @@ export function VoidTransactionDialog({
           <div className="space-y-2">
             <label
               htmlFor="void-reason"
-              className="font-medium text-slate-700 text-sm"
+              className="font-medium text-foreground text-sm"
             >
               Reason code
             </label>
@@ -142,7 +142,7 @@ export function VoidTransactionDialog({
           <div className="space-y-2">
             <label
               htmlFor="void-remark"
-              className="font-medium text-slate-700 text-sm"
+              className="font-medium text-foreground text-sm"
             >
               Remark (optional)
             </label>
@@ -169,7 +169,7 @@ export function VoidTransactionDialog({
             type="button"
             onClick={handleConfirm}
             disabled={disableConfirm}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive hover:opacity-90"
           >
             {submitting ? 'Voiding...' : 'Confirm Void'}
           </Button>

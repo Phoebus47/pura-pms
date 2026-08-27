@@ -2,11 +2,18 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { AlarmClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { Toolbar } from '@/components/shared/toolbar';
 import { propertiesAPI } from '@/lib/api/properties';
+import type { StatusTone } from '@/lib/design/status-tone';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
@@ -23,6 +30,13 @@ function statusLabel(status: WakeUpCall['status']): string {
   if (status === 'COMPLETED') return t('wakeUpCalls.statusCompleted');
   if (status === 'MISSED') return t('wakeUpCalls.statusMissed');
   return t('wakeUpCalls.statusCancelled');
+}
+
+function statusTone(status: WakeUpCall['status']): StatusTone {
+  if (status === 'SCHEDULED') return 'info';
+  if (status === 'COMPLETED') return 'positive';
+  if (status === 'MISSED') return 'critical';
+  return 'neutral';
 }
 
 function toDateInput(value: string | Date | undefined): string {
@@ -50,38 +64,38 @@ export function WakeUpCallsClient() {
   const cancelCall = useCancelWakeUpCall();
 
   return (
-    <div className="max-w-4xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('wakeUpCalls.title')}
-        </h1>
-        <p className="mt-1 text-slate-600 text-sm">
-          {t('wakeUpCalls.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={t('wakeUpCalls.title')}
+        subtitle={t('wakeUpCalls.subtitle')}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('wakeUpCalls.list')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="wake-up-date">
-              {t('wakeUpCalls.scheduledDate')}
-            </Label>
-            <Input
-              id="wake-up-date"
-              name="scheduledDate"
-              type="date"
-              className="max-w-xs mt-1"
-              value={effectiveDate}
-              onChange={(event) => setScheduledDate(event.target.value)}
-            />
-          </div>
+      <Panel title={t('wakeUpCalls.list')}>
+        <div className="space-y-4">
+          <Toolbar
+            filters={
+              <div className="space-y-2">
+                <Label htmlFor="wake-up-date">
+                  {t('wakeUpCalls.scheduledDate')}
+                </Label>
+                <Input
+                  id="wake-up-date"
+                  name="scheduledDate"
+                  type="date"
+                  className="max-w-xs"
+                  value={effectiveDate}
+                  onChange={(event) => setScheduledDate(event.target.value)}
+                />
+              </div>
+            }
+          />
 
-          {isLoading ? <p>{t('common.loading')}</p> : null}
+          {isLoading ? <LoadingSpinner message={t('common.loading')} /> : null}
           {!isLoading && calls.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('wakeUpCalls.empty')}</p>
+            <EmptyState
+              icon={<AlarmClock className="h-10 w-10" />}
+              title={t('wakeUpCalls.empty')}
+            />
           ) : null}
 
           <ul className="space-y-3">
@@ -93,22 +107,27 @@ export function WakeUpCallsClient() {
               return (
                 <li
                   key={call.id}
-                  className="border border-slate-200 p-3 rounded-md"
+                  className="border border-rule-mist p-4 rounded-lg space-y-2"
                 >
-                  <p className="font-semibold text-slate-800">
-                    {t('wakeUpCalls.room')} {call.room?.number ?? '—'} ·{' '}
-                    {guestName}
-                  </p>
-                  <p className="text-slate-600 text-sm">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <p className="font-semibold text-ink-strong">
+                      {t('wakeUpCalls.room')} {call.room?.number ?? '—'} ·{' '}
+                      {guestName}
+                    </p>
+                    <StatusBadge
+                      tone={statusTone(call.status)}
+                      label={statusLabel(call.status)}
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-ink-subtle text-sm">
                     {call.reservation?.confirmNumber} ·{' '}
-                    {new Date(call.scheduledAt).toLocaleString()} ·{' '}
-                    {statusLabel(call.status)}
+                    {new Date(call.scheduledAt).toLocaleString()}
                   </p>
                   {call.status === 'SCHEDULED' ? (
-                    <div className="flex flex-wrap gap-2 mt-3">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
-                        className="min-h-11"
                         onClick={() =>
                           void completeCall
                             .mutateAsync({ id: call.id, completedBy: userId })
@@ -125,7 +144,6 @@ export function WakeUpCallsClient() {
                       <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11"
                         onClick={() =>
                           void missCall
                             .mutateAsync({ id: call.id, missedBy: userId })
@@ -142,7 +160,7 @@ export function WakeUpCallsClient() {
                       <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11 text-red-600"
+                        className="text-status-critical-ink"
                         onClick={() =>
                           void cancelCall
                             .mutateAsync({ id: call.id, cancelledBy: userId })
@@ -162,8 +180,8 @@ export function WakeUpCallsClient() {
               );
             })}
           </ul>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
     </div>
   );
 }

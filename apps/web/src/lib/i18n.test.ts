@@ -14,13 +14,13 @@ describe('i18n bridge', () => {
   });
 
   it('returns English messages by default', () => {
-    expect(t('nav.dashboard')).toBe('Dashboard');
+    expect(t('nav.dashboard')).toBe('Shift Ops');
   });
 
   it('returns Thai messages when active locale messages are set', () => {
     setActiveMessages(th);
 
-    expect(t('nav.dashboard')).toBe('แดชบอร์ด');
+    expect(t('nav.dashboard')).toBe('Shift Ops');
   });
 
   it('falls back to the path when a key is missing', () => {
@@ -44,12 +44,16 @@ describe('i18n bridge', () => {
 
   it('provides Thai copy for critical front-office pages', () => {
     setActiveMessages(th);
-    expect(t('dashboard.title')).toBe('แดชบอร์ด');
+    expect(t('dashboard.title')).toBe('Shift Ops');
     expect(t('reservations.list.title')).toBe('การจอง');
     expect(t('guests.list.title')).toBe('แขก');
-    expect(t('billing.title')).toBe('บิลลิ่ง');
+    expect(t('billing.title')).toBe('โฟลิโอ');
     expect(t('housekeeping.title')).toBe('ตรวจห้องแม่บ้าน');
-    expect(t('nightAudit.title')).toBe('ตรวจรอบคืน');
+    expect(t('nightAudit.title')).toBe('Night Audit');
+    expect(t('nav.lostFound')).toBe('Lost & Found');
+    expect(t('nav.rates')).toBe('Rate');
+    expect(t('nav.yield')).toBe('Yield');
+    expect(t('nav.cardPreauths')).toBe('Pre-auth');
     expect(t('reservations.status.CHECKED_IN')).toBe('เช็คอินแล้ว');
   });
 });

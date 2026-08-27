@@ -1,3 +1,4 @@
+import { StatTile } from '@/components/shared/stat-tile';
 import { t } from '@/lib/i18n';
 import type { DailyFlashReport } from '@/lib/api/reports';
 
@@ -15,7 +16,7 @@ interface DailyFlashPanelProps {
 
 export function DailyFlashPanel({ flash, loading }: DailyFlashPanelProps) {
   if (loading) {
-    return <p className="text-slate-600 text-sm">{t('reports.loading')}</p>;
+    return <p className="text-ink-subtle text-sm">{t('reports.loading')}</p>;
   }
 
   const items = [
@@ -41,13 +42,10 @@ export function DailyFlashPanel({ flash, loading }: DailyFlashPanelProps) {
   ];
 
   return (
-    <dl className="gap-4 grid sm:grid-cols-2">
+    <div className="gap-4 grid lg:grid-cols-4 sm:grid-cols-2">
       {items.map((item) => (
-        <div key={item.label}>
-          <dt className="text-slate-600 text-sm">{item.label}</dt>
-          <dd className="font-semibold text-lg">{item.value}</dd>
-        </div>
+        <StatTile key={item.label} label={item.label} value={item.value} />
       ))}
-    </dl>
+    </div>
   );
 }

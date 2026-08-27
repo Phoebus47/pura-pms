@@ -346,6 +346,11 @@ describe('navigation', () => {
   describe('moreBottomNavItems', () => {
     it('should keep extra items in the overflow menu', () => {
       expect(moreBottomNavItems.map((item) => item.name)).toEqual([
+        'Housekeeping',
+        'Hardware',
+        'Rates',
+        'Yield',
+        'Blocks',
         'Shifts',
         'Night Audit',
         'Reports',
@@ -354,11 +359,6 @@ describe('navigation', () => {
         'Accounts receivable',
         'Card pre-auths',
         'Partner hotels',
-        'Rates',
-        'Yield',
-        'Blocks',
-        'Housekeeping',
-        'Hardware',
         'Wake-up calls',
         'TM.30',
         'Lost & found',
@@ -370,6 +370,11 @@ describe('navigation', () => {
         'Settings',
       ]);
       expect(moreBottomNavItems.map((item) => item.href)).toEqual([
+        '/housekeeping',
+        '/hardware-bridge',
+        '/rates',
+        '/yield',
+        '/blocks',
         '/shifts',
         '/night-audit',
         '/reports',
@@ -378,11 +383,6 @@ describe('navigation', () => {
         '/ar-accounts',
         '/card-preauths',
         '/partner-hotels',
-        '/rates',
-        '/yield',
-        '/blocks',
-        '/housekeeping',
-        '/hardware-bridge',
         '/wake-up-calls',
         '/tm30',
         '/lost-found',

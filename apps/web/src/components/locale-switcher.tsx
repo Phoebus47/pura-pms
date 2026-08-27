@@ -6,11 +6,21 @@ import { routing, type Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-export function LocaleSwitcher({ className }: { readonly className?: string }) {
+interface LocaleSwitcherProps {
+  readonly className?: string;
+  /** Use on dark surfaces (e.g. sidebar) so hover/active keep readable contrast. */
+  readonly appearance?: 'default' | 'onDark';
+}
+
+export function LocaleSwitcher({
+  className,
+  appearance = 'default',
+}: LocaleSwitcherProps) {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('locale');
+  const isOnDark = appearance === 'onDark';
 
   function handleLocaleChange(nextLocale: Locale) {
     if (nextLocale === locale) {
@@ -26,21 +36,51 @@ export function LocaleSwitcher({ className }: { readonly className?: string }) {
       role="group"
       aria-label={t('label')}
     >
-      <p className="font-medium text-slate-600 text-xs">{t('label')}</p>
+      <p
+        className={cn(
+          'font-medium text-xs',
+          isOnDark ? 'text-white/70' : 'text-muted-foreground',
+        )}
+      >
+        {t('label')}
+      </p>
       <div className="flex gap-2">
-        {routing.locales.map((option) => (
-          <Button
-            key={option}
-            type="button"
-            variant={locale === option ? 'default' : 'outline'}
-            size="sm"
-            aria-pressed={locale === option}
-            onClick={() => handleLocaleChange(option)}
-            className="min-h-11"
-          >
-            {t(option)}
-          </Button>
-        ))}
+        {routing.locales.map((option) => {
+          const isActive = locale === option;
+
+          if (isOnDark) {
+            return (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => handleLocaleChange(option)}
+                className={cn(
+                  'inline-flex min-h-11 items-center justify-center rounded-md px-4 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-pura-blue',
+                  isActive
+                    ? 'bg-white text-pura-blue hover:bg-white/90'
+                    : 'border border-white/40 bg-transparent text-white hover:border-white/70 hover:bg-white/15 hover:text-white',
+                )}
+              >
+                {t(option)}
+              </button>
+            );
+          }
+
+          return (
+            <Button
+              key={option}
+              type="button"
+              variant={isActive ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={isActive}
+              onClick={() => handleLocaleChange(option)}
+              className="min-h-11"
+            >
+              {t(option)}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

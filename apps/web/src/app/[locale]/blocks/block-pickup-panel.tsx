@@ -6,14 +6,14 @@ import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { StatTile } from '@/components/shared/stat-tile';
 import {
   useAttachBlockReservation,
   useBlockPickup,
   useReleaseBlock,
 } from '@/hooks/use-blocks';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 
 export function PickupPanel({ blockId }: { readonly blockId: string }) {
   const { data: report } = useBlockPickup(blockId);
@@ -40,14 +40,20 @@ export function PickupPanel({ blockId }: { readonly blockId: string }) {
     }
   }
 
+  const remaining = report?.remaining ?? 0;
+
   return (
     <div className="space-y-4">
-      <p className="text-slate-600 text-sm">
-        {t('blocks.pickedUp')}: {report?.pickedUp ?? 0} ·{' '}
-        {t('blocks.remaining')}: {report?.remaining ?? 0}
-      </p>
+      <div className="gap-4 grid grid-cols-2">
+        <StatTile label={t('blocks.pickedUp')} value={report?.pickedUp ?? 0} />
+        <StatTile
+          label={t('blocks.remaining')}
+          value={remaining}
+          tone={remaining === 0 ? 'caution' : 'positive'}
+        />
+      </div>
       {report?.nights?.length ? (
-        <ul className="space-y-1 text-slate-700 text-sm">
+        <ul className="space-y-1 tabular-nums text-ink-default text-sm">
           {report.nights.map((night) => (
             <li key={night.stayDate}>
               {night.stayDate}: {night.pickedUp}/{night.allotted} (
@@ -61,7 +67,6 @@ export function PickupPanel({ blockId }: { readonly blockId: string }) {
         <Input
           id="blockReservationId"
           name="reservationId"
-          className={fieldClass}
           value={reservationId}
           onChange={(event) => setReservationId(event.target.value)}
         />

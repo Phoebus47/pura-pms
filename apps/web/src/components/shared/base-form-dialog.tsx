@@ -42,17 +42,17 @@ export function BaseFormDialog({
   return (
     <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
       <div
-        className={`bg-white max-h-[90vh] ${maxWidthClasses[maxWidth]} overflow-hidden rounded-xl shadow-lg w-full`}
+        className={`bg-surface-desk max-h-[90vh] ${maxWidthClasses[maxWidth]} overflow-hidden rounded-xl shadow-lg w-full`}
       >
-        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+        <div className="border-b border-rule-mist flex items-center justify-between p-6">
           <h2 className="font-bold text-2xl text-pura-blue">{title}</h2>
           <button
             onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-xl transition-colors"
+            className="hover:bg-muted p-2 rounded-xl transition-colors"
             aria-label="Close dialog"
             type="button"
           >
-            <X className="h-5 text-slate-600 w-5" />
+            <X className="h-5 text-muted-foreground w-5" />
           </button>
         </div>
 
