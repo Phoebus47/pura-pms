@@ -14,6 +14,7 @@ import { Toolbar } from '@/components/shared/toolbar';
 import { useRoomTypes } from '@/hooks/use-room-types';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
+import { formatMessage, t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { RoomTypeCard } from './room-type-card';
 
@@ -29,8 +30,8 @@ export default function RoomTypesPage() {
 
   function handleDelete(roomType: RoomType) {
     confirm(
-      'Delete Room Type',
-      `Are you sure you want to delete room type "${roomType.name}"? This action cannot be undone.`,
+      t('roomTypes.deleteTitle'),
+      formatMessage('roomTypes.deleteConfirm', { name: roomType.name }),
       async () => {
         await deleteRoomType(roomType.id);
       },
@@ -44,18 +45,18 @@ export default function RoomTypesPage() {
   );
 
   if (loading) {
-    return <LoadingSpinner message="Loading room types..." />;
+    return <LoadingSpinner message={t('roomTypes.loading')} />;
   }
 
   if (error) {
     return (
       <Panel className={cn('border', statusToneSurface.critical)}>
         <h2 className={cn('font-semibold text-lg', statusToneInk.critical)}>
-          Error loading room types
+          {t('roomTypes.errorTitle')}
         </h2>
         <p className={cn('mt-2 text-sm', statusToneInk.critical)}>{error}</p>
         <Button onClick={loadRoomTypes} className="mt-4">
-          Retry
+          {t('common.tryAgain')}
         </Button>
       </Panel>
     );
@@ -78,12 +79,12 @@ export default function RoomTypesPage() {
       {Dialog}
       <div className="space-y-6">
         <PageHeader
-          title="Room Types"
-          subtitle="Manage room type configurations and pricing"
+          title={t('roomTypes.title')}
+          subtitle={t('roomTypes.subtitle')}
           actions={
             <Button>
               <Plus className="h-4 w-4" />
-              Add Room Type
+              {t('roomTypes.add')}
             </Button>
           }
         />
@@ -99,8 +100,8 @@ export default function RoomTypesPage() {
                 id="room-type-search"
                 name="roomTypeSearch"
                 type="search"
-                aria-label="Search room types by name or code"
-                placeholder="Search room types by name or code..."
+                aria-label={t('roomTypes.searchAria')}
+                placeholder={t('roomTypes.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -110,12 +111,15 @@ export default function RoomTypesPage() {
         />
 
         <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
-          <StatTile label="Total Types" value={roomTypes.length} />
           <StatTile
-            label="Avg Base Rate"
+            label={t('roomTypes.totalTypes')}
+            value={roomTypes.length}
+          />
+          <StatTile
+            label={t('roomTypes.avgBaseRate')}
             value={`฿${averageBaseRate.toLocaleString()}`}
           />
-          <StatTile label="Total Rooms" value={totalRooms} />
+          <StatTile label={t('roomTypes.totalRooms')} value={totalRooms} />
         </div>
 
         {filteredRoomTypes.length === 0 ? (
@@ -123,14 +127,10 @@ export default function RoomTypesPage() {
             <EmptyState
               title={
                 searchTerm
-                  ? 'No room types found matching your search'
-                  : 'No room types yet'
+                  ? t('roomTypes.emptySearch')
+                  : t('roomTypes.emptyTitle')
               }
-              description={
-                searchTerm
-                  ? undefined
-                  : 'Create your first room type to get started.'
-              }
+              description={searchTerm ? undefined : t('roomTypes.emptyBody')}
             />
           </Panel>
         ) : (

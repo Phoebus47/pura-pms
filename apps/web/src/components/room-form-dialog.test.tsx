@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RoomFormDialog } from './room-form-dialog';
 import { roomsAPI, roomTypesAPI, propertiesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/toast', () => ({
   toast: {
@@ -97,7 +98,7 @@ describe('RoomFormDialog', () => {
     // Wait for room types load attempt
     await waitFor(() => {
       expect(roomTypesAPI.getAll).toHaveBeenCalled();
-      expect(toast.error).toHaveBeenCalledWith('Failed to load room types');
+      expect(toast.error).toHaveBeenCalledWith(t('roomTypes.loadFailed'));
     });
   });
 
@@ -233,7 +234,7 @@ describe('RoomFormDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /create room/i }));
 
     await waitFor(() =>
-      expect(screen.getByText('Failed to save room')).toBeInTheDocument(),
+      expect(screen.getByText(t('rooms.form.saveFailed'))).toBeInTheDocument(),
     );
   });
 

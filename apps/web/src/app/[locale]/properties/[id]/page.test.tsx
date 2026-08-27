@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { useParams, useRouter } from 'next/navigation';
 import PropertyDetailPage from './page';
 import { propertiesAPI } from '@/lib/api';
+import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
   useParams: vi.fn(),
@@ -71,7 +72,7 @@ describe('PropertyDetailPage', () => {
     render(<PropertyDetailPage />);
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument();
-      expect(screen.getByText('Property not found')).toBeInTheDocument();
+      expect(screen.getByText(t('properties.notFound'))).toBeInTheDocument();
     });
   });
 
@@ -92,7 +93,7 @@ describe('PropertyDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Failed API')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByText('Back'));
+    fireEvent.click(screen.getByText(t('common.back')));
     expect(mockBack).toHaveBeenCalled();
   });
 
@@ -100,7 +101,7 @@ describe('PropertyDetailPage', () => {
     (propertiesAPI.getById as any).mockRejectedValue('String Error');
     render(<PropertyDetailPage />);
     await waitFor(() => {
-      expect(screen.getByText('Failed to load property')).toBeInTheDocument();
+      expect(screen.getByText(t('properties.loadFailed'))).toBeInTheDocument();
     });
   });
 
@@ -124,7 +125,7 @@ describe('PropertyDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText('42')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
-      expect(screen.getByText('Total Rooms')).toBeInTheDocument();
+      expect(screen.getByText(t('properties.totalRooms'))).toBeInTheDocument();
     });
   });
 
@@ -137,6 +138,8 @@ describe('PropertyDetailPage', () => {
     await waitFor(() =>
       expect(screen.getByText('Property A')).toBeInTheDocument(),
     );
-    expect(screen.queryByText('Total Rooms')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(t('properties.totalRooms')),
+    ).not.toBeInTheDocument();
   });
 });

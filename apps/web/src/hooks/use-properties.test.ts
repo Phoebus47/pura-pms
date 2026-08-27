@@ -3,6 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useProperties } from './use-properties';
 import { propertiesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api', () => ({
   propertiesAPI: {
@@ -72,7 +73,7 @@ describe('useProperties', () => {
   });
 
   it('should handle loading error', async () => {
-    const errorMessage = 'Failed to load properties';
+    const errorMessage = t('properties.loadFailed');
     (propertiesAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useProperties());
@@ -102,7 +103,7 @@ describe('useProperties', () => {
 
     expect(deleteResult!).toBe(true);
     expect(propertiesAPI.delete).toHaveBeenCalledWith('1');
-    expect(toast.success).toHaveBeenCalledWith('Property deleted successfully');
+    expect(toast.success).toHaveBeenCalledWith(t('properties.deleted'));
     expect(propertiesAPI.getAll).toHaveBeenCalled();
   });
 
@@ -144,8 +145,8 @@ describe('useProperties', () => {
     });
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe('Failed to load properties');
-    expect(toast.error).toHaveBeenCalledWith('Failed to load properties');
+    expect(result.current.error).toBe(t('properties.loadFailed'));
+    expect(toast.error).toHaveBeenCalledWith(t('properties.loadFailed'));
   });
 
   it('handles non-Error objects during delete', async () => {
@@ -159,6 +160,6 @@ describe('useProperties', () => {
     });
 
     expect(deleteResult).toBe(false);
-    expect(toast.error).toHaveBeenCalledWith('Failed to delete property');
+    expect(toast.error).toHaveBeenCalledWith(t('properties.deleteFailed'));
   });
 });

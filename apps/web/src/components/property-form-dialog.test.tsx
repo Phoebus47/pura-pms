@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { PropertyFormDialog } from './property-form-dialog';
 import { propertiesAPI } from '@/lib/api';
+import { t } from '@/lib/i18n';
 
 describe('PropertyFormDialog', () => {
   const mockOnClose = vi.fn();
@@ -32,7 +33,7 @@ describe('PropertyFormDialog', () => {
       />,
     );
 
-    expect(screen.getByText('New Property')).toBeInTheDocument();
+    expect(screen.getByText(t('properties.formNew'))).toBeInTheDocument();
     expect(screen.getByLabelText(/property name/i)).toHaveValue('');
   });
 
@@ -57,7 +58,7 @@ describe('PropertyFormDialog', () => {
       />,
     );
 
-    expect(screen.getByText('Edit Property')).toBeInTheDocument();
+    expect(screen.getByText(t('properties.formEdit'))).toBeInTheDocument();
     expect(screen.getByLabelText(/property name/i)).toHaveValue(
       'Existing Property',
     );
@@ -198,7 +199,9 @@ describe('PropertyFormDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /create property/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to save property')).toBeInTheDocument();
+      expect(
+        screen.getByText(t('properties.formSaveFailed')),
+      ).toBeInTheDocument();
     });
   });
 

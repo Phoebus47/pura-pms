@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { t } from '@/lib/i18n';
 
 interface DetailPageErrorProps {
   readonly title: string;
@@ -23,7 +24,7 @@ export function DetailPageError({
       <h3 className="font-semibold text-status-critical-ink">{title}</h3>
       <p className="mt-2 text-status-critical-ink">{message}</p>
       <Button onClick={handleBack} className="mt-4">
-        Go Back
+        {t('common.goBack')}
       </Button>
     </div>
   );

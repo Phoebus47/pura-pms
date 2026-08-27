@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { roomTypesAPI, type RoomType } from '@/lib/api';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 export function useRoomTypes() {
@@ -15,7 +16,7 @@ export function useRoomTypes() {
       setRoomTypes(data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load room types';
+        err instanceof Error ? err.message : t('roomTypes.loadFailed');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -27,12 +28,12 @@ export function useRoomTypes() {
     async (id: string): Promise<boolean> => {
       try {
         await roomTypesAPI.delete(id);
-        toast.success('Room type deleted successfully');
+        toast.success(t('roomTypes.deleted'));
         await loadRoomTypes();
         return true;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : 'Failed to delete room type';
+          err instanceof Error ? err.message : t('roomTypes.deleteFailed');
         toast.error(errorMessage);
         return false;
       }

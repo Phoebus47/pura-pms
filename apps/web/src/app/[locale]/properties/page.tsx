@@ -13,6 +13,7 @@ import { Panel } from '@/components/shared/panel';
 import { useProperties } from '@/hooks/use-properties';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
+import { formatMessage, t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { PropertyCard } from './property-card';
 
@@ -42,8 +43,8 @@ export default function PropertiesPage() {
 
   function handleDelete(property: Property) {
     confirm(
-      'Delete Property',
-      `Are you sure you want to delete "${property.name}"? This action cannot be undone.`,
+      t('properties.deleteTitle'),
+      formatMessage('properties.deleteConfirm', { name: property.name }),
       async () => {
         await deleteProperty(property.id);
       },
@@ -55,18 +56,18 @@ export default function PropertiesPage() {
   }
 
   if (loading) {
-    return <LoadingSpinner message="Loading properties..." />;
+    return <LoadingSpinner message={t('properties.loading')} />;
   }
 
   if (error) {
     return (
       <Panel className={cn('border', statusToneSurface.critical)}>
         <h2 className={cn('font-semibold text-lg', statusToneInk.critical)}>
-          Error loading properties
+          {t('properties.errorTitle')}
         </h2>
         <p className={cn('mt-2 text-sm', statusToneInk.critical)}>{error}</p>
         <Button onClick={loadProperties} className="mt-4">
-          Try Again
+          {t('common.tryAgain')}
         </Button>
       </Panel>
     );
@@ -77,12 +78,12 @@ export default function PropertiesPage() {
       {Dialog}
       <div className="space-y-6">
         <PageHeader
-          title="Properties"
-          subtitle="Manage your hotel properties and locations"
+          title={t('properties.title')}
+          subtitle={t('properties.subtitle')}
           actions={
             <Button onClick={handleCreate}>
               <Plus className="h-4 w-4" />
-              Add Property
+              {t('properties.add')}
             </Button>
           }
         />
@@ -91,12 +92,12 @@ export default function PropertiesPage() {
           <Panel padding="none">
             <EmptyState
               icon={<Building2 className="h-12 w-12" />}
-              title="No properties yet"
-              description="Get started by adding your first property"
+              title={t('properties.emptyTitle')}
+              description={t('properties.emptyBody')}
               action={
                 <Button onClick={handleCreate}>
                   <Plus className="h-4 w-4" />
-                  Add Property
+                  {t('properties.add')}
                 </Button>
               }
             />

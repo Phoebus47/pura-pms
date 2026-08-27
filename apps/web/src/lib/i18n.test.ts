@@ -55,5 +55,9 @@ describe('i18n bridge', () => {
     expect(t('nav.yield')).toBe('Yield');
     expect(t('nav.cardPreauths')).toBe('Pre-auth');
     expect(t('reservations.status.CHECKED_IN')).toBe('เช็คอินแล้ว');
+    expect(t('rooms.title')).toBe('ห้องพัก');
+    expect(t('roomTypes.title')).toBe('ประเภทห้อง');
+    expect(t('properties.title')).toBe('โรงแรม');
+    expect(t('rooms.status.VACANT_CLEAN')).toBe('ว่างสะอาด (VC)');
   });
 });
