@@ -37,7 +37,7 @@ export function StayPurposeFields({
         <div>
           <label
             htmlFor="approved-by"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.stayPurpose.approvedBy')} *
           </label>
@@ -53,7 +53,7 @@ export function StayPurposeFields({
         <div>
           <label
             htmlFor="stay-purpose-note"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.stayPurpose.purpose')}
           </label>
@@ -69,7 +69,7 @@ export function StayPurposeFields({
           <div>
             <label
               htmlFor="house-department"
-              className="block font-semibold mb-2 text-slate-700 text-sm"
+              className="block font-semibold mb-2 text-foreground text-sm"
             >
               {t('reservations.stayPurpose.department')} *
             </label>
@@ -91,7 +91,7 @@ export function StayPurposeFields({
     <div>
       <label
         htmlFor="stay-purpose"
-        className="block font-semibold mb-2 text-slate-700 text-sm"
+        className="block font-semibold mb-2 text-foreground text-sm"
       >
         {t('reservations.stayPurpose.label')}
       </label>
@@ -114,7 +114,7 @@ export function StayPurposeFields({
           {t('reservations.stayPurpose.houseUse')}
         </option>
       </select>
-      <p className="mt-1 text-slate-500 text-xs">
+      <p className="mt-1 text-muted-foreground text-xs">
         {t('reservations.stayPurpose.hint')}
       </p>
     </div>

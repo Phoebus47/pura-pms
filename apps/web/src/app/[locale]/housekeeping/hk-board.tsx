@@ -79,18 +79,18 @@ export function HkBoard({
         const column = rooms.filter((room) => room.hkStage === stage);
         return (
           <section key={stage} className="space-y-2">
-            <h2 className="font-semibold text-slate-800 text-sm">
+            <h2 className="font-semibold text-foreground text-sm">
               {stageLabel(stage)} ({column.length})
             </h2>
             {column.length === 0 ? (
-              <p className="text-slate-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {t('housekeeping.empty')}
               </p>
             ) : (
               <ul className="space-y-2">
                 {column.map((room) => (
                   <li key={room.id}>
-                    <div className="border border-slate-200 p-3 rounded-md space-y-2">
+                    <div className="border border-rule-mist p-3 rounded-md space-y-2">
                       <button
                         type="button"
                         className={`min-h-11 w-full rounded-md px-2 py-2 text-left text-sm ${

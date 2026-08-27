@@ -99,7 +99,7 @@ export default function TransactionCodesSettingsPage() {
     if (loading) {
       return (
         <tr>
-          <td className="px-3 py-6 text-slate-600" colSpan={8}>
+          <td className="px-3 py-6 text-muted-foreground" colSpan={8}>
             Loading...
           </td>
         </tr>
@@ -108,7 +108,7 @@ export default function TransactionCodesSettingsPage() {
     if (filtered.length === 0) {
       return (
         <tr>
-          <td className="px-3 py-6 text-slate-600" colSpan={8}>
+          <td className="px-3 py-6 text-muted-foreground" colSpan={8}>
             No transaction codes found.
           </td>
         </tr>
@@ -119,7 +119,7 @@ export default function TransactionCodesSettingsPage() {
         {filtered.map((x) => (
           <tr
             key={x.id}
-            className="border-slate-200 border-t text-slate-800 text-sm"
+            className="border-rule-mist border-t text-foreground text-sm"
           >
             <td className="font-semibold px-3 py-3">{x.code}</td>
             <td className="px-3 py-3">{x.description}</td>
@@ -145,7 +145,7 @@ export default function TransactionCodesSettingsPage() {
     <div className="space-y-6">
       <div className="flex gap-4 items-start justify-between">
         <div>
-          <p className="text-slate-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             <Link href="/settings" className="hover:underline">
               Settings
             </Link>{' '}
@@ -154,27 +154,27 @@ export default function TransactionCodesSettingsPage() {
           <h1 className="font-bold text-3xl text-pura-blue">
             Transaction Codes
           </h1>
-          <p className="mt-1 text-slate-600">
+          <p className="mt-1 text-muted-foreground">
             Manage the PMS chart of accounts mapping used for posting.
           </p>
         </div>
         <Button onClick={openCreate}>New Code</Button>
       </div>
 
-      <div className="bg-white border border-slate-200 p-4 rounded-xl">
+      <div className="bg-surface-desk border border-rule-mist p-4 rounded-xl">
         <div className="flex gap-3 items-center justify-between">
           <div className="max-w-md relative w-full">
             <Label htmlFor="search" className="sr-only">
               Search
             </Label>
-            <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-slate-400 top-1/2 w-4" />
+            <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-muted-foreground top-1/2 w-4" />
             <Input
               id="search"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by code or description..."
-              className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-2.5 rounded-lg text-slate-800 text-sm w-full"
+              className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-2.5 rounded-lg text-foreground text-sm w-full"
             />
           </div>
           <Button
@@ -196,7 +196,7 @@ export default function TransactionCodesSettingsPage() {
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-215 text-left w-full">
             <thead>
-              <tr className="text-slate-500 text-xs uppercase">
+              <tr className="text-muted-foreground text-xs uppercase">
                 <th className="px-3 py-2">Code</th>
                 <th className="px-3 py-2">Description</th>
                 <th className="px-3 py-2">Type</th>
@@ -364,7 +364,7 @@ function TransactionCodeDialog({
         </div>
 
         <div className="gap-4 grid grid-cols-1 items-end md:grid-cols-3">
-          <label className="flex gap-2 items-center mb-4 text-slate-700 text-sm">
+          <label className="flex gap-2 items-center mb-4 text-foreground text-sm">
             <input
               type="checkbox"
               checked={hasTax}
@@ -372,7 +372,7 @@ function TransactionCodeDialog({
             />
             <span className="font-semibold">Apply VAT</span>
           </label>
-          <label className="flex gap-2 items-center mb-4 text-slate-700 text-sm">
+          <label className="flex gap-2 items-center mb-4 text-foreground text-sm">
             <input
               type="checkbox"
               checked={hasService}

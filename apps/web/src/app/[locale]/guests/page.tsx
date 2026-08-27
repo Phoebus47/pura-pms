@@ -12,7 +12,9 @@ export default function GuestsPage() {
               className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"
               aria-hidden
             />
-            <p className="mt-4 text-slate-600">{t('common.loadingGuests')}</p>
+            <p className="mt-4 text-muted-foreground">
+              {t('common.loadingGuests')}
+            </p>
           </div>
         </div>
       }

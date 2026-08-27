@@ -45,7 +45,9 @@ describe('ExchangeRatesPage', () => {
     expect(
       await screen.findByRole('heading', { name: t('fx.title') }),
     ).toBeInTheDocument();
-    expect(screen.getByText(t('fx.subtitle'))).toHaveClass('text-slate-600');
+    expect(screen.getByText(t('fx.subtitle'))).toHaveClass(
+      'text-muted-foreground',
+    );
   });
 
   it('renders labeled create form fields', async () => {

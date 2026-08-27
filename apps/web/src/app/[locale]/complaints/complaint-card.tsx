@@ -33,22 +33,22 @@ export function ComplaintCard({
     : (complaint.guestId ?? t('complaints.noGuest'));
 
   return (
-    <li className="border border-slate-200 p-3 rounded-md">
-      <p className="font-semibold text-slate-800">
+    <li className="border border-rule-mist p-3 rounded-md">
+      <p className="font-semibold text-foreground">
         {complaint.subject}
         {' · '}
         {complaintSeverityLabel(complaint.severity)}
         {' · '}
         {complaintStatusLabel(complaint.status)}
       </p>
-      <p className="text-slate-600 text-sm">
+      <p className="text-muted-foreground text-sm">
         {complaint.category}
         {' · '}
         {guestName}
       </p>
-      <p className="mt-1 text-slate-700 text-sm">{complaint.description}</p>
+      <p className="mt-1 text-foreground text-sm">{complaint.description}</p>
       {complaint.resolutionNote ? (
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('complaints.resolutionNote')}: {complaint.resolutionNote}
         </p>
       ) : null}

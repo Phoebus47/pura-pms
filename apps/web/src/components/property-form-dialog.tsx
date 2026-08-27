@@ -74,17 +74,17 @@ export function PropertyFormDialog({
 
   return (
     <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
+      <div className="bg-surface-desk max-h-[90vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
         {/* Header */}
-        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+        <div className="border-b border-rule-mist flex items-center justify-between p-6">
           <h2 className="font-bold text-2xl text-pura-blue">
             {property ? 'Edit Property' : 'New Property'}
           </h2>
           <button
             onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
+            className="hover:bg-muted p-2 rounded-lg transition-colors"
           >
-            <X className="h-5 text-slate-600 w-5" />
+            <X className="h-5 text-muted-foreground w-5" />
           </button>
         </div>
 
@@ -98,7 +98,7 @@ export function PropertyFormDialog({
             <div>
               <label
                 htmlFor="property-name"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
+                className="block font-semibold mb-2 text-foreground text-sm"
               >
                 Property Name *
               </label>
@@ -119,7 +119,7 @@ export function PropertyFormDialog({
             <div>
               <label
                 htmlFor="property-address"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
+                className="block font-semibold mb-2 text-foreground text-sm"
               >
                 Address
               </label>
@@ -140,7 +140,7 @@ export function PropertyFormDialog({
               <div>
                 <label
                   htmlFor="property-phone"
-                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                  className="block font-semibold mb-2 text-foreground text-sm"
                 >
                   Phone
                 </label>
@@ -160,7 +160,7 @@ export function PropertyFormDialog({
               <div>
                 <label
                   htmlFor="property-email"
-                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                  className="block font-semibold mb-2 text-foreground text-sm"
                 >
                   Email
                 </label>
@@ -187,7 +187,7 @@ export function PropertyFormDialog({
           </div>
 
           {/* Footer */}
-          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
+          <div className="border-rule-mist border-t flex gap-3 mt-6 pt-6">
             <Button
               type="button"
               onClick={onClose}

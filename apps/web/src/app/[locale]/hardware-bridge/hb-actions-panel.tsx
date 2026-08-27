@@ -152,8 +152,8 @@ function ActionGroup({
   readonly onSend: () => void;
 }) {
   return (
-    <section className="border border-slate-200 p-3 rounded-md space-y-3">
-      <h2 className="font-semibold text-slate-800 text-sm">{t(titleKey)}</h2>
+    <section className="border border-rule-mist p-3 rounded-md space-y-3">
+      <h2 className="font-semibold text-foreground text-sm">{t(titleKey)}</h2>
       <div className="flex flex-wrap gap-2">
         <Button type="button" className={buttonClass} onClick={onSimulate}>
           {t('hardwareBridge.simulate')}

@@ -89,7 +89,7 @@ export default function RoomDetailPage() {
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist lg:col-span-2 p-6 rounded-xl shadow-sm">
           <h2 className="font-bold mb-6 text-pura-blue text-xl">
             Room Information
           </h2>
@@ -98,7 +98,7 @@ export default function RoomDetailPage() {
             <DetailField
               label="Room Number"
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {room.number}
                 </p>
               }
@@ -107,7 +107,7 @@ export default function RoomDetailPage() {
             <DetailField
               label="Floor"
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {room.floor}
                 </p>
               }
@@ -121,7 +121,7 @@ export default function RoomDetailPage() {
             <DetailField
               label="Room Type"
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {room.roomType?.name || '-'}
                 </p>
               }
@@ -139,7 +139,7 @@ export default function RoomDetailPage() {
             <DetailField
               label="Max Occupancy"
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {room.roomType?.maxOccupancy || '-'} guests
                 </p>
               }
@@ -147,16 +147,18 @@ export default function RoomDetailPage() {
           </div>
 
           {room.notes && (
-            <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">Notes</p>
-              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+            <div className="border-rule-mist border-t mt-6 pt-6">
+              <p className="font-semibold text-muted-foreground text-sm">
+                Notes
+              </p>
+              <p className="mt-2 text-foreground whitespace-pre-wrap">
                 {room.notes}
               </p>
             </div>
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
           <h2 className="font-bold mb-6 text-pura-blue text-xl">
             Room Type Details
           </h2>
@@ -165,7 +167,7 @@ export default function RoomDetailPage() {
             <DetailField
               label="Type Name"
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {room.roomType?.name || '-'}
                 </p>
               }
@@ -175,14 +177,14 @@ export default function RoomDetailPage() {
               <DetailField
                 label="Description"
                 value={
-                  <p className="text-slate-700">{room.roomType.description}</p>
+                  <p className="text-foreground">{room.roomType.description}</p>
                 }
               />
             )}
 
             {room.roomType?.amenities && room.roomType.amenities.length > 0 && (
               <div>
-                <p className="block font-semibold mb-2 text-slate-600 text-sm">
+                <p className="block font-semibold mb-2 text-muted-foreground text-sm">
                   Amenities
                 </p>
                 <div className="flex flex-wrap gap-2">

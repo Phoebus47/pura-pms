@@ -176,9 +176,9 @@ export function PostPaymentDialog({
               required={!needsFx}
             />
           </div>
-          <div className="bg-slate-50 border border-slate-200 flex items-center justify-between p-4 rounded-lg text-sm">
-            <p className="font-semibold text-slate-700">{t('folios.total')}</p>
-            <p className="font-bold text-slate-900">
+          <div className="bg-surface-inset border border-rule-mist flex items-center justify-between p-4 rounded-lg text-sm">
+            <p className="font-semibold text-foreground">{t('folios.total')}</p>
+            <p className="font-bold text-foreground">
               ฿{net.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
           </div>

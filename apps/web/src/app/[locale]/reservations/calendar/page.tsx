@@ -126,7 +126,7 @@ export default function ReservationCalendarPage() {
           <h1 className="font-bold text-3xl text-pura-blue">
             {t('reservations.calendar.title')}
           </h1>
-          <p className="mt-1 text-slate-600">
+          <p className="mt-1 text-muted-foreground">
             {monthLabel} {year}
           </p>
         </div>
@@ -157,13 +157,13 @@ export default function ReservationCalendarPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+      <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
         <div className="flex gap-4 items-center">
-          <Filter className="h-5 text-slate-600 w-5" />
+          <Filter className="h-5 text-muted-foreground w-5" />
           <div className="flex-1">
             <label
               htmlFor="property-filter"
-              className="block font-semibold mb-2 text-slate-700 text-sm"
+              className="block font-semibold mb-2 text-foreground text-sm"
             >
               {t('reservations.calendar.filterByProperty')}
             </label>
@@ -181,19 +181,19 @@ export default function ReservationCalendarPage() {
         <div className="flex h-96 items-center justify-center">
           <div className="text-center">
             <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-            <p className="mt-4 text-slate-600">
+            <p className="mt-4 text-muted-foreground">
               {t('reservations.calendar.loading')}
             </p>
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 overflow-hidden p-6 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist overflow-hidden p-6 rounded-xl shadow-sm">
           {/* Day Headers */}
           <div className="gap-2 grid grid-cols-7 mb-4">
             {WEEKDAY_KEYS.map((dayKey) => (
               <div
                 key={dayKey}
-                className="font-bold py-2 text-center text-slate-700"
+                className="font-bold py-2 text-center text-foreground"
               >
                 {t(`reservations.calendar.weekdays.${dayKey}`)}
               </div>
@@ -224,13 +224,13 @@ export default function ReservationCalendarPage() {
                   className={`aspect-square rounded-lg border-2 p-2 transition-colors ${
                     isToday
                       ? 'border-pura-blue bg-pura-blue/5'
-                      : 'border-slate-200 hover:border-slate-300'
+                      : 'border-rule-mist hover:border-slate-300'
                   }`}
                 >
                   <div className="flex flex-col h-full">
                     <div
                       className={`text-sm font-bold mb-1 ${
-                        isToday ? 'text-pura-blue' : 'text-slate-700'
+                        isToday ? 'text-pura-blue' : 'text-foreground'
                       }`}
                     >
                       {day}
@@ -239,7 +239,7 @@ export default function ReservationCalendarPage() {
                       {dayReservations.slice(0, 3).map((item) => (
                         <div
                           key={item.key}
-                          className="bg-white border border-slate-200 cursor-pointer hover:bg-slate-50 p-1 rounded text-xs transition-colors truncate"
+                          className="bg-surface-desk border border-rule-mist cursor-pointer hover:bg-surface-inset p-1 rounded text-xs transition-colors truncate"
                           title={formatMessage(
                             'reservations.calendar.occupantTooltip',
                             {
@@ -262,7 +262,7 @@ export default function ReservationCalendarPage() {
                         </div>
                       ))}
                       {dayReservations.length > 3 && (
-                        <div className="font-semibold text-slate-500 text-xs">
+                        <div className="font-semibold text-muted-foreground text-xs">
                           {formatMessage('reservations.calendar.more', {
                             count: dayReservations.length - 3,
                           })}
@@ -278,7 +278,7 @@ export default function ReservationCalendarPage() {
       )}
 
       {/* Legend */}
-      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+      <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
         <h3 className="font-bold mb-4 text-lg text-pura-blue">
           {t('reservations.calendar.legend')}
         </h3>
@@ -286,7 +286,7 @@ export default function ReservationCalendarPage() {
           {LEGEND_STATUSES.map((status) => (
             <div key={status} className="flex gap-2 items-center">
               <ReservationStatusBadge status={status} />
-              <span className="text-slate-600 text-sm">
+              <span className="text-muted-foreground text-sm">
                 {t(`reservations.status.${status}`)}
               </span>
             </div>

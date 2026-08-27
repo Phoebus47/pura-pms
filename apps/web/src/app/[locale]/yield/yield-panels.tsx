@@ -24,13 +24,15 @@ const REASON_KEYS: Record<YieldRecommendReason, string> = {
 
 export function PaceTable({ days }: { readonly days: YieldPaceDay[] }) {
   if (days.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('yield.paceEmpty')}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('yield.paceEmpty')}</p>
+    );
   }
   return (
     <div className="overflow-x-auto">
       <table className="text-left text-sm w-full">
         <thead>
-          <tr className="border-b border-slate-200 text-slate-700">
+          <tr className="border-b border-rule-mist text-foreground">
             <th scope="col" className="font-medium pr-3 py-2">
               {t('yield.stayDate')}
             </th>
@@ -74,7 +76,9 @@ export function RecommendationList({
   const dismissMutation = useDismissYieldRecommendation();
 
   if (recommendations.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('yield.recEmpty')}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('yield.recEmpty')}</p>
+    );
   }
 
   async function apply(id: string) {
@@ -100,12 +104,12 @@ export function RecommendationList({
       {recommendations.map((row) => (
         <li
           key={row.id}
-          className="border border-slate-200 p-3 rounded-md space-y-2"
+          className="border border-rule-mist p-3 rounded-md space-y-2"
         >
-          <p className="font-medium text-slate-900">
+          <p className="font-medium text-foreground">
             {row.rate?.code ?? row.rateId} · {row.stayDate}
           </p>
-          <p className="text-slate-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             {t(REASON_KEYS[row.reason])} · {row.currentAmount} →{' '}
             {row.recommendedAmount} ({row.occupancyPct}%)
           </p>

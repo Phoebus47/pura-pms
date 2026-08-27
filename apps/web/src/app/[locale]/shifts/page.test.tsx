@@ -96,7 +96,7 @@ describe('ShiftsPage', () => {
     ).toBeInTheDocument();
     expect(
       await screen.findByText(`${t('shifts.property')}: ${property.name}`),
-    ).toHaveClass('text-slate-600');
+    ).toHaveClass('text-muted-foreground');
   });
 
   it('renders a labeled open form when there is no current shift', async () => {

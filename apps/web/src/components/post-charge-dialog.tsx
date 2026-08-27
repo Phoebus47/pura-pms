@@ -118,17 +118,17 @@ export function PostChargeDialog({
               required
             />
           </div>
-          <div className="bg-slate-50 border border-slate-200 gap-x-4 gap-y-2 grid grid-cols-2 p-4 rounded-lg text-sm">
-            <p className="text-slate-500">Service</p>
-            <p className="font-semibold text-right text-slate-700">
+          <div className="bg-surface-inset border border-rule-mist gap-x-4 gap-y-2 grid grid-cols-2 p-4 rounded-lg text-sm">
+            <p className="text-muted-foreground">Service</p>
+            <p className="font-semibold text-foreground text-right">
               ฿{service.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
-            <p className="text-slate-500">Tax</p>
-            <p className="font-semibold text-right text-slate-700">
+            <p className="text-muted-foreground">Tax</p>
+            <p className="font-semibold text-foreground text-right">
               ฿{tax.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
-            <p className="font-semibold text-slate-700">Total</p>
-            <p className="font-bold text-right text-slate-900">
+            <p className="font-semibold text-foreground">Total</p>
+            <p className="font-bold text-foreground text-right">
               ฿{total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
           </div>

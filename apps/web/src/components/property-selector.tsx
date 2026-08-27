@@ -39,8 +39,8 @@ export function PropertySelector({
   if (loading) {
     return (
       <div className="relative">
-        <Building2 className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
-        <div className="bg-slate-50 border border-slate-300 pl-10 pr-4 py-3 rounded-lg text-slate-400 w-full">
+        <Building2 className="-translate-y-1/2 absolute h-5 left-3 text-muted-foreground top-1/2 w-5" />
+        <div className="bg-surface-inset border border-slate-300 pl-10 pr-4 py-3 rounded-lg text-muted-foreground w-full">
           Loading properties...
         </div>
       </div>
@@ -49,13 +49,13 @@ export function PropertySelector({
 
   return (
     <div className="relative">
-      <Building2 className="-translate-y-1/2 absolute h-5 left-3 pointer-events-none text-slate-400 top-1/2 w-5 z-10" />
+      <Building2 className="-translate-y-1/2 absolute h-5 left-3 pointer-events-none text-muted-foreground top-1/2 w-5 z-10" />
       <select
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="appearance-none bg-white border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-lg transition-colors w-full"
+        className="appearance-none bg-surface-desk border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none pl-10 pr-4 py-3 rounded-lg transition-colors w-full"
       >
         <option value="">Select a property</option>
         {properties.map((property) => (
@@ -66,7 +66,7 @@ export function PropertySelector({
       </select>
       <div className="-translate-y-1/2 absolute pointer-events-none right-3 top-1/2">
         <svg
-          className="h-5 text-slate-400 w-5"
+          className="h-5 text-muted-foreground w-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

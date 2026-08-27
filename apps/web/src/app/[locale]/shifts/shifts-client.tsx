@@ -122,7 +122,7 @@ export function ShiftsClient() {
           {t('shifts.title')}
         </h1>
         {property ? (
-          <p className="mt-1 text-slate-600 text-sm">
+          <p className="mt-1 text-muted-foreground text-sm">
             {t('shifts.property')}: {property.name}
           </p>
         ) : null}

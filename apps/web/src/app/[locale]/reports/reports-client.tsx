@@ -70,7 +70,7 @@ export function ReportsClient() {
           <h1 className="font-bold text-3xl text-pura-blue">
             {t('reports.title')}
           </h1>
-          <p className="mt-1 text-slate-600">{t('reports.subtitle')}</p>
+          <p className="mt-1 text-muted-foreground">{t('reports.subtitle')}</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="reportDate">{t('reports.businessDate')}</Label>
@@ -86,7 +86,7 @@ export function ReportsClient() {
       </header>
 
       {property ? (
-        <p className="text-slate-600 text-sm">
+        <p className="text-muted-foreground text-sm">
           {t('reports.property')}: {property.name}
         </p>
       ) : null}
@@ -106,7 +106,9 @@ export function ReportsClient() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-slate-600 text-sm">{t('reports.loading')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('reports.loading')}
+            </p>
           ) : (
             <DailyRevenueTable
               groups={groups}

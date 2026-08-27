@@ -87,7 +87,7 @@ export function DigitalKeysClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('digitalKey.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('digitalKey.subtitle')}
         </p>
       </header>
@@ -119,7 +119,7 @@ export function DigitalKeysClient() {
               <select
                 id="digital-key-page-transport"
                 name="transport"
-                className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md w-full"
+                className="border border-rule-mist min-h-11 mt-1 px-3 rounded-md w-full"
                 value={transport}
                 onChange={(event) =>
                   setTransport(event.target.value as DigitalKeyTransport)
@@ -148,20 +148,22 @@ export function DigitalKeysClient() {
         <CardContent className="space-y-4">
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && keys.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('digitalKey.empty')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('digitalKey.empty')}
+            </p>
           ) : null}
 
           <ul className="space-y-3">
             {keys.map((key) => (
               <li
                 key={key.id}
-                className="border border-slate-200 p-3 rounded-md"
+                className="border border-rule-mist p-3 rounded-md"
               >
-                <p className="font-semibold text-slate-800">
+                <p className="font-semibold text-foreground">
                   {t('digitalKey.room')} {key.roomNumber} · {key.transport} ·{' '}
                   {statusLabel(key.status)}
                 </p>
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {key.reservation?.confirmNumber} · {t('digitalKey.expiresAt')}
                   : {new Date(key.expiresAt).toLocaleString()}
                 </p>

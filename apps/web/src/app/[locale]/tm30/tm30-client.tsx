@@ -82,7 +82,9 @@ export function Tm30ReportsClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('tm30.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('tm30.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t('tm30.subtitle')}
+        </p>
       </header>
 
       {overdueCount > 0 ? (
@@ -118,19 +120,19 @@ export function Tm30ReportsClient() {
         <CardContent className="space-y-3">
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && reports.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('tm30.empty')}</p>
+            <p className="text-muted-foreground text-sm">{t('tm30.empty')}</p>
           ) : null}
           <ul className="space-y-3">
             {reports.map((row) => (
               <li
                 key={row.id}
-                className="border border-slate-200 p-3 rounded-md"
+                className="border border-rule-mist p-3 rounded-md"
               >
-                <p className="font-semibold text-slate-800">
+                <p className="font-semibold text-foreground">
                   {row.fullName} · {t('tm30.room')} {row.roomNumber}
                   {isOverdue(row) ? ` · ${t('tm30.overdue')}` : ''}
                 </p>
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {row.nationality} · {row.passportNumber} ·{' '}
                   {statusLabel(row.status)}
                 </p>

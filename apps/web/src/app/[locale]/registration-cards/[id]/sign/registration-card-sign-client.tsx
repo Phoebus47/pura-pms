@@ -61,8 +61,10 @@ export function RegistrationCardSignClient() {
         <h1 className="font-bold text-2xl text-pura-blue">
           {t('registrationCard.signTitle')}
         </h1>
-        <p className="mt-2 text-slate-600">{t('registrationCard.signHint')}</p>
-        <p className="mt-1 text-slate-800">
+        <p className="mt-2 text-muted-foreground">
+          {t('registrationCard.signHint')}
+        </p>
+        <p className="mt-1 text-foreground">
           {card.staySnapshot.confirmNumber} · {card.staySnapshot.roomNumber}
         </p>
       </header>

@@ -28,17 +28,21 @@ export function PortalReservationCard({
       <CardContent>
         <dl className="gap-3 grid sm:grid-cols-2 text-lg">
           <div>
-            <dt className="text-slate-500 text-sm">{t('portal.guest')}</dt>
+            <dt className="text-muted-foreground text-sm">
+              {t('portal.guest')}
+            </dt>
             <dd className="font-medium">{guestDisplayName(reservation)}</dd>
           </div>
           <div>
-            <dt className="text-slate-500 text-sm">{t('portal.room')}</dt>
+            <dt className="text-muted-foreground text-sm">
+              {t('portal.room')}
+            </dt>
             <dd className="font-medium">
               {reservation.room?.number ?? t('portal.unassignedRoom')}
             </dd>
           </div>
           <div>
-            <dt className="text-slate-500 text-sm">
+            <dt className="text-muted-foreground text-sm">
               {t('portal.checkInDate')}
             </dt>
             <dd className="font-medium">
@@ -46,7 +50,7 @@ export function PortalReservationCard({
             </dd>
           </div>
           <div>
-            <dt className="text-slate-500 text-sm">
+            <dt className="text-muted-foreground text-sm">
               {t('portal.checkOutDate')}
             </dt>
             <dd className="font-medium">
@@ -54,7 +58,9 @@ export function PortalReservationCard({
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-slate-500 text-sm">{t('portal.status')}</dt>
+            <dt className="text-muted-foreground text-sm">
+              {t('portal.status')}
+            </dt>
             <dd className="font-medium">{statusLabel(reservation.status)}</dd>
           </div>
         </dl>

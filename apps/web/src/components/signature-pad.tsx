@@ -85,7 +85,7 @@ export function SignaturePad({ onChange, className }: SignaturePadProps) {
         ref={canvasRef}
         width={640}
         height={240}
-        className="bg-white border border-slate-300 rounded-md touch-none w-full"
+        className="bg-surface-desk border border-slate-300 rounded-md touch-none w-full"
         aria-label={t('registrationCard.signTitle')}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

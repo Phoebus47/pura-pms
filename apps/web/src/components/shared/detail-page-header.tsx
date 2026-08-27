@@ -34,7 +34,7 @@ export function DetailPageHeader({
           {subtitle && (
             <div className="mt-1">
               {typeof subtitle === 'string' ? (
-                <p className="text-slate-600">{subtitle}</p>
+                <p className="text-muted-foreground">{subtitle}</p>
               ) : (
                 subtitle
               )}

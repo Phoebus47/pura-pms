@@ -52,7 +52,7 @@ export default function PropertiesPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading properties...</p>
+          <p className="mt-4 text-muted-foreground">Loading properties...</p>
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ export default function PropertiesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-bold text-3xl text-pura-blue">Properties</h1>
-            <p className="mt-1 text-slate-600">
+            <p className="mt-1 text-muted-foreground">
               Manage your hotel properties and locations
             </p>
           </div>
@@ -90,12 +90,12 @@ export default function PropertiesPage() {
 
         {/* Properties Grid */}
         {properties.length === 0 ? (
-          <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
-            <Building2 className="h-16 mx-auto text-slate-300 w-16" />
-            <h3 className="font-semibold mt-4 text-lg text-slate-700">
+          <div className="bg-surface-desk border border-rule-mist py-12 rounded-xl text-center">
+            <Building2 className="h-16 mx-auto text-muted-foreground/40 w-16" />
+            <h3 className="font-semibold mt-4 text-foreground text-lg">
               No properties yet
             </h3>
-            <p className="mt-2 text-slate-500">
+            <p className="mt-2 text-muted-foreground">
               Get started by adding your first property
             </p>
             <Button onClick={handleCreate} className="mt-6">
@@ -108,7 +108,7 @@ export default function PropertiesPage() {
             {properties.map((property) => (
               <div
                 key={property.id}
-                className="bg-white border border-slate-200 group hover:border-slate-300 overflow-hidden p-6 relative rounded-xl shadow-sm transition-colors"
+                className="bg-surface-desk border border-rule-mist group hover:border-slate-300 overflow-hidden p-6 relative rounded-xl shadow-sm transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -117,17 +117,17 @@ export default function PropertiesPage() {
                         <Building2 className="h-6 text-pura-blue w-6" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-slate-800">
+                        <h3 className="font-bold text-foreground text-lg">
                           {property.name}
                         </h3>
-                        <p className="text-slate-500 text-xs">
+                        <p className="text-muted-foreground text-xs">
                           {property.currency} • {property.timezone}
                         </p>
                       </div>
                     </div>
 
                     {property.address && (
-                      <p className="line-clamp-2 mt-4 text-slate-600 text-sm">
+                      <p className="line-clamp-2 mt-4 text-muted-foreground text-sm">
                         {property.address}
                       </p>
                     )}
@@ -139,13 +139,17 @@ export default function PropertiesPage() {
                             <div className="font-bold text-2xl text-pura-blue">
                               {property._count.rooms}
                             </div>
-                            <div className="text-slate-500 text-xs">Rooms</div>
+                            <div className="text-muted-foreground text-xs">
+                              Rooms
+                            </div>
                           </div>
                           <div className="text-center">
                             <div className="font-bold text-2xl text-pura-orange">
                               {property._count.roomTypes}
                             </div>
-                            <div className="text-slate-500 text-xs">Types</div>
+                            <div className="text-muted-foreground text-xs">
+                              Types
+                            </div>
                           </div>
                         </>
                       )}

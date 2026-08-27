@@ -139,7 +139,7 @@ export default function ReservationDetailPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 text-muted-foreground">
             {t('reservations.detail.loading')}
           </p>
         </div>
@@ -243,14 +243,14 @@ export default function ReservationDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-200 flex gap-4">
+      <div className="border-b border-rule-mist flex gap-4">
         <button
           onClick={() => setActiveTab('details')}
           className={cn(
             'px-4 py-3 text-sm font-bold transition-all border-b-2',
             activeTab === 'details'
               ? 'border-pura-blue text-pura-blue'
-              : 'border-transparent text-slate-400 hover:text-slate-600',
+              : 'border-transparent text-muted-foreground hover:text-muted-foreground',
           )}
         >
           {t('reservations.detail.tabDetails')}
@@ -261,7 +261,7 @@ export default function ReservationDetailPage() {
             'px-4 py-3 text-sm font-bold transition-all border-b-2',
             activeTab === 'billing'
               ? 'border-pura-blue text-pura-blue'
-              : 'border-transparent text-slate-400 hover:text-slate-600',
+              : 'border-transparent text-muted-foreground hover:text-muted-foreground',
           )}
         >
           {t('reservations.detail.tabBilling')}
@@ -273,14 +273,14 @@ export default function ReservationDetailPage() {
           {/* Reservation Information */}
           <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
             {/* Main Info Card */}
-            <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
+            <div className="bg-surface-desk border border-rule-mist lg:col-span-2 p-6 rounded-xl shadow-sm">
               <h2 className="font-bold mb-6 text-pura-blue text-xl">
                 {t('reservations.detail.reservationDetails')}
               </h2>
 
               <div className="gap-6 grid grid-cols-2">
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.confirmationNumber')}
                   </p>
                   <p className="font-mono font-semibold mt-1 text-lg text-pura-blue">
@@ -289,7 +289,7 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('common.status')}
                   </p>
                   <div className="mt-1">
@@ -298,54 +298,54 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.guest')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     {reservation.guest?.firstName} {reservation.guest?.lastName}
                   </p>
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {reservation.guest?.email}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.room')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     {t('common.roomLabel')} {reservation.room?.number}
                   </p>
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {reservation.room?.roomType.name}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.checkInDate')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     <Calendar className="h-4 inline mr-1 w-4" />
                     {formatDate(reservation.checkIn)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.checkOutDate')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     <Calendar className="h-4 inline mr-1 w-4" />
                     {formatDate(reservation.checkOut)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.numberOfNights')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     {reservation.isDayUse ? (
                       <DayUseBadge />
                     ) : (
@@ -360,10 +360,10 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-600 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.numberOfGuests')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     {reservation.numberOfGuests}{' '}
                     {reservation.numberOfGuests === 1
                       ? t('common.guestSingular')
@@ -373,32 +373,32 @@ export default function ReservationDetailPage() {
               </div>
 
               {isNonRevenueStay(reservation.stayPurpose) ? (
-                <div className="border-slate-200 border-t mt-6 pt-6">
+                <div className="border-rule-mist border-t mt-6 pt-6">
                   <div className="gap-6 grid md:grid-cols-2">
                     <div>
-                      <p className="font-semibold text-slate-600 text-sm">
+                      <p className="font-semibold text-muted-foreground text-sm">
                         {t('reservations.stayPurpose.approvedBy')}
                       </p>
-                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                      <p className="font-semibold mt-1 text-foreground text-lg">
                         {reservation.approvedBy}
                       </p>
                     </div>
                     {reservation.stayPurposeNote ? (
                       <div>
-                        <p className="font-semibold text-slate-600 text-sm">
+                        <p className="font-semibold text-muted-foreground text-sm">
                           {t('reservations.stayPurpose.purpose')}
                         </p>
-                        <p className="font-semibold mt-1 text-lg text-slate-800">
+                        <p className="font-semibold mt-1 text-foreground text-lg">
                           {reservation.stayPurposeNote}
                         </p>
                       </div>
                     ) : null}
                     {reservation.stayPurpose === 'HOUSE_USE' ? (
                       <div>
-                        <p className="font-semibold text-slate-600 text-sm">
+                        <p className="font-semibold text-muted-foreground text-sm">
                           {t('reservations.stayPurpose.department')}
                         </p>
-                        <p className="font-semibold mt-1 text-lg text-slate-800">
+                        <p className="font-semibold mt-1 text-foreground text-lg">
                           {reservation.department}
                         </p>
                       </div>
@@ -408,29 +408,29 @@ export default function ReservationDetailPage() {
               ) : null}
 
               {reservation.taxExempt ? (
-                <div className="border-slate-200 border-t mt-6 pt-6">
+                <div className="border-rule-mist border-t mt-6 pt-6">
                   <div className="gap-6 grid md:grid-cols-2">
                     <div>
-                      <p className="font-semibold text-slate-600 text-sm">
+                      <p className="font-semibold text-muted-foreground text-sm">
                         {t('reservations.taxExempt.reason')}
                       </p>
-                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                      <p className="font-semibold mt-1 text-foreground text-lg">
                         {reservation.taxExemptReason}
                       </p>
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-600 text-sm">
+                      <p className="font-semibold text-muted-foreground text-sm">
                         {t('reservations.taxExempt.documentRef')}
                       </p>
-                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                      <p className="font-semibold mt-1 text-foreground text-lg">
                         {reservation.taxExemptDocumentRef}
                       </p>
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-600 text-sm">
+                      <p className="font-semibold text-muted-foreground text-sm">
                         {t('reservations.taxExempt.approvedBy')}
                       </p>
-                      <p className="font-semibold mt-1 text-lg text-slate-800">
+                      <p className="font-semibold mt-1 text-foreground text-lg">
                         {reservation.taxExemptApprovedBy}
                       </p>
                     </div>
@@ -439,28 +439,28 @@ export default function ReservationDetailPage() {
               ) : null}
 
               {reservation.isRoomLocked ? (
-                <div className="border-slate-200 border-t mt-6 pt-6">
-                  <p className="font-semibold text-slate-600 text-sm">
+                <div className="border-rule-mist border-t mt-6 pt-6">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.roomLock.note')}
                   </p>
-                  <p className="font-semibold mt-1 text-lg text-slate-800">
+                  <p className="font-semibold mt-1 text-foreground text-lg">
                     {reservation.roomLockNote}
                   </p>
                 </div>
               ) : null}
 
               {reservation.stays ? (
-                <div className="border-slate-200 border-t mt-6 pt-6">
+                <div className="border-rule-mist border-t mt-6 pt-6">
                   <SplitStayTable stays={reservation.stays} />
                 </div>
               ) : null}
 
               {reservation.specialRequests && (
-                <div className="border-slate-200 border-t mt-6 pt-6">
-                  <p className="font-semibold text-slate-600 text-sm">
+                <div className="border-rule-mist border-t mt-6 pt-6">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     {t('reservations.detail.specialRequests')}
                   </p>
-                  <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+                  <p className="mt-2 text-foreground whitespace-pre-wrap">
                     {reservation.specialRequests}
                   </p>
                 </div>
@@ -479,17 +479,17 @@ export default function ReservationDetailPage() {
             </div>
 
             {/* Pricing Card */}
-            <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+            <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
               <h2 className="font-bold mb-6 text-pura-blue text-xl">
                 {t('reservations.detail.pricing')}
               </h2>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">
+                  <span className="text-muted-foreground">
                     {t('reservations.detail.roomRate')}
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-foreground">
                     ฿
                     {Number(
                       reservation.room?.roomType.baseRate || 0,
@@ -498,12 +498,12 @@ export default function ReservationDetailPage() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">
+                  <span className="text-muted-foreground">
                     {reservation.isDayUse
                       ? t('reservations.detail.stayType')
                       : t('common.nights')}
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-foreground">
                     {reservation.isDayUse ? (
                       <DayUseBadge />
                     ) : (
@@ -512,9 +512,9 @@ export default function ReservationDetailPage() {
                   </span>
                 </div>
 
-                <div className="border-slate-200 border-t pt-4">
+                <div className="border-rule-mist border-t pt-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-lg text-slate-700">
+                    <span className="font-semibold text-foreground text-lg">
                       {t('reservations.detail.totalAmount')}
                     </span>
                     <span className="font-bold text-2xl text-pura-blue">
@@ -524,11 +524,11 @@ export default function ReservationDetailPage() {
                 </div>
 
                 {reservation.actualCheckIn && (
-                  <div className="border-slate-200 border-t pt-4">
-                    <p className="font-semibold text-slate-600 text-sm">
+                  <div className="border-rule-mist border-t pt-4">
+                    <p className="font-semibold text-muted-foreground text-sm">
                       {t('reservations.detail.actualCheckIn')}
                     </p>
-                    <p className="mt-1 text-slate-700">
+                    <p className="mt-1 text-foreground">
                       {new Date(reservation.actualCheckIn).toLocaleString(
                         getDateLocale(),
                       )}
@@ -537,11 +537,11 @@ export default function ReservationDetailPage() {
                 )}
 
                 {reservation.actualCheckOut && (
-                  <div className="border-slate-200 border-t pt-4">
-                    <p className="font-semibold text-slate-600 text-sm">
+                  <div className="border-rule-mist border-t pt-4">
+                    <p className="font-semibold text-muted-foreground text-sm">
                       {t('reservations.detail.actualCheckOut')}
                     </p>
-                    <p className="mt-1 text-slate-700">
+                    <p className="mt-1 text-foreground">
                       {new Date(reservation.actualCheckOut).toLocaleString(
                         getDateLocale(),
                       )}
@@ -576,26 +576,26 @@ export default function ReservationDetailPage() {
           ) : null}
 
           {/* Metadata */}
-          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
             <h2 className="font-bold mb-4 text-pura-blue text-xl">
               {t('reservations.detail.metadata')}
             </h2>
             <div className="gap-4 grid grid-cols-2 text-sm">
               <div>
-                <span className="text-slate-600">
+                <span className="text-muted-foreground">
                   {t('reservations.detail.created')}
                 </span>{' '}
-                <span className="font-medium text-slate-800">
+                <span className="font-medium text-foreground">
                   {new Date(reservation.createdAt).toLocaleString(
                     getDateLocale(),
                   )}
                 </span>
               </div>
               <div>
-                <span className="text-slate-600">
+                <span className="text-muted-foreground">
                   {t('reservations.detail.lastUpdated')}
                 </span>{' '}
-                <span className="font-medium text-slate-800">
+                <span className="font-medium text-foreground">
                   {new Date(reservation.updatedAt).toLocaleString(
                     getDateLocale(),
                   )}

@@ -45,7 +45,7 @@ export default function ReservationsPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 text-muted-foreground">
             {t('reservations.list.loading')}
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function ReservationsPage() {
           <h1 className="font-bold md:text-3xl text-2xl text-pura-blue">
             {t('reservations.list.title')}
           </h1>
-          <p className="md:text-base mt-1 text-slate-600 text-sm">
+          <p className="md:text-base mt-1 text-muted-foreground text-sm">
             {t('reservations.list.subtitle')}
           </p>
         </div>
@@ -108,12 +108,12 @@ export default function ReservationsPage() {
       </div>
 
       {reservations.length === 0 ? (
-        <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
-          <Calendar className="h-16 mx-auto text-slate-300 w-16" />
-          <h3 className="font-semibold mt-4 text-lg text-slate-700">
+        <div className="bg-surface-desk border border-rule-mist py-12 rounded-xl text-center">
+          <Calendar className="h-16 mx-auto text-muted-foreground/40 w-16" />
+          <h3 className="font-semibold mt-4 text-foreground text-lg">
             {t('reservations.list.emptyTitle')}
           </h3>
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-muted-foreground">
             {t('reservations.list.emptyBody')}
           </p>
           <Button
@@ -127,42 +127,42 @@ export default function ReservationsPage() {
       ) : (
         <>
           <div className="hidden md:block relative rounded-xl">
-            <div className="bg-white border border-slate-200 overflow-hidden rounded-xl">
+            <div className="bg-surface-desk border border-rule-mist overflow-hidden rounded-xl">
               <div className="overflow-x-auto">
                 <table className="min-w-[56rem] w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
+                  <thead className="bg-surface-inset border-b border-rule-mist">
                     <tr>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.confirmation')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.guest')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.room')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.checkIn')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.checkOut')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.nights')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.total')}
                       </th>
-                      <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                      <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                         {t('reservations.list.table.status')}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-slate-200 divide-y">
+                  <tbody className="divide-rule-mist divide-y">
                     {reservations.map((reservation) => (
                       <tr
                         key={reservation.id}
-                        className="cursor-pointer hover:bg-slate-50 transition-colors"
+                        className="cursor-pointer hover:bg-surface-inset transition-colors"
                         onClick={() => {
                           router.push(`/reservations/${reservation.id}`);
                         }}
@@ -173,31 +173,31 @@ export default function ReservationsPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-semibold text-slate-800 whitespace-nowrap">
+                          <div className="font-semibold text-foreground whitespace-nowrap">
                             {reservation.guest?.firstName}{' '}
                             {reservation.guest?.lastName}
                           </div>
-                          <div className="max-w-48 text-slate-500 text-xs truncate">
+                          <div className="max-w-48 text-muted-foreground text-xs truncate">
                             {reservation.guest?.email}
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-semibold text-slate-800 whitespace-nowrap">
+                          <div className="font-semibold text-foreground whitespace-nowrap">
                             {t('reservations.list.roomPrefix')}{' '}
                             {reservation.room?.number}
                           </div>
-                          <div className="max-w-40 text-slate-500 text-xs truncate">
+                          <div className="max-w-40 text-muted-foreground text-xs truncate">
                             {reservation.room?.roomType.name}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-slate-700 text-sm whitespace-nowrap">
+                        <td className="px-4 py-3 text-foreground text-sm whitespace-nowrap">
                           {formatDate(reservation.checkIn)}
                         </td>
-                        <td className="px-4 py-3 text-slate-700 text-sm whitespace-nowrap">
+                        <td className="px-4 py-3 text-foreground text-sm whitespace-nowrap">
                           {formatDate(reservation.checkOut)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-semibold text-slate-800 text-sm">
+                          <div className="font-semibold text-foreground text-sm">
                             {reservation.nights}
                           </div>
                         </td>
@@ -239,7 +239,7 @@ export default function ReservationsPage() {
             {reservations.map((reservation) => (
               <button
                 key={reservation.id}
-                className="bg-white border border-slate-200 p-4 rounded-lg shadow-sm text-left transition-colors w-full"
+                className="bg-surface-desk border border-rule-mist p-4 rounded-lg shadow-sm text-left transition-colors w-full"
                 onClick={() => {
                   router.push(`/reservations/${reservation.id}`);
                 }}
@@ -274,15 +274,15 @@ export default function ReservationsPage() {
                       ) : null}
                     </div>
                     <div className="mt-2">
-                      <div className="font-semibold text-slate-800 text-sm">
+                      <div className="font-semibold text-foreground text-sm">
                         {reservation.guest?.firstName}{' '}
                         {reservation.guest?.lastName}
                       </div>
-                      <div className="text-slate-500 text-xs">
+                      <div className="text-muted-foreground text-xs">
                         {reservation.guest?.email}
                       </div>
                     </div>
-                    <div className="mt-2 text-slate-600 text-xs">
+                    <div className="mt-2 text-muted-foreground text-xs">
                       {t('reservations.list.roomPrefix')}{' '}
                       {reservation.room?.number} •{' '}
                       {reservation.room?.roomType.name}
@@ -292,7 +292,7 @@ export default function ReservationsPage() {
                     <div className="font-semibold text-pura-blue text-sm">
                       ฿{Number(reservation.totalAmount).toLocaleString()}
                     </div>
-                    <div className="mt-1 text-slate-500 text-xs">
+                    <div className="mt-1 text-muted-foreground text-xs">
                       {reservation.isDayUse
                         ? t('common.dayUse')
                         : formatMessage('reservations.list.nightsLabel', {
@@ -301,20 +301,20 @@ export default function ReservationsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="border-slate-200 border-t flex gap-4 items-center mt-3 pt-3">
+                <div className="border-rule-mist border-t flex gap-4 items-center mt-3 pt-3">
                   <div className="flex-1">
-                    <div className="text-[10px] text-slate-500 tracking-wide uppercase whitespace-nowrap">
+                    <div className="text-[10px] text-muted-foreground tracking-wide uppercase whitespace-nowrap">
                       {t('reservations.list.table.checkIn')}
                     </div>
-                    <div className="font-medium mt-0.5 text-slate-700 text-xs">
+                    <div className="font-medium mt-0.5 text-foreground text-xs">
                       {formatDate(reservation.checkIn)}
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="text-[10px] text-slate-500 tracking-wide uppercase whitespace-nowrap">
+                    <div className="text-[10px] text-muted-foreground tracking-wide uppercase whitespace-nowrap">
                       {t('reservations.list.table.checkOut')}
                     </div>
-                    <div className="font-medium mt-0.5 text-slate-700 text-xs">
+                    <div className="font-medium mt-0.5 text-foreground text-xs">
                       {formatDate(reservation.checkOut)}
                     </div>
                   </div>

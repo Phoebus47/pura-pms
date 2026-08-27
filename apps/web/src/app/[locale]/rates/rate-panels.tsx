@@ -121,7 +121,7 @@ export function CreateRateForm({
         <select
           id="rateRoomType"
           name="roomTypeId"
-          className={`${fieldClass} bg-white border border-slate-200 px-3 rounded-md w-full`}
+          className={`${fieldClass} bg-surface-desk border border-rule-mist px-3 rounded-md w-full`}
           value={effectiveRoomTypeId}
           onChange={(event) => setRoomTypeId(event.target.value)}
           required
@@ -138,7 +138,7 @@ export function CreateRateForm({
         <select
           id="rateParent"
           name="parentRateId"
-          className={`${fieldClass} bg-white border border-slate-200 px-3 rounded-md w-full`}
+          className={`${fieldClass} bg-surface-desk border border-rule-mist px-3 rounded-md w-full`}
           value={parentRateId}
           onChange={(event) => setParentRateId(event.target.value)}
         >
@@ -157,7 +157,7 @@ export function CreateRateForm({
             <select
               id="rateDeriveMode"
               name="deriveMode"
-              className={`${fieldClass} bg-white border border-slate-200 px-3 rounded-md w-full`}
+              className={`${fieldClass} bg-surface-desk border border-rule-mist px-3 rounded-md w-full`}
               value={deriveMode}
               onChange={(event) =>
                 setDeriveMode(event.target.value as RateDeriveMode)
@@ -228,7 +228,7 @@ export function RateList({ rates }: ListProps) {
   }
 
   if (rates.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('rates.empty')}</p>;
+    return <p className="text-muted-foreground text-sm">{t('rates.empty')}</p>;
   }
 
   return (
@@ -244,7 +244,7 @@ export function RateList({ rates }: ListProps) {
               <p className="font-medium">
                 {rate.code} — {rate.name}
               </p>
-              <p className="text-slate-500">
+              <p className="text-muted-foreground">
                 {formula ?? t('rates.standalone')} · ฿
                 {Number(rate.amount).toLocaleString()}
               </p>

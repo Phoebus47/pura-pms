@@ -122,7 +122,7 @@ export function RoomTypeFormDialog({
           <div>
             <label
               htmlFor="room-type-property-select"
-              className="block font-semibold mb-2 text-slate-700 text-sm"
+              className="block font-semibold mb-2 text-foreground text-sm"
             >
               Property *
             </label>
@@ -221,7 +221,7 @@ export function RoomTypeFormDialog({
           <div>
             <label
               htmlFor="room-type-amenity"
-              className="block font-semibold mb-2 text-slate-700 text-sm"
+              className="block font-semibold mb-2 text-foreground text-sm"
             >
               Amenities
             </label>

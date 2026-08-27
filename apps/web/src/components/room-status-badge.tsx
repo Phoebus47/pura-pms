@@ -29,7 +29,7 @@ const statusConfig: Record<RoomStatus, { label: string; className: string }> = {
   },
   OUT_OF_SERVICE: {
     label: 'Out of Service',
-    className: 'bg-slate-100 text-slate-700 ring-slate-600/20',
+    className: 'bg-slate-100 text-foreground ring-slate-600/20',
   },
 };
 

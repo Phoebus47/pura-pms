@@ -16,7 +16,7 @@ export function FormDialogFooter({
   cancelLabel = 'Cancel',
 }: FormDialogFooterProps) {
   return (
-    <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
+    <div className="border-rule-mist border-t flex gap-3 mt-6 pt-6">
       <Button
         type="button"
         onClick={onCancel}

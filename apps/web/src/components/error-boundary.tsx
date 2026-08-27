@@ -45,11 +45,11 @@ export class ErrorBoundary extends Component<
 
       return (
         <div className="flex items-center justify-center min-h-screen p-4">
-          <div className="bg-white border border-slate-200 max-w-md p-6 rounded-lg shadow-sm w-full">
-            <h2 className="font-bold mb-2 text-slate-900 text-xl">
+          <div className="bg-surface-desk border border-rule-mist max-w-md p-6 rounded-lg shadow-sm w-full">
+            <h2 className="font-bold mb-2 text-foreground text-xl">
               Something went wrong
             </h2>
-            <p className="mb-4 text-slate-600">
+            <p className="mb-4 text-muted-foreground">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <div className="flex gap-3">

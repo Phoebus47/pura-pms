@@ -23,7 +23,7 @@ function FieldWrapper({
     <div className={className}>
       <label
         htmlFor={id}
-        className="block font-semibold mb-2 text-slate-700 text-sm"
+        className="block font-semibold mb-2 text-foreground text-sm"
       >
         {label}
         {required && ' *'}
@@ -124,7 +124,7 @@ export function NumberInput({
         max={max}
         step={step}
         disabled={disabled}
-        className={`border border-slate-300 focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed ${className}`}
+        className={`border border-slate-300 focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full disabled:bg-surface-inset disabled:text-muted-foreground disabled:cursor-not-allowed ${className}`}
       />
     </FieldWrapper>
   );
@@ -212,7 +212,7 @@ export function Select({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         disabled={disabled}
-        className={`appearance-none bg-white border border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full ${className}`}
+        className={`appearance-none bg-surface-desk border border-slate-300 disabled:bg-surface-inset disabled:text-muted-foreground focus:border-pura-blue focus:ring-pura-blue/10 focus:ring-4 outline-none px-4 py-3 rounded-xl transition-all w-full ${className}`}
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (

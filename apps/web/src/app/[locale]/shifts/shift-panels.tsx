@@ -40,13 +40,15 @@ export function CurrentShiftCard({ shift }: CurrentShiftCardProps) {
               </p>
             </div>
             {shift.status === 'OPEN' ? (
-              <p className="text-slate-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {t('shifts.nightAuditBlocked')}
               </p>
             ) : null}
           </>
         ) : (
-          <p className="text-slate-600 text-sm">{t('shifts.noShiftHint')}</p>
+          <p className="text-muted-foreground text-sm">
+            {t('shifts.noShiftHint')}
+          </p>
         )}
       </CardContent>
     </Card>
@@ -71,7 +73,9 @@ export function TodayShiftList({
       </CardHeader>
       <CardContent>
         {shifts.length === 0 ? (
-          <p className="text-slate-600 text-sm">{t('shifts.noShiftHint')}</p>
+          <p className="text-muted-foreground text-sm">
+            {t('shifts.noShiftHint')}
+          </p>
         ) : (
           <ul className="space-y-3">
             {shifts.map((shift) => (

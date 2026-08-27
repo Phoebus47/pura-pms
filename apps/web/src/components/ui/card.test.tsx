@@ -16,7 +16,7 @@ describe('Card Components', () => {
     expect(el).toBeInTheDocument();
     expect(el).toHaveClass('custom-card');
     expect(el).toHaveClass('rounded-xl');
-    expect(el).toHaveClass('bg-white', 'text-slate-800');
+    expect(el).toHaveClass('bg-card', 'text-card-foreground');
   });
 
   it('renders CardHeader with custom className', () => {
@@ -42,7 +42,7 @@ describe('Card Components', () => {
     const el = screen.getByText('Description');
     expect(el).toBeInTheDocument();
     expect(el).toHaveClass('custom-desc');
-    expect(el).toHaveClass('text-slate-600');
+    expect(el).toHaveClass('text-muted-foreground');
   });
 
   it('renders CardContent with custom className', () => {

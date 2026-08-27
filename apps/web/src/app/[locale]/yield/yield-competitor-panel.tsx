@@ -97,7 +97,7 @@ export function CompetitorPanel({
           <select
             id="competitorRoomType"
             name="roomTypeId"
-            className={`${fieldClass} w-full rounded-md border border-slate-300 bg-white px-3`}
+            className={`${fieldClass} w-full rounded-md border border-slate-300 bg-surface-desk px-3`}
             value={roomTypeId}
             onChange={(event) => setRoomTypeId(event.target.value)}
           >
@@ -114,11 +114,13 @@ export function CompetitorPanel({
         </Button>
       </form>
       {competitors.length === 0 ? (
-        <p className="text-slate-600 text-sm">{t('yield.competitorEmpty')}</p>
+        <p className="text-muted-foreground text-sm">
+          {t('yield.competitorEmpty')}
+        </p>
       ) : (
         <ul className="space-y-2">
           {competitors.map((row) => (
-            <li key={row.id} className="text-slate-700 text-sm">
+            <li key={row.id} className="text-foreground text-sm">
               {row.competitorName} · {String(row.stayDate).slice(0, 10)} ·{' '}
               {row.amount}
             </li>

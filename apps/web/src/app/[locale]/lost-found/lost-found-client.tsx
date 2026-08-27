@@ -55,7 +55,9 @@ export function LostFoundClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('lostFound.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('lostFound.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t('lostFound.subtitle')}
+        </p>
       </header>
 
       {overdueCount > 0 ? (
@@ -76,7 +78,9 @@ export function LostFoundClient() {
         <CardContent className="space-y-3">
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && items.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('lostFound.empty')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('lostFound.empty')}
+            </p>
           ) : null}
           <ul className="space-y-3">
             {items.map((row) => (

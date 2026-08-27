@@ -44,7 +44,7 @@ export default function PropertyDetailPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading property...</p>
+          <p className="mt-4 text-muted-foreground">Loading property...</p>
         </div>
       </div>
     );
@@ -76,7 +76,7 @@ export default function PropertyDetailPage() {
       </div>
 
       {/* Property Info Card */}
-      <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
+      <div className="bg-surface-desk border border-rule-mist p-8 rounded-xl shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex gap-4 items-center">
             <div className="bg-pura-blue/10 p-4 rounded-lg">
@@ -86,7 +86,7 @@ export default function PropertyDetailPage() {
               <h1 className="font-bold text-3xl text-pura-blue">
                 {property.name}
               </h1>
-              <p className="mt-1 text-slate-600">
+              <p className="mt-1 text-muted-foreground">
                 {property.currency} • {property.timezone}
               </p>
             </div>
@@ -98,48 +98,56 @@ export default function PropertyDetailPage() {
         <div className="gap-6 grid md:grid-cols-2 mt-8">
           {property.address && (
             <div className="flex gap-3">
-              <MapPin className="h-5 mt-0.5 text-slate-400 w-5" />
+              <MapPin className="h-5 mt-0.5 text-muted-foreground w-5" />
               <div>
-                <div className="font-semibold text-slate-700 text-sm">
+                <div className="font-semibold text-foreground text-sm">
                   Address
                 </div>
-                <div className="mt-1 text-slate-600">{property.address}</div>
+                <div className="mt-1 text-muted-foreground">
+                  {property.address}
+                </div>
               </div>
             </div>
           )}
 
           {property.phone && (
             <div className="flex gap-3">
-              <Phone className="h-5 mt-0.5 text-slate-400 w-5" />
+              <Phone className="h-5 mt-0.5 text-muted-foreground w-5" />
               <div>
-                <div className="font-semibold text-slate-700 text-sm">
+                <div className="font-semibold text-foreground text-sm">
                   Phone
                 </div>
-                <div className="mt-1 text-slate-600">{property.phone}</div>
+                <div className="mt-1 text-muted-foreground">
+                  {property.phone}
+                </div>
               </div>
             </div>
           )}
 
           {property.email && (
             <div className="flex gap-3">
-              <Mail className="h-5 mt-0.5 text-slate-400 w-5" />
+              <Mail className="h-5 mt-0.5 text-muted-foreground w-5" />
               <div>
-                <div className="font-semibold text-slate-700 text-sm">
+                <div className="font-semibold text-foreground text-sm">
                   Email
                 </div>
-                <div className="mt-1 text-slate-600">{property.email}</div>
+                <div className="mt-1 text-muted-foreground">
+                  {property.email}
+                </div>
               </div>
             </div>
           )}
 
           {property.taxId && (
             <div className="flex gap-3">
-              <FileText className="h-5 mt-0.5 text-slate-400 w-5" />
+              <FileText className="h-5 mt-0.5 text-muted-foreground w-5" />
               <div>
-                <div className="font-semibold text-slate-700 text-sm">
+                <div className="font-semibold text-foreground text-sm">
                   Tax ID
                 </div>
-                <div className="mt-1 text-slate-600">{property.taxId}</div>
+                <div className="mt-1 text-muted-foreground">
+                  {property.taxId}
+                </div>
               </div>
             </div>
           )}
@@ -147,18 +155,22 @@ export default function PropertyDetailPage() {
 
         {/* Stats */}
         {property._count && (
-          <div className="border-slate-200 border-t flex gap-8 mt-8 pt-6">
+          <div className="border-rule-mist border-t flex gap-8 mt-8 pt-6">
             <div>
               <div className="font-bold text-3xl text-pura-blue">
                 {property._count.rooms}
               </div>
-              <div className="mt-1 text-slate-600 text-sm">Total Rooms</div>
+              <div className="mt-1 text-muted-foreground text-sm">
+                Total Rooms
+              </div>
             </div>
             <div>
               <div className="font-bold text-3xl text-pura-orange">
                 {property._count.roomTypes}
               </div>
-              <div className="mt-1 text-slate-600 text-sm">Room Types</div>
+              <div className="mt-1 text-muted-foreground text-sm">
+                Room Types
+              </div>
             </div>
           </div>
         )}
@@ -166,13 +178,15 @@ export default function PropertyDetailPage() {
 
       {/* Rooms & Room Types sections would go here */}
       <div className="gap-6 grid lg:grid-cols-2">
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold text-slate-800 text-xl">Rooms</h2>
-          <p className="mt-2 text-slate-600">Room management coming soon...</p>
+        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
+          <h2 className="font-bold text-foreground text-xl">Rooms</h2>
+          <p className="mt-2 text-muted-foreground">
+            Room management coming soon...
+          </p>
         </div>
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold text-slate-800 text-xl">Room Types</h2>
-          <p className="mt-2 text-slate-600">
+        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
+          <h2 className="font-bold text-foreground text-xl">Room Types</h2>
+          <p className="mt-2 text-muted-foreground">
             Room type management coming soon...
           </p>
         </div>

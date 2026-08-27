@@ -109,7 +109,7 @@ export function RegistrationCardPrintClient() {
       {card.signatureData ? (
         <section>
           <h2 className="font-semibold">{t('registrationCard.signature')}</h2>
-          <p className="text-slate-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             {card.signedByGuestName} ·{' '}
             {card.signedAt ? new Date(card.signedAt).toLocaleString() : ''}
           </p>
@@ -118,7 +118,7 @@ export function RegistrationCardPrintClient() {
             alt={t('registrationCard.signature')}
             width={320}
             height={120}
-            className="border border-slate-200 mt-2"
+            className="border border-rule-mist mt-2"
             unoptimized
           />
         </section>

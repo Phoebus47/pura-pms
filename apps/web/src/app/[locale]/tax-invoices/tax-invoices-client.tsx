@@ -23,7 +23,7 @@ export function TaxInvoicesClient() {
         <h1 className="font-bold text-3xl text-pura-blue">
           {t('taxInvoice.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('taxInvoice.subtitle')}
         </p>
       </header>

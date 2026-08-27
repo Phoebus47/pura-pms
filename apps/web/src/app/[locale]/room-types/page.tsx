@@ -38,7 +38,7 @@ export default function RoomTypesPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">Loading room types...</p>
+          <p className="mt-4 text-muted-foreground">Loading room types...</p>
         </div>
       </div>
     );
@@ -64,7 +64,7 @@ export default function RoomTypesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-bold text-3xl text-pura-blue">Room Types</h1>
-            <p className="mt-1 text-slate-600">
+            <p className="mt-1 text-muted-foreground">
               Manage room type configurations and pricing
             </p>
           </div>
@@ -75,9 +75,9 @@ export default function RoomTypesPage() {
         </div>
 
         {/* Search */}
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
           <div className="relative">
-            <Search className="-translate-y-1/2 absolute h-5 left-4 text-slate-400 top-1/2 w-5" />
+            <Search className="-translate-y-1/2 absolute h-5 left-4 text-muted-foreground top-1/2 w-5" />
             <Input
               type="search"
               placeholder="Search room types by name or code..."
@@ -90,14 +90,16 @@ export default function RoomTypesPage() {
 
         {/* Stats */}
         <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-            <p className="font-semibold text-slate-600 text-sm">Total Types</p>
+          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
+            <p className="font-semibold text-muted-foreground text-sm">
+              Total Types
+            </p>
             <p className="font-bold mt-2 text-3xl text-pura-blue">
               {roomTypes.length}
             </p>
           </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-            <p className="font-semibold text-slate-600 text-sm">
+          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
+            <p className="font-semibold text-muted-foreground text-sm">
               Avg Base Rate
             </p>
             <p className="font-bold mt-2 text-3xl text-pura-blue">
@@ -112,8 +114,10 @@ export default function RoomTypesPage() {
                 : 0}
             </p>
           </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-            <p className="font-semibold text-slate-600 text-sm">Total Rooms</p>
+          <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
+            <p className="font-semibold text-muted-foreground text-sm">
+              Total Rooms
+            </p>
             <p className="font-bold mt-2 text-3xl text-pura-blue">
               {roomTypes.reduce((sum, rt) => sum + (rt._count?.rooms || 0), 0)}
             </p>
@@ -122,8 +126,8 @@ export default function RoomTypesPage() {
 
         {/* Room Types Grid */}
         {filteredRoomTypes.length === 0 ? (
-          <div className="bg-white border border-slate-200 p-12 rounded-xl shadow-sm text-center">
-            <p className="text-slate-600">
+          <div className="bg-surface-desk border border-rule-mist p-12 rounded-xl shadow-sm text-center">
+            <p className="text-muted-foreground">
               {searchTerm
                 ? 'No room types found matching your search'
                 : 'No room types yet. Create your first room type to get started.'}
@@ -134,7 +138,7 @@ export default function RoomTypesPage() {
             {filteredRoomTypes.map((roomType) => (
               <div
                 key={roomType.id}
-                className="bg-white border border-slate-200 group hover:border-slate-300 p-6 rounded-xl shadow-sm transition-colors"
+                className="bg-surface-desk border border-rule-mist group hover:border-slate-300 p-6 rounded-xl shadow-sm transition-colors"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -142,16 +146,16 @@ export default function RoomTypesPage() {
                     <h3 className="font-bold text-pura-blue text-xl">
                       {roomType.name}
                     </h3>
-                    <p className="font-mono mt-1 text-slate-500 text-sm">
+                    <p className="font-mono mt-1 text-muted-foreground text-sm">
                       {roomType.code}
                     </p>
                   </div>
                   <div className="flex gap-2 group-hover:opacity-100 opacity-0 transition-opacity">
                     <button
-                      className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
+                      className="hover:bg-muted p-2 rounded-lg transition-colors"
                       title="Edit"
                     >
-                      <Edit className="h-4 text-slate-600 w-4" />
+                      <Edit className="h-4 text-muted-foreground w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(roomType.id, roomType.name)}
@@ -165,7 +169,7 @@ export default function RoomTypesPage() {
 
                 {/* Description */}
                 {roomType.description && (
-                  <p className="line-clamp-2 mb-4 text-slate-600 text-sm">
+                  <p className="line-clamp-2 mb-4 text-muted-foreground text-sm">
                     {roomType.description}
                   </p>
                 )}
@@ -173,22 +177,26 @@ export default function RoomTypesPage() {
                 {/* Details */}
                 <div className="mb-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 text-sm">Base Rate</span>
+                    <span className="text-muted-foreground text-sm">
+                      Base Rate
+                    </span>
                     <span className="font-bold text-lg text-pura-blue">
                       ฿{Number(roomType.baseRate).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 text-sm">
+                    <span className="text-muted-foreground text-sm">
                       Max Occupancy
                     </span>
-                    <span className="font-semibold text-slate-800">
+                    <span className="font-semibold text-foreground">
                       {roomType.maxOccupancy} guests
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 text-sm">Total Rooms</span>
-                    <span className="font-semibold text-slate-800">
+                    <span className="text-muted-foreground text-sm">
+                      Total Rooms
+                    </span>
+                    <span className="font-semibold text-foreground">
                       {roomType._count?.rooms || 0}
                     </span>
                   </div>
@@ -197,7 +205,7 @@ export default function RoomTypesPage() {
                 {/* Amenities */}
                 {roomType.amenities && roomType.amenities.length > 0 && (
                   <div>
-                    <p className="font-semibold mb-2 text-slate-600 text-xs">
+                    <p className="font-semibold mb-2 text-muted-foreground text-xs">
                       Amenities
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -210,7 +218,7 @@ export default function RoomTypesPage() {
                         </span>
                       ))}
                       {roomType.amenities.length > 3 && (
-                        <span className="bg-slate-100 font-semibold inline-flex items-center px-2 py-1 rounded-full text-slate-600 text-xs">
+                        <span className="bg-slate-100 font-semibold inline-flex items-center px-2 py-1 rounded-full text-muted-foreground text-xs">
                           +{roomType.amenities.length - 3} more
                         </span>
                       )}

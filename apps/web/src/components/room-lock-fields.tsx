@@ -26,7 +26,7 @@ export function RoomLockFields({
       <div>
         <label
           htmlFor="room-lock-note"
-          className="block font-semibold mb-2 text-slate-700 text-sm"
+          className="block font-semibold mb-2 text-foreground text-sm"
         >
           {t('reservations.roomLock.note')} *
         </label>
@@ -54,10 +54,10 @@ export function RoomLockFields({
         className="border-slate-300 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
       />
       <span>
-        <span className="block font-semibold text-slate-700 text-sm">
+        <span className="block font-semibold text-foreground text-sm">
           {t('reservations.roomLock.checkbox')}
         </span>
-        <span className="block mt-1 text-slate-500 text-xs">
+        <span className="block mt-1 text-muted-foreground text-xs">
           {t('reservations.roomLock.hint')}
         </span>
       </span>

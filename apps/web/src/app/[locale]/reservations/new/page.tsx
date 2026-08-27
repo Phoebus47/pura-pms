@@ -333,11 +333,13 @@ export default function NewReservationPage() {
         <h1 className="font-bold text-3xl text-pura-blue">
           {t('reservations.new.title')}
         </h1>
-        <p className="mt-1 text-slate-600">{t('reservations.new.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground">
+          {t('reservations.new.subtitle')}
+        </p>
       </div>
 
       {/* Progress Steps */}
-      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+      <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.number} className="flex flex-1 items-center">
@@ -346,7 +348,7 @@ export default function NewReservationPage() {
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
                     currentStep >= step.number
                       ? 'bg-pura-blue text-white'
-                      : 'bg-slate-200 text-slate-500'
+                      : 'bg-slate-200 text-muted-foreground'
                   }`}
                 >
                   <step.icon className="h-5 w-5" />
@@ -355,7 +357,7 @@ export default function NewReservationPage() {
                   className={`text-sm font-semibold mt-2 ${
                     currentStep >= step.number
                       ? 'text-pura-blue'
-                      : 'text-slate-500'
+                      : 'text-muted-foreground'
                   }`}
                 >
                   {step.title}
@@ -374,7 +376,7 @@ export default function NewReservationPage() {
       </div>
 
       {/* Step Content */}
-      <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
+      <div className="bg-surface-desk border border-rule-mist p-8 rounded-xl shadow-sm">
         {/* Step 1: Dates & Property */}
         {currentStep === 1 && (
           <div className="space-y-6">
@@ -385,7 +387,7 @@ export default function NewReservationPage() {
             <div>
               <label
                 htmlFor="property-select"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
+                className="block font-semibold mb-2 text-foreground text-sm"
               >
                 {t('reservations.new.propertyRequired')}
               </label>
@@ -415,10 +417,10 @@ export default function NewReservationPage() {
                 className="border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
               />
               <span>
-                <span className="block font-semibold text-slate-700 text-sm">
+                <span className="block font-semibold text-foreground text-sm">
                   {t('reservations.new.dayUseLabel')}
                 </span>
-                <span className="block mt-1 text-slate-500 text-xs">
+                <span className="block mt-1 text-muted-foreground text-xs">
                   {t('reservations.new.dayUseHint')}
                 </span>
               </span>
@@ -438,7 +440,7 @@ export default function NewReservationPage() {
             <div>
               <label
                 htmlFor="billing-cycle"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
+                className="block font-semibold mb-2 text-foreground text-sm"
               >
                 {t('reservations.billingCycle.label')}
               </label>
@@ -450,7 +452,7 @@ export default function NewReservationPage() {
                   handleBillingCycleChange(event.target.value as BillingCycle)
                 }
                 disabled={isDayUse || isSplitStay}
-                className="border border-slate-300 disabled:bg-slate-50 disabled:text-slate-500 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+                className="border border-slate-300 disabled:bg-surface-inset disabled:text-muted-foreground focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
               >
                 <option value="NIGHTLY">
                   {t('reservations.billingCycle.nightly')}
@@ -462,7 +464,7 @@ export default function NewReservationPage() {
                   {t('reservations.billingCycle.monthly')}
                 </option>
               </select>
-              <p className="mt-1 text-slate-500 text-xs">
+              <p className="mt-1 text-muted-foreground text-xs">
                 {t('reservations.billingCycle.hint')}
               </p>
             </div>
@@ -520,7 +522,7 @@ export default function NewReservationPage() {
             </h2>
 
             {availableRooms.length === 0 ? (
-              <p className="py-8 text-center text-slate-500">
+              <p className="py-8 text-center text-muted-foreground">
                 {t('reservations.new.noAvailableRooms')}
               </p>
             ) : (
@@ -534,18 +536,18 @@ export default function NewReservationPage() {
                     className={`p-4 rounded-xl border-2 text-left transition-colors ${
                       selectedRoom?.id === room.id
                         ? 'border-pura-blue bg-pura-blue/5'
-                        : 'border-slate-200 hover:border-slate-300'
+                        : 'border-rule-mist hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-bold text-lg text-slate-800">
+                        <h3 className="font-bold text-foreground text-lg">
                           {t('common.roomLabel')} {room.number}
                         </h3>
-                        <p className="text-slate-600 text-sm">
+                        <p className="text-muted-foreground text-sm">
                           {room.roomType?.name}
                         </p>
-                        <p className="mt-1 text-slate-500 text-xs">
+                        <p className="mt-1 text-muted-foreground text-xs">
                           {formatMessage('reservations.new.maxOccupancy', {
                             count: room.roomType?.maxOccupancy ?? 0,
                           })}
@@ -558,7 +560,7 @@ export default function NewReservationPage() {
                             room.roomType?.baseRate || 0,
                           ).toLocaleString()}
                         </p>
-                        <p className="text-slate-500 text-xs">
+                        <p className="text-muted-foreground text-xs">
                           {t('common.perNight')}
                         </p>
                       </div>
@@ -585,13 +587,13 @@ export default function NewReservationPage() {
                         className={`min-h-11 p-4 rounded-xl border-2 text-left transition-colors ${
                           secondRoom?.id === room.id
                             ? 'border-pura-blue bg-pura-blue/5'
-                            : 'border-slate-200 hover:border-slate-300'
+                            : 'border-rule-mist hover:border-slate-300'
                         }`}
                       >
-                        <h3 className="font-bold text-lg text-slate-800">
+                        <h3 className="font-bold text-foreground text-lg">
                           {t('common.roomLabel')} {room.number}
                         </h3>
-                        <p className="text-slate-600 text-sm">
+                        <p className="text-muted-foreground text-sm">
                           {room.roomType?.name}
                         </p>
                       </button>
@@ -627,13 +629,13 @@ export default function NewReservationPage() {
               <div className="bg-pura-blue/5 border-2 border-pura-blue p-4 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-lg text-slate-800">
+                    <h3 className="font-bold text-foreground text-lg">
                       {selectedGuest.firstName} {selectedGuest.lastName}
                     </h3>
-                    <p className="text-slate-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {selectedGuest.email}
                     </p>
-                    <p className="text-slate-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {selectedGuest.phone}
                     </p>
                   </div>
@@ -689,13 +691,13 @@ export default function NewReservationPage() {
 
             {/* Summary */}
             <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h3 className="font-semibold mb-2 text-slate-700">
+              <div className="bg-surface-inset p-4 rounded-xl">
+                <h3 className="font-semibold mb-2 text-foreground">
                   {t('reservations.new.bookingDetails')}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-600">
+                    <span className="text-muted-foreground">
                       {t('reservations.new.checkInLabel')}
                     </span>
                     <span className="font-semibold">
@@ -703,7 +705,7 @@ export default function NewReservationPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">
+                    <span className="text-muted-foreground">
                       {t('reservations.new.checkOutLabel')}
                     </span>
                     <span className="font-semibold">
@@ -711,7 +713,7 @@ export default function NewReservationPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">
+                    <span className="text-muted-foreground">
                       {t('reservations.new.nightsLabel')}
                     </span>
                     <span className="font-semibold">
@@ -719,7 +721,7 @@ export default function NewReservationPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">
+                    <span className="text-muted-foreground">
                       {t('reservations.new.roomLabel')}
                     </span>
                     <span className="font-semibold">
@@ -729,7 +731,7 @@ export default function NewReservationPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">
+                    <span className="text-muted-foreground">
                       {t('reservations.new.guestLabel')}
                     </span>
                     <span className="font-semibold">
@@ -737,7 +739,7 @@ export default function NewReservationPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">
+                    <span className="text-muted-foreground">
                       {t('reservations.stayPurpose.label')}:
                     </span>
                     <span className="font-semibold">
@@ -750,7 +752,7 @@ export default function NewReservationPage() {
                   </div>
                   {taxExempt ? (
                     <div className="flex justify-between">
-                      <span className="text-slate-600">
+                      <span className="text-muted-foreground">
                         {t('reservations.taxExempt.label')}:
                       </span>
                       <TaxExemptBadge taxExempt />
@@ -758,7 +760,7 @@ export default function NewReservationPage() {
                   ) : null}
                   {isRoomLocked ? (
                     <div className="flex justify-between">
-                      <span className="text-slate-600">
+                      <span className="text-muted-foreground">
                         {t('reservations.roomLock.label')}:
                       </span>
                       <RoomLockBadge isRoomLocked />
@@ -802,7 +804,7 @@ export default function NewReservationPage() {
               <div>
                 <label
                   htmlFor="number-of-guests"
-                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                  className="block font-semibold mb-2 text-foreground text-sm"
                 >
                   {t('reservations.new.numberOfGuests')}
                 </label>
@@ -823,7 +825,7 @@ export default function NewReservationPage() {
               <div>
                 <label
                   htmlFor="special-requests"
-                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                  className="block font-semibold mb-2 text-foreground text-sm"
                 >
                   {t('reservations.new.specialRequests')}
                 </label>
@@ -840,14 +842,14 @@ export default function NewReservationPage() {
 
               <div className="bg-pura-blue/5 border-2 border-pura-blue p-4 rounded-xl">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-lg text-slate-700">
+                  <span className="font-semibold text-foreground text-lg">
                     {t('reservations.new.totalAmount')}
                   </span>
                   <span className="font-bold text-3xl text-pura-blue">
                     ฿{totalAmount.toLocaleString()}
                   </span>
                 </div>
-                <p className="mt-1 text-slate-500 text-xs">
+                <p className="mt-1 text-muted-foreground text-xs">
                   ฿
                   {Number(
                     selectedRoom?.roomType?.baseRate || 0,

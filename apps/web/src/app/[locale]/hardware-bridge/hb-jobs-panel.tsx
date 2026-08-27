@@ -16,7 +16,9 @@ function resultText(result: unknown) {
 export function HbJobsPanel({ jobs }: { readonly jobs: HardwareJob[] }) {
   if (jobs.length === 0) {
     return (
-      <p className="text-slate-600 text-sm">{t('hardwareBridge.emptyJobs')}</p>
+      <p className="text-muted-foreground text-sm">
+        {t('hardwareBridge.emptyJobs')}
+      </p>
     );
   }
 
@@ -27,17 +29,19 @@ export function HbJobsPanel({ jobs }: { readonly jobs: HardwareJob[] }) {
         return (
           <li
             key={job.id}
-            className="border border-slate-200 p-3 rounded-md space-y-1"
+            className="border border-rule-mist p-3 rounded-md space-y-1"
           >
-            <p className="font-medium text-slate-800 text-sm">
+            <p className="font-medium text-foreground text-sm">
               {job.type} · {job.status}
             </p>
-            <p className="text-slate-600 text-sm">{job.requestedBy}</p>
+            <p className="text-muted-foreground text-sm">{job.requestedBy}</p>
             {job.errorMessage ? (
-              <p className="text-slate-600 text-sm">{job.errorMessage}</p>
+              <p className="text-muted-foreground text-sm">
+                {job.errorMessage}
+              </p>
             ) : null}
             {scanText ? (
-              <p className="text-slate-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {t('hardwareBridge.scanResult')}: {scanText}
               </p>
             ) : null}

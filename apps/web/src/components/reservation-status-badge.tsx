@@ -14,7 +14,7 @@ const statusConfig: Record<
 > = {
   TENTATIVE: {
     labelKey: 'reservations.status.TENTATIVE',
-    className: 'bg-slate-100 text-slate-700 ring-slate-600/20',
+    className: 'bg-slate-100 text-foreground ring-slate-600/20',
   },
   CONFIRMED: {
     labelKey: 'reservations.status.CONFIRMED',

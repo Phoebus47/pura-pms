@@ -64,7 +64,7 @@ describe('TaxInvoicesPage', () => {
       await screen.findByRole('heading', { name: t('taxInvoice.title') }),
     ).toBeInTheDocument();
     expect(screen.getByText(t('taxInvoice.subtitle'))).toHaveClass(
-      'text-slate-600',
+      'text-muted-foreground',
     );
   });
 

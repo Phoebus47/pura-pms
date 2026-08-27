@@ -112,7 +112,7 @@ export function Header() {
           />
         </Button>
 
-        <div className="bg-slate-200 h-8 mx-1 w-px" />
+        <div className="bg-rule-mist h-8 mx-1 w-px" />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -136,7 +136,7 @@ export function Header() {
                 <p className="font-semibold leading-tight text-foreground text-sm">
                   {userName}
                 </p>
-                <p className="font-medium text-[11px] text-slate-600">
+                <p className="font-medium text-[11px] text-muted-foreground">
                   {userRole}
                 </p>
               </div>
@@ -146,7 +146,7 @@ export function Header() {
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
                 <p className="font-semibold leading-none text-sm">{userName}</p>
-                <p className="leading-none text-slate-600 text-xs">
+                <p className="leading-none text-muted-foreground text-xs">
                   {userEmail}
                 </p>
               </div>

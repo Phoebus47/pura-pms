@@ -30,7 +30,9 @@ export function BlocksClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('blocks.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('blocks.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t('blocks.subtitle')}
+        </p>
       </header>
 
       {propertyId ? (

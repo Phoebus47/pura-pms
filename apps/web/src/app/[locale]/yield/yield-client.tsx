@@ -34,7 +34,9 @@ export function YieldClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('yield.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('yield.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t('yield.subtitle')}
+        </p>
       </header>
 
       <Card>

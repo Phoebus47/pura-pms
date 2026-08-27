@@ -22,7 +22,7 @@ export function BottomNavigation() {
   );
 
   return (
-    <nav className="bg-white border-slate-200 border-t bottom-0 fixed left-0 lg:hidden pb-[env(safe-area-inset-bottom)] right-0 z-50">
+    <nav className="bg-surface-desk border-rule-mist border-t bottom-0 fixed left-0 lg:hidden pb-[env(safe-area-inset-bottom)] right-0 z-50">
       <div className="flex h-16 items-center justify-around">
         {primaryBottomNavItems.map((item) => {
           const isActive = pathname === item.href;
@@ -34,7 +34,7 @@ export function BottomNavigation() {
                 TAB_CLASS,
                 isActive
                   ? 'text-pura-blue'
-                  : 'text-slate-600 hover:text-pura-blue',
+                  : 'text-muted-foreground hover:text-pura-blue',
               )}
               aria-label={t(item.labelKey)}
             >
@@ -60,7 +60,7 @@ export function BottomNavigation() {
                 TAB_CLASS,
                 isMoreActive
                   ? 'text-pura-blue'
-                  : 'text-slate-600 hover:text-pura-blue',
+                  : 'text-muted-foreground hover:text-pura-blue',
               )}
             >
               <MoreHorizontal className="h-5 w-5" />

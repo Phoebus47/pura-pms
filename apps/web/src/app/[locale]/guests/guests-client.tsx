@@ -66,7 +66,9 @@ export function GuestsClient() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin border-b-2 border-pura-blue h-12 mx-auto rounded-full w-12"></div>
-          <p className="mt-4 text-slate-600">{t('common.loadingGuests')}</p>
+          <p className="mt-4 text-muted-foreground">
+            {t('common.loadingGuests')}
+          </p>
         </div>
       </div>
     );
@@ -95,7 +97,9 @@ export function GuestsClient() {
             <h1 className="font-bold text-3xl text-pura-blue">
               {t('guests.list.title')}
             </h1>
-            <p className="mt-1 text-slate-600">{t('guests.list.subtitle')}</p>
+            <p className="mt-1 text-muted-foreground">
+              {t('guests.list.subtitle')}
+            </p>
           </div>
           <Button onClick={handleCreate}>
             <Plus className="h-4 mr-2 w-4" />
@@ -105,65 +109,65 @@ export function GuestsClient() {
 
         <div className="flex gap-3">
           <div className="flex-1 max-w-md relative">
-            <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-slate-400 top-1/2 w-4" />
+            <Search className="-translate-y-1/2 absolute h-4 left-3.5 text-muted-foreground top-1/2 w-4" />
             <input
               type="search"
               placeholder={t('common.searchGuestsPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="bg-white border border-slate-200 focus:border-pura-blue/40 focus:outline-none focus:ring-4 focus:ring-pura-blue/10 pl-10 placeholder:text-slate-500 pr-4 py-2.5 rounded-lg text-sm transition-colors w-full"
+              className="bg-surface-desk border border-rule-mist focus:border-pura-blue/40 focus:outline-none focus:ring-4 focus:ring-pura-blue/10 pl-10 placeholder:text-muted-foreground pr-4 py-2.5 rounded-lg text-sm transition-colors w-full"
             />
           </div>
           <Button onClick={handleSearch}>{t('common.search')}</Button>
         </div>
 
         {guests.length === 0 ? (
-          <div className="bg-white border border-slate-200 py-12 rounded-xl text-center">
-            <Users className="h-16 mx-auto text-slate-300 w-16" />
-            <h3 className="font-semibold mt-4 text-lg text-slate-700">
+          <div className="bg-surface-desk border border-rule-mist py-12 rounded-xl text-center">
+            <Users className="h-16 mx-auto text-muted-foreground/40 w-16" />
+            <h3 className="font-semibold mt-4 text-foreground text-lg">
               {t('common.noGuestsFound')}
             </h3>
-            <p className="mt-2 text-slate-500">
+            <p className="mt-2 text-muted-foreground">
               {searchQuery
                 ? t('common.tryDifferentSearch')
                 : t('common.addFirstGuest')}
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 overflow-hidden rounded-xl">
+          <div className="bg-surface-desk border border-rule-mist overflow-hidden rounded-xl">
             <div className="overflow-x-auto">
               <table className="min-w-[48rem] w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-surface-inset border-b border-rule-mist">
                   <tr>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.guest')}
                     </th>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.contact')}
                     </th>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.vipLevel')}
                     </th>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.stays')}
                     </th>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.revenue')}
                     </th>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.status')}
                     </th>
-                    <th className="font-semibold px-4 py-3 text-left text-slate-600 text-xs tracking-wider uppercase whitespace-nowrap">
+                    <th className="font-semibold px-4 py-3 text-left text-muted-foreground text-xs tracking-wider uppercase whitespace-nowrap">
                       {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-slate-200 divide-y">
+                <tbody className="divide-rule-mist divide-y">
                   {guests.map((guest) => (
                     <tr
                       key={guest.id}
-                      className="cursor-pointer hover:bg-slate-50 transition-colors"
+                      className="cursor-pointer hover:bg-surface-inset transition-colors"
                       onClick={() => {
                         router.push(`/guests/${guest.id}`);
                       }}
@@ -177,11 +181,11 @@ export function GuestsClient() {
                             </span>
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-800">
+                            <div className="font-semibold text-foreground">
                               {guest.firstName} {guest.lastName}
                             </div>
                             {guest.nationality && (
-                              <div className="text-slate-500 text-xs">
+                              <div className="text-muted-foreground text-xs">
                                 {guest.nationality}
                               </div>
                             )}
@@ -189,10 +193,10 @@ export function GuestsClient() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-slate-700 text-sm">
+                        <div className="text-foreground text-sm">
                           {guest.email || '-'}
                         </div>
-                        <div className="text-slate-500 text-xs">
+                        <div className="text-muted-foreground text-xs">
                           {guest.phone || '-'}
                         </div>
                       </td>
@@ -207,14 +211,14 @@ export function GuestsClient() {
                             ),
                           )}
                           {guest.vipLevel === 0 && (
-                            <span className="text-slate-400 text-xs">
+                            <span className="text-muted-foreground text-xs">
                               {t('common.standard')}
                             </span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800 text-sm">
+                        <div className="font-semibold text-foreground text-sm">
                           {guest.totalStays}
                         </div>
                       </td>

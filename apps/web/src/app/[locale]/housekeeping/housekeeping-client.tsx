@@ -28,7 +28,7 @@ export function HousekeepingClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('housekeeping.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('housekeeping.subtitle')}
         </p>
       </header>

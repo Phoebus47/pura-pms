@@ -169,7 +169,9 @@ export function CardPreauthList({ holds, userId, propertyId }: ListProps) {
   const [folioById, setFolioById] = useState<Record<string, string>>({});
 
   if (holds.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('preauth.empty')}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('preauth.empty')}</p>
+    );
   }
 
   return (

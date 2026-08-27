@@ -65,7 +65,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-slate-500">
+      <div className="p-8 text-center text-muted-foreground">
         {t('billing.loadingFolio')}
       </div>
     );
@@ -73,12 +73,12 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
 
   if (folios.length === 0) {
     return (
-      <div className="bg-white border border-slate-200 p-12 rounded-xl text-center">
-        <Receipt className="h-12 mb-4 mx-auto text-slate-300 w-12" />
-        <h3 className="font-semibold text-slate-700 text-xl">
+      <div className="bg-surface-desk border border-rule-mist p-12 rounded-xl text-center">
+        <Receipt className="h-12 mb-4 mx-auto text-muted-foreground/40 w-12" />
+        <h3 className="font-semibold text-foreground text-xl">
           {t('billing.noFolioTitle')}
         </h3>
-        <p className="mt-2 text-slate-600">{t('billing.noFolioBody')}</p>
+        <p className="mt-2 text-muted-foreground">{t('billing.noFolioBody')}</p>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 'px-4 py-2 rounded-xl border transition-colors font-medium text-sm',
                 activeFolioId === folio.id
                   ? 'bg-pura-blue text-white border-pura-blue'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50',
+                  : 'bg-surface-desk text-muted-foreground border-rule-mist hover:bg-surface-inset',
               )}
             >
               {t('billing.folioNumber')} {folio.folioNumber} ({folio.type})
@@ -112,9 +112,9 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
           ))}
         </div>
 
-        <div className="bg-white border border-slate-200 flex gap-6 items-center px-6 py-3 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist flex gap-6 items-center px-6 py-3 rounded-xl shadow-sm">
           <div>
-            <p className="font-bold text-slate-500 text-xs tracking-wider uppercase">
+            <p className="font-bold text-muted-foreground text-xs tracking-wider uppercase">
               {t('billing.totalBalance')}
             </p>
             <p
@@ -136,7 +136,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
       )}
 
       {/* Window Selector */}
-      <div className="border-b border-slate-200 flex gap-2 pb-px">
+      <div className="border-b border-rule-mist flex gap-2 pb-px">
         {[1, 2, 3, 4].map((num) => {
           const window = activeFolio?.windows.find(
             (w) => w.windowNumber === num,
@@ -149,7 +149,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 'px-6 py-3 text-sm font-bold transition-colors border-b-2 relative',
                 activeWindowNumber === num
                   ? 'border-pura-blue text-pura-blue'
-                  : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300',
+                  : 'border-transparent text-muted-foreground hover:text-muted-foreground hover:border-slate-300',
               )}
             >
               {t('billing.window')} {num}
@@ -164,7 +164,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white border border-slate-200 overflow-hidden rounded-xl shadow-sm">
+      <div className="bg-surface-desk border border-rule-mist overflow-hidden rounded-xl shadow-sm">
         <div className="flex items-center justify-between p-6">
           <h3 className="font-bold text-pura-blue text-xl">
             {t('billing.transactions')}
@@ -188,26 +188,26 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
         <div className="overflow-x-auto">
           <table className="text-left w-full">
             <thead>
-              <tr className="bg-slate-50 border-slate-200 border-y">
-                <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
+              <tr className="bg-surface-inset border-rule-mist border-y">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-xs tracking-wider uppercase">
                   {t('common.date')}
                 </th>
-                <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-xs tracking-wider uppercase">
                   {t('common.code')}
                 </th>
-                <th className="font-bold px-6 py-4 text-slate-500 text-xs tracking-wider uppercase">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-xs tracking-wider uppercase">
                   {t('common.description')}
                 </th>
-                <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-right text-xs tracking-wider uppercase">
                   {t('common.net')}
                 </th>
-                <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-right text-xs tracking-wider uppercase">
                   {t('common.taxSvc')}
                 </th>
-                <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-right text-xs tracking-wider uppercase">
                   {t('common.total')}
                 </th>
-                <th className="font-bold px-6 py-4 text-right text-slate-500 text-xs tracking-wider uppercase">
+                <th className="font-bold px-6 py-4 text-muted-foreground text-right text-xs tracking-wider uppercase">
                   {t('common.actions')}
                 </th>
               </tr>
@@ -219,24 +219,24 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                   <tr
                     key={trx.id}
                     className={cn(
-                      'hover:bg-slate-50 transition-colors',
-                      trx.isVoid && 'opacity-50 line-through bg-slate-50',
+                      'hover:bg-surface-inset transition-colors',
+                      trx.isVoid && 'opacity-50 line-through bg-surface-inset',
                     )}
                   >
-                    <td className="px-6 py-4 text-slate-600 text-sm">
+                    <td className="px-6 py-4 text-muted-foreground text-sm">
                       {new Date(trx.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-slate-100 font-bold font-mono px-2 py-1 rounded text-slate-700 text-xs">
+                      <span className="bg-slate-100 font-bold font-mono px-2 py-1 rounded text-foreground text-xs">
                         {trx.trxCode.code}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-slate-800 text-sm">
+                      <p className="font-semibold text-foreground text-sm">
                         {trx.trxCode.description}
                       </p>
                       {trx.reference && (
-                        <p className="text-[10px] text-slate-500">
+                        <p className="text-[10px] text-muted-foreground">
                           {trx.reference}
                         </p>
                       )}
@@ -244,7 +244,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                     <td className="font-medium px-6 py-4 text-right text-sm">
                       ฿{Number(trx.amountNet).toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-right text-slate-500 text-sm">
+                    <td className="px-6 py-4 text-muted-foreground text-right text-sm">
                       ฿
                       {Number(
                         trx.amountTax + trx.amountService,
@@ -279,7 +279,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 <tr>
                   <td
                     colSpan={7}
-                    className="italic px-6 py-12 text-center text-slate-500"
+                    className="italic px-6 py-12 text-center text-muted-foreground"
                   >
                     {t('billing.noTransactions')}
                   </td>
@@ -319,7 +319,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
           <h4 className="font-bold text-pura-blue text-sm">
             {t('billing.billingInstructions')}
           </h4>
-          <p className="mt-1 text-slate-600 text-xs">
+          <p className="mt-1 text-muted-foreground text-xs">
             {t('billing.billingInstructionsBody')}
           </p>
         </div>

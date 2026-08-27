@@ -55,7 +55,7 @@ export function WakeUpCallsClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('wakeUpCalls.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('wakeUpCalls.subtitle')}
         </p>
       </header>
@@ -81,7 +81,9 @@ export function WakeUpCallsClient() {
 
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && calls.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('wakeUpCalls.empty')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('wakeUpCalls.empty')}
+            </p>
           ) : null}
 
           <ul className="space-y-3">
@@ -93,13 +95,13 @@ export function WakeUpCallsClient() {
               return (
                 <li
                   key={call.id}
-                  className="border border-slate-200 p-3 rounded-md"
+                  className="border border-rule-mist p-3 rounded-md"
                 >
-                  <p className="font-semibold text-slate-800">
+                  <p className="font-semibold text-foreground">
                     {t('wakeUpCalls.room')} {call.room?.number ?? '—'} ·{' '}
                     {guestName}
                   </p>
-                  <p className="text-slate-600 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {call.reservation?.confirmNumber} ·{' '}
                     {new Date(call.scheduledAt).toLocaleString()} ·{' '}
                     {statusLabel(call.status)}

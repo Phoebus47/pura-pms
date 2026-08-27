@@ -15,7 +15,9 @@ interface DailyFlashPanelProps {
 
 export function DailyFlashPanel({ flash, loading }: DailyFlashPanelProps) {
   if (loading) {
-    return <p className="text-slate-600 text-sm">{t('reports.loading')}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('reports.loading')}</p>
+    );
   }
 
   const items = [
@@ -44,7 +46,7 @@ export function DailyFlashPanel({ flash, loading }: DailyFlashPanelProps) {
     <dl className="gap-4 grid sm:grid-cols-2">
       {items.map((item) => (
         <div key={item.label}>
-          <dt className="text-slate-600 text-sm">{item.label}</dt>
+          <dt className="text-muted-foreground text-sm">{item.label}</dt>
           <dd className="font-semibold text-lg">{item.value}</dd>
         </div>
       ))}

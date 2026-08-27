@@ -63,7 +63,9 @@ export function FeedbackClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('feedback.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('feedback.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t('feedback.subtitle')}
+        </p>
       </header>
 
       <Card>
@@ -86,7 +88,7 @@ export function FeedbackClient() {
             <select
               id="fb-score"
               name="score"
-              className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md w-full"
+              className="border border-rule-mist min-h-11 mt-1 px-3 rounded-md w-full"
               value={score}
               onChange={(event) => setScore(event.target.value)}
             >
@@ -102,7 +104,7 @@ export function FeedbackClient() {
             <textarea
               id="fb-comment"
               name="comment"
-              className="border border-slate-200 min-h-24 mt-1 p-3 rounded-md w-full"
+              className="border border-rule-mist min-h-24 mt-1 p-3 rounded-md w-full"
               value={comment}
               onChange={(event) => setComment(event.target.value)}
             />
@@ -125,15 +127,17 @@ export function FeedbackClient() {
         <CardContent className="space-y-3">
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && rows.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('feedback.empty')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('feedback.empty')}
+            </p>
           ) : null}
           <ul className="space-y-3">
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="border border-slate-200 p-3 rounded-md"
+                className="border border-rule-mist p-3 rounded-md"
               >
-                <p className="font-semibold text-slate-800">
+                <p className="font-semibold text-foreground">
                   {row.guest
                     ? `${row.guest.firstName} ${row.guest.lastName}`
                     : row.guestId}
@@ -146,7 +150,7 @@ export function FeedbackClient() {
                   {statusLabel(row.status)}
                 </p>
                 {row.comment ? (
-                  <p className="mt-1 text-slate-700 text-sm">{row.comment}</p>
+                  <p className="mt-1 text-foreground text-sm">{row.comment}</p>
                 ) : null}
                 {row.status === 'OPEN' ? (
                   <Button

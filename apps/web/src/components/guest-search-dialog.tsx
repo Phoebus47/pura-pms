@@ -59,25 +59,25 @@ export function GuestSearchDialog({
 
   return (
     <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[80vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
+      <div className="bg-surface-desk max-h-[80vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
         {/* Header */}
-        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+        <div className="border-b border-rule-mist flex items-center justify-between p-6">
           <h2 className="font-bold text-2xl text-pura-blue">
             {getDialogTitle(searched, guests.length > 0)}
           </h2>
           <button
             onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
+            className="hover:bg-muted p-2 rounded-lg transition-colors"
           >
-            <X className="h-5 text-slate-600 w-5" />
+            <X className="h-5 text-muted-foreground w-5" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="border-b border-slate-200 p-6">
+        <div className="border-b border-rule-mist p-6">
           <div className="flex gap-3">
             <div className="flex-1 relative">
-              <Search className="-translate-y-1/2 absolute h-5 left-3 text-slate-400 top-1/2 w-5" />
+              <Search className="-translate-y-1/2 absolute h-5 left-3 text-muted-foreground top-1/2 w-5" />
               <input
                 id="guest-search"
                 name="search"
@@ -104,7 +104,7 @@ export function GuestSearchDialog({
 
         {/* Footer */}
         {searched && guests.length > 0 && (
-          <div className="border-slate-200 border-t p-6">
+          <div className="border-rule-mist border-t p-6">
             <Button
               onClick={handleCreateNew}
               variant="outline"
@@ -123,8 +123,8 @@ export function GuestSearchDialog({
     if (!searched) {
       return (
         <div className="py-12 text-center">
-          <Search className="h-12 mb-4 mx-auto text-slate-300 w-12" />
-          <p className="text-slate-500">
+          <Search className="h-12 mb-4 mx-auto text-muted-foreground/40 w-12" />
+          <p className="text-muted-foreground">
             Enter a name, email, or phone to search
           </p>
         </div>
@@ -134,7 +134,7 @@ export function GuestSearchDialog({
     if (guests.length === 0) {
       return (
         <div className="py-12 text-center">
-          <p className="mb-4 text-slate-600">No guests found</p>
+          <p className="mb-4 text-muted-foreground">No guests found</p>
           <Button onClick={handleCreateNew}>
             <UserPlus className="h-4 mr-2 w-4" />
             Create New Guest
@@ -149,22 +149,22 @@ export function GuestSearchDialog({
           <button
             key={guest.id}
             onClick={() => handleSelect(guest)}
-            className="border border-slate-200 hover:bg-pura-blue/5 hover:border-pura-blue p-4 rounded-lg text-left transition-colors w-full"
+            className="border border-rule-mist hover:bg-pura-blue/5 hover:border-pura-blue p-4 rounded-lg text-left transition-colors w-full"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold text-slate-800">
+                <p className="font-semibold text-foreground">
                   {guest.firstName} {guest.lastName}
                 </p>
-                <p className="mt-1 text-slate-500 text-sm">
+                <p className="mt-1 text-muted-foreground text-sm">
                   {guest.email || guest.phone || 'No contact info'}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {guest.totalStays} stays
                 </p>
-                <p className="text-slate-500 text-xs">
+                <p className="text-muted-foreground text-xs">
                   ฿{Number(guest.totalRevenue).toLocaleString()}
                 </p>
               </div>

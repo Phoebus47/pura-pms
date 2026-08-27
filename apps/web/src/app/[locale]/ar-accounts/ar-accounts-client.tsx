@@ -36,7 +36,7 @@ export function ArAccountsClient() {
     <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
       <header>
         <h1 className="font-bold text-3xl text-pura-blue">{t('ar.title')}</h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('ar.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">{t('ar.subtitle')}</p>
       </header>
 
       {propertyId ? (

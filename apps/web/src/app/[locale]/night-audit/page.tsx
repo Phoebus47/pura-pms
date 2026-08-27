@@ -96,14 +96,14 @@ export default function NightAuditPage() {
           <h1 className="font-bold text-3xl text-pura-blue tracking-tight">
             {t('nightAudit.title')}
           </h1>
-          <p className="flex gap-2 items-center mt-1 text-slate-600">
+          <p className="flex gap-2 items-center mt-1 text-muted-foreground">
             <Building2 className="size-4" aria-hidden="true" /> {property.name}
           </p>
         </div>
-        <div className="bg-white border border-slate-200 flex gap-3 items-center px-4 py-2 rounded-lg">
+        <div className="bg-surface-desk border border-rule-mist flex gap-3 items-center px-4 py-2 rounded-lg">
           <Clock className="size-5 text-amber-500" aria-hidden="true" />
           <div>
-            <p className="font-semibold text-slate-600 text-xs uppercase">
+            <p className="font-semibold text-muted-foreground text-xs uppercase">
               {t('nightAudit.businessDate')}
             </p>
             <p className="font-bold text-lg text-pura-blue">
@@ -115,7 +115,7 @@ export default function NightAuditPage() {
 
       <div className="gap-6 grid md:grid-cols-2">
         <Card className="md:col-span-2 overflow-hidden">
-          <CardHeader className="bg-pura-blue/5 border-b border-slate-200">
+          <CardHeader className="bg-pura-blue/5 border-b border-rule-mist">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-pura-blue">
@@ -136,13 +136,13 @@ export default function NightAuditPage() {
           <CardContent className="pt-6">
             <div className="gap-6 grid grid-cols-2 mb-8 md:grid-cols-4">
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {t('nightAudit.roomsPosted')}
                 </p>
                 <p className="font-bold text-2xl">{status?.roomsPosted || 0}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {t('nightAudit.revenueCaptured')}
                 </p>
                 <p className="font-bold text-2xl text-green-600">
@@ -150,7 +150,7 @@ export default function NightAuditPage() {
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {t('nightAudit.startedAt')}
                 </p>
                 <p className="font-medium text-sm">
@@ -160,7 +160,7 @@ export default function NightAuditPage() {
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-slate-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {t('nightAudit.completedAt')}
                 </p>
                 <p className="font-medium text-sm">
@@ -218,7 +218,7 @@ export default function NightAuditPage() {
               </div>
             )}
           </CardContent>
-          <CardFooter className="bg-slate-50 border-t flex justify-center py-6">
+          <CardFooter className="bg-surface-inset border-t flex justify-center py-6">
             {!isCompleted && !isInProgress && (
               <Button
                 size="lg"
@@ -268,12 +268,12 @@ export default function NightAuditPage() {
                 {status.errors.map((error) => (
                   <li
                     key={error.id}
-                    className="hover:bg-slate-50 p-4 transition-colors"
+                    className="hover:bg-surface-inset p-4 transition-colors"
                   >
-                    <p className="font-bold text-slate-800 text-sm">
+                    <p className="font-bold text-foreground text-sm">
                       {error.errorType}
                     </p>
-                    <p className="mt-1 text-slate-600 text-xs">
+                    <p className="mt-1 text-muted-foreground text-xs">
                       {error.description}
                     </p>
                   </li>
@@ -295,7 +295,7 @@ export default function NightAuditPage() {
                 {status.reports.map((report) => (
                   <li
                     key={report.id}
-                    className="flex hover:bg-slate-50 items-center justify-between p-4 transition-colors"
+                    className="flex hover:bg-surface-inset items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex gap-3 items-center">
                       <div className="bg-pura-blue/10 p-2 rounded-lg">
@@ -314,7 +314,7 @@ export default function NightAuditPage() {
                 ))}
               </ul>
             ) : (
-              <div className="italic p-8 text-center text-slate-600 text-sm">
+              <div className="italic p-8 text-center text-muted-foreground text-sm">
                 {t('nightAudit.noReports')}
               </div>
             )}

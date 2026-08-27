@@ -42,7 +42,7 @@ export function HardwareBridgeClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('hardwareBridge.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('hardwareBridge.subtitle')}
         </p>
       </header>
@@ -59,7 +59,7 @@ export function HardwareBridgeClient() {
               onChange={(event) => setAgentUrl(event.target.value)}
             />
           </div>
-          <p className="text-slate-600 text-sm" role="status">
+          <p className="text-muted-foreground text-sm" role="status">
             {agentOnline
               ? t('hardwareBridge.agentOnline')
               : t('hardwareBridge.agentOffline')}

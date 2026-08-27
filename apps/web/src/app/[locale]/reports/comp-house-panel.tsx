@@ -77,12 +77,16 @@ export function CompHousePanel({ propertyId, date }: CompHousePanelProps) {
   const lost = rows.reduce((sum, row) => sum + revenueLost(row), 0);
 
   if (loading) {
-    return <p className="text-slate-600 text-sm">{t('reports.loading')}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('reports.loading')}</p>
+    );
   }
 
   if (rows.length === 0) {
     return (
-      <p className="text-slate-600 text-sm">{t('reports.compHouseEmpty')}</p>
+      <p className="text-muted-foreground text-sm">
+        {t('reports.compHouseEmpty')}
+      </p>
     );
   }
 
@@ -90,22 +94,22 @@ export function CompHousePanel({ propertyId, date }: CompHousePanelProps) {
     <div className="space-y-4">
       <dl className="gap-4 grid sm:grid-cols-3">
         <div>
-          <dt className="text-slate-600 text-sm">
+          <dt className="text-muted-foreground text-sm">
             {t('reports.compHouseTotalComp')}
           </dt>
-          <dd className="font-semibold text-slate-800">{totalComp}</dd>
+          <dd className="font-semibold text-foreground">{totalComp}</dd>
         </div>
         <div>
-          <dt className="text-slate-600 text-sm">
+          <dt className="text-muted-foreground text-sm">
             {t('reports.compHouseTotalHouse')}
           </dt>
-          <dd className="font-semibold text-slate-800">{totalHouse}</dd>
+          <dd className="font-semibold text-foreground">{totalHouse}</dd>
         </div>
         <div>
-          <dt className="text-slate-600 text-sm">
+          <dt className="text-muted-foreground text-sm">
             {t('reports.compHouseRevenueLost')}
           </dt>
-          <dd className="font-semibold text-slate-800">
+          <dd className="font-semibold text-foreground">
             ฿{lost.toLocaleString()}
           </dd>
         </div>
@@ -113,7 +117,7 @@ export function CompHousePanel({ propertyId, date }: CompHousePanelProps) {
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-600">
+            <tr className="border-b border-rule-mist text-muted-foreground">
               <th className="pr-4 py-2">{t('reports.compHouseRoom')}</th>
               <th className="pr-4 py-2">{t('reports.compHouseGuest')}</th>
               <th className="pr-4 py-2">{t('reports.compHouseNights')}</th>

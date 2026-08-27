@@ -33,10 +33,10 @@ export function SplitStayOptions({
           className="border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
         />
         <span>
-          <span className="block font-semibold text-slate-700 text-sm">
+          <span className="block font-semibold text-foreground text-sm">
             {t('reservations.splitStay.label')}
           </span>
-          <span className="block mt-1 text-slate-500 text-xs">
+          <span className="block mt-1 text-muted-foreground text-xs">
             {t('reservations.splitStay.hint')}
           </span>
         </span>
@@ -46,7 +46,7 @@ export function SplitStayOptions({
         <div>
           <label
             htmlFor="split-date"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.splitStay.splitDate')}
           </label>

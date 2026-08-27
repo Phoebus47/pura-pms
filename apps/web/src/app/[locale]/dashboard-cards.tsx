@@ -52,7 +52,7 @@ export function StatCard({ stat }: StatCardProps) {
   return (
     <div
       className={cn(
-        'bg-white border border-slate-200 group hover:border-slate-300 hover:shadow-md p-6 relative rounded-xl shadow-sm transition-all duration-200',
+        'bg-surface-desk border border-rule-mist group hover:border-slate-300 hover:shadow-md p-6 relative rounded-xl shadow-sm transition-all duration-200',
         tones.hoverBg,
       )}
     >
@@ -72,7 +72,9 @@ export function StatCard({ stat }: StatCardProps) {
         >
           <Icon className="h-6 w-6" />
         </div>
-        <p className="font-semibold mt-4 text-slate-600 text-sm">{stat.name}</p>
+        <p className="font-semibold mt-4 text-muted-foreground text-sm">
+          {stat.name}
+        </p>
         <div className="flex gap-3 items-end justify-between mt-2">
           <p className="font-black sm:text-4xl text-3xl text-pura-blue tracking-tight">
             {stat.value}
@@ -102,7 +104,7 @@ export function RecentReservationRow({
     `${reservation.guest?.firstName ?? ''} ${reservation.guest?.lastName ?? ''}`.trim();
 
   return (
-    <div className="bg-white border border-slate-200 duration-200 flex flex-col gap-3 group hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm p-4 rounded-lg sm:flex-row sm:items-center sm:justify-between transition-all">
+    <div className="bg-surface-desk border border-rule-mist duration-200 flex flex-col gap-3 group hover:bg-surface-inset hover:border-slate-300 hover:shadow-sm p-4 rounded-lg sm:flex-row sm:items-center sm:justify-between transition-all">
       <div className="flex gap-4 items-center min-w-0">
         <Avatar className="h-10 shrink-0 w-10">
           <AvatarImage
@@ -115,8 +117,8 @@ export function RecentReservationRow({
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <p className="font-semibold text-slate-800 truncate">{guestName}</p>
-          <p className="text-slate-500 text-sm truncate">
+          <p className="font-semibold text-foreground truncate">{guestName}</p>
+          <p className="text-muted-foreground text-sm truncate">
             {t('common.roomLabel')} {reservation.room?.number} •{' '}
             {reservation.confirmNumber}
           </p>
@@ -126,7 +128,7 @@ export function RecentReservationRow({
         <p className="font-semibold text-pura-blue">
           ฿{Number(reservation.totalAmount).toLocaleString()}
         </p>
-        <p className="text-slate-500 text-sm">
+        <p className="text-muted-foreground text-sm">
           {new Date(reservation.checkIn).toLocaleDateString(getDateLocale())} -{' '}
           {new Date(reservation.checkOut).toLocaleDateString(getDateLocale())}
         </p>
@@ -142,6 +144,6 @@ function getChangeTypeColor(type: 'positive' | 'negative' | 'neutral') {
     case 'negative':
       return 'text-red-600 font-medium';
     default:
-      return 'text-slate-500 font-medium';
+      return 'text-muted-foreground font-medium';
   }
 }

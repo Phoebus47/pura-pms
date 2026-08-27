@@ -26,11 +26,13 @@ export function PortalFolioCard({ folios }: PortalFolioCardProps) {
       </CardHeader>
       <CardContent>
         {isEmpty ? (
-          <p className="text-center text-slate-500">{t('portal.folioEmpty')}</p>
+          <p className="text-center text-muted-foreground">
+            {t('portal.folioEmpty')}
+          </p>
         ) : (
           <table className="text-left w-full">
             <thead>
-              <tr className="border-b text-slate-500 text-sm">
+              <tr className="border-b text-muted-foreground text-sm">
                 <th scope="col" className="pb-2">
                   {t('portal.transactionDate')}
                 </th>

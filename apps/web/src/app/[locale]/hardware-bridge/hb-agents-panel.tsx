@@ -94,7 +94,7 @@ export function HbAgentsPanel({
         </form>
 
         {agents.length === 0 ? (
-          <p className="text-slate-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             {t('hardwareBridge.emptyAgents')}
           </p>
         ) : (
@@ -102,14 +102,16 @@ export function HbAgentsPanel({
             {agents.map((agent) => (
               <li
                 key={agent.id}
-                className="border border-slate-200 flex flex-wrap gap-3 items-center justify-between p-3 rounded-md"
+                className="border border-rule-mist flex flex-wrap gap-3 items-center justify-between p-3 rounded-md"
               >
                 <div>
-                  <p className="font-medium text-slate-800 text-sm">
+                  <p className="font-medium text-foreground text-sm">
                     {agent.name}
                   </p>
-                  <p className="text-slate-600 text-sm">{agent.machineId}</p>
-                  <p className="text-slate-600 text-sm">
+                  <p className="text-muted-foreground text-sm">
+                    {agent.machineId}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
                     {isAgentOnline(agent)
                       ? t('hardwareBridge.agentOnline')
                       : t('hardwareBridge.agentOffline')}

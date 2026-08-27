@@ -54,9 +54,11 @@ export function JournalsPanel({
         {t('reports.postJournals')}
       </Button>
       {loading ? (
-        <p className="text-slate-600 text-sm">{t('reports.loading')}</p>
+        <p className="text-muted-foreground text-sm">{t('reports.loading')}</p>
       ) : lines.length === 0 ? (
-        <p className="text-slate-600 text-sm">{t('reports.journalsEmpty')}</p>
+        <p className="text-muted-foreground text-sm">
+          {t('reports.journalsEmpty')}
+        </p>
       ) : (
         <ul className="space-y-2 text-sm">
           {lines.map((line) => (

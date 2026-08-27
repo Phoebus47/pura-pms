@@ -73,7 +73,7 @@ export function ComplaintsClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('complaints.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           {t('complaints.subtitle')}
         </p>
       </header>
@@ -108,7 +108,7 @@ export function ComplaintsClient() {
             <select
               id="gc-severity"
               name="severity"
-              className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md w-full"
+              className="border border-rule-mist min-h-11 mt-1 px-3 rounded-md w-full"
               value={severity}
               onChange={(event) =>
                 setSeverity(event.target.value as GuestComplaintSeverity)
@@ -140,7 +140,7 @@ export function ComplaintsClient() {
             <textarea
               id="gc-description"
               name="description"
-              className="border border-slate-200 min-h-24 mt-1 p-3 rounded-md w-full"
+              className="border border-rule-mist min-h-24 mt-1 p-3 rounded-md w-full"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
             />
@@ -168,7 +168,9 @@ export function ComplaintsClient() {
         <CardContent className="space-y-3">
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && rows.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('complaints.empty')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('complaints.empty')}
+            </p>
           ) : null}
           <ul className="space-y-3">
             {rows.map((row) => (

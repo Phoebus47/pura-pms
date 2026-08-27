@@ -42,12 +42,12 @@ export function PickupPanel({ blockId }: { readonly blockId: string }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-slate-600 text-sm">
+      <p className="text-muted-foreground text-sm">
         {t('blocks.pickedUp')}: {report?.pickedUp ?? 0} ·{' '}
         {t('blocks.remaining')}: {report?.remaining ?? 0}
       </p>
       {report?.nights?.length ? (
-        <ul className="space-y-1 text-slate-700 text-sm">
+        <ul className="space-y-1 text-foreground text-sm">
           {report.nights.map((night) => (
             <li key={night.stayDate}>
               {night.stayDate}: {night.pickedUp}/{night.allotted} (

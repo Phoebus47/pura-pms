@@ -100,7 +100,7 @@ export function CreateBlockForm({
         <select
           id="blockKind"
           name="kind"
-          className={`${fieldClass} w-full rounded-md border border-slate-300 bg-white px-3`}
+          className={`${fieldClass} w-full rounded-md border border-slate-300 bg-surface-desk px-3`}
           value={kind}
           onChange={(event) => setKind(event.target.value as BlockKind)}
         >
@@ -123,7 +123,7 @@ export function CreateBlockForm({
         <select
           id="blockRoomType"
           name="roomTypeId"
-          className={`${fieldClass} w-full rounded-md border border-slate-300 bg-white px-3`}
+          className={`${fieldClass} w-full rounded-md border border-slate-300 bg-surface-desk px-3`}
           value={roomTypeId || roomTypes[0]?.id || ''}
           onChange={(event) => setRoomTypeId(event.target.value)}
         >
@@ -200,7 +200,7 @@ export function BlockList({
   readonly onSelect: (id: string) => void;
 }) {
   if (blocks.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('blocks.empty')}</p>;
+    return <p className="text-muted-foreground text-sm">{t('blocks.empty')}</p>;
   }
   return (
     <ul className="space-y-2">
@@ -211,7 +211,7 @@ export function BlockList({
             className={`min-h-11 w-full rounded-md border px-3 py-2 text-left text-sm ${
               selectedId === block.id
                 ? 'border-pura-blue bg-pura-blue/5'
-                : 'border-slate-200'
+                : 'border-rule-mist'
             }`}
             onClick={() => onSelect(block.id)}
           >

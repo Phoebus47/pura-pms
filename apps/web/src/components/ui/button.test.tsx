@@ -34,7 +34,7 @@ describe('Button', () => {
   it('keeps outline button text readable on a light surface', () => {
     render(<Button variant="outline">Show details</Button>);
     expect(screen.getByRole('button', { name: 'Show details' })).toHaveClass(
-      'bg-white',
+      'bg-surface-desk',
       'text-pura-blue',
     );
   });

@@ -151,7 +151,7 @@ export default function GuestDetailPage() {
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist lg:col-span-2 p-6 rounded-xl shadow-sm">
           <h2 className="font-bold mb-6 text-pura-blue text-xl">
             {t('common.personalInfo')}
           </h2>
@@ -160,7 +160,7 @@ export default function GuestDetailPage() {
             <DetailField
               label={t('common.firstName')}
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {guest.firstName}
                 </p>
               }
@@ -169,7 +169,7 @@ export default function GuestDetailPage() {
             <DetailField
               label={t('common.lastName')}
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-foreground text-lg">
                   {guest.lastName}
                 </p>
               }
@@ -177,51 +177,51 @@ export default function GuestDetailPage() {
 
             <DetailField
               label={t('common.email')}
-              value={<p className="text-slate-700">{guest.email || '-'}</p>}
+              value={<p className="text-foreground">{guest.email || '-'}</p>}
             />
 
             <DetailField
               label={t('common.phone')}
-              value={<p className="text-slate-700">{guest.phone || '-'}</p>}
+              value={<p className="text-foreground">{guest.phone || '-'}</p>}
             />
 
             <DetailField
               label={t('common.nationality')}
               value={
-                <p className="text-slate-700">{guest.nationality || '-'}</p>
+                <p className="text-foreground">{guest.nationality || '-'}</p>
               }
             />
 
             <DetailField
               label={t('common.idNumber')}
-              value={<p className="text-slate-700">{guest.idNumber || '-'}</p>}
+              value={<p className="text-foreground">{guest.idNumber || '-'}</p>}
             />
           </div>
 
           {guest.address && (
-            <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">
+            <div className="border-rule-mist border-t mt-6 pt-6">
+              <p className="font-semibold text-muted-foreground text-sm">
                 {t('common.address')}
               </p>
-              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+              <p className="mt-2 text-foreground whitespace-pre-wrap">
                 {guest.address}
               </p>
             </div>
           )}
 
           {guest.notes && (
-            <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">
+            <div className="border-rule-mist border-t mt-6 pt-6">
+              <p className="font-semibold text-muted-foreground text-sm">
                 {t('common.notes')}
               </p>
-              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+              <p className="mt-2 text-foreground whitespace-pre-wrap">
                 {guest.notes}
               </p>
             </div>
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+        <div className="bg-surface-desk border border-rule-mist p-6 rounded-xl shadow-sm">
           <h2 className="font-bold mb-6 text-pura-blue text-xl">
             {t('common.guestStatistics')}
           </h2>
@@ -232,7 +232,7 @@ export default function GuestDetailPage() {
               value={
                 <div className="flex gap-1 items-center">
                   {guest.vipLevel === 0 ? (
-                    <span className="text-slate-500">
+                    <span className="text-muted-foreground">
                       {t('common.standardGuest')}
                     </span>
                   ) : (

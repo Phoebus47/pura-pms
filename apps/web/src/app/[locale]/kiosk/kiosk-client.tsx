@@ -95,7 +95,9 @@ export function KioskClient() {
         <h1 className="font-bold md:text-5xl text-(--pura-blue) text-4xl">
           {t('kiosk.title')}
         </h1>
-        <p className="mt-2 text-lg text-slate-600">{t('kiosk.subtitle')}</p>
+        <p className="mt-2 text-lg text-muted-foreground">
+          {t('kiosk.subtitle')}
+        </p>
       </header>
 
       <Card className="border-2 shadow-lg">
@@ -146,26 +148,30 @@ export function KioskClient() {
           {reservation ? (
             <section
               aria-live="polite"
-              className="bg-slate-50 border p-6 rounded-lg space-y-4"
+              className="bg-surface-inset border p-6 rounded-lg space-y-4"
             >
               <h2 className="font-semibold text-(--pura-blue) text-xl">
                 {t('kiosk.reservationDetails')}
               </h2>
               <dl className="gap-3 grid sm:grid-cols-2 text-lg">
                 <div>
-                  <dt className="text-slate-500 text-sm">{t('kiosk.guest')}</dt>
+                  <dt className="text-muted-foreground text-sm">
+                    {t('kiosk.guest')}
+                  </dt>
                   <dd className="font-medium">
                     {guestDisplayName(reservation)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500 text-sm">{t('kiosk.room')}</dt>
+                  <dt className="text-muted-foreground text-sm">
+                    {t('kiosk.room')}
+                  </dt>
                   <dd className="font-medium">
                     {reservation.room?.number ?? t('kiosk.unassignedRoom')}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500 text-sm">
+                  <dt className="text-muted-foreground text-sm">
                     {t('kiosk.checkInDate')}
                   </dt>
                   <dd className="font-medium">
@@ -173,7 +179,7 @@ export function KioskClient() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500 text-sm">
+                  <dt className="text-muted-foreground text-sm">
                     {t('kiosk.checkOutDate')}
                   </dt>
                   <dd className="font-medium">
@@ -181,7 +187,7 @@ export function KioskClient() {
                   </dd>
                 </div>
                 <div className="sm:col-span-2">
-                  <dt className="text-slate-500 text-sm">
+                  <dt className="text-muted-foreground text-sm">
                     {t('kiosk.status')}
                   </dt>
                   <dd className="font-medium">

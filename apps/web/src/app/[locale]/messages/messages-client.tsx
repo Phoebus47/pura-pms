@@ -62,7 +62,9 @@ export function MessagesClient() {
         <h1 className="font-bold text-(--pura-blue) text-3xl">
           {t('messages.title')}
         </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('messages.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t('messages.subtitle')}
+        </p>
       </header>
 
       <Card>
@@ -85,7 +87,7 @@ export function MessagesClient() {
             <select
               id="msg-direction"
               name="direction"
-              className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md w-full"
+              className="border border-rule-mist min-h-11 mt-1 px-3 rounded-md w-full"
               value={direction}
               onChange={(event) =>
                 setDirection(event.target.value as 'OUTBOUND' | 'INBOUND')
@@ -100,7 +102,7 @@ export function MessagesClient() {
             <textarea
               id="msg-content"
               name="content"
-              className="border border-slate-200 min-h-24 mt-1 p-3 rounded-md w-full"
+              className="border border-rule-mist min-h-24 mt-1 p-3 rounded-md w-full"
               value={content}
               onChange={(event) => setContent(event.target.value)}
             />
@@ -125,15 +127,17 @@ export function MessagesClient() {
         <CardContent className="space-y-3">
           {isLoading ? <p>{t('common.loading')}</p> : null}
           {!isLoading && rows.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('messages.empty')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('messages.empty')}
+            </p>
           ) : null}
           <ul className="space-y-3">
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="border border-slate-200 p-3 rounded-md"
+                className="border border-rule-mist p-3 rounded-md"
               >
-                <p className="font-semibold text-slate-800">
+                <p className="font-semibold text-foreground">
                   {row.guest
                     ? `${row.guest.firstName} ${row.guest.lastName}`
                     : row.guestId}
@@ -141,7 +145,7 @@ export function MessagesClient() {
                   {directionLabel(row.direction)}
                   {!row.readAt ? ` · ${t('messages.unread')}` : ''}
                 </p>
-                <p className="mt-1 text-slate-700 text-sm">{row.content}</p>
+                <p className="mt-1 text-foreground text-sm">{row.content}</p>
                 {!row.readAt ? (
                   <Button
                     type="button"

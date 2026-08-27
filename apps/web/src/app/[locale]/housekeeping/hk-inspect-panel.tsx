@@ -20,7 +20,9 @@ export function HkInspectPanel({ room }: { readonly room: HkBoardRoom }) {
 
   if (room.hkStage !== 'CLEAN') {
     return (
-      <p className="text-slate-600 text-sm">{t('housekeeping.inspectHint')}</p>
+      <p className="text-muted-foreground text-sm">
+        {t('housekeeping.inspectHint')}
+      </p>
     );
   }
 

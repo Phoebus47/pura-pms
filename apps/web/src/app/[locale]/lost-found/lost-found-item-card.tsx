@@ -30,12 +30,12 @@ export function LostFoundItemCard({
     : t('lostFound.deskClaimant');
 
   return (
-    <li className="border border-slate-200 p-3 rounded-md">
-      <p className="font-semibold text-slate-800">
+    <li className="border border-rule-mist p-3 rounded-md">
+      <p className="font-semibold text-foreground">
         {item.itemDescription}
         {isLostFoundOverdue(item) ? ` · ${t('lostFound.overdue')}` : ''}
       </p>
-      <p className="text-slate-600 text-sm">
+      <p className="text-muted-foreground text-sm">
         {item.locationFound}
         {item.roomNumber ? ` · ${t('lostFound.room')} ${item.roomNumber}` : ''}
         {' · '}

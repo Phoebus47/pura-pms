@@ -122,7 +122,11 @@ export function PartnerHotelList({ hotels }: ListProps) {
   }
 
   if (hotels.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('partnerHotels.empty')}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">
+        {t('partnerHotels.empty')}
+      </p>
+    );
   }
 
   return (
@@ -135,7 +139,7 @@ export function PartnerHotelList({ hotels }: ListProps) {
           <div>
             <p className="font-medium">{hotel.name}</p>
             {hotel.phone ? (
-              <p className="text-slate-500">{hotel.phone}</p>
+              <p className="text-muted-foreground">{hotel.phone}</p>
             ) : null}
           </div>
           <Button
