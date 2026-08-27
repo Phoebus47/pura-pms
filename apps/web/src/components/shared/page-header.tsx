@@ -11,15 +11,21 @@ export interface PageHeaderProps {
   readonly subtitle?: string;
   readonly actions?: ReactNode;
   readonly backHref?: string;
+  /** Use when the back target is history rather than a known route. */
+  readonly onBack?: () => void;
   readonly eyebrow?: string;
   readonly className?: string;
 }
+
+const BACK_CLASS =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring font-semibold gap-1 hover:underline inline-flex items-center mb-2 min-h-11 rounded-md text-pura-blue text-sm';
 
 export function PageHeader({
   title,
   subtitle,
   actions,
   backHref,
+  onBack,
   eyebrow,
   className,
 }: PageHeaderProps) {
@@ -33,14 +39,18 @@ export function PageHeader({
       )}
     >
       <div className="min-w-0">
-        {backHref && (
-          <Link
-            href={backHref}
-            className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring font-semibold gap-1 hover:underline inline-flex items-center mb-2 min-h-11 rounded-md text-pura-blue text-sm"
-          >
+        {backHref ? (
+          <Link href={backHref} className={BACK_CLASS}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t('back')}
           </Link>
+        ) : (
+          onBack && (
+            <button type="button" onClick={onBack} className={BACK_CLASS}>
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              {t('back')}
+            </button>
+          )
         )}
         {eyebrow && (
           <p className="font-semibold text-2xs text-ink-subtle tracking-wide uppercase">

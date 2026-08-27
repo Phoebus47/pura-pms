@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { PageHeader } from './page-header';
 
 describe('PageHeader', () => {
@@ -47,5 +48,26 @@ describe('PageHeader', () => {
     render(<PageHeader title="Room 101" />);
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('falls back to a back button when only onBack is given', async () => {
+    const user = userEvent.setup();
+    const onBack = vi.fn();
+    render(<PageHeader title="Room 101" onBack={onBack} />);
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /back/i }));
+
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('prefers the back link over the callback when both are given', () => {
+    const onBack = vi.fn();
+    render(<PageHeader title="Room 101" backHref="/rooms" onBack={onBack} />);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/rooms');
+    expect(
+      screen.queryByRole('button', { name: /back/i }),
+    ).not.toBeInTheDocument();
   });
 });
