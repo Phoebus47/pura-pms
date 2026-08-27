@@ -95,6 +95,13 @@
     "en": "English",
     "th": "Thai"
   },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "switchToLight": "Switch to light appearance",
+    "switchToDark": "Switch to dark appearance"
+  },
   "property": {
     "label": "Property",
     "select": "Select property",

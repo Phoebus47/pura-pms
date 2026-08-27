@@ -90,8 +90,8 @@ describe('LocaleLayout', () => {
     expect(screen.getByText('Test Content')).toBeInTheDocument();
   });
 
-  it('locks the viewport to a light color scheme', () => {
-    expect(viewport.colorScheme).toBe('light');
+  it('advertises both color schemes so the night theme is honoured', () => {
+    expect(viewport.colorScheme).toBe('light dark');
   });
 
   it('should render AppLayout', async () => {

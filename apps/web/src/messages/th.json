@@ -95,6 +95,13 @@
     "en": "English",
     "th": "ไทย"
   },
+  "theme": {
+    "label": "ธีมการแสดงผล",
+    "light": "สว่าง",
+    "dark": "มืด",
+    "switchToLight": "สลับเป็นธีมสว่าง",
+    "switchToDark": "สลับเป็นธีมมืด"
+  },
   "property": {
     "label": "โรงแรม",
     "select": "เลือกโรงแรม",
