@@ -6,6 +6,6 @@ describe('Label', () => {
     render(<Label htmlFor="test-id">Email address</Label>);
     const label = screen.getByText('Email address');
     expect(label).toBeInTheDocument();
-    expect(label).toHaveClass('text-foreground');
+    expect(label).toHaveClass('text-sm', 'font-medium', 'text-ink-default');
   });
 });

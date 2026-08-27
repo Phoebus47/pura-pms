@@ -213,6 +213,31 @@ describe('DropdownMenu', () => {
     );
   });
 
+  it('renders the content as an overlay with menu-item radius', async () => {
+    render(
+      <DropdownMenu>
+        <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>Item 1</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>,
+    );
+
+    await userEvent.click(screen.getByText('Open'));
+
+    expect(screen.getByRole('menu')).toHaveClass(
+      'shadow-overlay',
+      'bg-popover',
+      'text-popover-foreground',
+      'border-border',
+    );
+    expect(screen.getByRole('menuitem', { name: 'Item 1' })).toHaveClass(
+      'rounded-lg',
+      'focus:bg-muted',
+      'focus:text-foreground',
+    );
+  });
+
   it('applies inset styles', async () => {
     const TestComponent = () => (
       <DropdownMenu>

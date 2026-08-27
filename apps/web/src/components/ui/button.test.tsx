@@ -25,17 +25,60 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
+  it('meets the 44px interactive floor at the default size', () => {
+    render(<Button>Post charge</Button>);
+    expect(screen.getByRole('button', { name: 'Post charge' })).toHaveClass(
+      'h-(--field-h)',
+      'rounded-lg',
+    );
+  });
+
+  it('keeps the icon size square on the field height', () => {
+    render(<Button size="icon" aria-label="More actions" />);
+    expect(screen.getByRole('button', { name: 'More actions' })).toHaveClass(
+      'h-(--field-h)',
+      'w-(--field-h)',
+    );
+  });
+
+  it('keeps compact and large sizes on their own heights', () => {
+    const { rerender } = render(<Button size="sm">Sized</Button>);
+    expect(screen.getByRole('button')).toHaveClass('h-9');
+
+    rerender(<Button size="lg">Sized</Button>);
+    expect(screen.getByRole('button')).toHaveClass('h-12');
+  });
+
   it('should apply variant styles', () => {
-    const { container } = render(<Button variant="destructive">Delete</Button>);
-    const button = container.querySelector('button');
-    expect(button).toHaveClass('bg-destructive');
+    render(<Button variant="destructive">Delete</Button>);
+    expect(screen.getByRole('button', { name: 'Delete' })).toHaveClass(
+      'bg-destructive',
+      'text-destructive-foreground',
+    );
+  });
+
+  it('renders the primary variant on semantic action tokens', () => {
+    render(<Button>Save</Button>);
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveClass(
+      'bg-action-primary',
+      'text-ink-onbrand',
+    );
+  });
+
+  it('keeps the secondary variant on the orange signal token', () => {
+    render(<Button variant="secondary">Alert</Button>);
+    expect(screen.getByRole('button', { name: 'Alert' })).toHaveClass(
+      'bg-signal',
+      'text-ink-onbrand',
+    );
   });
 
   it('keeps outline button text readable on a light surface', () => {
     render(<Button variant="outline">Show details</Button>);
     expect(screen.getByRole('button', { name: 'Show details' })).toHaveClass(
       'bg-surface-desk',
-      'text-pura-blue',
+      'text-action-primary',
+      'border-border',
     );
   });
 
@@ -47,6 +90,7 @@ describe('Button', () => {
     );
     const link = screen.getByRole('link', { name: /link button/i });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('inline-flex');
+    expect(link.tagName).toBe('SPAN');
+    expect(link).toHaveClass('inline-flex', 'h-(--field-h)');
   });
 });

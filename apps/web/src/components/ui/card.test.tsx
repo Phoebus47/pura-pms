@@ -15,7 +15,7 @@ describe('Card Components', () => {
     const el = screen.getByText('Card Content');
     expect(el).toBeInTheDocument();
     expect(el).toHaveClass('custom-card');
-    expect(el).toHaveClass('rounded-xl');
+    expect(el).toHaveClass('rounded-xl', 'shadow-panel', 'border-border');
     expect(el).toHaveClass('bg-card', 'text-card-foreground');
   });
 
@@ -24,7 +24,7 @@ describe('Card Components', () => {
     const el = screen.getByText('Header');
     expect(el).toBeInTheDocument();
     expect(el).toHaveClass('custom-header');
-    expect(el).toHaveClass('p-6');
+    expect(el).toHaveClass('p-(--panel-pad)');
   });
 
   it('renders CardTitle with custom className', () => {
@@ -50,7 +50,7 @@ describe('Card Components', () => {
     const el = screen.getByText('Content');
     expect(el).toBeInTheDocument();
     expect(el).toHaveClass('custom-content');
-    expect(el).toHaveClass('p-6');
+    expect(el).toHaveClass('p-(--panel-pad)');
   });
 
   it('renders CardFooter with custom className', () => {
@@ -58,6 +58,6 @@ describe('Card Components', () => {
     const el = screen.getByText('Footer');
     expect(el).toBeInTheDocument();
     expect(el).toHaveClass('custom-footer');
-    expect(el).toHaveClass('p-6');
+    expect(el).toHaveClass('p-(--panel-pad)');
   });
 });
