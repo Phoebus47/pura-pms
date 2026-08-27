@@ -1,7 +1,12 @@
 @import 'tailwindcss';
 
+/*
+ * Harbor Design System v2 — three tiers.
+ * Tier 1 primitives live here but must never be referenced from components.
+ * Components read Tier 2 semantics only (see docs/planning/harbor-design-system-v2.md).
+ */
 :root {
-  /* PURA Brand Colors - Based on Logo */
+  /* ── Tier 1: brand primitives ─────────────────────────────── */
   --pura-blue: #1e4b8e;
   --pura-blue-dark: #153a6e;
   --pura-blue-light: #2563eb;
@@ -10,82 +15,146 @@
   --pura-orange-light: #fbbf24;
   --pura-sky: #3b82f6;
 
-  /* Morning Harbor Desk surfaces */
-  --surface-harbor: oklch(0.975 0.012 247);
-  --surface-desk: oklch(0.995 0.004 247);
-  --surface-inset: oklch(0.96 0.012 247);
-  --rule-mist: oklch(0.9 0.015 247);
+  /* ── Tier 1: Harbor neutral ramp (cool, hue 247) ───────────── */
+  --harbor-25: oklch(0.995 0.004 247);
+  --harbor-50: oklch(0.985 0.008 247);
+  --harbor-100: oklch(0.975 0.012 247);
+  --harbor-200: oklch(0.96 0.012 247);
+  --harbor-300: oklch(0.9 0.015 247);
+  --harbor-400: oklch(0.8 0.018 247);
+  --harbor-500: oklch(0.62 0.022 247);
+  --harbor-600: oklch(0.52 0.024 247);
+  --harbor-700: oklch(0.38 0.026 247);
+  --harbor-800: oklch(0.28 0.026 247);
+  --harbor-900: oklch(0.2 0.02 247);
 
-  /* Light Mode — semantic tokens follow Harbor */
+  /* ── Tier 1: status ramps (100 tint · 500 solid · 700 ink) ── */
+  --status-positive-100: oklch(0.95 0.05 155);
+  --status-positive-500: oklch(0.63 0.15 155);
+  --status-positive-700: oklch(0.45 0.13 155);
+  --status-caution-100: oklch(0.96 0.06 85);
+  --status-caution-500: oklch(0.74 0.15 75);
+  --status-caution-700: oklch(0.52 0.13 70);
+  --status-critical-100: oklch(0.95 0.04 25);
+  --status-critical-500: oklch(0.6 0.2 25);
+  --status-critical-700: oklch(0.45 0.17 25);
+  --status-info-100: oklch(0.95 0.04 250);
+  --status-info-500: oklch(0.58 0.16 255);
+  --status-info-700: oklch(0.42 0.14 255);
+
+  /* ── Tier 2: surfaces ─────────────────────────────────────── */
+  --surface-harbor: var(--harbor-100);
+  --surface-desk: var(--harbor-25);
+  --surface-inset: var(--harbor-200);
+  --surface-sunken: var(--harbor-50);
+  --rule-mist: var(--harbor-300);
+  --rule-strong: var(--harbor-400);
+
+  /* ── Tier 2: ink (text). Not --text-*: that namespace is font size. */
+  --ink-strong: var(--harbor-900);
+  --ink-default: var(--harbor-800);
+  --ink-subtle: var(--harbor-600);
+  --ink-disabled: var(--harbor-500);
+  --ink-onbrand: var(--harbor-25);
+
+  /* ── Tier 2: actions & signal ─────────────────────────────── */
+  --action-primary: var(--pura-blue);
+  --action-primary-alt: var(--pura-blue-dark);
+  --signal: var(--pura-orange);
+  --signal-ink: var(--pura-orange-dark);
+
+  /* ── Tier 2: shadcn-compatible aliases (re-pointed at Harbor) */
+  --background: var(--surface-harbor);
+  --foreground: var(--ink-default);
   --card: var(--surface-desk);
-  --card-foreground: oklch(0.2 0.02 247);
-  --primary: var(--pura-blue);
-  --primary-foreground: oklch(0.985 0 0);
+  --card-foreground: var(--ink-default);
+  --popover: var(--surface-desk);
+  --popover-foreground: var(--ink-default);
+  --primary: var(--action-primary);
+  --primary-foreground: var(--ink-onbrand);
   --secondary: var(--surface-inset);
-  --secondary-foreground: oklch(0.25 0.03 247);
+  --secondary-foreground: var(--ink-strong);
   --muted: var(--surface-inset);
-  --muted-foreground: oklch(0.45 0.02 247);
+  --muted-foreground: var(--ink-subtle);
   --accent: var(--surface-inset);
-  --accent-foreground: oklch(0.25 0.03 247);
+  --accent-foreground: var(--ink-strong);
   --border: var(--rule-mist);
   --input: var(--rule-mist);
-  --ring: color-mix(in oklab, var(--pura-blue) 35%, transparent);
+  --ring: color-mix(in oklab, var(--action-primary) 35%, transparent);
+  --destructive: var(--status-critical-500);
+  --destructive-foreground: var(--ink-onbrand);
+
+  /* ── Tier 3: component tokens (use sparingly) ─────────────── */
   --radius: 0.625rem;
-  --background: var(--surface-harbor);
-  --foreground: oklch(0.2 0.02 247);
-  --popover: var(--surface-desk);
-  --popover-foreground: oklch(0.2 0.02 247);
-  --destructive: oklch(0.577 0.245 27.325);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --table-row-h-compact: 2.25rem;
+  --table-row-h-default: 3rem;
+  --panel-pad: 1.25rem;
+  --panel-pad-lg: 1.5rem;
+  --field-h: 2.75rem;
+
+  /* ── Tier 2: elevation ────────────────────────────────────── */
+  --shadow-panel: 0 1px 2px oklch(0.2 0.02 247 / 0.05);
+  --shadow-overlay: 0 12px 32px -12px oklch(0.2 0.02 247 / 0.28);
 }
 
 @theme inline {
+  /* Surfaces & rules */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
-  --font-sans: var(--font-geist-sans), var(--font-sarabun), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono);
-  --font-thai: var(--font-sarabun), system-ui, sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --color-surface-harbor: var(--surface-harbor);
+  --color-surface-desk: var(--surface-desk);
+  --color-surface-inset: var(--surface-inset);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-rule-mist: var(--rule-mist);
+  --color-rule-strong: var(--rule-strong);
+
+  /* Ink */
+  --color-ink-strong: var(--ink-strong);
+  --color-ink-default: var(--ink-default);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-ink-disabled: var(--ink-disabled);
+  --color-ink-onbrand: var(--ink-onbrand);
+
+  /* Actions & signal */
+  --color-action-primary: var(--action-primary);
+  --color-action-primary-alt: var(--action-primary-alt);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+
+  /* Status tones */
+  --color-status-positive-tint: var(--status-positive-100);
+  --color-status-positive-line: var(--status-positive-500);
+  --color-status-positive-ink: var(--status-positive-700);
+  --color-status-caution-tint: var(--status-caution-100);
+  --color-status-caution-line: var(--status-caution-500);
+  --color-status-caution-ink: var(--status-caution-700);
+  --color-status-critical-tint: var(--status-critical-100);
+  --color-status-critical-line: var(--status-critical-500);
+  --color-status-critical-ink: var(--status-critical-700);
+  --color-status-info-tint: var(--status-info-100);
+  --color-status-info-line: var(--status-info-500);
+  --color-status-info-ink: var(--status-info-700);
+
+  /* shadcn-compatible aliases */
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Brand utilities */
   --color-pura-blue: var(--pura-blue);
   --color-pura-blue-dark: var(--pura-blue-dark);
   --color-pura-blue-light: var(--pura-blue-light);
@@ -93,17 +162,38 @@
   --color-pura-orange-dark: var(--pura-orange-dark);
   --color-pura-orange-light: var(--pura-orange-light);
   --color-pura-sky: var(--pura-sky);
-  --color-surface-harbor: var(--surface-harbor);
-  --color-surface-desk: var(--surface-desk);
-  --color-surface-inset: var(--surface-inset);
-  --color-rule-mist: var(--rule-mist);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Typography — sizes carry their line-height */
+  --font-sans: var(--font-geist-sans), var(--font-sarabun), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-thai: var(--font-sarabun), system-ui, sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 0.875rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.375rem;
+
+  /* Radius — three legal steps plus pill */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+
+  /* Elevation */
+  --shadow-panel: var(--shadow-panel);
+  --shadow-overlay: var(--shadow-overlay);
 }
 
 html {
@@ -115,38 +205,20 @@ body {
   background: var(--background);
 }
 
+/* Dark values are kept token-ready but the app ships light only. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --surface-harbor: var(--harbor-900);
+  --surface-desk: var(--harbor-800);
+  --surface-inset: var(--harbor-700);
+  --surface-sunken: var(--harbor-800);
+  --rule-mist: oklch(1 0 0 / 12%);
+  --rule-strong: oklch(1 0 0 / 20%);
+  --ink-strong: var(--harbor-25);
+  --ink-default: var(--harbor-50);
+  --ink-subtle: var(--harbor-300);
+  --ink-disabled: var(--harbor-400);
+  --ink-onbrand: var(--harbor-25);
+  --ring: color-mix(in oklab, var(--pura-blue-light) 45%, transparent);
 }
 
 @layer base {
@@ -183,18 +255,12 @@ body {
 
 .surface-desk {
   background: var(--surface-desk);
-  border-radius: var(--radius);
-}
-
-.surface-panel {
-  background: var(--surface-desk);
-  border: 1px solid var(--rule-mist);
-  border-radius: var(--radius);
+  border-radius: var(--radius-xl);
 }
 
 .surface-inset {
   background: var(--surface-inset);
-  border-radius: var(--radius);
+  border-radius: var(--radius-xl);
 }
 
 .motion-enter {
@@ -213,6 +279,10 @@ body {
   animation-delay: 120ms;
 }
 
+.motion-row-flash {
+  animation: harbor-row-flash 240ms ease-out both;
+}
+
 @keyframes shift-ops-enter {
   from {
     opacity: 0;
@@ -224,11 +294,21 @@ body {
   }
 }
 
+@keyframes harbor-row-flash {
+  from {
+    background-color: var(--status-info-100);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .motion-enter,
   .motion-enter-delay-1,
   .motion-enter-delay-2,
-  .motion-enter-delay-3 {
+  .motion-enter-delay-3,
+  .motion-row-flash {
     animation: none;
   }
 }
