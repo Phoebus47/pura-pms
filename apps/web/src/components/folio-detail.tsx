@@ -7,6 +7,7 @@ import type { TransactionCode } from '@/lib/api/transaction-codes';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
+import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
 import { PostChargeDialog } from './post-charge-dialog';
 import { PostPaymentDialog } from './post-payment-dialog';
 import { VoidTransactionDialog } from './void-transaction-dialog';
@@ -98,13 +99,13 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
               className={cn(
                 'px-4 py-2 rounded-xl border transition-colors font-medium text-sm',
                 activeFolioId === folio.id
-                  ? 'bg-pura-blue text-white border-pura-blue'
+                  ? 'bg-pura-blue text-ink-onbrand border-pura-blue'
                   : 'bg-surface-desk text-muted-foreground border-rule-mist hover:bg-surface-inset',
               )}
             >
               {t('billing.folioNumber')} {folio.folioNumber} ({folio.type})
               {folio.isInterim ? (
-                <span className="ml-1 text-indigo-200">
+                <span className="ml-1 opacity-70">
                   · {t('folios.interimLabel')}
                 </span>
               ) : null}
@@ -119,10 +120,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
             </p>
             <p
               className={cn(
-                'text-2xl font-black mt-0.5',
+                'text-2xl font-bold mt-0.5',
                 (activeFolio?.balance || 0) > 0
-                  ? 'text-red-600'
-                  : 'text-emerald-600',
+                  ? statusToneInk.critical
+                  : statusToneInk.positive,
               )}
             >
               ฿{Number(activeFolio?.balance || 0).toLocaleString()}
@@ -149,12 +150,18 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 'px-6 py-3 text-sm font-bold transition-colors border-b-2 relative',
                 activeWindowNumber === num
                   ? 'border-pura-blue text-pura-blue'
-                  : 'border-transparent text-muted-foreground hover:text-muted-foreground hover:border-slate-300',
+                  : 'border-transparent text-muted-foreground hover:text-muted-foreground hover:border-rule-mist',
               )}
             >
               {t('billing.window')} {num}
               {window && window.balance !== 0 && (
-                <span className="-right-1 -top-1 absolute bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full text-[10px] text-red-600">
+                <span
+                  className={cn(
+                    '-right-1 -top-1 absolute border px-1.5 py-0.5 rounded-full text-2xs',
+                    statusToneSurface.critical,
+                    statusToneInk.critical,
+                  )}
+                >
                   {Number(window.balance).toLocaleString()}
                 </span>
               )}
@@ -212,7 +219,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-slate-100 divide-y">
+            <tbody className="divide-rule-mist divide-y">
               {activeWindow?.transactions &&
               activeWindow.transactions.length > 0 ? (
                 activeWindow.transactions.map((trx) => (
@@ -227,7 +234,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                       {new Date(trx.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-slate-100 font-bold font-mono px-2 py-1 rounded text-foreground text-xs">
+                      <span className="bg-surface-inset font-bold font-mono px-2 py-1 rounded text-ink-strong text-xs">
                         {trx.trxCode.code}
                       </span>
                     </td>
@@ -236,7 +243,7 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                         {trx.trxCode.description}
                       </p>
                       {trx.reference && (
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-2xs text-muted-foreground">
                           {trx.reference}
                         </p>
                       )}
@@ -253,7 +260,9 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                     <td
                       className={cn(
                         'px-6 py-4 text-sm text-right font-bold',
-                        trx.sign > 0 ? 'text-red-600' : 'text-emerald-600',
+                        trx.sign > 0
+                          ? statusToneInk.critical
+                          : statusToneInk.positive,
                       )}
                     >
                       {trx.sign > 0 ? '' : '-'}฿
@@ -263,7 +272,10 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-red-300 hover:bg-red-50 text-red-600"
+                        className={cn(
+                          'border-status-critical-line/40 hover:bg-status-critical-tint',
+                          statusToneInk.critical,
+                        )}
                         disabled={trx.isVoid}
                         onClick={() => {
                           setSelectedTransactionId(trx.id);
@@ -299,8 +311,8 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
                     className={cn(
                       'px-6 py-4 text-right text-lg',
                       Number(activeWindow.balance) > 0
-                        ? 'text-red-600'
-                        : 'text-emerald-600',
+                        ? statusToneInk.critical
+                        : statusToneInk.positive,
                     )}
                   >
                     ฿{Number(activeWindow.balance).toLocaleString()}
@@ -313,7 +325,12 @@ export function FolioDetail({ reservationId }: FolioDetailProps) {
       </div>
 
       {/* Routing Info (Placeholder for now) */}
-      <div className="bg-blue-50 border border-blue-100 flex gap-3 items-start p-4 rounded-xl">
+      <div
+        className={cn(
+          'border flex gap-3 items-start p-4 rounded-xl',
+          statusToneSurface.info,
+        )}
+      >
         <AlertCircle className="h-5 mt-0.5 text-pura-blue w-5" />
         <div>
           <h4 className="font-bold text-pura-blue text-sm">

@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
+import type { StatusTone } from '@/lib/design/status-tone';
 import type { ReservationStatus } from '@/lib/api/reservations';
+import { StatusChip } from './status-chip';
 
 interface ReservationStatusBadgeProps {
   readonly status: ReservationStatus;
@@ -8,38 +10,26 @@ interface ReservationStatusBadgeProps {
   readonly size?: 'default' | 'xs';
 }
 
-const statusConfig: Record<
-  ReservationStatus,
-  { className: string; labelKey: string }
-> = {
-  TENTATIVE: {
-    labelKey: 'reservations.status.TENTATIVE',
-    className: 'bg-slate-100 text-foreground ring-slate-600/20',
-  },
-  CONFIRMED: {
-    labelKey: 'reservations.status.CONFIRMED',
-    className: 'bg-blue-100 text-blue-700 ring-blue-600/20',
-  },
-  CHECKED_IN: {
-    labelKey: 'reservations.status.CHECKED_IN',
-    className: 'bg-emerald-100 text-emerald-700 ring-emerald-600/20',
-  },
-  CHECKED_OUT: {
-    labelKey: 'reservations.status.CHECKED_OUT',
-    className: 'bg-purple-100 text-purple-700 ring-purple-600/20',
-  },
-  CANCELLED: {
-    labelKey: 'reservations.status.CANCELLED',
-    className: 'bg-red-100 text-red-700 ring-red-600/20',
-  },
-  NO_SHOW: {
-    labelKey: 'reservations.status.NO_SHOW',
-    className: 'bg-amber-100 text-amber-700 ring-amber-600/20',
-  },
-  WALKED: {
-    labelKey: 'reservations.status.WALKED',
-    className: 'bg-orange-100 text-orange-700 ring-orange-600/20',
-  },
+export const reservationStatusTone: Record<ReservationStatus, StatusTone> = {
+  TENTATIVE: 'caution',
+  CONFIRMED: 'info',
+  CHECKED_IN: 'positive',
+  CHECKED_OUT: 'neutral',
+  CANCELLED: 'critical',
+  // No-show still needs desk action (post the fee, release the room), so it
+  // reads as an exception rather than a settled cancellation.
+  NO_SHOW: 'caution',
+  WALKED: 'caution',
+};
+
+const reservationStatusLabelKey: Record<ReservationStatus, string> = {
+  TENTATIVE: 'reservations.status.TENTATIVE',
+  CONFIRMED: 'reservations.status.CONFIRMED',
+  CHECKED_IN: 'reservations.status.CHECKED_IN',
+  CHECKED_OUT: 'reservations.status.CHECKED_OUT',
+  CANCELLED: 'reservations.status.CANCELLED',
+  NO_SHOW: 'reservations.status.NO_SHOW',
+  WALKED: 'reservations.status.WALKED',
 };
 
 export function ReservationStatusBadge({
@@ -47,18 +37,12 @@ export function ReservationStatusBadge({
   className,
   size = 'default',
 }: ReservationStatusBadgeProps) {
-  const config = statusConfig[status];
-
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full font-semibold ring-1 ring-inset shrink-0 whitespace-nowrap',
-        size === 'xs' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
-        config.className,
-        className,
-      )}
-    >
-      {t(config.labelKey)}
-    </span>
+    <StatusChip
+      tone={reservationStatusTone[status]}
+      label={t(reservationStatusLabelKey[status])}
+      size={size === 'xs' ? 'sm' : 'md'}
+      className={cn('shrink-0', className)}
+    />
   );
 }

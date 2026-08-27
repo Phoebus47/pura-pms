@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { ErrorDisplay } from './error-display';
+import { statusToneInk, statusToneSurface } from '@/lib/design/status-tone';
 
 describe('ErrorDisplay', () => {
   it('should not render when error is null', () => {
@@ -16,10 +17,14 @@ describe('ErrorDisplay', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
-  it('should have correct styling for error message', () => {
+  it('should use the critical tone for the message and the panel', () => {
     render(<ErrorDisplay error="Test error" />);
 
-    const errorElement = screen.getByText('Test error');
-    expect(errorElement).toHaveClass('text-red-600');
+    expect(screen.getByText('Test error')).toHaveClass(
+      ...statusToneInk.critical.split(' '),
+    );
+    expect(screen.getByRole('alert')).toHaveClass(
+      ...statusToneSurface.critical.split(' '),
+    );
   });
 });
