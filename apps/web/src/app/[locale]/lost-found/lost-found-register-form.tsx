@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Panel } from '@/components/shared/panel';
 import { t } from '@/lib/i18n';
 
 interface LostFoundRegisterFormProps {
@@ -37,38 +37,32 @@ export function LostFoundRegisterForm({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('lostFound.register')}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div>
+    <Panel title={t('lostFound.register')}>
+      <div className="space-y-4">
+        <div className="space-y-2">
           <Label htmlFor="lf-description">{t('lostFound.description')}</Label>
           <Input
             id="lf-description"
             name="itemDescription"
-            className="mt-1"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
         </div>
-        <div className="gap-3 grid sm:grid-cols-2">
-          <div>
+        <div className="gap-4 grid sm:grid-cols-2">
+          <div className="space-y-2">
             <Label htmlFor="lf-location">{t('lostFound.location')}</Label>
             <Input
               id="lf-location"
               name="locationFound"
-              className="mt-1"
               value={location}
               onChange={(event) => setLocation(event.target.value)}
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="lf-room">{t('lostFound.room')}</Label>
             <Input
               id="lf-room"
               name="roomNumber"
-              className="mt-1"
               value={roomNumber}
               onChange={(event) => setRoomNumber(event.target.value)}
             />
@@ -76,13 +70,12 @@ export function LostFoundRegisterForm({
         </div>
         <Button
           type="button"
-          className="min-h-11"
           disabled={!description.trim() || !location.trim() || isPending}
           onClick={() => void handleCreate()}
         >
           {t('lostFound.create')}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }

@@ -74,17 +74,17 @@ export function PropertyFormDialog({
 
   return (
     <div className="bg-black/50 fixed flex inset-0 items-center justify-center p-4 z-50">
-      <div className="bg-white max-h-[90vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
+      <div className="bg-surface-desk max-h-[90vh] max-w-2xl overflow-hidden rounded-xl shadow-lg w-full">
         {/* Header */}
-        <div className="border-b border-slate-200 flex items-center justify-between p-6">
+        <div className="border-b border-rule-mist flex items-center justify-between p-6">
           <h2 className="font-bold text-2xl text-pura-blue">
             {property ? 'Edit Property' : 'New Property'}
           </h2>
           <button
             onClick={onClose}
-            className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
+            className="hover:bg-muted p-2 rounded-lg transition-colors"
           >
-            <X className="h-5 text-slate-600 w-5" />
+            <X className="h-5 text-muted-foreground w-5" />
           </button>
         </div>
 
@@ -98,7 +98,7 @@ export function PropertyFormDialog({
             <div>
               <label
                 htmlFor="property-name"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
+                className="block font-semibold mb-2 text-foreground text-sm"
               >
                 Property Name *
               </label>
@@ -112,14 +112,14 @@ export function PropertyFormDialog({
                 }
                 required
                 placeholder="e.g., Grand Hotel Bangkok"
-                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
+                className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
               />
             </div>
 
             <div>
               <label
                 htmlFor="property-address"
-                className="block font-semibold mb-2 text-slate-700 text-sm"
+                className="block font-semibold mb-2 text-foreground text-sm"
               >
                 Address
               </label>
@@ -132,7 +132,7 @@ export function PropertyFormDialog({
                 }
                 placeholder="Full address"
                 rows={3}
-                className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 resize-none rounded-lg transition-colors w-full"
+                className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 resize-none rounded-lg transition-colors w-full"
               />
             </div>
 
@@ -140,7 +140,7 @@ export function PropertyFormDialog({
               <div>
                 <label
                   htmlFor="property-phone"
-                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                  className="block font-semibold mb-2 text-foreground text-sm"
                 >
                   Phone
                 </label>
@@ -153,14 +153,14 @@ export function PropertyFormDialog({
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="+66 2 123 4567"
-                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
+                  className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="property-email"
-                  className="block font-semibold mb-2 text-slate-700 text-sm"
+                  className="block font-semibold mb-2 text-foreground text-sm"
                 >
                   Email
                 </label>
@@ -173,21 +173,21 @@ export function PropertyFormDialog({
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="contact@property.com"
-                  className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-lg transition-colors w-full"
+                  className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="bg-status-critical-tint border border-status-critical-line/30 p-4 rounded-xl">
+                <p className="text-sm text-status-critical-ink">{error}</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="border-slate-200 border-t flex gap-3 mt-6 pt-6">
+          <div className="border-rule-mist border-t flex gap-3 mt-6 pt-6">
             <Button
               type="button"
               onClick={onClose}

@@ -39,7 +39,7 @@ export function LocaleSwitcher({
       <p
         className={cn(
           'font-medium text-xs',
-          isOnDark ? 'text-white/70' : 'text-slate-600',
+          isOnDark ? 'text-white/70' : 'text-muted-foreground',
         )}
       >
         {t('label')}

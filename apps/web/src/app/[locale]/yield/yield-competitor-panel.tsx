@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { Building2 } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/shared/empty-state';
 import { useCreateCompetitorRate } from '@/hooks/use-yield';
 import type { CompetitorRate } from '@/lib/api/yield';
 import type { RoomType } from '@/lib/api/room-types';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const CONTROL_CLASS =
+  'h-(--field-h) w-full rounded-md border border-input bg-surface-desk px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+const buttonClass = 'w-full sm:w-auto';
 
 interface CompetitorFormProps {
   readonly propertyId: string;
@@ -58,7 +61,6 @@ export function CompetitorPanel({
           <Input
             id="competitorName"
             name="competitorName"
-            className={fieldClass}
             value={competitorName}
             onChange={(event) => setCompetitorName(event.target.value)}
             required
@@ -70,7 +72,6 @@ export function CompetitorPanel({
             id="competitorStayDate"
             name="stayDate"
             type="date"
-            className={fieldClass}
             value={stayDate}
             onChange={(event) => setStayDate(event.target.value)}
             required
@@ -86,7 +87,6 @@ export function CompetitorPanel({
             type="number"
             min="0"
             step="0.01"
-            className={fieldClass}
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             required
@@ -97,7 +97,7 @@ export function CompetitorPanel({
           <select
             id="competitorRoomType"
             name="roomTypeId"
-            className={`${fieldClass} w-full rounded-md border border-slate-300 bg-white px-3`}
+            className={CONTROL_CLASS}
             value={roomTypeId}
             onChange={(event) => setRoomTypeId(event.target.value)}
           >
@@ -114,11 +114,14 @@ export function CompetitorPanel({
         </Button>
       </form>
       {competitors.length === 0 ? (
-        <p className="text-slate-600 text-sm">{t('yield.competitorEmpty')}</p>
+        <EmptyState
+          icon={<Building2 className="h-10 w-10" />}
+          title={t('yield.competitorEmpty')}
+        />
       ) : (
         <ul className="space-y-2">
           {competitors.map((row) => (
-            <li key={row.id} className="text-slate-700 text-sm">
+            <li key={row.id} className="tabular-nums text-ink-default text-sm">
               {row.competitorName} · {String(row.stayDate).slice(0, 10)} ·{' '}
               {row.amount}
             </li>

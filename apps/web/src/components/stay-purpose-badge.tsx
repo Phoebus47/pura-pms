@@ -1,12 +1,20 @@
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
+import type { StatusTone } from '@/lib/design/status-tone';
 import { isNonRevenueStay, type StayPurpose } from '@/lib/stay-purpose';
+import { StatusBadge } from './shared/status-badge';
 
 interface StayPurposeBadgeProps {
   readonly stayPurpose?: StayPurpose | null;
   readonly className?: string;
   readonly size?: 'default' | 'xs';
 }
+
+export const stayPurposeTone: Record<StayPurpose, StatusTone> = {
+  STANDARD: 'neutral',
+  HOUSE_USE: 'neutral',
+  COMPLIMENTARY: 'positive',
+};
 
 export function StayPurposeBadge({
   stayPurpose,
@@ -17,23 +25,18 @@ export function StayPurposeBadge({
     return null;
   }
 
-  const label =
-    stayPurpose === 'HOUSE_USE'
-      ? t('reservations.stayPurpose.badgeHouse')
-      : t('reservations.stayPurpose.badgeComp');
+  const isHouseUse = stayPurpose === 'HOUSE_USE';
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full font-semibold ring-1 ring-inset shrink-0 whitespace-nowrap',
-        stayPurpose === 'HOUSE_USE'
-          ? 'bg-slate-100 text-slate-800 ring-slate-600/20'
-          : 'bg-emerald-100 text-emerald-800 ring-emerald-600/20',
-        size === 'xs' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
-        className,
-      )}
-    >
-      {label}
-    </span>
+    <StatusBadge
+      tone={stayPurposeTone[isHouseUse ? 'HOUSE_USE' : 'COMPLIMENTARY']}
+      label={
+        isHouseUse
+          ? t('reservations.stayPurpose.badgeHouse')
+          : t('reservations.stayPurpose.badgeComp')
+      }
+      size={size === 'xs' ? 'sm' : 'md'}
+      className={cn('shrink-0', className)}
+    />
   );
 }

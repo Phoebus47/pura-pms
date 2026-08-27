@@ -83,10 +83,18 @@ describe('ReportsPage', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('heading', { name: t('reports.title') }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: t('reports.title'),
+      }),
     ).toBeInTheDocument();
-    expect(screen.getByText(t('reports.drrTitle'))).toBeInTheDocument();
-    expect(await screen.findByText('ROOM')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('reports.drrTitle') }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole('table', { name: t('reports.drrTitle') }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('ROOM')).toBeInTheDocument();
     expect(screen.getByText('SPA')).toBeInTheDocument();
     expect(screen.getAllByText('1,404.00').length).toBeGreaterThan(0);
   });
@@ -95,7 +103,7 @@ describe('ReportsPage', () => {
     renderPage();
 
     expect(
-      await screen.findByText(t('reports.flashTitle')),
+      await screen.findByRole('heading', { name: t('reports.flashTitle') }),
     ).toBeInTheDocument();
     expect(await screen.findByText('10%')).toBeInTheDocument();
     expect(screen.getByText('1 / 10')).toBeInTheDocument();
@@ -118,7 +126,7 @@ describe('ReportsPage', () => {
   it('renders the GL journals panel', async () => {
     renderPage();
     expect(
-      await screen.findByText(t('reports.journalsTitle')),
+      await screen.findByRole('heading', { name: t('reports.journalsTitle') }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: t('reports.postJournals') }),
@@ -127,7 +135,9 @@ describe('ReportsPage', () => {
 
   it('renders the trial balance panel', async () => {
     renderPage();
-    expect(await screen.findByText(t('reports.tbTitle'))).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: t('reports.tbTitle') }),
+    ).toBeInTheDocument();
   });
 
   it('shows an empty state when there is no revenue', async () => {

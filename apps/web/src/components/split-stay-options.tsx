@@ -30,13 +30,13 @@ export function SplitStayOptions({
           disabled={disabled}
           aria-label={t('reservations.splitStay.label')}
           onChange={(event) => onEnabledChange(event.target.checked)}
-          className="border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
+          className="border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-4 mt-1 rounded text-pura-blue w-4"
         />
         <span>
-          <span className="block font-semibold text-slate-700 text-sm">
+          <span className="block font-semibold text-foreground text-sm">
             {t('reservations.splitStay.label')}
           </span>
-          <span className="block mt-1 text-slate-500 text-xs">
+          <span className="block mt-1 text-muted-foreground text-xs">
             {t('reservations.splitStay.hint')}
           </span>
         </span>
@@ -46,7 +46,7 @@ export function SplitStayOptions({
         <div>
           <label
             htmlFor="split-date"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.splitStay.splitDate')}
           </label>
@@ -58,7 +58,7 @@ export function SplitStayOptions({
             min={minDate}
             max={maxDate}
             onChange={(event) => onSplitDateChange(event.target.value)}
-            className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 min-h-11 outline-none px-4 py-3 rounded-xl transition-all w-full"
+            className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring min-h-11 px-4 py-3 rounded-xl transition-all w-full"
           />
         </div>
       ) : null}

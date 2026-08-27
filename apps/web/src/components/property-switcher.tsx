@@ -44,7 +44,7 @@ export function PropertySwitcher({
       {showLabel ? (
         <label
           htmlFor="property-select"
-          className="flex font-medium gap-1.5 items-center text-slate-600 text-xs"
+          className="flex font-medium gap-1.5 items-center text-muted-foreground text-xs"
         >
           <Building2 className="h-3.5 text-muted-foreground w-3.5" />
           <span>{t('label')}</span>
@@ -60,7 +60,7 @@ export function PropertySwitcher({
           onChange={(e) => setActivePropertyId(e.target.value)}
           disabled={isLoading || properties.length === 0}
           aria-label={t('select')}
-          className="bg-white border border-slate-200 cursor-pointer disabled:opacity-50 focus:border-pura-blue focus:outline-none focus:ring-2 focus:ring-pura-blue/20 font-medium h-10 min-h-10 pl-8 pr-7 py-1.5 rounded-lg sm:text-sm text-slate-800 text-xs transition-all"
+          className="bg-surface-desk border border-rule-mist cursor-pointer disabled:opacity-50 focus:border-pura-blue focus:outline-none focus:ring-2 focus:ring-pura-blue/20 font-medium h-10 min-h-10 pl-8 pr-7 py-1.5 rounded-lg sm:text-sm text-foreground text-xs transition-all"
         >
           {properties.length === 0 ? (
             <option value="">{isLoading ? '...' : t('select')}</option>

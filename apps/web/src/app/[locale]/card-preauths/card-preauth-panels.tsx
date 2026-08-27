@@ -8,18 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { EntitySelect } from '@/components/shared/entity-select';
-import { useOpenFolios } from '@/hooks/use-folios';
-import { folioOptionLabel, reservationOptionLabel } from '@/lib/entity-labels';
+import { reservationOptionLabel } from '@/lib/entity-labels';
 import { reservationsAPI } from '@/lib/api/reservations';
-import {
-  useCaptureCardPreauth,
-  useCreateCardPreauth,
-  useIncrementCardPreauth,
-  useReleaseCardPreauth,
-} from '@/hooks/use-card-preauths';
-import type { CardPreauth } from '@/lib/api/card-preauths';
-
-const fieldClass = 'min-h-11';
+import { useCreateCardPreauth } from '@/hooks/use-card-preauths';
 
 interface HoldFormProps {
   readonly createdBy: string;
@@ -87,7 +78,6 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
           type="number"
           min={0.01}
           step="0.01"
-          className={fieldClass}
           value={amount}
           onChange={(event) => setAmount(event.target.value)}
           required
@@ -98,7 +88,6 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
         <Input
           id="preauthLast4"
           name="last4"
-          className={fieldClass}
           maxLength={4}
           value={last4}
           onChange={(event) => setLast4(event.target.value)}
@@ -113,7 +102,6 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
           type="number"
           min={1}
           max={12}
-          className={fieldClass}
           value={expiryMonth}
           onChange={(event) => setExpiryMonth(event.target.value)}
           required
@@ -126,7 +114,6 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
           name="expiryYear"
           type="number"
           min={2020}
-          className={fieldClass}
           value={expiryYear}
           onChange={(event) => setExpiryYear(event.target.value)}
           required
@@ -137,156 +124,14 @@ export function HoldCardPreauthForm({ createdBy }: HoldFormProps) {
         <Input
           id="preauthManualRef"
           name="manualRef"
-          className={fieldClass}
           value={manualRef}
           onChange={(event) => setManualRef(event.target.value)}
           required
         />
       </div>
-      <Button
-        type="submit"
-        className="min-h-11"
-        disabled={createMutation.isPending}
-      >
+      <Button type="submit" disabled={createMutation.isPending}>
         {t('preauth.holdSubmit')}
       </Button>
     </form>
-  );
-}
-
-interface ListProps {
-  readonly holds: CardPreauth[];
-  readonly userId: string;
-  readonly propertyId?: string;
-}
-
-export function CardPreauthList({ holds, userId, propertyId }: ListProps) {
-  const incrementMutation = useIncrementCardPreauth();
-  const captureMutation = useCaptureCardPreauth();
-  const releaseMutation = useReleaseCardPreauth();
-  const { data: folios = [] } = useOpenFolios(propertyId);
-  const [amountById, setAmountById] = useState<Record<string, string>>({});
-  const [folioById, setFolioById] = useState<Record<string, string>>({});
-
-  if (holds.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('preauth.empty')}</p>;
-  }
-
-  return (
-    <ul className="space-y-4">
-      {holds.map((hold) => {
-        const open = hold.status === 'HELD' || hold.status === 'INCREMENTAL';
-        return (
-          <li key={hold.id} className="border-b last:border-0 pb-4 space-y-2">
-            <p className="text-sm">
-              ****{hold.last4} · {Number(hold.amount).toFixed(2)} ·{' '}
-              {hold.status} · {hold.manualRef}
-            </p>
-            {open ? (
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Input
-                  id={`inc-${hold.id}`}
-                  name={`inc-${hold.id}`}
-                  type="number"
-                  min={0.01}
-                  className="min-h-11"
-                  aria-label={t('preauth.incrementAmount')}
-                  value={amountById[hold.id] ?? ''}
-                  onChange={(event) =>
-                    setAmountById((current) => ({
-                      ...current,
-                      [hold.id]: event.target.value,
-                    }))
-                  }
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="min-h-11"
-                  disabled={incrementMutation.isPending}
-                  onClick={() =>
-                    void incrementMutation
-                      .mutateAsync({
-                        id: hold.id,
-                        amount: Number(amountById[hold.id]),
-                      })
-                      .then(() => toast.success(t('preauth.incrementSuccess')))
-                      .catch((err: unknown) =>
-                        toast.error(
-                          err instanceof Error
-                            ? err.message
-                            : t('preauth.increment'),
-                        ),
-                      )
-                  }
-                >
-                  {t('preauth.increment')}
-                </Button>
-                <EntitySelect
-                  id={`folio-${hold.id}`}
-                  name={`folio-${hold.id}`}
-                  label={t('preauth.folioId')}
-                  value={folioById[hold.id] ?? ''}
-                  onChange={(value) =>
-                    setFolioById((current) => ({
-                      ...current,
-                      [hold.id]: value,
-                    }))
-                  }
-                  options={folios.map((folio) => ({
-                    value: folio.id,
-                    label: folioOptionLabel(folio),
-                  }))}
-                  required
-                />
-                <Button
-                  type="button"
-                  className="min-h-11"
-                  disabled={captureMutation.isPending}
-                  onClick={() =>
-                    void captureMutation
-                      .mutateAsync({
-                        id: hold.id,
-                        folioId: folioById[hold.id],
-                        userId,
-                      })
-                      .then(() => toast.success(t('preauth.captureSuccess')))
-                      .catch((err: unknown) =>
-                        toast.error(
-                          err instanceof Error
-                            ? err.message
-                            : t('preauth.capture'),
-                        ),
-                      )
-                  }
-                >
-                  {t('preauth.capture')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="min-h-11"
-                  disabled={releaseMutation.isPending}
-                  onClick={() =>
-                    void releaseMutation
-                      .mutateAsync(hold.id)
-                      .then(() => toast.success(t('preauth.releaseSuccess')))
-                      .catch((err: unknown) =>
-                        toast.error(
-                          err instanceof Error
-                            ? err.message
-                            : t('preauth.release'),
-                        ),
-                      )
-                  }
-                >
-                  {t('preauth.release')}
-                </Button>
-              </div>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
   );
 }

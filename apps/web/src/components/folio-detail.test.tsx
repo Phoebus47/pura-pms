@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FolioDetail } from './folio-detail';
 import { foliosAPI } from '@/lib/api/folios';
+import { statusToneInk } from '@/lib/design/status-tone';
 
 vi.mock('@/lib/api/folios', () => ({
   foliosAPI: {
@@ -297,12 +298,11 @@ describe('FolioDetail', () => {
       expect(screen.getByText('Folio 1001 (GUEST)')).toBeInTheDocument();
     });
 
-    // Both the Folio balance and the Window balance are 0
-    // So both should render text-emerald-600
+    // A settled balance (folio and window alike) reads as the positive tone.
     const zeroBalances = screen.getAllByText('฿0');
     expect(zeroBalances.length).toBe(2);
-    expect(zeroBalances[0]).toHaveClass('text-emerald-600');
-    expect(zeroBalances[1]).toHaveClass('text-emerald-600');
+    expect(zeroBalances[0]).toHaveClass(statusToneInk.positive);
+    expect(zeroBalances[1]).toHaveClass(statusToneInk.positive);
   });
 
   it('renders sign correctly for charges and payments', async () => {
@@ -310,9 +310,21 @@ describe('FolioDetail', () => {
     render(<FolioDetail reservationId="res1" />);
 
     await waitFor(() => {
-      expect(screen.getByText('฿110')).toHaveClass('text-red-600');
+      expect(screen.getByText('฿110')).toHaveClass(statusToneInk.critical);
     });
-    expect(screen.getByText('-฿50')).toHaveClass('text-emerald-600');
+    expect(screen.getByText('-฿50')).toHaveClass(statusToneInk.positive);
+  });
+
+  it('renders an outstanding balance with the critical tone', async () => {
+    render(<FolioDetail reservationId="res1" />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('฿500')).not.toHaveLength(0);
+    });
+
+    for (const balance of screen.getAllByText('฿500')) {
+      expect(balance).toHaveClass(statusToneInk.critical);
+    }
   });
 
   it('renders window balance badge when non-zero', async () => {

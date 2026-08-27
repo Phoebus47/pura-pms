@@ -35,7 +35,7 @@ export function TaxExemptFields({
         <div>
           <label
             htmlFor="tax-exempt-reason"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.taxExempt.reason')} *
           </label>
@@ -46,7 +46,7 @@ export function TaxExemptFields({
             onChange={(event) =>
               onTaxExemptReasonChange(event.target.value as TaxExemptReason)
             }
-            className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+            className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
             required
           >
             {TAX_EXEMPT_REASONS.map((reason) => (
@@ -59,7 +59,7 @@ export function TaxExemptFields({
         <div>
           <label
             htmlFor="tax-exempt-document"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.taxExempt.documentRef')} *
           </label>
@@ -70,14 +70,14 @@ export function TaxExemptFields({
             onChange={(event) =>
               onTaxExemptDocumentRefChange(event.target.value)
             }
-            className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+            className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
             required
           />
         </div>
         <div>
           <label
             htmlFor="tax-exempt-approved-by"
-            className="block font-semibold mb-2 text-slate-700 text-sm"
+            className="block font-semibold mb-2 text-foreground text-sm"
           >
             {t('reservations.taxExempt.approvedBy')} *
           </label>
@@ -88,7 +88,7 @@ export function TaxExemptFields({
             onChange={(event) =>
               onTaxExemptApprovedByChange(event.target.value)
             }
-            className="border border-slate-300 focus:border-pura-blue focus:ring-4 focus:ring-pura-blue/10 outline-none px-4 py-3 rounded-xl transition-all w-full"
+            className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-xl transition-all w-full"
             required
           />
         </div>
@@ -105,13 +105,13 @@ export function TaxExemptFields({
           type="checkbox"
           checked={taxExempt}
           onChange={(event) => onTaxExemptChange(event.target.checked)}
-          className="border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pura-blue h-4 mt-1 rounded text-pura-blue w-4"
+          className="border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-4 mt-1 rounded text-pura-blue w-4"
         />
         <span>
-          <span className="block font-semibold text-slate-700 text-sm">
+          <span className="block font-semibold text-foreground text-sm">
             {t('reservations.taxExempt.checkbox')}
           </span>
-          <span className="block mt-1 text-slate-500 text-xs">
+          <span className="block mt-1 text-muted-foreground text-xs">
             {t('reservations.taxExempt.hint')}
           </span>
         </span>

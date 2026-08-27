@@ -33,8 +33,12 @@ describe('BillingClient', () => {
   it('shows selector when reservationId is missing', () => {
     render(<BillingClient />);
 
-    expect(screen.getByText('Billing')).toBeInTheDocument();
-    expect(screen.getByText(/select a reservation/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Billing' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /select a reservation/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: /go to reservations/i }),
     ).toHaveAttribute('href', '/reservations');

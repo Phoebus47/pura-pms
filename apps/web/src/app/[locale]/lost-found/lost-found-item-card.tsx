@@ -1,10 +1,15 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/shared/status-badge';
 import type { LostFoundItem } from '@/lib/api/lost-found';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
-import { isLostFoundOverdue, lostFoundStatusLabel } from './lost-found-helpers';
+import {
+  isLostFoundOverdue,
+  lostFoundStatusLabel,
+  lostFoundStatusTone,
+} from './lost-found-helpers';
 
 interface LostFoundItemCardProps {
   item: LostFoundItem;
@@ -30,22 +35,30 @@ export function LostFoundItemCard({
     : t('lostFound.deskClaimant');
 
   return (
-    <li className="border border-slate-200 p-3 rounded-md">
-      <p className="font-semibold text-slate-800">
-        {item.itemDescription}
-        {isLostFoundOverdue(item) ? ` · ${t('lostFound.overdue')}` : ''}
-      </p>
-      <p className="text-slate-600 text-sm">
+    <li className="border border-rule-mist p-4 rounded-lg space-y-2">
+      <div className="flex flex-wrap gap-2 items-center">
+        <p className="font-semibold text-ink-strong">{item.itemDescription}</p>
+        <StatusBadge
+          tone={lostFoundStatusTone(item.status)}
+          label={lostFoundStatusLabel(item.status)}
+          size="sm"
+        />
+        {isLostFoundOverdue(item) ? (
+          <StatusBadge
+            tone="critical"
+            label={t('lostFound.overdue')}
+            size="sm"
+          />
+        ) : null}
+      </div>
+      <p className="text-ink-subtle text-sm">
         {item.locationFound}
         {item.roomNumber ? ` · ${t('lostFound.room')} ${item.roomNumber}` : ''}
-        {' · '}
-        {lostFoundStatusLabel(item.status)}
       </p>
       {item.status === 'FOUND' ? (
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
-            className="min-h-11"
             onClick={() =>
               void onClaim(item.id, userId)
                 .then(() => toast.success(t('lostFound.claimSuccess')))
@@ -57,7 +70,6 @@ export function LostFoundItemCard({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11"
             onClick={() =>
               void onDispose(
                 item.id,
@@ -75,7 +87,6 @@ export function LostFoundItemCard({
       {item.status === 'CLAIMED' ? (
         <Button
           type="button"
-          className="min-h-11 mt-2"
           onClick={() =>
             void onReturn(item.id, returnedTo)
               .then(() => toast.success(t('lostFound.returnSuccess')))

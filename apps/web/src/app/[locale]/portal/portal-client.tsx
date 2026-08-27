@@ -71,7 +71,9 @@ export function PortalClient() {
         <h1 className="font-bold md:text-5xl text-(--pura-blue) text-4xl">
           {t('portal.title')}
         </h1>
-        <p className="mt-2 text-lg text-slate-600">{t('portal.subtitle')}</p>
+        <p className="mt-2 text-lg text-muted-foreground">
+          {t('portal.subtitle')}
+        </p>
       </header>
 
       {!reservation ? (

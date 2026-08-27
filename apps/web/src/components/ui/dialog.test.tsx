@@ -33,4 +33,51 @@ describe('Dialog', () => {
     expect(screen.getByText('Dialog Title')).toBeInTheDocument();
     expect(screen.getByText('Dialog Description')).toBeInTheDocument();
   });
+
+  it('renders the content surface as an overlay panel', () => {
+    render(
+      <Dialog open={true}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Overlay</DialogTitle>
+            <DialogDescription>Tokens</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    expect(screen.getByRole('dialog')).toHaveClass(
+      'rounded-xl',
+      'shadow-overlay',
+      'bg-popover',
+      'text-popover-foreground',
+      'border-border',
+    );
+    expect(screen.getByText('Overlay')).toHaveClass(
+      'text-lg',
+      'font-semibold',
+      'text-ink-strong',
+    );
+    expect(screen.getByText('Tokens')).toHaveClass(
+      'text-sm',
+      'text-ink-subtle',
+    );
+  });
+
+  it('gives the close control a focus-visible ring', () => {
+    render(
+      <Dialog open={true}>
+        <DialogContent>
+          <DialogTitle>Closable</DialogTitle>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(close).toHaveClass(
+      'focus-visible:ring-2',
+      'focus-visible:ring-ring',
+    );
+    expect(close.className).not.toContain('focus:ring');
+  });
 });

@@ -2,23 +2,25 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import { propertiesAPI } from '@/lib/api/properties';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { useDigitalKeys, useRevokeDigitalKey } from '@/hooks/use-digital-keys';
 import { digitalKeysAPI } from '@/lib/api/digital-keys';
-import type { DigitalKey, DigitalKeyTransport } from '@/lib/api/digital-keys';
+import type { DigitalKeyTransport } from '@/lib/api/digital-keys';
+import { DigitalKeyCard } from './digital-key-card';
 
-function statusLabel(status: DigitalKey['status']): string {
-  if (status === 'ACTIVE') return t('digitalKey.statusActive');
-  if (status === 'REVOKED') return t('digitalKey.statusRevoked');
-  return t('digitalKey.statusExpired');
-}
+const CONTROL_CLASS =
+  'h-(--field-h) w-full rounded-md border border-input bg-surface-desk px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 export function DigitalKeysClient() {
   const userId = useAuthStore((state) => state.user?.id) ?? 'usr_mock_1';
@@ -82,23 +84,16 @@ export function DigitalKeysClient() {
   }
 
   return (
-    <div className="max-w-4xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('digitalKey.title')}
-        </h1>
-        <p className="mt-1 text-slate-600 text-sm">
-          {t('digitalKey.subtitle')}
-        </p>
-      </header>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={t('digitalKey.title')}
+        subtitle={t('digitalKey.subtitle')}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('digitalKey.issueTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="gap-3 grid sm:grid-cols-[1fr_auto]">
-            <div>
+      <Panel title={t('digitalKey.issueTitle')}>
+        <div className="space-y-4">
+          <div className="gap-4 grid sm:grid-cols-[1fr_auto]">
+            <div className="space-y-2">
               <Label htmlFor="digital-key-confirm-number">
                 {t('digitalKey.confirmNumber')}
               </Label>
@@ -108,18 +103,17 @@ export function DigitalKeysClient() {
                 value={confirmNumber}
                 onChange={(event) => setConfirmNumber(event.target.value)}
                 placeholder={t('digitalKey.confirmNumberPlaceholder')}
-                className="mt-1"
                 autoComplete="off"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="digital-key-page-transport">
                 {t('digitalKey.transport')}
               </Label>
               <select
                 id="digital-key-page-transport"
                 name="transport"
-                className="border border-slate-200 min-h-11 mt-1 px-3 rounded-md w-full"
+                className={CONTROL_CLASS}
                 value={transport}
                 onChange={(event) =>
                   setTransport(event.target.value as DigitalKeyTransport)
@@ -132,74 +126,35 @@ export function DigitalKeysClient() {
           </div>
           <Button
             type="button"
-            className="min-h-11"
             onClick={() => void handleIssue()}
             disabled={issuing || !confirmNumber.trim()}
           >
             {t('digitalKey.issue')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('digitalKey.list')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isLoading ? <p>{t('common.loading')}</p> : null}
-          {!isLoading && keys.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('digitalKey.empty')}</p>
-          ) : null}
+      <Panel title={t('digitalKey.list')}>
+        {isLoading ? <LoadingSpinner message={t('common.loading')} /> : null}
+        {!isLoading && keys.length === 0 ? (
+          <EmptyState
+            icon={<KeyRound className="h-10 w-10" />}
+            title={t('digitalKey.empty')}
+          />
+        ) : null}
 
-          <ul className="space-y-3">
-            {keys.map((key) => (
-              <li
-                key={key.id}
-                className="border border-slate-200 p-3 rounded-md"
-              >
-                <p className="font-semibold text-slate-800">
-                  {t('digitalKey.room')} {key.roomNumber} · {key.transport} ·{' '}
-                  {statusLabel(key.status)}
-                </p>
-                <p className="text-slate-600 text-sm">
-                  {key.reservation?.confirmNumber} · {t('digitalKey.expiresAt')}
-                  : {new Date(key.expiresAt).toLocaleString()}
-                </p>
-                <div className="flex flex-wrap gap-2 items-center mt-2">
-                  <Input
-                    id={`digital-key-list-token-${key.id}`}
-                    name={`token-${key.id}`}
-                    readOnly
-                    value={key.token}
-                    aria-label={t('digitalKey.token')}
-                    className="flex-1 font-mono min-w-0 text-xs"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11"
-                    onClick={() => void handleCopy(key.id, key.token)}
-                  >
-                    {copiedId === key.id
-                      ? t('digitalKey.copied')
-                      : t('digitalKey.copyToken')}
-                  </Button>
-                  {key.status === 'ACTIVE' ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="min-h-11 text-red-600"
-                      onClick={() => void handleRevoke(key.id)}
-                    >
-                      {t('digitalKey.revoke')}
-                    </Button>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+        <ul className="space-y-3">
+          {keys.map((key) => (
+            <DigitalKeyCard
+              key={key.id}
+              digitalKey={key}
+              isCopied={copiedId === key.id}
+              onCopy={(id, token) => void handleCopy(id, token)}
+              onRevoke={(id) => void handleRevoke(id)}
+            />
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }

@@ -1,7 +1,11 @@
 'use client';
 
+import { ListChecks } from 'lucide-react';
 import { t } from '@/lib/i18n';
+import { EmptyState } from '@/components/shared/empty-state';
+import { StatusBadge } from '@/components/shared/status-badge';
 import type { HardwareJob } from '@/lib/api/hardware-bridge';
+import type { StatusTone } from '@/lib/design/status-tone';
 
 function resultText(result: unknown) {
   if (result === undefined || result === null) return '';
@@ -13,10 +17,21 @@ function resultText(result: unknown) {
   }
 }
 
+function jobTone(status: HardwareJob['status']): StatusTone {
+  if (status === 'COMPLETED') return 'positive';
+  if (status === 'FAILED') return 'critical';
+  if (status === 'PENDING') return 'caution';
+  if (status === 'CANCELLED') return 'neutral';
+  return 'info';
+}
+
 export function HbJobsPanel({ jobs }: { readonly jobs: HardwareJob[] }) {
   if (jobs.length === 0) {
     return (
-      <p className="text-slate-600 text-sm">{t('hardwareBridge.emptyJobs')}</p>
+      <EmptyState
+        icon={<ListChecks className="h-10 w-10" />}
+        title={t('hardwareBridge.emptyJobs')}
+      />
     );
   }
 
@@ -27,17 +42,24 @@ export function HbJobsPanel({ jobs }: { readonly jobs: HardwareJob[] }) {
         return (
           <li
             key={job.id}
-            className="border border-slate-200 p-3 rounded-md space-y-1"
+            className="border border-rule-mist p-4 rounded-lg space-y-1"
           >
-            <p className="font-medium text-slate-800 text-sm">
-              {job.type} · {job.status}
+            <p className="flex flex-wrap font-semibold gap-2 items-center text-ink-strong text-sm">
+              {job.type}
+              <StatusBadge
+                tone={jobTone(job.status)}
+                label={job.status}
+                size="sm"
+              />
             </p>
-            <p className="text-slate-600 text-sm">{job.requestedBy}</p>
+            <p className="text-ink-subtle text-sm">{job.requestedBy}</p>
             {job.errorMessage ? (
-              <p className="text-slate-600 text-sm">{job.errorMessage}</p>
+              <p className="text-sm text-status-critical-ink">
+                {job.errorMessage}
+              </p>
             ) : null}
             {scanText ? (
-              <p className="text-slate-600 text-sm">
+              <p className="text-ink-subtle text-sm">
                 {t('hardwareBridge.scanResult')}: {scanText}
               </p>
             ) : null}

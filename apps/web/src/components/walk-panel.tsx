@@ -101,7 +101,7 @@ export function WalkPanel({ reservation, onWalked }: WalkPanelProps) {
             disabled={busy || options.length === 0}
           />
           {options.length === 0 ? (
-            <p className="text-slate-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {t('reservations.walk.noHotels')}
             </p>
           ) : null}
@@ -164,16 +164,16 @@ export function WalkPanel({ reservation, onWalked }: WalkPanelProps) {
             {t('reservations.walk.submit')}
           </Button>
         </form>
-        <div className="border-slate-200 border-t pt-4">
+        <div className="border-rule-mist border-t pt-4">
           <h4 className="font-semibold mb-2 text-sm">
             {t('reservations.walk.history')}
           </h4>
           {history.length === 0 ? (
-            <p className="text-slate-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {t('reservations.walk.emptyHistory')}
             </p>
           ) : (
-            <ul className="space-y-2 text-slate-800 text-sm">
+            <ul className="space-y-2 text-foreground text-sm">
               {history.map((walk) => (
                 <li key={walk.id}>
                   {walk.partnerHotel?.name ?? walk.partnerHotelId} · ฿

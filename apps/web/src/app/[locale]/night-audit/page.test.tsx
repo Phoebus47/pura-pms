@@ -84,10 +84,18 @@ describe('NightAuditPage', () => {
 
     render(<NightAuditPage />);
 
+    expect(
+      screen.getByRole('heading', { level: 1, name: t('nightAudit.title') }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Test Property')).toBeInTheDocument();
-    expect(screen.getByText('Current Run Status')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('nightAudit.currentStatus') }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Run Night Audit/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('nightAudit.noReports') }),
     ).toBeInTheDocument();
   });
 
@@ -201,6 +209,9 @@ describe('NightAuditPage', () => {
     render(<NightAuditPage />);
 
     expect(screen.getByText(/Night Audit Failed/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: t('nightAudit.errors') }),
+    ).toBeInTheDocument();
     expect(screen.getByText('TEST_ERROR')).toBeInTheDocument();
     expect(screen.getByText('Test error message')).toBeInTheDocument();
     expect(

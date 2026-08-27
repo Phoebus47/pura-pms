@@ -2,10 +2,9 @@
 
 import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { PageHeader } from './page-header';
 
-interface DetailPageHeaderProps {
+export interface DetailPageHeaderProps {
   readonly title: string;
   readonly subtitle?: string | ReactNode;
   readonly actions?: ReactNode;
@@ -19,30 +18,20 @@ export function DetailPageHeader({
   onBack,
 }: DetailPageHeaderProps) {
   const router = useRouter();
-
-  const handleBack = onBack || (() => router.back());
+  const handleBack = onBack ?? (() => router.back());
+  const hasTextSubtitle = typeof subtitle === 'string';
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex gap-4 items-center">
-        <Button variant="outline" onClick={handleBack}>
-          <ArrowLeft className="h-4 mr-2 w-4" />
-          Back
-        </Button>
-        <div>
-          <h1 className="font-bold text-3xl text-pura-blue">{title}</h1>
-          {subtitle && (
-            <div className="mt-1">
-              {typeof subtitle === 'string' ? (
-                <p className="text-slate-600">{subtitle}</p>
-              ) : (
-                subtitle
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      {actions && <div className="flex gap-3">{actions}</div>}
+    <div className="space-y-4">
+      <PageHeader
+        title={title}
+        subtitle={hasTextSubtitle ? subtitle : undefined}
+        actions={actions}
+        onBack={handleBack}
+      />
+      {subtitle && !hasTextSubtitle && (
+        <div className="text-ink-subtle text-sm">{subtitle}</div>
+      )}
     </div>
   );
 }

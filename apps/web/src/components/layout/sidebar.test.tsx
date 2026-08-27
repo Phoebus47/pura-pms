@@ -59,7 +59,10 @@ describe('Sidebar', () => {
   it('should render navigation items', () => {
     render(<Sidebar />);
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Shift Ops')).toBeInTheDocument();
+    expect(screen.getByText('Front Office')).toBeInTheDocument();
+    expect(screen.getByText('Rooms & HK')).toBeInTheDocument();
+    expect(screen.getByText('Finance')).toBeInTheDocument();
     expect(screen.getByText('Reservations')).toBeInTheDocument();
     expect(screen.getByText('Guests')).toBeInTheDocument();
     expect(screen.getByText('Rooms')).toBeInTheDocument();

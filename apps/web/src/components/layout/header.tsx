@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Bell, Search } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { clearAuthToken } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { cn } from '@/lib/utils';
+import { t } from '@/lib/i18n';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +24,23 @@ export function Header() {
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   function handleLogout() {
     clearAuthToken();
     clearAuth();
     router.push('/login');
+  }
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) {
+      return;
+    }
+    router.push(`/guests?q=${encodeURIComponent(q)}`);
+    setIsSearchOpen(false);
   }
 
   const userName = user?.name || 'Guest User';
@@ -49,7 +61,7 @@ export function Header() {
   }, [isSearchOpen]);
 
   return (
-    <header className="bg-white border-b border-slate-200 flex h-14 items-center justify-between lg:h-16 lg:px-6 px-3 sticky top-0 z-20">
+    <header className="bg-surface-desk border-b border-rule-mist flex h-14 items-center justify-between lg:h-16 lg:px-6 px-3 sticky top-0 z-20">
       <div className="flex flex-1 gap-2 items-center lg:gap-4 min-w-0">
         <Button
           type="button"
@@ -63,23 +75,26 @@ export function Header() {
         >
           <Search className="h-5 text-muted-foreground w-5" />
         </Button>
-        <div
+        <form
+          onSubmit={handleSearchSubmit}
           className={cn(
-            'group max-w-md min-w-0 relative w-full',
+            'group relative w-full max-w-md min-w-0',
             isSearchOpen ? 'block' : 'hidden lg:block',
           )}
         >
-          <Search className="-translate-y-1/2 absolute group-focus-within:text-pura-blue h-4 left-3.5 text-muted-foreground top-1/2 transition-colors w-4" />
+          <Search className="-translate-y-1/2 absolute group-focus-within:text-pura-blue h-4 left-3.5 pointer-events-none text-muted-foreground top-1/2 transition-colors w-4" />
           <Input
             ref={searchInputRef}
             id="global-search"
             name="search"
             type="search"
-            placeholder="Search guests, reservations, rooms..."
-            aria-label="Search guests, reservations, rooms"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder={t('header.searchPlaceholder')}
+            aria-label={t('header.searchLabel')}
             className="pl-10 pr-4 py-2.5 rounded-lg text-sm w-full"
           />
-        </div>
+        </form>
       </div>
 
       <div className="flex gap-2 items-center lg:gap-3">
@@ -97,7 +112,7 @@ export function Header() {
           />
         </Button>
 
-        <div className="bg-slate-200 h-8 mx-1 w-px" />
+        <div className="bg-rule-mist h-8 mx-1 w-px" />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -115,13 +130,13 @@ export function Header() {
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute bg-emerald-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
+                <div className="absolute bg-status-positive-500 border-2 border-white bottom-0 h-2.5 right-0 rounded-full w-2.5" />
               </div>
               <div className="hidden lg:block text-left">
                 <p className="font-semibold leading-tight text-foreground text-sm">
                   {userName}
                 </p>
-                <p className="font-medium text-[11px] text-slate-600">
+                <p className="font-medium text-[11px] text-muted-foreground">
                   {userRole}
                 </p>
               </div>
@@ -131,7 +146,7 @@ export function Header() {
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
                 <p className="font-semibold leading-none text-sm">{userName}</p>
-                <p className="leading-none text-slate-600 text-xs">
+                <p className="leading-none text-muted-foreground text-xs">
                   {userEmail}
                 </p>
               </div>
@@ -146,7 +161,7 @@ export function Header() {
             <DropdownMenuSeparator className="mx-2" />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="cursor-pointer focus:bg-red-50 focus:text-red-600 font-semibold my-0.5 p-2.5 rounded-md text-red-600"
+              className="cursor-pointer focus:bg-status-critical-tint focus:text-status-critical-ink font-semibold my-0.5 p-2.5 rounded-md text-status-critical-ink"
             >
               Log out
             </DropdownMenuItem>

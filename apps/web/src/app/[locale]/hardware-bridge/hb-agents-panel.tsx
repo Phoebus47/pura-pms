@@ -1,17 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { Cpu } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/shared/empty-state';
+import { Panel } from '@/components/shared/panel';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { useHeartbeat, useRegisterAgent } from '@/hooks/use-hardware-bridge';
 import type { HardwareAgent } from '@/lib/api/hardware-bridge';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
+const buttonClass = 'w-full sm:w-auto';
 const ONLINE_MS = 120_000;
 
 function isAgentOnline(agent: HardwareAgent) {
@@ -52,11 +54,8 @@ export function HbAgentsPanel({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('hardwareBridge.agents')}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <Panel title={t('hardwareBridge.agents')}>
+      <div className="space-y-6">
         <form
           className="gap-4 grid md:grid-cols-2"
           onSubmit={(event) => {
@@ -69,7 +68,6 @@ export function HbAgentsPanel({
             <Input
               id="agentName"
               name="name"
-              className={fieldClass}
               value={name}
               onChange={(event) => setName(event.target.value)}
               required
@@ -80,7 +78,6 @@ export function HbAgentsPanel({
             <Input
               id="machineId"
               name="machineId"
-              className={fieldClass}
               value={machineId}
               onChange={(event) => setMachineId(event.target.value)}
               required
@@ -94,26 +91,31 @@ export function HbAgentsPanel({
         </form>
 
         {agents.length === 0 ? (
-          <p className="text-slate-600 text-sm">
-            {t('hardwareBridge.emptyAgents')}
-          </p>
+          <EmptyState
+            icon={<Cpu className="h-10 w-10" />}
+            title={t('hardwareBridge.emptyAgents')}
+          />
         ) : (
           <ul className="space-y-3">
             {agents.map((agent) => (
               <li
                 key={agent.id}
-                className="border border-slate-200 flex flex-wrap gap-3 items-center justify-between p-3 rounded-md"
+                className="border border-rule-mist flex flex-wrap gap-3 items-center justify-between p-4 rounded-lg"
               >
-                <div>
-                  <p className="font-medium text-slate-800 text-sm">
+                <div className="min-w-0">
+                  <p className="flex flex-wrap font-semibold gap-2 items-center text-ink-strong text-sm">
                     {agent.name}
+                    <StatusBadge
+                      tone={isAgentOnline(agent) ? 'positive' : 'neutral'}
+                      label={
+                        isAgentOnline(agent)
+                          ? t('hardwareBridge.agentOnline')
+                          : t('hardwareBridge.agentOffline')
+                      }
+                      size="sm"
+                    />
                   </p>
-                  <p className="text-slate-600 text-sm">{agent.machineId}</p>
-                  <p className="text-slate-600 text-sm">
-                    {isAgentOnline(agent)
-                      ? t('hardwareBridge.agentOnline')
-                      : t('hardwareBridge.agentOffline')}
-                  </p>
+                  <p className="text-ink-subtle text-sm">{agent.machineId}</p>
                 </div>
                 <Button
                   type="button"
@@ -127,7 +129,7 @@ export function HbAgentsPanel({
             ))}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }

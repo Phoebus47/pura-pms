@@ -4,22 +4,17 @@ import { useState } from 'react';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import {
   useCreateExchangeRate,
   useExchangeRates,
-  useUpdateExchangeRate,
 } from '@/hooks/use-exchange-rates';
-import type { ExchangeRate } from '@/lib/api/exchange-rates';
+import { ExchangeRateList } from './exchange-rate-list';
 
-const fieldClass = 'min-h-11';
-const buttonClass = 'min-h-11 w-full sm:w-auto';
-
-function formatRate(rate: number): string {
-  return Number(rate).toFixed(4);
-}
+const buttonClass = 'w-full sm:w-auto';
 
 function ExchangeRateForm() {
   const createMutation = useCreateExchangeRate();
@@ -57,7 +52,6 @@ function ExchangeRateForm() {
         <Input
           id="baseCurrency"
           name="baseCurrency"
-          className={fieldClass}
           value={baseCurrency}
           onChange={(event) => setBaseCurrency(event.target.value)}
           required
@@ -69,7 +63,6 @@ function ExchangeRateForm() {
         <Input
           id="targetCurrency"
           name="targetCurrency"
-          className={fieldClass}
           value={targetCurrency}
           onChange={(event) => setTargetCurrency(event.target.value)}
           required
@@ -85,7 +78,6 @@ function ExchangeRateForm() {
           min={0.0001}
           step="0.0001"
           inputMode="decimal"
-          className={fieldClass}
           value={rate}
           onChange={(event) => setRate(event.target.value)}
           required
@@ -97,7 +89,6 @@ function ExchangeRateForm() {
           id="effectiveDate"
           name="effectiveDate"
           type="date"
-          className={fieldClass}
           value={effectiveDate}
           onChange={(event) => setEffectiveDate(event.target.value)}
           required
@@ -114,78 +105,20 @@ function ExchangeRateForm() {
   );
 }
 
-function ExchangeRateList({ rates }: { readonly rates: ExchangeRate[] }) {
-  const updateMutation = useUpdateExchangeRate();
-
-  async function handleToggle(rate: ExchangeRate) {
-    try {
-      await updateMutation.mutateAsync({
-        id: rate.id,
-        data: { isActive: !rate.isActive },
-      });
-      toast.success(t('fx.updateSuccess'));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('fx.updateSuccess'));
-    }
-  }
-
-  if (rates.length === 0) {
-    return <p className="text-slate-600 text-sm">{t('fx.empty')}</p>;
-  }
-
-  return (
-    <ul className="space-y-3">
-      {rates.map((rate) => (
-        <li
-          key={rate.id}
-          className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-sm">
-            {rate.baseCurrency}/{rate.targetCurrency} {formatRate(rate.rate)}{' '}
-            {rate.effectiveDate.slice(0, 10)}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-11"
-            disabled={updateMutation.isPending}
-            onClick={() => void handleToggle(rate)}
-          >
-            {rate.isActive ? t('fx.deactivate') : t('fx.activate')}
-          </Button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function ExchangeRatesClient() {
   const { data: rates = [] } = useExchangeRates();
 
   return (
-    <div className="max-w-3xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-3xl text-pura-blue">{t('fx.title')}</h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('fx.subtitle')}</p>
-      </header>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader title={t('fx.title')} subtitle={t('fx.subtitle')} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('fx.add')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ExchangeRateForm />
-        </CardContent>
-      </Card>
+      <Panel title={t('fx.add')}>
+        <ExchangeRateForm />
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('fx.list')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ExchangeRateList rates={rates} />
-        </CardContent>
-      </Card>
+      <Panel title={t('fx.list')} padding="none">
+        <ExchangeRateList rates={rates} />
+      </Panel>
     </div>
   );
 }

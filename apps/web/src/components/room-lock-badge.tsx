@@ -1,12 +1,18 @@
 import { t } from '@/lib/i18n';
+import type { StatusTone } from '@/lib/design/status-tone';
+import { StatusBadge } from './shared/status-badge';
 
 interface RoomLockBadgeProps {
+  readonly size?: 'default' | 'xs';
   readonly isRoomLocked?: boolean | null;
   readonly className?: string;
 }
 
+export const roomLockTone: StatusTone = 'info';
+
 export function RoomLockBadge({
   isRoomLocked,
+  size = 'default',
   className = '',
 }: RoomLockBadgeProps) {
   if (!isRoomLocked) {
@@ -14,10 +20,11 @@ export function RoomLockBadge({
   }
 
   return (
-    <span
-      className={`inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 font-semibold text-violet-900 text-xs ${className}`}
-    >
-      {t('reservations.roomLock.badge')}
-    </span>
+    <StatusBadge
+      tone={roomLockTone}
+      label={t('reservations.roomLock.badge')}
+      size={size === 'xs' ? 'sm' : 'md'}
+      className={className}
+    />
   );
 }

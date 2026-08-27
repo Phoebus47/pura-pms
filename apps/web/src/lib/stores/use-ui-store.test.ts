@@ -57,6 +57,26 @@ describe('useUIStore', () => {
     expect(result.current.theme).toBe('light');
   });
 
+  it('should toggle theme between light and dark', () => {
+    const { result } = renderHook(() => useUIStore());
+
+    act(() => {
+      result.current.setTheme('light');
+    });
+
+    act(() => {
+      result.current.toggleTheme();
+    });
+
+    expect(result.current.theme).toBe('dark');
+
+    act(() => {
+      result.current.toggleTheme();
+    });
+
+    expect(result.current.theme).toBe('light');
+  });
+
   it('should set active property ID', () => {
     const { result } = renderHook(() => useUIStore());
 

@@ -22,7 +22,7 @@ export function SplitStayTable({ stays }: SplitStayTableProps) {
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead>
-            <tr className="text-slate-600">
+            <tr className="text-muted-foreground">
               <th scope="col" className="pb-2 pr-4">
                 {t('reservations.splitStay.dates')}
               </th>
@@ -41,7 +41,7 @@ export function SplitStayTable({ stays }: SplitStayTableProps) {
             {stays.map((stay, index) => (
               <tr
                 key={stay.id ?? stay.sequence ?? index}
-                className="text-slate-800"
+                className="text-foreground"
               >
                 <td className="pr-4 py-2">
                   {stay.startDate.slice(0, 10)} → {stay.endDate.slice(0, 10)}

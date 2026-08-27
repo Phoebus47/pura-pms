@@ -15,7 +15,9 @@ export function DetailField({
 }: DetailFieldProps) {
   return (
     <div className={className}>
-      <label className="font-semibold text-slate-600 text-sm">{label}</label>
+      <label className="font-semibold text-muted-foreground text-sm">
+        {label}
+      </label>
       <div className="mt-1">{value}</div>
     </div>
   );

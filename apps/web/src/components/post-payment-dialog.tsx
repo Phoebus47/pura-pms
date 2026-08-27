@@ -110,7 +110,7 @@ export function PostPaymentDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent aria-describedby={undefined} className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle className="font-bold text-2xl text-emerald-700">
+          <DialogTitle className="font-bold text-2xl text-status-positive-ink">
             {t('folios.postPayment')}
           </DialogTitle>
         </DialogHeader>
@@ -176,9 +176,9 @@ export function PostPaymentDialog({
               required={!needsFx}
             />
           </div>
-          <div className="bg-slate-50 border border-slate-200 flex items-center justify-between p-4 rounded-lg text-sm">
-            <p className="font-semibold text-slate-700">{t('folios.total')}</p>
-            <p className="font-bold text-slate-900">
+          <div className="bg-surface-inset border border-rule-mist flex items-center justify-between p-4 rounded-lg text-sm">
+            <p className="font-semibold text-foreground">{t('folios.total')}</p>
+            <p className="font-bold text-foreground">
               ฿{net.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
           </div>
@@ -201,7 +201,7 @@ export function PostPaymentDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-status-positive-ink hover:opacity-90"
             >
               {loading ? t('folios.posting') : t('folios.postPaymentSubmit')}
             </Button>

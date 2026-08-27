@@ -10,7 +10,31 @@ import { DetailPageError } from '@/components/shared/detail-page-error';
 import { DetailPageHeader } from '@/components/shared/detail-page-header';
 import { MetadataCard } from '@/components/shared/metadata-card';
 import { DetailField } from '@/components/shared/detail-field';
+import { Panel } from '@/components/shared/panel';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { statusToneInk } from '@/lib/design/status-tone';
+import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
+
+function VipStars({
+  guest,
+  size,
+}: {
+  readonly guest: Guest;
+  readonly size: string;
+}) {
+  return (
+    <div className="flex gap-1 items-center">
+      {Array.from({ length: guest.vipLevel }).map((_, index) => (
+        <Star
+          key={`${guest.id}-star-${index}`}
+          className={cn('fill-pura-orange text-pura-orange', size)}
+          aria-hidden="true"
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function GuestDetailPage() {
   const params = useParams();
@@ -79,33 +103,30 @@ export default function GuestDetailPage() {
     );
   }
 
+  const isBlacklisted = guest.isBlacklist;
+
   return (
     <div className="space-y-6">
       <DetailPageHeader
         title={`${guest.firstName} ${guest.lastName}`}
         subtitle={
-          <div className="flex gap-2 items-center mt-1">
-            {guest.isBlacklist ? (
-              <span className="font-semibold gap-1 inline-flex items-center text-red-600 text-sm">
-                <Ban className="h-4 w-4" />
-                {t('common.blacklisted')}
-              </span>
-            ) : (
-              <span className="font-semibold gap-1 inline-flex items-center text-emerald-600 text-sm">
-                <CheckCircle className="h-4 w-4" />
-                {t('common.activeGuest')}
-              </span>
-            )}
-            {guest.vipLevel > 0 && (
-              <div className="flex gap-1 items-center">
-                {Array.from({ length: guest.vipLevel }).map((_, i) => (
-                  <Star
-                    key={`${guest.id}-vip-star-${i}`}
-                    className="fill-pura-orange h-4 text-pura-orange w-4"
-                  />
-                ))}
-              </div>
-            )}
+          <div className="flex gap-2 items-center">
+            <span
+              className={cn(
+                'font-semibold gap-1 inline-flex items-center text-sm',
+                isBlacklisted ? statusToneInk.critical : statusToneInk.positive,
+              )}
+            >
+              {isBlacklisted ? (
+                <Ban className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <CheckCircle className="h-4 w-4" aria-hidden="true" />
+              )}
+              {isBlacklisted
+                ? t('common.blacklisted')
+                : t('common.activeGuest')}
+            </span>
+            {guest.vipLevel > 0 && <VipStars guest={guest} size="h-4 w-4" />}
           </div>
         }
         actions={
@@ -113,20 +134,20 @@ export default function GuestDetailPage() {
             <Button
               variant="outline"
               onClick={toggleBlacklist}
-              className={
-                guest.isBlacklist
-                  ? 'text-emerald-600 hover:bg-emerald-50'
-                  : 'text-red-600 hover:bg-red-50'
-              }
+              className={cn(
+                isBlacklisted
+                  ? 'hover:bg-status-positive-tint text-status-positive-ink'
+                  : 'hover:bg-status-critical-tint text-status-critical-ink',
+              )}
             >
-              {guest.isBlacklist ? (
+              {isBlacklisted ? (
                 <>
-                  <CheckCircle className="h-4 mr-2 w-4" />
+                  <CheckCircle className="h-4 w-4" />
                   {t('common.removeFromBlacklist')}
                 </>
               ) : (
                 <>
-                  <Ban className="h-4 mr-2 w-4" />
+                  <Ban className="h-4 w-4" />
                   {t('common.addToBlacklist')}
                 </>
               )}
@@ -135,15 +156,15 @@ export default function GuestDetailPage() {
               variant="outline"
               onClick={() => router.push(`/guests/${guestId}/edit`)}
             >
-              <Edit className="h-4 mr-2 w-4" />
+              <Edit className="h-4 w-4" />
               {t('common.edit')}
             </Button>
             <Button
               variant="outline"
               onClick={handleDelete}
-              className="hover:bg-red-50 text-red-600"
+              className="hover:bg-status-critical-tint text-status-critical-ink"
             >
-              <Trash2 className="h-4 mr-2 w-4" />
+              <Trash2 className="h-4 w-4" />
               {t('common.delete')}
             </Button>
           </>
@@ -151,16 +172,16 @@ export default function GuestDetailPage() {
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <div className="bg-white border border-slate-200 lg:col-span-2 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold mb-6 text-pura-blue text-xl">
-            {t('common.personalInfo')}
-          </h2>
-
+        <Panel
+          title={t('common.personalInfo')}
+          padding="lg"
+          className="lg:col-span-2"
+        >
           <div className="gap-6 grid grid-cols-2">
             <DetailField
               label={t('common.firstName')}
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-ink-strong text-lg">
                   {guest.firstName}
                 </p>
               }
@@ -169,7 +190,7 @@ export default function GuestDetailPage() {
             <DetailField
               label={t('common.lastName')}
               value={
-                <p className="font-semibold text-lg text-slate-800">
+                <p className="font-semibold text-ink-strong text-lg">
                   {guest.lastName}
                 </p>
               }
@@ -177,80 +198,71 @@ export default function GuestDetailPage() {
 
             <DetailField
               label={t('common.email')}
-              value={<p className="text-slate-700">{guest.email || '-'}</p>}
+              value={<p className="text-ink-default">{guest.email || '-'}</p>}
             />
 
             <DetailField
               label={t('common.phone')}
-              value={<p className="text-slate-700">{guest.phone || '-'}</p>}
+              value={<p className="text-ink-default">{guest.phone || '-'}</p>}
             />
 
             <DetailField
               label={t('common.nationality')}
               value={
-                <p className="text-slate-700">{guest.nationality || '-'}</p>
+                <p className="text-ink-default">{guest.nationality || '-'}</p>
               }
             />
 
             <DetailField
               label={t('common.idNumber')}
-              value={<p className="text-slate-700">{guest.idNumber || '-'}</p>}
+              value={
+                <p className="text-ink-default">{guest.idNumber || '-'}</p>
+              }
             />
           </div>
 
           {guest.address && (
-            <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">
+            <div className="border-rule-mist border-t mt-6 pt-6">
+              <p className="font-semibold text-ink-subtle text-sm">
                 {t('common.address')}
               </p>
-              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+              <p className="mt-2 text-ink-default whitespace-pre-wrap">
                 {guest.address}
               </p>
             </div>
           )}
 
           {guest.notes && (
-            <div className="border-slate-200 border-t mt-6 pt-6">
-              <p className="font-semibold text-slate-600 text-sm">
+            <div className="border-rule-mist border-t mt-6 pt-6">
+              <p className="font-semibold text-ink-subtle text-sm">
                 {t('common.notes')}
               </p>
-              <p className="mt-2 text-slate-700 whitespace-pre-wrap">
+              <p className="mt-2 text-ink-default whitespace-pre-wrap">
                 {guest.notes}
               </p>
             </div>
           )}
-        </div>
+        </Panel>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
-          <h2 className="font-bold mb-6 text-pura-blue text-xl">
-            {t('common.guestStatistics')}
-          </h2>
-
+        <Panel title={t('common.guestStatistics')} padding="lg">
           <div className="space-y-6">
             <DetailField
               label={t('common.vipLevel')}
               value={
-                <div className="flex gap-1 items-center">
-                  {guest.vipLevel === 0 ? (
-                    <span className="text-slate-500">
-                      {t('common.standardGuest')}
-                    </span>
-                  ) : (
-                    Array.from({ length: guest.vipLevel }).map((_, i) => (
-                      <Star
-                        key={`${guest.id}-stats-star-${i}`}
-                        className="fill-pura-orange h-6 text-pura-orange w-6"
-                      />
-                    ))
-                  )}
-                </div>
+                guest.vipLevel === 0 ? (
+                  <span className="text-ink-subtle">
+                    {t('common.standardGuest')}
+                  </span>
+                ) : (
+                  <VipStars guest={guest} size="h-6 w-6" />
+                )
               }
             />
 
             <DetailField
               label={t('common.totalStays')}
               value={
-                <p className="font-bold text-3xl text-pura-blue">
+                <p className="font-bold tabular-nums text-2xl text-pura-blue">
                   {guest.totalStays}
                 </p>
               }
@@ -259,7 +271,7 @@ export default function GuestDetailPage() {
             <DetailField
               label={t('common.totalRevenue')}
               value={
-                <p className="font-bold text-3xl text-pura-blue">
+                <p className="font-bold tabular-nums text-2xl text-pura-blue">
                   ฿{Number(guest.totalRevenue).toLocaleString()}
                 </p>
               }
@@ -268,23 +280,25 @@ export default function GuestDetailPage() {
             <DetailField
               label={t('common.status')}
               value={
-                <div>
-                  {guest.isBlacklist ? (
-                    <span className="bg-red-100 font-semibold gap-1 inline-flex items-center px-3 py-1.5 ring-1 ring-inset ring-red-600/20 rounded-full text-red-700 text-sm">
-                      <Ban className="h-4 w-4" />
-                      {t('common.blacklisted')}
-                    </span>
-                  ) : (
-                    <span className="bg-emerald-100 font-semibold gap-1 inline-flex items-center px-3 py-1.5 ring-1 ring-emerald-600/20 ring-inset rounded-full text-emerald-700 text-sm">
-                      <CheckCircle className="h-4 w-4" />
-                      {t('common.active')}
-                    </span>
-                  )}
-                </div>
+                isBlacklisted ? (
+                  <StatusBadge
+                    tone="critical"
+                    label={t('common.blacklisted')}
+                    icon={<Ban className="h-4 w-4" aria-hidden="true" />}
+                  />
+                ) : (
+                  <StatusBadge
+                    tone="positive"
+                    label={t('common.active')}
+                    icon={
+                      <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                    }
+                  />
+                )
               }
             />
           </div>
-        </div>
+        </Panel>
       </div>
 
       <MetadataCard createdAt={guest.createdAt} updatedAt={guest.updatedAt} />

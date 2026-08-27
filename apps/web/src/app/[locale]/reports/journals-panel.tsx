@@ -1,5 +1,10 @@
 'use client';
 
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/shared/data-table';
+import { EmptyState } from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
@@ -11,6 +16,41 @@ interface JournalsPanelProps {
   readonly journals: JournalEntry[];
   readonly loading: boolean;
   readonly onPosted: () => void;
+}
+
+interface JournalLineRow {
+  readonly id: string;
+  readonly source: string;
+  readonly code: string;
+  readonly debit: number;
+  readonly credit: number;
+}
+
+function journalColumns(): DataTableColumn<JournalLineRow>[] {
+  return [
+    {
+      id: 'source',
+      header: t('reports.journalsSource'),
+      cell: (line) => line.source,
+    },
+    {
+      id: 'account',
+      header: t('reports.tbAccount'),
+      cell: (line) => line.code,
+    },
+    {
+      id: 'debit',
+      header: t('reports.tbDebit'),
+      numeric: true,
+      cell: (line) => line.debit.toFixed(2),
+    },
+    {
+      id: 'credit',
+      header: t('reports.tbCredit'),
+      numeric: true,
+      cell: (line) => line.credit.toFixed(2),
+    },
+  ];
 }
 
 export function JournalsPanel({
@@ -33,7 +73,7 @@ export function JournalsPanel({
     }
   }
 
-  const lines = journals.flatMap((entry) =>
+  const lines: JournalLineRow[] = journals.flatMap((entry) =>
     entry.lines.map((line) => ({
       id: line.id,
       source: entry.source,
@@ -43,30 +83,35 @@ export function JournalsPanel({
     })),
   );
 
+  function renderLines() {
+    if (loading) {
+      return <p className="text-ink-subtle text-sm">{t('reports.loading')}</p>;
+    }
+    if (lines.length === 0) {
+      return <EmptyState title={t('reports.journalsEmpty')} />;
+    }
+    return (
+      <DataTable
+        caption={t('reports.journalsTitle')}
+        columns={journalColumns()}
+        rows={lines}
+        rowKey={(line) => line.id}
+        density="compact"
+        stickyHeader
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Button
         type="button"
-        className="min-h-11"
         disabled={!propertyId || !date}
         onClick={() => void handlePost()}
       >
         {t('reports.postJournals')}
       </Button>
-      {loading ? (
-        <p className="text-slate-600 text-sm">{t('reports.loading')}</p>
-      ) : lines.length === 0 ? (
-        <p className="text-slate-600 text-sm">{t('reports.journalsEmpty')}</p>
-      ) : (
-        <ul className="space-y-2 text-sm">
-          {lines.map((line) => (
-            <li key={line.id}>
-              {line.source} · {line.code} · {line.debit.toFixed(2)} /{' '}
-              {line.credit.toFixed(2)}
-            </li>
-          ))}
-        </ul>
-      )}
+      {renderLines()}
     </div>
   );
 }

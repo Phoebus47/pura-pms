@@ -86,12 +86,12 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
         <CardTitle>{t('reservations.roomMove.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-slate-600 text-sm">
+        <p className="text-muted-foreground text-sm">
           {t('reservations.roomMove.currentRoom')}:{' '}
           {reservation.room?.number ?? reservation.roomId}
         </p>
         {roomLocked ? (
-          <p className="text-amber-800 text-sm">
+          <p className="text-sm text-status-caution-ink">
             {t('reservations.roomLock.moveBlocked')}
           </p>
         ) : null}
@@ -114,7 +114,7 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
             disabled={busy || options.length === 0 || roomLocked}
           />
           {options.length === 0 ? (
-            <p className="text-slate-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {t('reservations.roomMove.noRooms')}
             </p>
           ) : null}
@@ -134,16 +134,16 @@ export function RoomMovePanel({ reservation, onMoved }: RoomMovePanelProps) {
             {t('reservations.roomMove.submit')}
           </Button>
         </form>
-        <div className="border-slate-200 border-t pt-4">
+        <div className="border-rule-mist border-t pt-4">
           <h4 className="font-semibold mb-2 text-sm">
             {t('reservations.roomMove.history')}
           </h4>
           {history.length === 0 ? (
-            <p className="text-slate-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {t('reservations.roomMove.emptyHistory')}
             </p>
           ) : (
-            <ul className="space-y-2 text-slate-800 text-sm">
+            <ul className="space-y-2 text-foreground text-sm">
               {history.map((move) => (
                 <li key={move.id}>
                   {t('reservations.roomMove.from')}{' '}

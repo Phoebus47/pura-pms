@@ -97,21 +97,23 @@ export function WakeUpCallPanel({ reservation }: WakeUpCallPanelProps) {
         </Button>
 
         {calls.length === 0 ? (
-          <p className="text-slate-600 text-sm">{t('wakeUpCalls.empty')}</p>
+          <p className="text-muted-foreground text-sm">
+            {t('wakeUpCalls.empty')}
+          </p>
         ) : null}
 
         <ul className="space-y-3">
           {calls.map((call) => (
             <li
               key={call.id}
-              className="border border-slate-200 p-3 rounded-md text-sm"
+              className="border border-rule-mist p-3 rounded-md text-sm"
             >
-              <p className="font-semibold text-slate-800">
+              <p className="font-semibold text-foreground">
                 {new Date(call.scheduledAt).toLocaleString()} ·{' '}
                 {statusLabel(call.status)}
               </p>
               {call.notes ? (
-                <p className="text-slate-600">{call.notes}</p>
+                <p className="text-muted-foreground">{call.notes}</p>
               ) : null}
               {call.status === 'SCHEDULED' ? (
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -145,7 +147,7 @@ export function WakeUpCallPanel({ reservation }: WakeUpCallPanelProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11 text-red-600"
+                    className="min-h-11 text-status-critical-ink"
                     onClick={() =>
                       void cancelCall
                         .mutateAsync({ id: call.id, cancelledBy: userId })

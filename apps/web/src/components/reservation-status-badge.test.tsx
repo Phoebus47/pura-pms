@@ -1,5 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import { ReservationStatusBadge } from './reservation-status-badge';
+import {
+  ReservationStatusBadge,
+  reservationStatusTone,
+} from './reservation-status-badge';
+import { statusToneClass } from '@/lib/design/status-tone';
 import type { ReservationStatus } from '@/lib/api/reservations';
 
 describe('ReservationStatusBadge', () => {
@@ -29,6 +33,25 @@ describe('ReservationStatusBadge', () => {
     expect(screen.getByText(labels[status])).toBeInTheDocument();
   });
 
+  it.each(statuses)('should apply the %s tone classes', (status) => {
+    render(<ReservationStatusBadge status={status} />);
+
+    expect(screen.getByText(labels[status])).toHaveClass(
+      ...statusToneClass[reservationStatusTone[status]].split(' '),
+    );
+  });
+
+  it('maps an active stay to positive and a cancelled stay to critical', () => {
+    expect(reservationStatusTone.CHECKED_IN).toBe('positive');
+    expect(reservationStatusTone.CANCELLED).toBe('critical');
+  });
+
+  it('keeps exceptions that still need desk action on caution', () => {
+    expect(reservationStatusTone.NO_SHOW).toBe('caution');
+    expect(reservationStatusTone.WALKED).toBe('caution');
+    expect(reservationStatusTone.TENTATIVE).toBe('caution');
+  });
+
   it('should apply custom className', () => {
     render(
       <ReservationStatusBadge status="CONFIRMED" className="custom-class" />,
@@ -42,7 +65,7 @@ describe('ReservationStatusBadge', () => {
     render(<ReservationStatusBadge status="CONFIRMED" size="xs" />);
 
     const badge = screen.getByText('Confirmed');
-    expect(badge).toHaveClass('px-1.5', 'py-0.5', 'text-[10px]');
+    expect(badge).toHaveClass('px-2', 'py-0.5', 'text-2xs');
   });
 
   it('should render default size correctly', () => {

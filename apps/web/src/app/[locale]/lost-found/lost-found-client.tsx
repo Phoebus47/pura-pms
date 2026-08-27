@@ -1,8 +1,13 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PackageSearch } from 'lucide-react';
+import { EmptyState } from '@/components/shared/empty-state';
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
+import { PageHeader } from '@/components/shared/page-header';
+import { Panel } from '@/components/shared/panel';
 import { propertiesAPI } from '@/lib/api/properties';
+import { statusToneSurface } from '@/lib/design/status-tone';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
@@ -50,16 +55,17 @@ export function LostFoundClient() {
   }
 
   return (
-    <div className="max-w-4xl md:p-6 mx-auto p-4 space-y-6">
-      <header>
-        <h1 className="font-bold text-(--pura-blue) text-3xl">
-          {t('lostFound.title')}
-        </h1>
-        <p className="mt-1 text-slate-600 text-sm">{t('lostFound.subtitle')}</p>
-      </header>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={t('lostFound.title')}
+        subtitle={t('lostFound.subtitle')}
+      />
 
       {overdueCount > 0 ? (
-        <p className="font-medium text-amber-800 text-sm" role="status">
+        <p
+          className={`${statusToneSurface.caution} border font-medium p-4 rounded-xl text-ink-default text-sm`}
+          role="status"
+        >
           {t('lostFound.overdueAlert').replace('{count}', String(overdueCount))}
         </p>
       ) : null}
@@ -69,35 +75,33 @@ export function LostFoundClient() {
         onSubmit={handleCreate}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('lostFound.list')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {isLoading ? <p>{t('common.loading')}</p> : null}
-          {!isLoading && items.length === 0 ? (
-            <p className="text-slate-600 text-sm">{t('lostFound.empty')}</p>
-          ) : null}
-          <ul className="space-y-3">
-            {items.map((row) => (
-              <LostFoundItemCard
-                key={row.id}
-                item={row}
-                userId={userId}
-                onClaim={(id, claimedBy) =>
-                  claimItem.mutateAsync({ id, claimedBy })
-                }
-                onReturn={(id, returnedTo) =>
-                  returnItem.mutateAsync({ id, returnedTo })
-                }
-                onDispose={(id, disposedBy, disposeReason) =>
-                  disposeItem.mutateAsync({ id, disposedBy, disposeReason })
-                }
-              />
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <Panel title={t('lostFound.list')}>
+        {isLoading ? <LoadingSpinner message={t('common.loading')} /> : null}
+        {!isLoading && items.length === 0 ? (
+          <EmptyState
+            icon={<PackageSearch className="h-10 w-10" />}
+            title={t('lostFound.empty')}
+          />
+        ) : null}
+        <ul className="space-y-3">
+          {items.map((row) => (
+            <LostFoundItemCard
+              key={row.id}
+              item={row}
+              userId={userId}
+              onClaim={(id, claimedBy) =>
+                claimItem.mutateAsync({ id, claimedBy })
+              }
+              onReturn={(id, returnedTo) =>
+                returnItem.mutateAsync({ id, returnedTo })
+              }
+              onDispose={(id, disposedBy, disposeReason) =>
+                disposeItem.mutateAsync({ id, disposedBy, disposeReason })
+              }
+            />
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }

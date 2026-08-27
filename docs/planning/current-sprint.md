@@ -1,20 +1,34 @@
 # Current Sprint
 
-## Sprint: Phase 7 — i18n & Multi-Property / CRS
+## Sprint: Shift Ops UI (Post–Phase 7)
 
-- Status: `DONE`
-- Dates: 2026-08-24 → 2026-08-26
-- Goal: Thai localisation, fonts/print, guest search, multi-property switcher, guest portal, digital key mock, mobile check-in.
+- Status: `IN PROGRESS` (PR #135)
+- Goal: Replace stiff marketing KPI home with a Front Office **Shift Ops** desk; Harbor visual polish; CSS-only motion. No Framer Motion in v1.
 
-## Deliverables
+## Source of truth
 
-1. [x] next-intl foundation (ADR 018)
-2. [x] Thai FO page translations
-3. [x] Sarabun fonts + PrintDocument (ADR 019)
-4. [x] Thai multi-token guest search (API)
-5. [x] PropertySwitcher / CRS UI v1
-6. [x] Guest portal (ADR 020)
-7. [x] Digital key mock (ADR 021)
-8. [x] Mobile check-in (ADR 022)
+→ **`docs/planning/shift-ops-ui-brief.md`**
 
-See `docs/planning/phase-7-closeout.md`.
+## Progress
+
+| Phase | Status   | Notes                                             |
+| ----- | -------- | ------------------------------------------------- |
+| **A** | Done     | Shift Ops home queues / exceptions / work list    |
+| **B** | Done     | Harbor tokens app-wide; UI primitives + FO panels |
+| **C** | Done     | Grouped sidebar + header guest search             |
+| **D** | Done     | CSS enter motion + reduced-motion                 |
+| **E** | Deferred | Framer only with ADR                              |
+
+## Role ownership (virtual AI team)
+
+| Role           | Owns                                                   |
+| -------------- | ------------------------------------------------------ |
+| **@PM**        | Phase A task breakdown + acceptance; cut scope         |
+| **@Architect** | Data composition / token plan; block unnecessary APIs  |
+| **@Frontend**  | Shift Ops UI, Harbor polish, nav/search UI, CSS motion |
+| **@Backend**   | Aggregate endpoint only if Architect flags a gap       |
+| **@QA**        | RTL tests, FO path, reduced-motion, AC sign-off        |
+
+## Prior sprint
+
+Phase 7 — i18n & Multi-Property: `DONE` (see `phase-7-closeout.md`).

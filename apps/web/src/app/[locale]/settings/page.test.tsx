@@ -6,7 +6,9 @@ describe('SettingsPage', () => {
   it('should render settings page', () => {
     render(<SettingsPage />);
 
-    expect(screen.getByText(t('settings.title'))).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: t('settings.title') }),
+    ).toBeInTheDocument();
     expect(screen.getByText(t('settings.subtitle'))).toBeInTheDocument();
   });
 
