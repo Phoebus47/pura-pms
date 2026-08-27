@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { propertiesAPI, type Property } from '@/lib/api';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 export function useProperties() {
@@ -15,7 +16,7 @@ export function useProperties() {
       setProperties(data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load properties';
+        err instanceof Error ? err.message : t('properties.loadFailed');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -27,12 +28,12 @@ export function useProperties() {
     async (id: string): Promise<boolean> => {
       try {
         await propertiesAPI.delete(id);
-        toast.success('Property deleted successfully');
+        toast.success(t('properties.deleted'));
         await loadProperties();
         return true;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : 'Failed to delete property';
+          err instanceof Error ? err.message : t('properties.deleteFailed');
         toast.error(errorMessage);
         return false;
       }

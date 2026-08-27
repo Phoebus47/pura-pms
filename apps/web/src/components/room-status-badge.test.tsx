@@ -1,16 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { RoomStatusBadge, roomStatusTone } from './room-status-badge';
 import { statusToneClass } from '@/lib/design/status-tone';
+import { t } from '@/lib/i18n';
 import type { RoomStatus } from '@/lib/api/rooms';
 
 describe('RoomStatusBadge', () => {
   const labels: Record<RoomStatus, string> = {
-    VACANT_CLEAN: 'Vacant Clean',
-    VACANT_DIRTY: 'Vacant Dirty',
-    OCCUPIED_CLEAN: 'Occupied Clean',
-    OCCUPIED_DIRTY: 'Occupied Dirty',
-    OUT_OF_ORDER: 'Out of Order',
-    OUT_OF_SERVICE: 'Out of Service',
+    VACANT_CLEAN: t('rooms.status.VACANT_CLEAN'),
+    VACANT_DIRTY: t('rooms.status.VACANT_DIRTY'),
+    OCCUPIED_CLEAN: t('rooms.status.OCCUPIED_CLEAN'),
+    OCCUPIED_DIRTY: t('rooms.status.OCCUPIED_DIRTY'),
+    OUT_OF_ORDER: t('rooms.status.OUT_OF_ORDER'),
+    OUT_OF_SERVICE: t('rooms.status.OUT_OF_SERVICE'),
   };
 
   const statuses = Object.keys(labels) as RoomStatus[];
@@ -42,14 +43,14 @@ describe('RoomStatusBadge', () => {
   it('should apply custom className', () => {
     render(<RoomStatusBadge status="VACANT_CLEAN" className="custom-class" />);
 
-    const badge = screen.getByText('Vacant Clean');
+    const badge = screen.getByText(t('rooms.status.VACANT_CLEAN'));
     expect(badge).toHaveClass('custom-class');
   });
 
   it('should keep status labels on one line', () => {
     render(<RoomStatusBadge status="OCCUPIED_DIRTY" />);
 
-    expect(screen.getByText('Occupied Dirty')).toHaveClass(
+    expect(screen.getByText(t('rooms.status.OCCUPIED_DIRTY'))).toHaveClass(
       'whitespace-nowrap',
       'shrink-0',
     );

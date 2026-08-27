@@ -3,6 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useRooms } from './use-rooms';
 import { roomsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api', () => ({
   roomsAPI: {
@@ -70,7 +71,7 @@ describe('useRooms', () => {
   });
 
   it('should handle loading error', async () => {
-    const errorMessage = 'Failed to load rooms';
+    const errorMessage = t('rooms.loadFailed');
     (roomsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useRooms());
@@ -89,7 +90,7 @@ describe('useRooms', () => {
   });
 
   it('should handle non-Error rejection', async () => {
-    const errorMessage = 'Failed to load rooms';
+    const errorMessage = t('rooms.loadFailed');
     (roomsAPI.getAll as any).mockRejectedValue(errorMessage);
 
     const { result } = renderHook(() => useRooms());

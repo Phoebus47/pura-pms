@@ -5,6 +5,7 @@ import ReservationDetailPage from './page';
 import { reservationsAPI } from '@/lib/api';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api', () => ({
   reservationsAPI: {
@@ -357,7 +358,7 @@ describe('ReservationDetailPage', () => {
       expect(screen.getByText('Error loading reservation')).toBeInTheDocument(),
     );
 
-    await userEvent.click(screen.getByText('Go Back'));
+    await userEvent.click(screen.getByText(t('common.goBack')));
     expect(mockBack).toHaveBeenCalled();
   });
 

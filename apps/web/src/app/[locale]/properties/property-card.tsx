@@ -4,6 +4,7 @@ import { Building2, Pencil, Trash2 } from 'lucide-react';
 import { type Property } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Panel } from '@/components/shared/panel';
+import { formatMessage, t } from '@/lib/i18n';
 
 interface PropertyCardProps {
   readonly property: Property;
@@ -61,12 +62,12 @@ export function PropertyCard({
         <div className="flex gap-4 mt-4">
           <CountFigure
             value={property._count.rooms}
-            label="Rooms"
+            label={t('properties.rooms')}
             ink="text-pura-blue"
           />
           <CountFigure
             value={property._count.roomTypes}
-            label="Types"
+            label={t('properties.types')}
             ink="text-signal-ink"
           />
         </div>
@@ -79,13 +80,15 @@ export function PropertyCard({
           className="flex-1"
           onClick={() => onView(property)}
         >
-          View Details
+          {t('properties.viewDetails')}
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onEdit(property)}
-          aria-label={`Edit ${property.name}`}
+          aria-label={formatMessage('properties.editAria', {
+            name: property.name,
+          })}
         >
           <Pencil className="h-4 w-4" />
         </Button>
@@ -94,7 +97,9 @@ export function PropertyCard({
           size="sm"
           className="hover:bg-status-critical-tint text-status-critical-ink"
           onClick={() => onDelete(property)}
-          aria-label={`Delete ${property.name}`}
+          aria-label={formatMessage('properties.deleteAria', {
+            name: property.name,
+          })}
         >
           <Trash2 className="h-4 w-4" />
         </Button>

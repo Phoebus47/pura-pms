@@ -10,6 +10,8 @@ import {
   type RoomStatus,
 } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
+import { roomStatusLabel } from '@/components/room-status-badge';
 import { PropertySelector } from './property-selector';
 import { BaseFormDialog } from '@/components/shared/base-form-dialog';
 import {
@@ -27,13 +29,13 @@ interface RoomFormDialogProps {
   readonly room?: Room | null;
 }
 
-const ROOM_STATUSES: { value: RoomStatus; label: string }[] = [
-  { value: 'VACANT_CLEAN', label: 'Vacant Clean' },
-  { value: 'VACANT_DIRTY', label: 'Vacant Dirty' },
-  { value: 'OCCUPIED_CLEAN', label: 'Occupied Clean' },
-  { value: 'OCCUPIED_DIRTY', label: 'Occupied Dirty' },
-  { value: 'OUT_OF_ORDER', label: 'Out of Order' },
-  { value: 'OUT_OF_SERVICE', label: 'Out of Service' },
+const ROOM_STATUSES: RoomStatus[] = [
+  'VACANT_CLEAN',
+  'VACANT_DIRTY',
+  'OCCUPIED_CLEAN',
+  'OCCUPIED_DIRTY',
+  'OUT_OF_ORDER',
+  'OUT_OF_SERVICE',
 ];
 
 export function RoomFormDialog({
@@ -89,7 +91,7 @@ export function RoomFormDialog({
       const data = await roomTypesAPI.getAll(propertyId);
       setRoomTypes(data);
     } catch {
-      toast.error('Failed to load room types');
+      toast.error(t('roomTypes.loadFailed'));
     } finally {
       setLoadingRoomTypes(false);
     }
@@ -109,7 +111,7 @@ export function RoomFormDialog({
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save room');
+      setError(err instanceof Error ? err.message : t('rooms.form.saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -119,7 +121,7 @@ export function RoomFormDialog({
     <BaseFormDialog
       isOpen={isOpen}
       onClose={onClose}
-      title={room ? 'Edit Room' : 'New Room'}
+      title={room ? t('rooms.form.edit') : t('rooms.form.new')}
     >
       <form
         onSubmit={handleSubmit}
@@ -131,7 +133,7 @@ export function RoomFormDialog({
               htmlFor="room-property-select"
               className="block font-semibold mb-2 text-foreground text-sm"
             >
-              Property *
+              {t('rooms.form.propertyRequired')}
             </label>
             <PropertySelector
               id="room-property-select"
@@ -147,7 +149,7 @@ export function RoomFormDialog({
             <TextInput
               id="room-number"
               name="number"
-              label="Room Number"
+              label={t('rooms.roomNumberLabel')}
               value={formData.number}
               onChange={(value) => setFormData({ ...formData, number: value })}
               required
@@ -156,7 +158,7 @@ export function RoomFormDialog({
             <NumberInput
               id="room-floor"
               name="floor"
-              label="Floor"
+              label={t('rooms.floorLabel')}
               value={formData.floor}
               onChange={(value) => setFormData({ ...formData, floor: value })}
               min={1}
@@ -167,7 +169,7 @@ export function RoomFormDialog({
           <Select
             id="room-type"
             name="roomTypeId"
-            label="Room Type"
+            label={t('rooms.roomType')}
             value={formData.roomTypeId}
             onChange={(value) =>
               setFormData({ ...formData, roomTypeId: value })
@@ -187,7 +189,7 @@ export function RoomFormDialog({
           <Select
             id="room-status"
             name="status"
-            label="Status"
+            label={t('common.status')}
             value={formData.status}
             onChange={(value) =>
               setFormData({
@@ -197,8 +199,8 @@ export function RoomFormDialog({
             }
             required
             options={ROOM_STATUSES.map((status) => ({
-              value: status.value,
-              label: status.label,
+              value: status,
+              label: roomStatusLabel(status),
             }))}
           />
 
@@ -208,7 +210,7 @@ export function RoomFormDialog({
         <FormDialogFooter
           onCancel={onClose}
           loading={loading}
-          submitLabel={room ? 'Update Room' : 'Create Room'}
+          submitLabel={room ? t('rooms.form.update') : t('rooms.form.create')}
         />
       </form>
     </BaseFormDialog>
@@ -219,7 +221,7 @@ function getRoomTypePlaceholder(
   isLoading: boolean,
   hasProperty: boolean,
 ): string {
-  if (isLoading) return 'Loading...';
-  if (hasProperty) return 'Select a room type';
-  return 'Select property first';
+  if (isLoading) return t('rooms.form.loadingTypes');
+  if (hasProperty) return t('rooms.form.selectType');
+  return t('rooms.form.selectPropertyFirst');
 }

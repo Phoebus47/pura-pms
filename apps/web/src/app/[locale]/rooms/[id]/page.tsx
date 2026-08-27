@@ -12,6 +12,14 @@ import { DetailPageHeader } from '@/components/shared/detail-page-header';
 import { MetadataCard } from '@/components/shared/metadata-card';
 import { DetailField } from '@/components/shared/detail-field';
 import { Panel } from '@/components/shared/panel';
+import { formatMessage, t } from '@/lib/i18n';
+
+function occupancyLabel(maxOccupancy: number | undefined): string {
+  if (maxOccupancy === undefined) {
+    return '-';
+  }
+  return formatMessage('rooms.guestsValue', { count: maxOccupancy });
+}
 
 export default function RoomDetailPage() {
   const params = useParams();
@@ -29,7 +37,7 @@ export default function RoomDetailPage() {
       const data = await roomsAPI.getById(roomId);
       setRoom(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load room');
+      setError(err instanceof Error ? err.message : t('rooms.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -40,25 +48,25 @@ export default function RoomDetailPage() {
   }, [loadRoom]);
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to delete this room?')) return;
+    if (!confirm(t('rooms.deleteConfirm'))) return;
 
     try {
       await roomsAPI.delete(roomId);
       router.push('/rooms');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete room');
+      alert(err instanceof Error ? err.message : t('rooms.deleteFailed'));
     }
   }
 
   if (loading) {
-    return <LoadingSpinner message="Loading room details..." />;
+    return <LoadingSpinner message={t('rooms.detailLoading')} />;
   }
 
   if (error || !room) {
     return (
       <DetailPageError
-        title="Error loading room"
-        message={error || 'Room not found'}
+        title={t('rooms.errorLoading')}
+        message={error || t('rooms.notFound')}
       />
     );
   }
@@ -67,11 +75,16 @@ export default function RoomDetailPage() {
     <p className="font-semibold text-ink-strong text-lg">{value}</p>
   );
 
+  const floorSubtitle =
+    room.floor === null || room.floor === undefined
+      ? undefined
+      : formatMessage('rooms.floorValue', { floor: room.floor });
+
   return (
     <div className="space-y-6">
       <DetailPageHeader
-        title={`Room ${room.number}`}
-        subtitle={`Floor ${room.floor}`}
+        title={formatMessage('rooms.roomNumber', { number: room.number })}
+        subtitle={floorSubtitle}
         actions={
           <>
             <Button
@@ -79,7 +92,7 @@ export default function RoomDetailPage() {
               onClick={() => router.push(`/rooms/${roomId}/edit`)}
             >
               <Edit className="h-4 w-4" />
-              Edit
+              {t('common.edit')}
             </Button>
             <Button
               variant="outline"
@@ -87,31 +100,41 @@ export default function RoomDetailPage() {
               className="hover:bg-status-critical-tint text-status-critical-ink"
             >
               <Trash2 className="h-4 w-4" />
-              Delete
+              {t('common.delete')}
             </Button>
           </>
         }
       />
 
       <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <Panel title="Room Information" padding="lg" className="lg:col-span-2">
+        <Panel
+          title={t('rooms.information')}
+          padding="lg"
+          className="lg:col-span-2"
+        >
           <div className="gap-6 grid grid-cols-2">
-            <DetailField label="Room Number" value={strongValue(room.number)} />
-
-            <DetailField label="Floor" value={strongValue(room.floor ?? '-')} />
+            <DetailField
+              label={t('rooms.roomNumberLabel')}
+              value={strongValue(room.number)}
+            />
 
             <DetailField
-              label="Status"
+              label={t('rooms.floorLabel')}
+              value={strongValue(room.floor ?? '-')}
+            />
+
+            <DetailField
+              label={t('common.status')}
               value={<RoomStatusBadge status={room.status} />}
             />
 
             <DetailField
-              label="Room Type"
+              label={t('rooms.roomType')}
               value={strongValue(room.roomType?.name || '-')}
             />
 
             <DetailField
-              label="Base Rate"
+              label={t('rooms.baseRate')}
               value={
                 <p className="font-semibold tabular-nums text-lg text-pura-blue">
                   ฿{Number(room.roomType?.baseRate || 0).toLocaleString()}
@@ -120,16 +143,16 @@ export default function RoomDetailPage() {
             />
 
             <DetailField
-              label="Max Occupancy"
-              value={strongValue(
-                `${room.roomType?.maxOccupancy || '-'} guests`,
-              )}
+              label={t('rooms.maxOccupancy')}
+              value={strongValue(occupancyLabel(room.roomType?.maxOccupancy))}
             />
           </div>
 
           {room.notes && (
             <div className="border-rule-mist border-t mt-6 pt-6">
-              <p className="font-semibold text-ink-subtle text-sm">Notes</p>
+              <p className="font-semibold text-ink-subtle text-sm">
+                {t('common.notes')}
+              </p>
               <p className="mt-2 text-ink-default whitespace-pre-wrap">
                 {room.notes}
               </p>
@@ -137,16 +160,16 @@ export default function RoomDetailPage() {
           )}
         </Panel>
 
-        <Panel title="Room Type Details" padding="lg">
+        <Panel title={t('rooms.typeDetails')} padding="lg">
           <div className="space-y-4">
             <DetailField
-              label="Type Name"
+              label={t('rooms.typeName')}
               value={strongValue(room.roomType?.name || '-')}
             />
 
             {room.roomType?.description && (
               <DetailField
-                label="Description"
+                label={t('common.description')}
                 value={
                   <p className="text-ink-default">
                     {room.roomType.description}
@@ -158,7 +181,7 @@ export default function RoomDetailPage() {
             {room.roomType?.amenities && room.roomType.amenities.length > 0 && (
               <div>
                 <p className="block font-semibold mb-2 text-ink-subtle text-sm">
-                  Amenities
+                  {t('rooms.amenities')}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {room.roomType.amenities.map((amenity, index) => (

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import RoomsPage from './page';
 import { roomsAPI } from '@/lib/api';
+import { formatMessage, t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -67,18 +68,22 @@ describe('RoomsPage', () => {
 
     render(<RoomsPage />);
 
-    expect(screen.getByText('Loading rooms...')).toBeInTheDocument();
+    expect(screen.getByText(t('rooms.loading'))).toBeInTheDocument();
   });
 
   it('should display rooms after loading', async () => {
     render(<RoomsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Rooms')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.title'))).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Room 101')).toBeInTheDocument();
-    expect(screen.getByText('Room 102')).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('rooms.roomNumber', { number: '102' })),
+    ).toBeInTheDocument();
   });
 
   it('should display error message if loading fails', async () => {
@@ -88,7 +93,7 @@ describe('RoomsPage', () => {
     render(<RoomsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Error loading rooms')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.errorTitle'))).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
@@ -99,8 +104,8 @@ describe('RoomsPage', () => {
     render(<RoomsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Error loading rooms')).toBeInTheDocument();
-      expect(screen.getByText('Failed to load rooms')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.errorTitle'))).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.loadFailed'))).toBeInTheDocument();
     });
   });
 
@@ -109,10 +114,14 @@ describe('RoomsPage', () => {
     render(<RoomsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    const roomCard = screen.getByText('Room 101').closest('div');
+    const roomCard = screen
+      .getByText(formatMessage('rooms.roomNumber', { number: '101' }))
+      .closest('div');
     if (roomCard) {
       await user.click(roomCard);
     }
@@ -126,10 +135,8 @@ describe('RoomsPage', () => {
     render(<RoomsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No rooms found')).toBeInTheDocument();
-      expect(
-        screen.getByText('Get started by adding your first room'),
-      ).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.emptyTitle'))).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.emptyBody'))).toBeInTheDocument();
     });
   });
 
@@ -141,14 +148,16 @@ describe('RoomsPage', () => {
 
     // We expect 0 rooms
     await waitFor(() => {
-      expect(screen.getByText('No rooms found')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.emptyTitle'))).toBeInTheDocument();
     });
 
-    const vacantCleanBadge = screen.getAllByText('Vacant Clean')[0];
+    const vacantCleanBadge = screen.getAllByText(
+      t('rooms.status.VACANT_CLEAN'),
+    )[0];
     await user.click(vacantCleanBadge);
 
     await waitFor(() => {
-      expect(screen.getByText('Try changing the filter')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.emptyFilter'))).toBeInTheDocument();
     });
   });
 
@@ -156,9 +165,13 @@ describe('RoomsPage', () => {
     const { container } = render(<RoomsPage />);
 
     await waitFor(() => {
-      const vacantCleanElements = screen.getAllByText('Vacant Clean');
+      const vacantCleanElements = screen.getAllByText(
+        t('rooms.status.VACANT_CLEAN'),
+      );
       expect(vacantCleanElements.length).toBeGreaterThan(0);
-      const occupiedCleanElements = screen.getAllByText('Occupied Clean');
+      const occupiedCleanElements = screen.getAllByText(
+        t('rooms.status.OCCUPIED_CLEAN'),
+      );
       expect(occupiedCleanElements.length).toBeGreaterThan(0);
     });
 
@@ -169,7 +182,9 @@ describe('RoomsPage', () => {
     const user = userEvent.setup();
     render(<RoomsPage />);
     await waitFor(() =>
-      expect(screen.getByText('Room 101')).toBeInTheDocument(),
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument(),
     );
 
     // Click Vacant Clean filter (using class or text check carefully)
@@ -184,7 +199,9 @@ describe('RoomsPage', () => {
 
     // Find the button that toggles filter.
     // Let's filter by OCCUPIED_CLEAN (Room 102).
-    const occupiedCleanBadge = screen.getAllByText('Occupied Clean')[0];
+    const occupiedCleanBadge = screen.getAllByText(
+      t('rooms.status.OCCUPIED_CLEAN'),
+    )[0];
     // Wait, getAllByText might match the badge inside the button.
     // Click it.
     await user.click(occupiedCleanBadge);
@@ -196,7 +213,9 @@ describe('RoomsPage', () => {
     });
 
     // Toggle off - Re-query because the component re-rendered
-    const occupiedCleanBadgeOff = screen.getAllByText('Occupied Clean')[0];
+    const occupiedCleanBadgeOff = screen.getAllByText(
+      t('rooms.status.OCCUPIED_CLEAN'),
+    )[0];
     await user.click(occupiedCleanBadgeOff);
 
     await waitFor(() => {
@@ -214,13 +233,15 @@ describe('RoomsPage', () => {
     render(<RoomsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Error loading rooms')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.errorTitle'))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('Try Again'));
+    await user.click(screen.getByText(t('common.tryAgain')));
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
   });
 });

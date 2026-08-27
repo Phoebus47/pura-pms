@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { useParams, useRouter } from 'next/navigation';
 import RoomDetailPage from './page';
 import { roomsAPI } from '@/lib/api';
+import { formatMessage, t } from '@/lib/i18n';
 import type { Room } from '@/lib/api';
 
 vi.mock('next/navigation', () => ({
@@ -56,7 +57,7 @@ describe('RoomDetailPage', () => {
 
     render(<RoomDetailPage />);
 
-    expect(screen.getByText('Loading room details...')).toBeInTheDocument();
+    expect(screen.getByText(t('rooms.detailLoading'))).toBeInTheDocument();
   });
 
   it('should display room details when loaded', async () => {
@@ -65,14 +66,20 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Floor 1')).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('rooms.floorValue', { floor: 1 })),
+    ).toBeInTheDocument();
     expect(screen.getByText('101')).toBeInTheDocument();
     expect(screen.getAllByText('Standard').length).toBeGreaterThan(0);
     expect(screen.getByText('฿1,000')).toBeInTheDocument();
-    expect(screen.getByText('2 guests')).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('rooms.guestsValue', { count: 2 })),
+    ).toBeInTheDocument();
   });
 
   it('should display room type amenities', async () => {
@@ -95,10 +102,12 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    const editButton = screen.getByText('Edit');
+    const editButton = screen.getByText(t('common.edit'));
     await user.click(editButton);
 
     expect(mockPush).toHaveBeenCalledWith('/rooms/1/edit');
@@ -113,10 +122,12 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByText(t('common.delete'));
     await user.click(deleteButton);
 
     await waitFor(() => {
@@ -135,10 +146,12 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByText(t('common.delete'));
     await user.click(deleteButton);
 
     expect(roomsAPI.delete).not.toHaveBeenCalled();
@@ -150,10 +163,10 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Error loading room')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.errorLoading'))).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Room not found')).toBeInTheDocument();
+    expect(screen.getByText(t('rooms.notFound'))).toBeInTheDocument();
   });
 
   it('should handle delete error', async () => {
@@ -165,10 +178,12 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByText(t('common.delete'));
     await user.click(deleteButton);
 
     await waitFor(() => {
@@ -200,13 +215,15 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 102')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '102' })),
+      ).toBeInTheDocument();
     });
 
     // No notes section
-    expect(screen.queryByText('Notes')).not.toBeInTheDocument();
+    expect(screen.queryByText(t('common.notes'))).not.toBeInTheDocument();
     // No amenities
-    expect(screen.queryByText('Amenities')).not.toBeInTheDocument();
+    expect(screen.queryByText(t('rooms.amenities'))).not.toBeInTheDocument();
   });
 
   it('should render room correctly when roomType is missing', async () => {
@@ -226,7 +243,9 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 102')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '102' })),
+      ).toBeInTheDocument();
     });
 
     const dashes = screen.getAllByText('-');
@@ -254,10 +273,10 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Error loading room')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.errorLoading'))).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Failed to load room')).toBeInTheDocument();
+    expect(screen.getByText(t('rooms.loadFailed'))).toBeInTheDocument();
   });
 
   it('should handle non-Error exception in handleDelete', async () => {
@@ -269,14 +288,16 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Room 101')).toBeInTheDocument();
+      expect(
+        screen.getByText(formatMessage('rooms.roomNumber', { number: '101' })),
+      ).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByText(t('common.delete'));
     await user.click(deleteButton);
 
     await waitFor(() => {
-      expect(global.alert).toHaveBeenCalledWith('Failed to delete room');
+      expect(global.alert).toHaveBeenCalledWith(t('rooms.deleteFailed'));
     });
   });
 
@@ -286,9 +307,9 @@ describe('RoomDetailPage', () => {
     render(<RoomDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Error loading room')).toBeInTheDocument();
+      expect(screen.getByText(t('rooms.errorLoading'))).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Room not found')).toBeInTheDocument();
+    expect(screen.getByText(t('rooms.notFound'))).toBeInTheDocument();
   });
 });
