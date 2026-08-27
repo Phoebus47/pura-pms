@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface DayUseBadgeProps {
   readonly className?: string;
@@ -12,7 +12,7 @@ export const dayUseTone: StatusTone = 'caution';
 
 export function DayUseBadge({ className, size = 'default' }: DayUseBadgeProps) {
   return (
-    <StatusChip
+    <StatusBadge
       tone={dayUseTone}
       label={t('common.dayUse')}
       size={size === 'xs' ? 'sm' : 'md'}

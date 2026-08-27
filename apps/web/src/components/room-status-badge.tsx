@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { StatusTone } from '@/lib/design/status-tone';
 import type { RoomStatus } from '@/lib/api/rooms';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface RoomStatusBadgeProps {
   readonly status: RoomStatus;
@@ -28,7 +28,7 @@ const roomStatusLabel: Record<RoomStatus, string> = {
 
 export function RoomStatusBadge({ status, className }: RoomStatusBadgeProps) {
   return (
-    <StatusChip
+    <StatusBadge
       tone={roomStatusTone[status]}
       label={roomStatusLabel[status]}
       className={cn('shrink-0', className)}

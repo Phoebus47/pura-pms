@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
 import type { ReservationStatus } from '@/lib/api/reservations';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface ReservationStatusBadgeProps {
   readonly status: ReservationStatus;
@@ -38,7 +38,7 @@ export function ReservationStatusBadge({
   size = 'default',
 }: ReservationStatusBadgeProps) {
   return (
-    <StatusChip
+    <StatusBadge
       tone={reservationStatusTone[status]}
       label={t(reservationStatusLabelKey[status])}
       size={size === 'xs' ? 'sm' : 'md'}

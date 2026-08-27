@@ -1,6 +1,6 @@
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface TaxExemptBadgeProps {
   readonly taxExempt?: boolean | null;
@@ -18,7 +18,7 @@ export function TaxExemptBadge({
   }
 
   return (
-    <StatusChip
+    <StatusBadge
       tone={taxExemptTone}
       label={t('reservations.taxExempt.badge')}
       className={className}

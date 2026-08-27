@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface SplitStayBadgeProps {
   readonly className?: string;
@@ -15,7 +15,7 @@ export function SplitStayBadge({
   size = 'default',
 }: SplitStayBadgeProps) {
   return (
-    <StatusChip
+    <StatusBadge
       tone={splitStayTone}
       label={t('reservations.splitStay.badge')}
       size={size === 'xs' ? 'sm' : 'md'}

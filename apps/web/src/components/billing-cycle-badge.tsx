@@ -1,7 +1,7 @@
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
 import { isExtendedBillingCycle, type BillingCycle } from '@/lib/billing-cycle';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface BillingCycleBadgeProps {
   readonly billingCycle?: BillingCycle | null;
@@ -25,7 +25,7 @@ export function BillingCycleBadge({
   const isWeekly = billingCycle === 'WEEKLY';
 
   return (
-    <StatusChip
+    <StatusBadge
       tone={billingCycleTone[isWeekly ? 'WEEKLY' : 'MONTHLY']}
       label={
         isWeekly

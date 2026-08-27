@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
 import { isNonRevenueStay, type StayPurpose } from '@/lib/stay-purpose';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface StayPurposeBadgeProps {
   readonly stayPurpose?: StayPurpose | null;
@@ -28,7 +28,7 @@ export function StayPurposeBadge({
   const isHouseUse = stayPurpose === 'HOUSE_USE';
 
   return (
-    <StatusChip
+    <StatusBadge
       tone={stayPurposeTone[isHouseUse ? 'HOUSE_USE' : 'COMPLIMENTARY']}
       label={
         isHouseUse

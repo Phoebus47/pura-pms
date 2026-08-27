@@ -1,6 +1,6 @@
 import { t } from '@/lib/i18n';
 import type { StatusTone } from '@/lib/design/status-tone';
-import { StatusChip } from './status-chip';
+import { StatusBadge } from './shared/status-badge';
 
 interface RoomLockBadgeProps {
   readonly isRoomLocked?: boolean | null;
@@ -18,7 +18,7 @@ export function RoomLockBadge({
   }
 
   return (
-    <StatusChip
+    <StatusBadge
       tone={roomLockTone}
       label={t('reservations.roomLock.badge')}
       className={className}
