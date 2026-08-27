@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import PropertiesPage from './page';
 import { useProperties } from '@/hooks/use-properties';
 import { useRouter } from 'next/navigation';
+import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -77,7 +78,7 @@ describe('PropertiesPage', () => {
       loadProperties: mockLoadProperties,
     });
     render(<PropertiesPage />);
-    expect(screen.getByText('Loading properties...')).toBeInTheDocument();
+    expect(screen.getByText(t('properties.loading'))).toBeInTheDocument();
   });
 
   it('renders error state', () => {
@@ -88,9 +89,9 @@ describe('PropertiesPage', () => {
       loadProperties: mockLoadProperties,
     });
     render(<PropertiesPage />);
-    expect(screen.getByText('Error loading properties')).toBeInTheDocument();
+    expect(screen.getByText(t('properties.errorTitle'))).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Try Again'));
+    fireEvent.click(screen.getByText(t('common.tryAgain')));
     expect(mockLoadProperties).toHaveBeenCalled();
   });
 
@@ -101,10 +102,10 @@ describe('PropertiesPage', () => {
       loadProperties: mockLoadProperties,
     });
     render(<PropertiesPage />);
-    expect(screen.getByText('No properties yet')).toBeInTheDocument();
+    expect(screen.getByText(t('properties.emptyTitle'))).toBeInTheDocument();
 
     // Empty state has an add button
-    const addButtons = screen.getAllByText('Add Property');
+    const addButtons = screen.getAllByText(t('properties.add'));
     expect(addButtons.length).toBeGreaterThan(0);
   });
 
@@ -119,7 +120,7 @@ describe('PropertiesPage', () => {
     // Implementation: {property.address && ...}
 
     // View Details button
-    await userEvent.click(screen.getAllByText('View Details')[0]);
+    await userEvent.click(screen.getAllByText(t('properties.viewDetails'))[0]);
     expect(mockPush).toHaveBeenCalledWith('/properties/1');
   });
 
@@ -127,7 +128,7 @@ describe('PropertiesPage', () => {
     render(<PropertiesPage />);
     // There are 2 "Add Property" buttons (header + potentially empty state, but here list is populated so only header)
     // Wait, empty state is only when properties.length === 0.
-    await userEvent.click(screen.getByText('Add Property'));
+    await userEvent.click(screen.getByText(t('properties.add')));
 
     expect(screen.getByText('Create Property')).toBeInTheDocument();
 
@@ -137,7 +138,7 @@ describe('PropertiesPage', () => {
 
   it('closes dialog', async () => {
     render(<PropertiesPage />);
-    await userEvent.click(screen.getByText('Add Property'));
+    await userEvent.click(screen.getByText(t('properties.add')));
     expect(screen.getByText('Create Property')).toBeInTheDocument();
 
     await userEvent.click(screen.getByText('Close'));
@@ -150,7 +151,7 @@ describe('PropertiesPage', () => {
     // Find edit button (Pencil) via card
     screen.getByText('Hotel California').closest('div');
 
-    const viewDetailsBtns = screen.getAllByText('View Details');
+    const viewDetailsBtns = screen.getAllByText(t('properties.viewDetails'));
     const firstDetailsBtn = viewDetailsBtns[0];
     const actionsContainer = firstDetailsBtn.parentElement;
     if (!actionsContainer) throw new Error('Actions container not found');
@@ -164,7 +165,7 @@ describe('PropertiesPage', () => {
   it('handles delete property', async () => {
     render(<PropertiesPage />);
 
-    const viewDetailsBtns = screen.getAllByText('View Details');
+    const viewDetailsBtns = screen.getAllByText(t('properties.viewDetails'));
     const actionsContainer = viewDetailsBtns[0].parentElement!;
 
     const deleteBtn = within(actionsContainer).getAllByRole('button')[2];

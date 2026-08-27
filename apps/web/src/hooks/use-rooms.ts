@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { roomsAPI, type Room, type RoomStatus } from '@/lib/api';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 interface UseRoomsOptions {
@@ -25,7 +26,7 @@ export function useRooms(options?: UseRoomsOptions) {
       setRooms(data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load rooms';
+        err instanceof Error ? err.message : t('rooms.loadFailed');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

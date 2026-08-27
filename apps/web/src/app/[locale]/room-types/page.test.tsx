@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import RoomTypesPage from './page';
 import { useRoomTypes } from '@/hooks/use-room-types';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { formatMessage, t } from '@/lib/i18n';
 
 vi.mock('@/hooks/use-room-types', () => ({
   useRoomTypes: vi.fn(),
@@ -71,7 +72,7 @@ describe('RoomTypesPage', () => {
 
     render(<RoomTypesPage />);
 
-    expect(screen.getByText('Loading room types...')).toBeInTheDocument();
+    expect(screen.getByText(t('roomTypes.loading'))).toBeInTheDocument();
   });
 
   it('should display error state', () => {
@@ -86,14 +87,14 @@ describe('RoomTypesPage', () => {
 
     render(<RoomTypesPage />);
 
-    expect(screen.getByText('Error loading room types')).toBeInTheDocument();
+    expect(screen.getByText(t('roomTypes.errorTitle'))).toBeInTheDocument();
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
   it('should display room types list', () => {
     render(<RoomTypesPage />);
 
-    expect(screen.getByText('Room Types')).toBeInTheDocument();
+    expect(screen.getByText(t('roomTypes.title'))).toBeInTheDocument();
     expect(screen.getByText('Standard')).toBeInTheDocument();
     expect(screen.getByText('Deluxe')).toBeInTheDocument();
     expect(screen.getByText('STD')).toBeInTheDocument();
@@ -105,7 +106,7 @@ describe('RoomTypesPage', () => {
     render(<RoomTypesPage />);
 
     const searchInput = screen.getByPlaceholderText(
-      'Search room types by name or code...',
+      t('roomTypes.searchPlaceholder'),
     );
     await user.type(searchInput, 'Standard');
 
@@ -120,14 +121,12 @@ describe('RoomTypesPage', () => {
     render(<RoomTypesPage />);
 
     const searchInput = screen.getByPlaceholderText(
-      'Search room types by name or code...',
+      t('roomTypes.searchPlaceholder'),
     );
     await user.type(searchInput, 'NonExistent');
 
     await waitFor(() => {
-      expect(
-        screen.getByText('No room types found matching your search'),
-      ).toBeInTheDocument();
+      expect(screen.getByText(t('roomTypes.emptySearch'))).toBeInTheDocument();
     });
   });
 
@@ -146,7 +145,9 @@ describe('RoomTypesPage', () => {
     });
 
     render(<RoomTypesPage />);
-    expect(screen.getByText('+2 more')).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('roomTypes.moreAmenities', { count: 2 })),
+    ).toBeInTheDocument();
   });
 
   it('should not render description if missing', () => {
@@ -177,9 +178,7 @@ describe('RoomTypesPage', () => {
 
     render(<RoomTypesPage />);
 
-    expect(
-      screen.getByText(/No room types yet|No room types found matching/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(t('roomTypes.emptyTitle'))).toBeInTheDocument();
   });
 
   it('should display room type details', () => {
@@ -187,8 +186,12 @@ describe('RoomTypesPage', () => {
 
     expect(screen.getByText('฿1,000')).toBeInTheDocument();
     expect(screen.getByText('฿2,000')).toBeInTheDocument();
-    expect(screen.getByText(/2 guests/i)).toBeInTheDocument();
-    expect(screen.getByText(/4 guests/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('rooms.guestsValue', { count: 2 })),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(formatMessage('rooms.guestsValue', { count: 4 })),
+    ).toBeInTheDocument();
   });
 
   it('should call deleteRoomType when delete is confirmed', async () => {
@@ -207,7 +210,7 @@ describe('RoomTypesPage', () => {
 
     const deleteButtons = screen.getAllByRole('button');
     const deleteButton = deleteButtons.find(
-      (btn) => btn.getAttribute('title') === 'Delete',
+      (btn) => btn.getAttribute('title') === t('common.delete'),
     );
     if (deleteButton) {
       await user.click(deleteButton);

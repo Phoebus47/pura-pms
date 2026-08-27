@@ -8,6 +8,7 @@ import {
   type CreatePropertyDto,
 } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { t } from '@/lib/i18n';
 
 interface PropertyFormDialogProps {
   readonly isOpen: boolean;
@@ -64,7 +65,9 @@ export function PropertyFormDialog({
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save property');
+      setError(
+        err instanceof Error ? err.message : t('properties.formSaveFailed'),
+      );
     } finally {
       setLoading(false);
     }
@@ -78,10 +81,12 @@ export function PropertyFormDialog({
         {/* Header */}
         <div className="border-b border-rule-mist flex items-center justify-between p-6">
           <h2 className="font-bold text-2xl text-pura-blue">
-            {property ? 'Edit Property' : 'New Property'}
+            {property ? t('properties.formEdit') : t('properties.formNew')}
           </h2>
           <button
+            type="button"
             onClick={onClose}
+            aria-label={t('common.cancel')}
             className="hover:bg-muted p-2 rounded-lg transition-colors"
           >
             <X className="h-5 text-muted-foreground w-5" />
@@ -100,7 +105,7 @@ export function PropertyFormDialog({
                 htmlFor="property-name"
                 className="block font-semibold mb-2 text-foreground text-sm"
               >
-                Property Name *
+                {t('properties.formName')}
               </label>
               <input
                 id="property-name"
@@ -111,7 +116,7 @@ export function PropertyFormDialog({
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                placeholder="e.g., Grand Hotel Bangkok"
+                placeholder={t('properties.formNamePlaceholder')}
                 className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
               />
             </div>
@@ -121,7 +126,7 @@ export function PropertyFormDialog({
                 htmlFor="property-address"
                 className="block font-semibold mb-2 text-foreground text-sm"
               >
-                Address
+                {t('common.address')}
               </label>
               <textarea
                 id="property-address"
@@ -130,7 +135,7 @@ export function PropertyFormDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, address: e.target.value })
                 }
-                placeholder="Full address"
+                placeholder={t('properties.formAddressPlaceholder')}
                 rows={3}
                 className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 resize-none rounded-lg transition-colors w-full"
               />
@@ -142,7 +147,7 @@ export function PropertyFormDialog({
                   htmlFor="property-phone"
                   className="block font-semibold mb-2 text-foreground text-sm"
                 >
-                  Phone
+                  {t('common.phone')}
                 </label>
                 <input
                   id="property-phone"
@@ -152,7 +157,7 @@ export function PropertyFormDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  placeholder="+66 2 123 4567"
+                  placeholder={t('properties.formPhonePlaceholder')}
                   className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
@@ -162,7 +167,7 @@ export function PropertyFormDialog({
                   htmlFor="property-email"
                   className="block font-semibold mb-2 text-foreground text-sm"
                 >
-                  Email
+                  {t('common.email')}
                 </label>
                 <input
                   id="property-email"
@@ -172,7 +177,7 @@ export function PropertyFormDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  placeholder="contact@property.com"
+                  placeholder={t('properties.formEmailPlaceholder')}
                   className="border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors w-full"
                 />
               </div>
@@ -195,10 +200,12 @@ export function PropertyFormDialog({
               className="flex-1"
               disabled={loading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" className="flex-1" disabled={loading}>
-              {loading ? 'Saving...' : getSubmitButtonLabel(!!property)}
+              {loading
+                ? t('properties.formSaving')
+                : getSubmitButtonLabel(!!property)}
             </Button>
           </div>
         </form>
@@ -208,6 +215,6 @@ export function PropertyFormDialog({
 }
 
 function getSubmitButtonLabel(isEdit: boolean): string {
-  if (isEdit) return 'Update Property';
-  return 'Create Property';
+  if (isEdit) return t('properties.formUpdate');
+  return t('properties.formCreate');
 }

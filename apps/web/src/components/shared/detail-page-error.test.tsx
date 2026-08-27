@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import { DetailPageError } from './detail-page-error';
+import { t } from '@/lib/i18n';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -32,7 +33,7 @@ describe('DetailPageError', () => {
 
     render(<DetailPageError title="Error Title" message="Error message" />);
 
-    const backButton = screen.getByText('Go Back');
+    const backButton = screen.getByText(t('common.goBack'));
     await user.click(backButton);
 
     expect(mockBack).toHaveBeenCalledTimes(1);
@@ -50,7 +51,7 @@ describe('DetailPageError', () => {
       />,
     );
 
-    const backButton = screen.getByText('Go Back');
+    const backButton = screen.getByText(t('common.goBack'));
     await user.click(backButton);
 
     expect(handleBack).toHaveBeenCalledTimes(1);

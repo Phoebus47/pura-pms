@@ -3,6 +3,7 @@
 import { Edit, Trash2 } from 'lucide-react';
 import type { RoomType } from '@/lib/api';
 import { Panel } from '@/components/shared/panel';
+import { formatMessage, t } from '@/lib/i18n';
 
 interface RoomTypeCardProps {
   readonly roomType: RoomType;
@@ -47,8 +48,10 @@ export function RoomTypeCard({ roomType, onDelete }: RoomTypeCardProps) {
           <button
             type="button"
             className={`${ICON_BUTTON} hover:bg-surface-inset`}
-            title="Edit"
-            aria-label={`Edit ${roomType.name}`}
+            title={t('common.edit')}
+            aria-label={formatMessage('roomTypes.editAria', {
+              name: roomType.name,
+            })}
           >
             <Edit className="h-4 text-ink-subtle w-4" aria-hidden="true" />
           </button>
@@ -56,8 +59,10 @@ export function RoomTypeCard({ roomType, onDelete }: RoomTypeCardProps) {
             type="button"
             onClick={() => onDelete(roomType)}
             className={`${ICON_BUTTON} hover:bg-status-critical-tint`}
-            title="Delete"
-            aria-label={`Delete ${roomType.name}`}
+            title={t('common.delete')}
+            aria-label={formatMessage('roomTypes.deleteAria', {
+              name: roomType.name,
+            })}
           >
             <Trash2
               className="h-4 text-status-critical-ink w-4"
@@ -74,17 +79,19 @@ export function RoomTypeCard({ roomType, onDelete }: RoomTypeCardProps) {
       )}
 
       <div className="mb-4 space-y-3">
-        <DetailRow label="Base Rate">
+        <DetailRow label={t('rooms.baseRate')}>
           <span className="font-bold tabular-nums text-lg text-pura-blue">
             ฿{Number(roomType.baseRate).toLocaleString()}
           </span>
         </DetailRow>
-        <DetailRow label="Max Occupancy">
+        <DetailRow label={t('rooms.maxOccupancy')}>
           <span className="font-semibold tabular-nums text-ink-strong">
-            {roomType.maxOccupancy} guests
+            {formatMessage('rooms.guestsValue', {
+              count: roomType.maxOccupancy,
+            })}
           </span>
         </DetailRow>
-        <DetailRow label="Total Rooms">
+        <DetailRow label={t('roomTypes.totalRooms')}>
           <span className="font-semibold tabular-nums text-ink-strong">
             {roomType._count?.rooms || 0}
           </span>
@@ -94,7 +101,7 @@ export function RoomTypeCard({ roomType, onDelete }: RoomTypeCardProps) {
       {roomType.amenities && roomType.amenities.length > 0 && (
         <div>
           <p className="font-semibold mb-2 text-2xs text-ink-subtle tracking-wide uppercase">
-            Amenities
+            {t('rooms.amenities')}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {roomType.amenities.slice(0, 3).map((amenity) => (
@@ -107,7 +114,9 @@ export function RoomTypeCard({ roomType, onDelete }: RoomTypeCardProps) {
             ))}
             {extraAmenities > 0 && (
               <span className={`${CHIP} bg-surface-inset text-ink-subtle`}>
-                +{extraAmenities} more
+                {formatMessage('roomTypes.moreAmenities', {
+                  count: extraAmenities,
+                })}
               </span>
             )}
           </div>

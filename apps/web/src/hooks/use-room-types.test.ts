@@ -3,6 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useRoomTypes } from './use-room-types';
 import { roomTypesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api', () => ({
   roomTypesAPI: {
@@ -74,7 +75,7 @@ describe('useRoomTypes', () => {
   });
 
   it('should handle loading error', async () => {
-    const errorMessage = 'Failed to load room types';
+    const errorMessage = t('roomTypes.loadFailed');
     (roomTypesAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useRoomTypes());
@@ -104,8 +105,8 @@ describe('useRoomTypes', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.error).toBe('Failed to load room types');
-    expect(toast.error).toHaveBeenCalledWith('Failed to load room types');
+    expect(result.current.error).toBe(t('roomTypes.loadFailed'));
+    expect(toast.error).toHaveBeenCalledWith(t('roomTypes.loadFailed'));
   });
 
   it('should delete room type successfully', async () => {
@@ -121,9 +122,7 @@ describe('useRoomTypes', () => {
 
     expect(deleteResult!).toBe(true);
     expect(roomTypesAPI.delete).toHaveBeenCalledWith('1');
-    expect(toast.success).toHaveBeenCalledWith(
-      'Room type deleted successfully',
-    );
+    expect(toast.success).toHaveBeenCalledWith(t('roomTypes.deleted'));
     expect(roomTypesAPI.getAll).toHaveBeenCalled();
   });
 
@@ -153,7 +152,7 @@ describe('useRoomTypes', () => {
     });
 
     expect(deleteResult!).toBe(false);
-    expect(toast.error).toHaveBeenCalledWith('Failed to delete room type');
+    expect(toast.error).toHaveBeenCalledWith(t('roomTypes.deleteFailed'));
   });
 
   it('should reload room types after successful delete', async () => {
