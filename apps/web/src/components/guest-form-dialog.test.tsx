@@ -2,6 +2,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { GuestFormDialog } from './guest-form-dialog';
 import { guestsAPI } from '@/lib/api';
+import { t } from '@/lib/i18n';
 
 describe('GuestFormDialog', () => {
   const mockOnClose = vi.fn();
@@ -35,7 +36,7 @@ describe('GuestFormDialog', () => {
         onSuccess={mockOnSuccess}
       />,
     );
-    expect(screen.getByText('New Guest')).toBeInTheDocument();
+    expect(screen.getByText(t('guests.form.new'))).toBeInTheDocument();
     expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/vip level standard/i)).toBeInTheDocument();
   });
@@ -49,7 +50,7 @@ describe('GuestFormDialog', () => {
         guest={mockGuest}
       />,
     );
-    expect(screen.getByText('Edit Guest')).toBeInTheDocument();
+    expect(screen.getByText(t('guests.form.edit'))).toBeInTheDocument();
     expect(screen.getByLabelText(/first name/i)).toHaveValue('Existing');
     expect(screen.getByLabelText(/vip level 1/i)).toHaveAttribute(
       'aria-pressed',
@@ -155,7 +156,7 @@ describe('GuestFormDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /create guest/i }));
 
     await waitFor(() =>
-      expect(screen.getByText('Failed to save guest')).toBeInTheDocument(),
+      expect(screen.getByText(t('guests.form.saveFailed'))).toBeInTheDocument(),
     );
   });
 

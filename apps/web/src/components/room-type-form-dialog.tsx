@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
 import { roomTypesAPI, type RoomType, type CreateRoomTypeDto } from '@/lib/api';
-import { Button } from '@/components/ui/button';
+import { t } from '@/lib/i18n';
 import { PropertySelector } from './property-selector';
+import { RoomTypeAmenityField } from './room-type-amenity-field';
 import { BaseFormDialog } from '@/components/shared/base-form-dialog';
 import {
   TextInput,
@@ -100,7 +100,9 @@ export function RoomTypeFormDialog({
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save room type');
+      setError(
+        err instanceof Error ? err.message : t('roomTypes.form.saveFailed'),
+      );
     } finally {
       setLoading(false);
     }
@@ -110,7 +112,7 @@ export function RoomTypeFormDialog({
     <BaseFormDialog
       isOpen={isOpen}
       onClose={onClose}
-      title={roomType ? 'Edit Room Type' : 'New Room Type'}
+      title={roomType ? t('roomTypes.form.edit') : t('roomTypes.form.new')}
       maxWidth="xl"
     >
       <form
@@ -124,7 +126,7 @@ export function RoomTypeFormDialog({
               htmlFor="room-type-property-select"
               className="block font-semibold mb-2 text-foreground text-sm"
             >
-              Property *
+              {t('rooms.form.propertyRequired')}
             </label>
             <PropertySelector
               id="room-type-property-select"
@@ -141,16 +143,16 @@ export function RoomTypeFormDialog({
             <TextInput
               id="room-type-name"
               name="name"
-              label="Room Type Name"
+              label={t('roomTypes.form.name')}
               value={formData.name}
               onChange={(value) => setFormData({ ...formData, name: value })}
               required
-              placeholder="Deluxe Suite"
+              placeholder={t('roomTypes.form.namePlaceholder')}
             />
             <TextInput
               id="room-type-code"
               name="code"
-              label="Code"
+              label={t('common.code')}
               value={formData.code}
               onChange={(value) =>
                 setFormData({
@@ -159,7 +161,7 @@ export function RoomTypeFormDialog({
                 })
               }
               required
-              placeholder="DLX"
+              placeholder={t('roomTypes.form.codePlaceholder')}
               className="uppercase"
             />
           </div>
@@ -168,12 +170,12 @@ export function RoomTypeFormDialog({
           <Textarea
             id="room-type-description"
             name="description"
-            label="Description"
+            label={t('common.description')}
             value={formData.description}
             onChange={(value) =>
               setFormData({ ...formData, description: value })
             }
-            placeholder="Room type description..."
+            placeholder={t('roomTypes.form.descriptionPlaceholder')}
             rows={3}
           />
 
@@ -181,7 +183,7 @@ export function RoomTypeFormDialog({
             <NumberInput
               id="room-type-base-rate"
               name="baseRate"
-              label="Base Rate (฿)"
+              label={t('roomTypes.form.baseRate')}
               value={formData.baseRate}
               onChange={(value) =>
                 setFormData({ ...formData, baseRate: value })
@@ -194,7 +196,7 @@ export function RoomTypeFormDialog({
             <NumberInput
               id="room-type-max-adults"
               name="maxAdults"
-              label="Max Adults"
+              label={t('roomTypes.form.maxAdults')}
               value={formData.maxAdults}
               onChange={(value) =>
                 setFormData({ ...formData, maxAdults: value })
@@ -206,7 +208,7 @@ export function RoomTypeFormDialog({
             <NumberInput
               id="room-type-max-children"
               name="maxChildren"
-              label="Max Children"
+              label={t('roomTypes.form.maxChildren')}
               value={formData.maxChildren}
               onChange={(value) =>
                 setFormData({ ...formData, maxChildren: value })
@@ -217,66 +219,14 @@ export function RoomTypeFormDialog({
             />
           </div>
 
-          {/* Amenities */}
-          <div>
-            <label
-              htmlFor="room-type-amenity"
-              className="block font-semibold mb-2 text-foreground text-sm"
-            >
-              Amenities
-            </label>
+          <RoomTypeAmenityField
+            amenities={formData.amenities ?? []}
+            newAmenity={newAmenity}
+            onNewAmenityChange={setNewAmenity}
+            onAdd={addAmenity}
+            onRemove={removeAmenity}
+          />
 
-            {/* Add Amenity */}
-            <div className="flex gap-2 mb-3">
-              <input
-                id="room-type-amenity"
-                name="amenity"
-                type="text"
-                value={newAmenity}
-                onChange={(e) => setNewAmenity(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addAmenity();
-                  }
-                }}
-                placeholder="e.g., WiFi, TV, Mini Bar"
-                className="border border-input flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring px-4 py-3 rounded-lg transition-colors"
-              />
-              <Button
-                type="button"
-                onClick={addAmenity}
-                className="px-4"
-                aria-label="Add amenity"
-              >
-                <Plus className="h-5 w-5" />
-              </Button>
-            </div>
-
-            {/* Amenities List */}
-            {formData.amenities && formData.amenities.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {formData.amenities.map((amenity, index) => (
-                  <div
-                    key={`${amenity}-${index}`}
-                    className="bg-pura-blue/10 font-semibold gap-2 inline-flex items-center px-3 py-1.5 ring-1 ring-inset ring-pura-blue/20 rounded-full text-pura-blue text-sm"
-                  >
-                    {amenity}
-                    <button
-                      type="button"
-                      onClick={() => removeAmenity(index)}
-                      className="hover:text-status-critical-ink transition-colors"
-                      aria-label={`Remove ${amenity}`}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Error Message */}
           <ErrorDisplay error={error} />
         </div>
 
@@ -284,7 +234,9 @@ export function RoomTypeFormDialog({
         <FormDialogFooter
           onCancel={onClose}
           loading={loading}
-          submitLabel={roomType ? 'Update Room Type' : 'Create Room Type'}
+          submitLabel={
+            roomType ? t('roomTypes.form.update') : t('roomTypes.form.create')
+          }
         />
       </form>
     </BaseFormDialog>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { guestsAPI, type Guest, type CreateGuestDto } from '@/lib/api';
+import { formatMessage, t } from '@/lib/i18n';
 import { BaseFormDialog } from '@/components/shared/base-form-dialog';
 import { TextInput, Textarea } from '@/components/shared/form-fields';
 import { FormDialogFooter } from '@/components/shared/form-dialog-footer';
@@ -76,7 +77,9 @@ export function GuestFormDialog({
       onSuccess(savedGuest);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save guest');
+      setError(
+        err instanceof Error ? err.message : t('guests.form.saveFailed'),
+      );
     } finally {
       setLoading(false);
     }
@@ -86,7 +89,7 @@ export function GuestFormDialog({
     <BaseFormDialog
       isOpen={isOpen}
       onClose={onClose}
-      title={guest ? 'Edit Guest' : 'New Guest'}
+      title={guest ? t('guests.form.edit') : t('guests.form.new')}
     >
       <form
         onSubmit={handleSubmit}
@@ -96,23 +99,25 @@ export function GuestFormDialog({
           <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
             <TextInput
               id="guest-first-name"
-              label="First Name"
+              name="firstName"
+              label={t('common.firstName')}
               value={formData.firstName}
               onChange={(value) =>
                 setFormData({ ...formData, firstName: value })
               }
               required
-              placeholder="John"
+              placeholder={t('guests.form.firstNamePlaceholder')}
             />
             <TextInput
               id="guest-last-name"
-              label="Last Name"
+              name="lastName"
+              label={t('common.lastName')}
               value={formData.lastName}
               onChange={(value) =>
                 setFormData({ ...formData, lastName: value })
               }
               required
-              placeholder="Doe"
+              placeholder={t('guests.form.lastNamePlaceholder')}
             />
           </div>
 
@@ -120,20 +125,20 @@ export function GuestFormDialog({
             <TextInput
               id="guest-email"
               name="email"
-              label="Email"
+              label={t('common.email')}
               type="email"
               value={formData.email}
               onChange={(value) => setFormData({ ...formData, email: value })}
-              placeholder="john.doe@email.com"
+              placeholder={t('guests.form.emailPlaceholder')}
             />
             <TextInput
               id="guest-phone"
               name="phone"
-              label="Phone"
+              label={t('common.phone')}
               type="tel"
               value={formData.phone}
               onChange={(value) => setFormData({ ...formData, phone: value })}
-              placeholder="+66 81 234 5678"
+              placeholder={t('guests.form.phonePlaceholder')}
             />
           </div>
 
@@ -141,32 +146,32 @@ export function GuestFormDialog({
             <TextInput
               id="guest-nationality"
               name="nationality"
-              label="Nationality"
+              label={t('common.nationality')}
               value={formData.nationality}
               onChange={(value) =>
                 setFormData({ ...formData, nationality: value })
               }
-              placeholder="Thai"
+              placeholder={t('guests.form.nationalityPlaceholder')}
             />
             <TextInput
               id="guest-id-number"
               name="idNumber"
-              label="ID Number"
+              label={t('common.idNumber')}
               value={formData.idNumber}
               onChange={(value) =>
                 setFormData({ ...formData, idNumber: value })
               }
-              placeholder="Passport or ID number"
+              placeholder={t('guests.form.idPlaceholder')}
             />
           </div>
 
           <Textarea
             id="guest-address"
             name="address"
-            label="Address"
+            label={t('common.address')}
             value={formData.address}
             onChange={(value) => setFormData({ ...formData, address: value })}
-            placeholder="Full address"
+            placeholder={t('guests.form.addressPlaceholder')}
             rows={3}
           />
 
@@ -175,7 +180,7 @@ export function GuestFormDialog({
               htmlFor="vip-level-group"
               className="block font-semibold mb-2 text-foreground text-sm"
             >
-              VIP Level
+              {t('common.vipLevel')}
             </label>
             <fieldset id="vip-level-group" className="flex gap-2">
               {[0, 1, 2, 3, 4, 5].map((level) => (
@@ -183,7 +188,11 @@ export function GuestFormDialog({
                   key={level}
                   type="button"
                   onClick={() => setFormData({ ...formData, vipLevel: level })}
-                  aria-label={`VIP Level ${level === 0 ? 'Standard' : level}`}
+                  aria-label={
+                    level === 0
+                      ? t('guests.form.vipStandardAria')
+                      : formatMessage('guests.form.vipLevelAria', { level })
+                  }
                   aria-pressed={formData.vipLevel === level}
                   className={`flex items-center gap-1 px-4 py-2 rounded-xl border-2 transition-colors ${
                     formData.vipLevel === level
@@ -192,7 +201,9 @@ export function GuestFormDialog({
                   }`}
                 >
                   {level === 0 ? (
-                    <span className="font-semibold text-sm">Standard</span>
+                    <span className="font-semibold text-sm">
+                      {t('common.standard')}
+                    </span>
                   ) : (
                     <>
                       {Array.from({ length: level }).map((_, i) => (
@@ -214,7 +225,9 @@ export function GuestFormDialog({
         <FormDialogFooter
           onCancel={onClose}
           loading={loading}
-          submitLabel={guest ? 'Update Guest' : 'Create Guest'}
+          submitLabel={
+            guest ? t('guests.form.update') : t('guests.form.create')
+          }
         />
       </form>
     </BaseFormDialog>

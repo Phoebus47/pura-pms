@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { guestsAPI, type Guest } from '@/lib/api';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 interface UseGuestsOptions {
@@ -23,7 +24,7 @@ export function useGuests(options?: UseGuestsOptions) {
       setGuests(response.data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load guests';
+        err instanceof Error ? err.message : t('guests.loadFailed');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -35,12 +36,12 @@ export function useGuests(options?: UseGuestsOptions) {
     async (id: string): Promise<boolean> => {
       try {
         await guestsAPI.delete(id);
-        toast.success('Guest deleted successfully');
+        toast.success(t('guests.deleted'));
         await loadGuests();
         return true;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : 'Failed to delete guest';
+          err instanceof Error ? err.message : t('common.failedToDeleteGuest');
         toast.error(errorMessage);
         return false;
       }

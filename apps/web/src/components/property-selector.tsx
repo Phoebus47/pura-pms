@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Building2 } from 'lucide-react';
 import { propertiesAPI, type Property } from '@/lib/api';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 interface PropertySelectorProps {
@@ -30,7 +31,7 @@ export function PropertySelector({
       const data = await propertiesAPI.getAll();
       setProperties(data);
     } catch {
-      toast.error('Failed to load properties');
+      toast.error(t('properties.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -41,7 +42,7 @@ export function PropertySelector({
       <div className="relative">
         <Building2 className="-translate-y-1/2 absolute h-5 left-3 text-muted-foreground top-1/2 w-5" />
         <div className="bg-surface-inset border border-input pl-10 pr-4 py-3 rounded-lg text-muted-foreground w-full">
-          Loading properties...
+          {t('properties.loading')}
         </div>
       </div>
     );
@@ -52,12 +53,13 @@ export function PropertySelector({
       <Building2 className="-translate-y-1/2 absolute h-5 left-3 pointer-events-none text-muted-foreground top-1/2 w-5 z-10" />
       <select
         id={id}
+        name={id ?? 'propertyId'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
         className="appearance-none bg-surface-desk border border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring pl-10 pr-4 py-3 rounded-lg transition-colors w-full"
       >
-        <option value="">Select a property</option>
+        <option value="">{t('properties.selectPlaceholder')}</option>
         {properties.map((property) => (
           <option key={property.id} value={property.id}>
             {property.name}
