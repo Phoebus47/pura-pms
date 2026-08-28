@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BaseFormDialog } from './base-form-dialog';
+import { t } from '@/lib/i18n';
 
 describe('BaseFormDialog', () => {
   it('should not render when isOpen is false', () => {
@@ -34,7 +35,7 @@ describe('BaseFormDialog', () => {
       </BaseFormDialog>,
     );
 
-    const closeButton = screen.getByLabelText('Close dialog');
+    const closeButton = screen.getByLabelText(t('common.closeDialog'));
     await user.click(closeButton);
 
     expect(handleClose).toHaveBeenCalledTimes(1);

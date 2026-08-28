@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { t } from '@/lib/i18n';
 
 interface FormDialogFooterProps {
   readonly onCancel: () => void;
@@ -13,7 +14,7 @@ export function FormDialogFooter({
   onCancel,
   loading,
   submitLabel,
-  cancelLabel = 'Cancel',
+  cancelLabel = t('common.cancel'),
 }: FormDialogFooterProps) {
   return (
     <div className="border-rule-mist border-t flex gap-3 mt-6 pt-6">
@@ -27,7 +28,7 @@ export function FormDialogFooter({
         {cancelLabel}
       </Button>
       <Button type="submit" className="flex-1" disabled={loading}>
-        {loading ? 'Saving...' : submitLabel}
+        {loading ? t('common.saving') : submitLabel}
       </Button>
     </div>
   );

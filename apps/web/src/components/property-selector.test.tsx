@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { PropertySelector } from './property-selector';
 import { propertiesAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api', () => ({
   propertiesAPI: {
@@ -36,7 +37,7 @@ describe('PropertySelector', () => {
 
     render(<PropertySelector value="" onChange={mockOnChange} />);
 
-    expect(screen.getByText('Loading properties...')).toBeInTheDocument();
+    expect(screen.getByText(t('properties.loading'))).toBeInTheDocument();
   });
 
   it('should load and display properties', async () => {
@@ -104,6 +105,7 @@ describe('PropertySelector', () => {
     await waitFor(() => {
       const select = screen.getByRole('combobox');
       expect(select).toHaveAttribute('id', 'property-select');
+      expect(select).toHaveAttribute('name', 'property-select');
     });
   });
 
@@ -113,7 +115,7 @@ describe('PropertySelector', () => {
     render(<PropertySelector value="" onChange={mockOnChange} />);
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to load properties');
+      expect(toast.error).toHaveBeenCalledWith(t('properties.loadFailed'));
     });
   });
 });

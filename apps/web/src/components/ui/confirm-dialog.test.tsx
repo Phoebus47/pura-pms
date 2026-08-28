@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useConfirmDialog } from './confirm-dialog';
+import { t } from '@/lib/i18n';
 
 function TestComponent() {
   const { confirm, Dialog } = useConfirmDialog();
@@ -86,7 +87,7 @@ describe('useConfirmDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByText('Confirm');
+    const confirmButton = screen.getByText(t('common.confirm'));
     await user.click(confirmButton);
 
     await waitFor(() => {
@@ -122,7 +123,7 @@ describe('useConfirmDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText(t('common.cancel'));
     await user.click(cancelButton);
 
     await waitFor(() => {
@@ -175,7 +176,7 @@ describe('useConfirmDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByText('Confirm');
+    const confirmButton = screen.getByText(t('common.confirm'));
     await user.click(confirmButton);
 
     await waitFor(() => {
@@ -211,7 +212,7 @@ describe('useConfirmDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByText('Confirm');
+    const confirmButton = screen.getByText(t('common.confirm'));
     await user.click(confirmButton);
 
     await waitFor(() => {
@@ -230,7 +231,7 @@ describe('useConfirmDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText(t('common.cancel'));
     await user.click(cancelButton);
 
     await waitFor(() => {
@@ -266,7 +267,7 @@ describe('useConfirmDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByText('Confirm');
+    const confirmButton = screen.getByText(t('common.confirm'));
     // Simulate rapid double click
     await user.click(confirmButton);
     await user.click(confirmButton);

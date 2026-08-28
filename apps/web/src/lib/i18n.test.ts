@@ -15,6 +15,11 @@ describe('i18n bridge', () => {
 
   it('returns English messages by default', () => {
     expect(t('nav.dashboard')).toBe('Shift Ops');
+    expect(t('guests.form.new')).toBe('New Guest');
+    expect(t('guests.search.title')).toBe('Search Guest');
+    expect(t('roomTypes.form.new')).toBe('New Room Type');
+    expect(t('properties.selectPlaceholder')).toBe('Select a property');
+    expect(t('common.closeDialog')).toBe('Close dialog');
   });
 
   it('returns Thai messages when active locale messages are set', () => {
@@ -56,6 +61,11 @@ describe('i18n bridge', () => {
     expect(t('nav.cardPreauths')).toBe('Pre-auth');
     expect(t('reservations.status.CHECKED_IN')).toBe('เช็คอินแล้ว');
     expect(t('rooms.title')).toBe('ห้องพัก');
+    expect(t('guests.form.new')).toBe('เพิ่มแขก');
+    expect(t('guests.search.title')).toBe('ค้นหาแขก');
+    expect(t('roomTypes.form.new')).toBe('เพิ่มประเภทห้อง');
+    expect(t('properties.selectPlaceholder')).toBe('เลือกโรงแรม');
+    expect(t('common.closeDialog')).toBe('ปิดหน้าต่าง');
     expect(t('roomTypes.title')).toBe('ประเภทห้อง');
     expect(t('properties.title')).toBe('โรงแรม');
     expect(t('rooms.status.VACANT_CLEAN')).toBe('ว่างสะอาด (VC)');

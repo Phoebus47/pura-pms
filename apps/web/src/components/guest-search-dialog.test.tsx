@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GuestSearchDialog } from './guest-search-dialog';
 import { guestsAPI } from '@/lib/api';
+import { t } from '@/lib/i18n';
 
 // Mock the API
 vi.mock('@/lib/api', () => ({
@@ -50,8 +51,15 @@ describe('GuestSearchDialog', () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText(/search by name/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(t('guests.search.placeholder')),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: t('common.search') }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: t('common.closeDialog') }),
+    ).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
@@ -65,7 +73,7 @@ describe('GuestSearchDialog', () => {
     );
 
     expect(
-      screen.queryByPlaceholderText(/search by name/i),
+      screen.queryByPlaceholderText(t('guests.search.placeholder')),
     ).not.toBeInTheDocument();
   });
 
@@ -81,7 +89,7 @@ describe('GuestSearchDialog', () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText(/search by name/i);
+    const input = screen.getByPlaceholderText(t('guests.search.placeholder'));
     await userEvent.type(input, 'John');
 
     const searchButton = screen.getByRole('button', { name: /search/i });
@@ -107,7 +115,7 @@ describe('GuestSearchDialog', () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText(/search by name/i);
+    const input = screen.getByPlaceholderText(t('guests.search.placeholder'));
     await userEvent.type(input, 'John{enter}');
 
     expect(guestsAPI.getAll).toHaveBeenCalledWith({ search: 'John' });
@@ -129,12 +137,12 @@ describe('GuestSearchDialog', () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText(/search by name/i);
+    const input = screen.getByPlaceholderText(t('guests.search.placeholder'));
     await userEvent.type(input, 'Unknown');
     await userEvent.click(screen.getByRole('button', { name: /search/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('No guests found')).toBeInTheDocument();
+      expect(screen.getByText(t('common.noGuestsFound'))).toBeInTheDocument();
     });
     expect(
       screen.getByRole('button', { name: /create new guest/i }),
@@ -156,7 +164,7 @@ describe('GuestSearchDialog', () => {
     );
 
     await userEvent.type(
-      screen.getByPlaceholderText(/search by name/i),
+      screen.getByPlaceholderText(t('guests.search.placeholder')),
       'John',
     );
     await userEvent.click(screen.getByRole('button', { name: /search/i }));
@@ -184,7 +192,7 @@ describe('GuestSearchDialog', () => {
     );
 
     await userEvent.type(
-      screen.getByPlaceholderText(/search by name/i),
+      screen.getByPlaceholderText(t('guests.search.placeholder')),
       'Unknown',
     );
     await userEvent.click(screen.getByRole('button', { name: /search/i }));
@@ -216,7 +224,7 @@ describe('GuestSearchDialog', () => {
     );
 
     await userEvent.type(
-      screen.getByPlaceholderText(/search by name/i),
+      screen.getByPlaceholderText(t('guests.search.placeholder')),
       'Error',
     );
     await userEvent.click(screen.getByRole('button', { name: /search/i }));
@@ -238,7 +246,7 @@ describe('GuestSearchDialog', () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText(/search by name/i);
+    const input = screen.getByPlaceholderText(t('guests.search.placeholder'));
     await userEvent.type(input, '   {enter}');
 
     expect(guestsAPI.getAll).not.toHaveBeenCalled();
@@ -265,13 +273,15 @@ describe('GuestSearchDialog', () => {
     );
 
     await userEvent.type(
-      screen.getByPlaceholderText(/search by name/i),
+      screen.getByPlaceholderText(t('guests.search.placeholder')),
       'John',
     );
     await userEvent.click(screen.getByRole('button', { name: /search/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('No contact info')).toBeInTheDocument();
+      expect(
+        screen.getByText(t('guests.search.noContact')),
+      ).toBeInTheDocument();
     });
   });
 });

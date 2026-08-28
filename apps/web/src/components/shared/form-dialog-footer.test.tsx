@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormDialogFooter } from './form-dialog-footer';
+import { t } from '@/lib/i18n';
 
 describe('FormDialogFooter', () => {
   it('should render cancel and submit buttons', () => {
@@ -12,7 +13,7 @@ describe('FormDialogFooter', () => {
       />,
     );
 
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    expect(screen.getByText(t('common.cancel'))).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
@@ -28,7 +29,7 @@ describe('FormDialogFooter', () => {
       />,
     );
 
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText(t('common.cancel'));
     await user.click(cancelButton);
 
     expect(handleCancel).toHaveBeenCalledTimes(1);
@@ -43,8 +44,8 @@ describe('FormDialogFooter', () => {
       />,
     );
 
-    expect(screen.getByText('Cancel')).toBeDisabled();
-    expect(screen.getByText('Saving...')).toBeDisabled();
+    expect(screen.getByText(t('common.cancel'))).toBeDisabled();
+    expect(screen.getByText(t('common.saving'))).toBeDisabled();
   });
 
   it('should show loading text when loading', () => {
@@ -56,7 +57,7 @@ describe('FormDialogFooter', () => {
       />,
     );
 
-    expect(screen.getByText('Saving...')).toBeInTheDocument();
+    expect(screen.getByText(t('common.saving'))).toBeInTheDocument();
   });
 
   it('should support custom cancel label', () => {

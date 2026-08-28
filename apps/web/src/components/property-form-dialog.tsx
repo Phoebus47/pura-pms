@@ -86,7 +86,7 @@ export function PropertyFormDialog({
           <button
             type="button"
             onClick={onClose}
-            aria-label={t('common.cancel')}
+            aria-label={t('common.closeDialog')}
             className="hover:bg-muted p-2 rounded-lg transition-colors"
           >
             <X className="h-5 text-muted-foreground w-5" />

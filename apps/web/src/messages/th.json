@@ -81,7 +81,11 @@
     "guestNotFound": "ไม่พบแขก",
     "failedToLoadGuest": "โหลดแขกไม่สำเร็จ",
     "failedToDeleteGuest": "ลบแขกไม่สำเร็จ",
-    "failedToUpdateBlacklist": "อัปเดตสถานะแบล็กลิสต์ไม่สำเร็จ"
+    "failedToUpdateBlacklist": "อัปเดตสถานะแบล็กลิสต์ไม่สำเร็จ",
+    "confirm": "ยืนยัน",
+    "saving": "กำลังบันทึก...",
+    "searching": "กำลังค้นหา...",
+    "closeDialog": "ปิดหน้าต่าง"
   },
   "pwa": {
     "offlineBanner": "ออฟไลน์ — แสดงข้อมูลที่ซิงค์ล่าสุด การบันทึกต้องมีอินเทอร์เน็ต",
@@ -1246,7 +1250,37 @@
       "subtitle": "จัดการโปรไฟล์และประวัติแขก",
       "tableCaption": "ทะเบียนแขก พร้อมข้อมูลติดต่อ ระดับ VIP จำนวนการเข้าพัก รายได้ และสถานะ"
     },
-    "detail": {}
+    "detail": {},
+    "loadFailed": "โหลดรายชื่อแขกไม่สำเร็จ",
+    "deleted": "ลบแขกแล้ว",
+    "form": {
+      "new": "เพิ่มแขก",
+      "edit": "แก้ไขแขก",
+      "saveFailed": "บันทึกแขกไม่สำเร็จ",
+      "create": "สร้างแขก",
+      "update": "อัปเดตแขก",
+      "firstNamePlaceholder": "สมชาย",
+      "lastNamePlaceholder": "ใจดี",
+      "emailPlaceholder": "john.doe@email.com",
+      "phonePlaceholder": "+66 81 234 5678",
+      "nationalityPlaceholder": "ไทย",
+      "idPlaceholder": "เลขพาสปอร์ตหรือบัตรประชาชน",
+      "addressPlaceholder": "ที่อยู่เต็ม",
+      "vipStandardAria": "ระดับ VIP มาตรฐาน",
+      "vipLevelAria": "ระดับ VIP {level}"
+    },
+    "search": {
+      "title": "ค้นหาแขก",
+      "selectTitle": "เลือกแขก",
+      "emptyTitle": "ไม่พบแขก",
+      "searchFailed": "ค้นหาแขกไม่สำเร็จ",
+      "placeholder": "ค้นหาชื่อ อีเมล หรือโทรศัพท์...",
+      "hint": "พิมพ์ชื่อ อีเมล หรือโทรศัพท์เพื่อค้นหา",
+      "createInstead": "สร้างแขกใหม่แทน",
+      "createNew": "สร้างแขกใหม่",
+      "noContact": "ไม่มีข้อมูลติดต่อ",
+      "stays": "{count} ครั้ง"
+    }
   },
   "portal": {
     "title": "Guest Portal",
@@ -1400,7 +1434,24 @@
     "deleteFailed": "ลบประเภทห้องไม่สำเร็จ",
     "editAria": "แก้ไข {name}",
     "deleteAria": "ลบ {name}",
-    "moreAmenities": "+{count} เพิ่มเติม"
+    "moreAmenities": "+{count} เพิ่มเติม",
+    "form": {
+      "new": "เพิ่มประเภทห้อง",
+      "edit": "แก้ไขประเภทห้อง",
+      "name": "ชื่อประเภทห้อง",
+      "namePlaceholder": "Deluxe Suite",
+      "codePlaceholder": "DLX",
+      "descriptionPlaceholder": "รายละเอียดประเภทห้อง...",
+      "baseRate": "ราคาฐาน (฿)",
+      "maxAdults": "ผู้ใหญ่สูงสุด",
+      "maxChildren": "เด็กสูงสุด",
+      "amenityPlaceholder": "เช่น WiFi, TV, Mini Bar",
+      "addAmenity": "เพิ่มสิ่งอำนวยความสะดวก",
+      "removeAmenity": "ลบ {name}",
+      "saveFailed": "บันทึกประเภทห้องไม่สำเร็จ",
+      "create": "สร้างประเภทห้อง",
+      "update": "อัปเดตประเภทห้อง"
+    }
   },
   "properties": {
     "title": "โรงแรม",
@@ -1439,7 +1490,8 @@
     "formSaving": "กำลังบันทึก...",
     "formCreate": "สร้างโรงแรม",
     "formUpdate": "อัปเดตโรงแรม",
-    "formSaveFailed": "บันทึกโรงแรมไม่สำเร็จ"
+    "formSaveFailed": "บันทึกโรงแรมไม่สำเร็จ",
+    "selectPlaceholder": "เลือกโรงแรม"
   },
   "header": {
     "searchPlaceholder": "ค้นหาแขก หมายเลขยืนยัน ห้อง…",
