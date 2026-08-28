@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RoomTypeFormDialog } from './room-type-form-dialog';
 import { roomTypesAPI, propertiesAPI } from '@/lib/api';
+import { formatMessage, t } from '@/lib/i18n';
 
 describe('RoomTypeFormDialog', () => {
   const mockOnClose = vi.fn();
@@ -46,8 +47,12 @@ describe('RoomTypeFormDialog', () => {
     await screen.findByRole('combobox', { name: /property/i });
 
     // Add amenity
-    const amenityInput = screen.getByPlaceholderText(/e.g., WiFi/i);
-    const addButton = screen.getByRole('button', { name: /add amenity/i });
+    const amenityInput = screen.getByPlaceholderText(
+      t('roomTypes.form.amenityPlaceholder'),
+    );
+    const addButton = screen.getByRole('button', {
+      name: t('roomTypes.form.addAmenity'),
+    });
 
     fireEvent.change(amenityInput, { target: { value: 'WiFi' } });
     fireEvent.click(addButton);
@@ -74,7 +79,7 @@ describe('RoomTypeFormDialog', () => {
 
     // Remove amenity (WiFi)
     const removeWifiButton = screen.getByRole('button', {
-      name: /remove WiFi/i,
+      name: formatMessage('roomTypes.form.removeAmenity', { name: 'WiFi' }),
     });
     fireEvent.click(removeWifiButton);
 
@@ -93,7 +98,7 @@ describe('RoomTypeFormDialog', () => {
         onSuccess={mockOnSuccess}
       />,
     );
-    expect(screen.getByText('New Room Type')).toBeInTheDocument();
+    expect(screen.getByText(t('roomTypes.form.new'))).toBeInTheDocument();
     await screen.findByRole('combobox', { name: /property/i });
   });
 
@@ -220,7 +225,9 @@ describe('RoomTypeFormDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /create room type/i }));
 
     await waitFor(() =>
-      expect(screen.getByText('Failed to save room type')).toBeInTheDocument(),
+      expect(
+        screen.getByText(t('roomTypes.form.saveFailed')),
+      ).toBeInTheDocument(),
     );
   });
 
@@ -258,8 +265,12 @@ describe('RoomTypeFormDialog', () => {
       />,
     );
 
-    const amenityInput = screen.getByPlaceholderText(/e.g., WiFi/i);
-    const addButton = screen.getByRole('button', { name: /add amenity/i });
+    const amenityInput = screen.getByPlaceholderText(
+      t('roomTypes.form.amenityPlaceholder'),
+    );
+    const addButton = screen.getByRole('button', {
+      name: t('roomTypes.form.addAmenity'),
+    });
 
     // Add amenity via button
     await user.type(amenityInput, 'WiFi');
@@ -276,7 +287,7 @@ describe('RoomTypeFormDialog', () => {
 
     // Remove amenity
     const removeWifiButton = screen.getByRole('button', {
-      name: /remove WiFi/i,
+      name: formatMessage('roomTypes.form.removeAmenity', { name: 'WiFi' }),
     });
     await user.click(removeWifiButton);
 

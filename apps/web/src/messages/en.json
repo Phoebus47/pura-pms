@@ -81,7 +81,11 @@
     "guestNotFound": "Guest not found",
     "failedToLoadGuest": "Failed to load guest",
     "failedToDeleteGuest": "Failed to delete guest",
-    "failedToUpdateBlacklist": "Failed to update blacklist status"
+    "failedToUpdateBlacklist": "Failed to update blacklist status",
+    "confirm": "Confirm",
+    "saving": "Saving...",
+    "searching": "Searching...",
+    "closeDialog": "Close dialog"
   },
   "pwa": {
     "offlineBanner": "You are offline — showing last synced data. Changes need a connection.",
@@ -1246,7 +1250,37 @@
       "subtitle": "Manage guest profiles and history",
       "tableCaption": "Guest directory with contact details, VIP level, stays, revenue and status"
     },
-    "detail": {}
+    "detail": {},
+    "loadFailed": "Failed to load guests",
+    "deleted": "Guest deleted successfully",
+    "form": {
+      "new": "New Guest",
+      "edit": "Edit Guest",
+      "saveFailed": "Failed to save guest",
+      "create": "Create Guest",
+      "update": "Update Guest",
+      "firstNamePlaceholder": "John",
+      "lastNamePlaceholder": "Doe",
+      "emailPlaceholder": "john.doe@email.com",
+      "phonePlaceholder": "+66 81 234 5678",
+      "nationalityPlaceholder": "Thai",
+      "idPlaceholder": "Passport or ID number",
+      "addressPlaceholder": "Full address",
+      "vipStandardAria": "VIP Level Standard",
+      "vipLevelAria": "VIP Level {level}"
+    },
+    "search": {
+      "title": "Search Guest",
+      "selectTitle": "Select Guest",
+      "emptyTitle": "No Guests Found",
+      "searchFailed": "Failed to search guests",
+      "placeholder": "Search by name, email, or phone...",
+      "hint": "Enter a name, email, or phone to search",
+      "createInstead": "Create New Guest Instead",
+      "createNew": "Create New Guest",
+      "noContact": "No contact info",
+      "stays": "{count} stays"
+    }
   },
   "portal": {
     "title": "Guest portal",
@@ -1400,7 +1434,24 @@
     "deleteFailed": "Failed to delete room type",
     "editAria": "Edit {name}",
     "deleteAria": "Delete {name}",
-    "moreAmenities": "+{count} more"
+    "moreAmenities": "+{count} more",
+    "form": {
+      "new": "New Room Type",
+      "edit": "Edit Room Type",
+      "name": "Room Type Name",
+      "namePlaceholder": "Deluxe Suite",
+      "codePlaceholder": "DLX",
+      "descriptionPlaceholder": "Room type description...",
+      "baseRate": "Base Rate (฿)",
+      "maxAdults": "Max Adults",
+      "maxChildren": "Max Children",
+      "amenityPlaceholder": "e.g., WiFi, TV, Mini Bar",
+      "addAmenity": "Add amenity",
+      "removeAmenity": "Remove {name}",
+      "saveFailed": "Failed to save room type",
+      "create": "Create Room Type",
+      "update": "Update Room Type"
+    }
   },
   "properties": {
     "title": "Properties",
@@ -1439,7 +1490,8 @@
     "formSaving": "Saving...",
     "formCreate": "Create Property",
     "formUpdate": "Update Property",
-    "formSaveFailed": "Failed to save property"
+    "formSaveFailed": "Failed to save property",
+    "selectPlaceholder": "Select a property"
   },
   "header": {
     "searchPlaceholder": "Search guests, confirmation, rooms…",

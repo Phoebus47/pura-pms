@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import { ReactNode, useEffect } from 'react';
+import { t } from '@/lib/i18n';
 
 interface BaseFormDialogProps {
   readonly isOpen: boolean;
@@ -49,7 +50,7 @@ export function BaseFormDialog({
           <button
             onClick={onClose}
             className="hover:bg-muted p-2 rounded-xl transition-colors"
-            aria-label="Close dialog"
+            aria-label={t('common.closeDialog')}
             type="button"
           >
             <X className="h-5 text-muted-foreground w-5" />

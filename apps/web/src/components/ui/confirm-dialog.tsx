@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Button } from './button';
+import { t } from '@/lib/i18n';
 
 interface ConfirmDialogProps {
   title: string;
@@ -38,8 +39,8 @@ export function useConfirmDialog() {
       setDialog({
         title,
         message,
-        confirmText: options?.confirmText || 'Confirm',
-        cancelText: options?.cancelText || 'Cancel',
+        confirmText: options?.confirmText || t('common.confirm'),
+        cancelText: options?.cancelText || t('common.cancel'),
       });
       setOnConfirmCallback(() => onConfirm);
       setOnCancelCallback(() => options?.onCancel || undefined);

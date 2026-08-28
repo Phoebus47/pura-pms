@@ -3,6 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useGuests } from './use-guests';
 import { guestsAPI } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api', () => ({
   guestsAPI: {
@@ -68,7 +69,7 @@ describe('useGuests', () => {
   });
 
   it('should handle loading error', async () => {
-    const errorMessage = 'Failed to load guests';
+    const errorMessage = t('guests.loadFailed');
     (guestsAPI.getAll as any).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useGuests());
@@ -98,8 +99,8 @@ describe('useGuests', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.error).toBe('Failed to load guests');
-    expect(toast.error).toHaveBeenCalledWith('Failed to load guests');
+    expect(result.current.error).toBe(t('guests.loadFailed'));
+    expect(toast.error).toHaveBeenCalledWith(t('guests.loadFailed'));
   });
 
   it('should apply search filter when provided', async () => {
@@ -145,7 +146,7 @@ describe('useGuests', () => {
 
     expect(deleteResult!).toBe(true);
     expect(guestsAPI.delete).toHaveBeenCalledWith('1');
-    expect(toast.success).toHaveBeenCalledWith('Guest deleted successfully');
+    expect(toast.success).toHaveBeenCalledWith(t('guests.deleted'));
     expect(guestsAPI.getAll).toHaveBeenCalled();
   });
 
@@ -175,7 +176,7 @@ describe('useGuests', () => {
     });
 
     expect(deleteResult!).toBe(false);
-    expect(toast.error).toHaveBeenCalledWith('Failed to delete guest');
+    expect(toast.error).toHaveBeenCalledWith(t('common.failedToDeleteGuest'));
   });
 
   it('should reload guests after successful delete', async () => {
