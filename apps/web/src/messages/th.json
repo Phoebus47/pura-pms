@@ -590,7 +590,32 @@
     "paymentError": "บันทึกการชำระไม่สำเร็จ",
     "currency": "สกุลเงิน",
     "foreignAmount": "จำนวนเงินสกุลต่างประเทศ",
-    "interimLabel": "ชั่วคราว"
+    "interimLabel": "ชั่วคราว",
+    "charge": {
+      "success": "ลงค่าใช้จ่ายแล้ว",
+      "error": "ลงค่าใช้จ่ายไม่สำเร็จ",
+      "transactionCode": "รหัสรายการ",
+      "selectCode": "เลือกรหัส...",
+      "amountNet": "จำนวนเงิน (สุทธิ)",
+      "service": "ค่าบริการ",
+      "tax": "ภาษี",
+      "reference": "เลขอ้างอิง",
+      "referencePlaceholder": "เช่น ใบเสร็จ #123",
+      "remark": "หมายเหตุ",
+      "remarkPlaceholder": "หมายเหตุภายใน..."
+    },
+    "void": {
+      "title": "ยกเลิกรายการ",
+      "description": "ระบบจะสร้างรายการแก้ไขและทำเครื่องหมายว่ารายการเดิมถูกยกเลิก ต้องระบุรหัสเหตุผลเพื่อเก็บหลักฐานการตรวจสอบ",
+      "reasonCode": "รหัสเหตุผล",
+      "selectReason": "เลือกเหตุผล",
+      "remarkOptional": "หมายเหตุ (ไม่บังคับ)",
+      "submitting": "กำลังยกเลิก...",
+      "confirm": "ยืนยันการยกเลิก",
+      "success": "ยกเลิกรายการแล้ว",
+      "error": "ยกเลิกรายการไม่สำเร็จ",
+      "loadReasonsFailed": "โหลดรหัสเหตุผลไม่สำเร็จ"
+    }
   },
   "preauth": {
     "title": "Pre-auth",

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import type { TransactionCode } from '@/lib/api/transaction-codes';
 import { submitFolioTransaction } from '@/lib/posting';
+import { t } from '@/lib/i18n';
 
 interface PostChargeDialogProps {
   readonly isOpen: boolean;
@@ -69,8 +70,8 @@ export function PostChargeDialog({
           userId: 'CURRENT_USER', // Replace with actual auth user
           businessDate: new Date().toISOString().slice(0, 10),
         },
-        successMessage: 'Charge posted successfully',
-        errorPrefix: 'Failed to post charge',
+        successMessage: t('folios.charge.success'),
+        errorPrefix: t('folios.charge.error'),
         onSuccess,
         onClose,
       });
@@ -84,15 +85,17 @@ export function PostChargeDialog({
       <DialogContent aria-describedby={undefined} className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="font-bold text-2xl text-pura-blue">
-            Post Charge
+            {t('billing.postCharge')}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="py-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="trxCode">Transaction Code</Label>
+            <Label htmlFor="trxCode">
+              {t('folios.charge.transactionCode')}
+            </Label>
             <Select value={trxCodeId} onValueChange={setTrxCodeId}>
-              <SelectTrigger id="trxCode" className="rounded-xl">
-                <SelectValue placeholder="Select code..." />
+              <SelectTrigger id="trxCode" name="trxCode" className="rounded-xl">
+                <SelectValue placeholder={t('folios.charge.selectCode')} />
               </SelectTrigger>
               <SelectContent>
                 {chargeCodes.map((code) => (
@@ -104,9 +107,10 @@ export function PostChargeDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount (Net)</Label>
+            <Label htmlFor="amount">{t('folios.charge.amountNet')}</Label>
             <Input
               id="amount"
+              name="amountNet"
               type="number"
               step="0.01"
               value={amountNet}
@@ -119,49 +123,53 @@ export function PostChargeDialog({
             />
           </div>
           <div className="bg-surface-inset border border-rule-mist gap-x-4 gap-y-2 grid grid-cols-2 p-4 rounded-lg text-sm">
-            <p className="text-muted-foreground">Service</p>
+            <p className="text-muted-foreground">
+              {t('folios.charge.service')}
+            </p>
             <p className="font-semibold text-foreground text-right">
               ฿{service.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
-            <p className="text-muted-foreground">Tax</p>
+            <p className="text-muted-foreground">{t('folios.charge.tax')}</p>
             <p className="font-semibold text-foreground text-right">
               ฿{tax.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
-            <p className="font-semibold text-foreground">Total</p>
+            <p className="font-semibold text-foreground">{t('folios.total')}</p>
             <p className="font-bold text-foreground text-right">
               ฿{total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reference">Reference</Label>
+            <Label htmlFor="reference">{t('folios.charge.reference')}</Label>
             <Input
               id="reference"
+              name="reference"
               value={reference}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setReference(e.target.value)
               }
-              placeholder="e.g. Receipt #123"
+              placeholder={t('folios.charge.referencePlaceholder')}
               className="rounded-xl"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="remark">Remark</Label>
+            <Label htmlFor="remark">{t('folios.charge.remark')}</Label>
             <Input
               id="remark"
+              name="remark"
               value={remark}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setRemark(e.target.value)
               }
-              placeholder="Internal notes..."
+              placeholder={t('folios.charge.remarkPlaceholder')}
               className="rounded-xl"
             />
           </div>
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Posting...' : 'Post Charge'}
+              {loading ? t('folios.posting') : t('billing.postCharge')}
             </Button>
           </DialogFooter>
         </form>
