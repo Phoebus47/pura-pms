@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Theme = 'light' | 'dark';
+export type TableDensity = 'default' | 'compact';
 
 /** Shared with the inline boot script in the locale layout. */
 export const UI_STORE_KEY = 'pura-ui';
@@ -9,11 +10,14 @@ export const UI_STORE_KEY = 'pura-ui';
 interface UIState {
   sidebarOpen: boolean;
   theme: Theme;
+  tableDensity: TableDensity;
   activePropertyId?: string;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
+  setTableDensity: (density: TableDensity) => void;
+  toggleTableDensity: () => void;
   setActivePropertyId: (id?: string) => void;
 }
 
@@ -22,6 +26,7 @@ export const useUIStore = create<UIState>()(
     (set) => ({
       sidebarOpen: true,
       theme: 'light',
+      tableDensity: 'default',
       activePropertyId: undefined,
       toggleSidebar: () =>
         set((state) => ({ sidebarOpen: !state.sidebarOpen })),
@@ -29,11 +34,20 @@ export const useUIStore = create<UIState>()(
       setTheme: (theme) => set({ theme }),
       toggleTheme: () =>
         set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      setTableDensity: (tableDensity) => set({ tableDensity }),
+      toggleTableDensity: () =>
+        set((state) => ({
+          tableDensity:
+            state.tableDensity === 'compact' ? 'default' : 'compact',
+        })),
       setActivePropertyId: (id) => set({ activePropertyId: id }),
     }),
     {
       name: UI_STORE_KEY,
-      partialize: (state) => ({ theme: state.theme }),
+      partialize: (state) => ({
+        theme: state.theme,
+        tableDensity: state.tableDensity,
+      }),
     },
   ),
 );
