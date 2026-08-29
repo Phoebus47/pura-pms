@@ -5,6 +5,7 @@ import { Header } from './header';
 import { useRouter } from '@/i18n/navigation';
 import * as clientAPI from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/use-auth-store';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/i18n/navigation', () => ({
   useRouter: vi.fn(),
@@ -47,9 +48,7 @@ describe('Header', () => {
   it('should render search input', () => {
     render(<Header />);
 
-    const searchInput = screen.getByLabelText(
-      'Search guests, reservations, and rooms',
-    );
+    const searchInput = screen.getByLabelText(t('header.searchLabel'));
     expect(searchInput).toBeInTheDocument();
     expect(searchInput).toHaveAttribute('type', 'search');
     expect(searchInput).toHaveAttribute('id', 'global-search');
@@ -59,14 +58,16 @@ describe('Header', () => {
   it('should render notifications button', () => {
     render(<Header />);
 
-    const notificationsButton = screen.getByLabelText('Notifications');
+    const notificationsButton = screen.getByLabelText(
+      t('header.notifications'),
+    );
     expect(notificationsButton).toBeInTheDocument();
   });
 
   it('should keep the user name in the document on smaller viewports', () => {
     render(<Header />);
 
-    const userName = screen.getByText('Guest User');
+    const userName = screen.getByText(t('header.guestUser'));
     expect(userName).toBeInTheDocument();
     expect(userName.closest('div')).toHaveClass('hidden', 'lg:block');
   });
@@ -75,14 +76,12 @@ describe('Header', () => {
     const user = userEvent.setup();
     render(<Header />);
 
-    const searchInput = screen.getByLabelText(
-      'Search guests, reservations, and rooms',
-    );
+    const searchInput = screen.getByLabelText(t('header.searchLabel'));
     expect(searchInput).toBeInTheDocument();
     expect(searchInput).toHaveAttribute('id', 'global-search');
     expect(searchInput.parentElement).toHaveClass('hidden', 'lg:block');
 
-    const openSearch = screen.getByLabelText('Open search');
+    const openSearch = screen.getByLabelText(t('header.openSearch'));
     expect(openSearch).toHaveClass('lg:hidden', 'min-h-11', 'min-w-11');
 
     await user.click(openSearch);
@@ -95,9 +94,7 @@ describe('Header', () => {
     const user = userEvent.setup();
     render(<Header />);
 
-    const searchInput = screen.getByLabelText(
-      'Search guests, reservations, and rooms',
-    );
+    const searchInput = screen.getByLabelText(t('header.searchLabel'));
     await user.type(searchInput, 'Ada Lovelace');
     await user.keyboard('{Enter}');
 
@@ -111,22 +108,20 @@ describe('Header', () => {
     render(<Header />);
 
     // Name stays in the DOM (hidden below lg); click the menu trigger, not visibility.
-    const userButton = screen.getByText('Guest User');
+    const userButton = screen.getByText(t('header.guestUser'));
     expect(userButton).toBeInTheDocument();
 
     await user.click(userButton);
 
     expect(screen.getByText('guest@pura.com')).toBeInTheDocument();
-    expect(screen.getByText('Profile Settings')).toBeInTheDocument();
-    expect(screen.getByText('Log out')).toBeInTheDocument();
+    expect(screen.getByText(t('header.profileSettings'))).toBeInTheDocument();
+    expect(screen.getByText(t('header.logOut'))).toBeInTheDocument();
   });
 
   it('should have accessible search input', () => {
     render(<Header />);
 
-    const searchInput = screen.getByLabelText(
-      'Search guests, reservations, and rooms',
-    );
+    const searchInput = screen.getByLabelText(t('header.searchLabel'));
     expect(searchInput).toHaveAttribute('aria-label');
   });
 
@@ -154,7 +149,7 @@ describe('Header', () => {
     await user.click(userButton);
 
     // Click log out
-    const logoutItem = screen.getByText('Log out');
+    const logoutItem = screen.getByText(t('header.logOut'));
     await user.click(logoutItem);
 
     await waitFor(() => {

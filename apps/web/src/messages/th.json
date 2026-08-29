@@ -85,7 +85,10 @@
     "confirm": "ยืนยัน",
     "saving": "กำลังบันทึก...",
     "searching": "กำลังค้นหา...",
-    "closeDialog": "ปิดหน้าต่าง"
+    "closeDialog": "ปิดหน้าต่าง",
+    "somethingWentWrong": "เกิดข้อผิดพลาด",
+    "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
+    "goHome": "กลับหน้าแรก"
   },
   "pwa": {
     "offlineBanner": "ออฟไลน์ — แสดงข้อมูลที่ซิงค์ล่าสุด การบันทึกต้องมีอินเทอร์เน็ต",
@@ -1520,6 +1523,14 @@
   },
   "header": {
     "searchPlaceholder": "ค้นหาแขก หมายเลขยืนยัน ห้อง…",
-    "searchLabel": "ค้นหาแขก การจอง และห้องพัก"
+    "searchLabel": "ค้นหาแขก การจอง และห้องพัก",
+    "openSearch": "เปิดค้นหา",
+    "notifications": "การแจ้งเตือน",
+    "profilePictureAlt": "รูปโปรไฟล์",
+    "guestUser": "ผู้ใช้ทั่วไป",
+    "superAdmin": "ซูเปอร์แอดมิน",
+    "profileSettings": "ตั้งค่าโปรไฟล์",
+    "switchProperty": "เปลี่ยนโรงแรม",
+    "logOut": "ออกจากระบบ"
   }
 }

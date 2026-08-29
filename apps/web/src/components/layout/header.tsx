@@ -43,7 +43,7 @@ export function Header() {
     setIsSearchOpen(false);
   }
 
-  const userName = user?.name || 'Guest User';
+  const userName = user?.name || t('header.guestUser');
   const userInitials = userName
     .split(' ')
     .map((n) => n[0])
@@ -51,7 +51,9 @@ export function Header() {
     .substring(0, 2)
     .toUpperCase();
   const userRole =
-    user?.role === 'ADMIN' ? 'Super Admin' : user?.role || 'Guest';
+    user?.role === 'ADMIN'
+      ? t('header.superAdmin')
+      : user?.role || t('common.guest');
   const userEmail = user?.email || 'guest@pura.com';
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export function Header() {
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Open search"
+          aria-label={t('header.openSearch')}
           aria-expanded={isSearchOpen}
           aria-controls="global-search"
           onClick={() => setIsSearchOpen((open) => !open)}
@@ -102,7 +104,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Notifications"
+          aria-label={t('header.notifications')}
           className="group hover:bg-muted min-h-11 min-w-11 relative rounded-full"
         >
           <Bell className="group-hover:text-pura-blue h-5 text-muted-foreground transition-colors w-5" />
@@ -124,7 +126,7 @@ export function Header() {
                 <Avatar className="border-2 border-transparent group-hover:border-pura-blue/20 h-9 transition-colors w-9">
                   <AvatarImage
                     src="/placeholder-avatar.jpg"
-                    alt="Super Admin profile picture"
+                    alt={t('header.profilePictureAlt')}
                   />
                   <AvatarFallback className="bg-pura-blue font-semibold text-white text-xs">
                     {userInitials}
@@ -153,17 +155,17 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="mx-2" />
             <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-md transition-colors">
-              Profile Settings
+              {t('header.profileSettings')}
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer focus:bg-pura-blue/5 focus:text-pura-blue font-medium my-0.5 p-2.5 rounded-md transition-colors">
-              Switch Property
+              {t('header.switchProperty')}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="mx-2" />
             <DropdownMenuItem
               onClick={handleLogout}
               className="cursor-pointer focus:bg-status-critical-tint focus:text-status-critical-ink font-semibold my-0.5 p-2.5 rounded-md text-status-critical-ink"
             >
-              Log out
+              {t('header.logOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

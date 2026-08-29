@@ -4,6 +4,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from './error-boundary';
+import { t } from '@/lib/i18n';
 
 function ThrowError({ shouldThrow }: Readonly<{ shouldThrow: boolean }>) {
   if (shouldThrow) {
@@ -46,7 +47,9 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText(t('common.somethingWentWrong')),
+    ).toBeInTheDocument();
     expect(screen.getByText('Test error')).toBeInTheDocument();
   });
 
@@ -57,9 +60,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    expect(
-      screen.getByText('An unexpected error occurred'),
-    ).toBeInTheDocument();
+    expect(screen.getByText(t('common.unexpectedError'))).toBeInTheDocument();
   });
 
   it('should log error in non-production mode', () => {
@@ -105,7 +106,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    const goHomeButton = screen.getByText('Go to home');
+    const goHomeButton = screen.getByText(t('common.goHome'));
 
     const originalWindow = globalThis.window;
     // @ts-ignore
@@ -128,7 +129,9 @@ describe('ErrorBoundary', () => {
     );
 
     expect(screen.getByText('Custom error message')).toBeInTheDocument();
-    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(t('common.somethingWentWrong')),
+    ).not.toBeInTheDocument();
   });
 
   it('should reset error state when Try again is clicked', async () => {
@@ -147,10 +150,12 @@ describe('ErrorBoundary', () => {
     const { rerender } = render(<TestComponent />);
 
     await waitFor(() => {
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(
+        screen.getByText(t('common.somethingWentWrong')),
+      ).toBeInTheDocument();
     });
 
-    const tryAgainButton = screen.getByText('Try again');
+    const tryAgainButton = screen.getByText(t('common.tryAgain'));
     await user.click(tryAgainButton);
 
     key = 'reset';
@@ -182,7 +187,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    const goHomeButton = screen.getByText('Go to home');
+    const goHomeButton = screen.getByText(t('common.goHome'));
     await user.click(goHomeButton);
 
     expect(mockAssign).toHaveBeenCalledWith('/');

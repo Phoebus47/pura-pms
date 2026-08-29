@@ -22,6 +22,8 @@ describe('i18n bridge', () => {
     expect(t('common.closeDialog')).toBe('Close dialog');
     expect(t('folios.charge.success')).toBe('Charge posted successfully');
     expect(t('folios.void.title')).toBe('Void Transaction');
+    expect(t('header.logOut')).toBe('Log out');
+    expect(t('common.goHome')).toBe('Go to home');
   });
 
   it('returns Thai messages when active locale messages are set', () => {
@@ -73,5 +75,7 @@ describe('i18n bridge', () => {
     expect(t('rooms.status.VACANT_CLEAN')).toBe('ว่างสะอาด (VC)');
     expect(t('folios.charge.success')).toBe('ลงค่าใช้จ่ายแล้ว');
     expect(t('folios.void.title')).toBe('ยกเลิกรายการ');
+    expect(t('header.logOut')).toBe('ออกจากระบบ');
+    expect(t('common.goHome')).toBe('กลับหน้าแรก');
   });
 });
