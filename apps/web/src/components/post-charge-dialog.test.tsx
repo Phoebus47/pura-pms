@@ -10,6 +10,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import { PostChargeDialog } from './post-charge-dialog';
 import { foliosAPI, type FolioTransaction } from '@/lib/api/folios';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 vi.mock('@/lib/api/folios', () => ({
@@ -76,7 +77,7 @@ describe('PostChargeDialog', () => {
   it('renders correctly and filters charge codes', () => {
     render(<PostChargeDialog {...defaultProps} />);
     expect(
-      screen.getByRole('heading', { name: 'Post Charge' }),
+      screen.getByRole('heading', { name: t('billing.postCharge') }),
     ).toBeInTheDocument();
   });
 
@@ -126,7 +127,7 @@ describe('PostChargeDialog', () => {
           businessDate: expect.any(String),
         }),
       );
-      expect(toast.success).toHaveBeenCalledWith('Charge posted successfully');
+      expect(toast.success).toHaveBeenCalledWith(t('folios.charge.success'));
       expect(defaultProps.onSuccess).toHaveBeenCalled();
       expect(defaultProps.onClose).toHaveBeenCalled();
     });
@@ -144,7 +145,7 @@ describe('PostChargeDialog', () => {
     await user.clear(screen.getByLabelText(/amount/i));
     await user.type(screen.getByLabelText(/amount/i), '100');
 
-    expect(screen.getByText('Service')).toBeInTheDocument();
+    expect(screen.getByText(t('folios.charge.service'))).toBeInTheDocument();
     expect(screen.getAllByText('฿0').length).toBeGreaterThanOrEqual(1);
   });
 
@@ -163,7 +164,7 @@ describe('PostChargeDialog', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to post charge:'),
+        expect.stringContaining(`${t('folios.charge.error')}:`),
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
     });

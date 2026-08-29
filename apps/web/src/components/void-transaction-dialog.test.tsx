@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { VoidTransactionDialog } from './void-transaction-dialog';
 import { reasonCodesAPI } from '@/lib/api/reason-codes';
 import { foliosAPI } from '@/lib/api/folios';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 vi.mock('@/components/ui/button', async (importOriginal) => {
@@ -69,7 +70,7 @@ describe('VoidTransactionDialog', () => {
       expect(reasonCodesAPI.list).toHaveBeenCalled();
     });
 
-    const trigger = screen.getByText('Select a reason');
+    const trigger = screen.getByText(t('folios.void.selectReason'));
     expect(trigger).toBeInTheDocument();
   });
 
@@ -91,7 +92,9 @@ describe('VoidTransactionDialog', () => {
     const remark = screen.getByLabelText(/remark/i);
     await user.type(remark, 'Test remark');
 
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     await user.click(confirmButton);
 
     await waitFor(() => {
@@ -103,9 +106,7 @@ describe('VoidTransactionDialog', () => {
           remark: 'Test remark',
         }),
       );
-      expect(toast.success).toHaveBeenCalledWith(
-        'Transaction voided successfully',
-      );
+      expect(toast.success).toHaveBeenCalledWith(t('folios.void.success'));
       expect(defaultProps.onSuccess).toHaveBeenCalled();
       expect(defaultProps.onClose).toHaveBeenCalled();
     });
@@ -118,7 +119,9 @@ describe('VoidTransactionDialog', () => {
       expect(reasonCodesAPI.list).toHaveBeenCalled();
     });
 
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     expect(confirmButton).toHaveAttribute('data-disabled', 'true');
   });
 
@@ -131,7 +134,7 @@ describe('VoidTransactionDialog', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to load reason codes:'),
+        expect.stringContaining(`${t('folios.void.loadReasonsFailed')}:`),
       );
     });
   });
@@ -151,12 +154,14 @@ describe('VoidTransactionDialog', () => {
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: /Void transaction/ }));
 
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     await user.click(confirmButton);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to void transaction:'),
+        expect.stringContaining(`${t('folios.void.error')}:`),
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
     });
@@ -180,7 +185,9 @@ describe('VoidTransactionDialog', () => {
 
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: /Void transaction/ }));
-    await user.click(screen.getByRole('button', { name: /confirm void/i }));
+    await user.click(
+      screen.getByRole('button', { name: t('folios.void.confirm') }),
+    );
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(t('shifts.noOpenShift'));
@@ -240,7 +247,9 @@ describe('VoidTransactionDialog', () => {
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: /Void transaction/ }));
 
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     await user.click(confirmButton);
 
     await waitFor(() => {
@@ -263,14 +272,18 @@ describe('VoidTransactionDialog', () => {
     });
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByRole('option', { name: /Void transaction/ }));
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     expect(confirmButton).toHaveAttribute('data-disabled', 'true');
   });
 
   it('hits Case 1 guard: transactionId null', async () => {
     render(<VoidTransactionDialog {...defaultProps} transactionId={null} />);
     await waitFor(() => expect(reasonCodesAPI.list).toHaveBeenCalled());
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
 
     expect(confirmButton).toHaveAttribute('data-disabled', 'true');
     fireEvent.click(confirmButton);
@@ -280,7 +293,9 @@ describe('VoidTransactionDialog', () => {
   it('hits Case 2 guard: selectedReasonId empty', async () => {
     render(<VoidTransactionDialog {...defaultProps} />);
     await waitFor(() => expect(reasonCodesAPI.list).toHaveBeenCalled());
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
 
     expect(confirmButton).toHaveAttribute('data-disabled', 'true');
     fireEvent.click(confirmButton);
@@ -302,7 +317,9 @@ describe('VoidTransactionDialog', () => {
       }),
     );
 
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     await user.click(confirmButton);
     await waitFor(() =>
       expect(confirmButton).toHaveAttribute('data-disabled', 'true'),
@@ -327,7 +344,9 @@ describe('VoidTransactionDialog', () => {
     await user.clear(remarkInput);
 
     vi.mocked(foliosAPI.voidTransaction).mockResolvedValue({ id: 'ok' } as any);
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     await user.click(confirmButton);
 
     expect(foliosAPI.voidTransaction).toHaveBeenCalledWith(
@@ -339,9 +358,11 @@ describe('VoidTransactionDialog', () => {
   it('covers useEffect error and fallback', async () => {
     vi.mocked(reasonCodesAPI.list).mockRejectedValueOnce({});
     render(<VoidTransactionDialog {...defaultProps} />);
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Failed to load reason codes: '),
-    );
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        `${t('folios.void.loadReasonsFailed')}: `,
+      );
+    });
   });
 
   it('covers void error fallback', async () => {
@@ -352,11 +373,13 @@ describe('VoidTransactionDialog', () => {
     await user.click(screen.getByRole('option', { name: /Void transaction/ }));
 
     vi.mocked(foliosAPI.voidTransaction).mockRejectedValueOnce({});
-    const confirmButton = screen.getByRole('button', { name: /confirm void/i });
+    const confirmButton = screen.getByRole('button', {
+      name: t('folios.void.confirm'),
+    });
     await user.click(confirmButton);
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Failed to void transaction: '),
-    );
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(`${t('folios.void.error')}: `);
+    });
   });
 
   it('covers useEffect cancellation', async () => {

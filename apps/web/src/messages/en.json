@@ -590,7 +590,32 @@
     "paymentError": "Failed to post payment",
     "currency": "Currency",
     "foreignAmount": "Foreign amount",
-    "interimLabel": "Interim"
+    "interimLabel": "Interim",
+    "charge": {
+      "success": "Charge posted successfully",
+      "error": "Failed to post charge",
+      "transactionCode": "Transaction Code",
+      "selectCode": "Select code...",
+      "amountNet": "Amount (Net)",
+      "service": "Service",
+      "tax": "Tax",
+      "reference": "Reference",
+      "referencePlaceholder": "e.g. Receipt #123",
+      "remark": "Remark",
+      "remarkPlaceholder": "Internal notes..."
+    },
+    "void": {
+      "title": "Void Transaction",
+      "description": "This will create a correcting entry and mark the original transaction as void. A reason code is required for audit trail.",
+      "reasonCode": "Reason code",
+      "selectReason": "Select a reason",
+      "remarkOptional": "Remark (optional)",
+      "submitting": "Voiding...",
+      "confirm": "Confirm Void",
+      "success": "Transaction voided successfully",
+      "error": "Failed to void transaction",
+      "loadReasonsFailed": "Failed to load reason codes"
+    }
   },
   "preauth": {
     "title": "Card pre-authorizations",
