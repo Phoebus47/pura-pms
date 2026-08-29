@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogClose,
 } from './dialog';
+import { t } from '@/lib/i18n';
 
 describe('Dialog', () => {
   it('renders all dialog components without crashing', () => {
@@ -73,7 +74,7 @@ describe('Dialog', () => {
       </Dialog>,
     );
 
-    const close = screen.getByRole('button', { name: 'Close' });
+    const close = screen.getByRole('button', { name: t('common.closeDialog') });
     expect(close).toHaveClass(
       'focus-visible:ring-2',
       'focus-visible:ring-ring',

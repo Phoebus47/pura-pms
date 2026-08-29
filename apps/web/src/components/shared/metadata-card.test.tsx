@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MetadataCard } from './metadata-card';
+import { t } from '@/lib/i18n';
 
 describe('MetadataCard', () => {
   it('should render created and updated dates', () => {
@@ -8,8 +9,12 @@ describe('MetadataCard', () => {
 
     render(<MetadataCard createdAt={createdAt} updatedAt={updatedAt} />);
 
-    expect(screen.getByText(/Created:/)).toBeInTheDocument();
-    expect(screen.getByText(/Last Updated:/)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`${t('common.created')}:`)),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`${t('common.lastUpdated')}:`)),
+    ).toBeInTheDocument();
   });
 
   it('should format dates correctly', () => {
@@ -18,11 +23,15 @@ describe('MetadataCard', () => {
 
     render(<MetadataCard createdAt={createdAt} updatedAt={updatedAt} />);
 
-    const createdText = screen.getByText(/Created:/).textContent;
-    const updatedText = screen.getByText(/Last Updated:/).textContent;
+    const createdText = screen.getByText(
+      new RegExp(`${t('common.created')}:`),
+    ).textContent;
+    const updatedText = screen.getByText(
+      new RegExp(`${t('common.lastUpdated')}:`),
+    ).textContent;
 
-    expect(createdText).toContain('Created:');
-    expect(updatedText).toContain('Last Updated:');
+    expect(createdText).toContain(`${t('common.created')}:`);
+    expect(updatedText).toContain(`${t('common.lastUpdated')}:`);
   });
 
   it('should accept string dates', () => {
@@ -33,7 +42,11 @@ describe('MetadataCard', () => {
       />,
     );
 
-    expect(screen.getByText(/Created:/)).toBeInTheDocument();
-    expect(screen.getByText(/Last Updated:/)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`${t('common.created')}:`)),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`${t('common.lastUpdated')}:`)),
+    ).toBeInTheDocument();
   });
 });

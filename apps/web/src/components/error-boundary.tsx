@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, type ReactNode } from 'react';
+import { t } from '@/lib/i18n';
 import { Button } from './ui/button';
 
 interface ErrorBoundaryProps {
@@ -47,13 +48,13 @@ export class ErrorBoundary extends Component<
         <div className="flex items-center justify-center min-h-screen p-4">
           <div className="bg-surface-desk border border-rule-mist max-w-md p-6 rounded-lg shadow-sm w-full">
             <h2 className="font-bold mb-2 text-foreground text-xl">
-              Something went wrong
+              {t('common.somethingWentWrong')}
             </h2>
             <p className="mb-4 text-muted-foreground">
-              {this.state.error?.message || 'An unexpected error occurred'}
+              {this.state.error?.message || t('common.unexpectedError')}
             </p>
             <div className="flex gap-3">
-              <Button onClick={this.handleReset}>Try again</Button>
+              <Button onClick={this.handleReset}>{t('common.tryAgain')}</Button>
               <Button
                 variant="outline"
                 onClick={() => {
@@ -62,7 +63,7 @@ export class ErrorBoundary extends Component<
                   }
                 }}
               >
-                Go to home
+                {t('common.goHome')}
               </Button>
             </div>
           </div>
