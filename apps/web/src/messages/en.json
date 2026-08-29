@@ -85,7 +85,10 @@
     "confirm": "Confirm",
     "saving": "Saving...",
     "searching": "Searching...",
-    "closeDialog": "Close dialog"
+    "closeDialog": "Close dialog",
+    "somethingWentWrong": "Something went wrong",
+    "unexpectedError": "An unexpected error occurred",
+    "goHome": "Go to home"
   },
   "pwa": {
     "offlineBanner": "You are offline — showing last synced data. Changes need a connection.",
@@ -1520,6 +1523,14 @@
   },
   "header": {
     "searchPlaceholder": "Search guests, confirmation, rooms…",
-    "searchLabel": "Search guests, reservations, and rooms"
+    "searchLabel": "Search guests, reservations, and rooms",
+    "openSearch": "Open search",
+    "notifications": "Notifications",
+    "profilePictureAlt": "Profile picture",
+    "guestUser": "Guest User",
+    "superAdmin": "Super Admin",
+    "profileSettings": "Profile Settings",
+    "switchProperty": "Switch Property",
+    "logOut": "Log out"
   }
 }
