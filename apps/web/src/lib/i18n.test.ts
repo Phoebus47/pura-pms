@@ -20,6 +20,8 @@ describe('i18n bridge', () => {
     expect(t('roomTypes.form.new')).toBe('New Room Type');
     expect(t('properties.selectPlaceholder')).toBe('Select a property');
     expect(t('common.closeDialog')).toBe('Close dialog');
+    expect(t('folios.charge.success')).toBe('Charge posted successfully');
+    expect(t('folios.void.title')).toBe('Void Transaction');
   });
 
   it('returns Thai messages when active locale messages are set', () => {
@@ -69,5 +71,7 @@ describe('i18n bridge', () => {
     expect(t('roomTypes.title')).toBe('ประเภทห้อง');
     expect(t('properties.title')).toBe('โรงแรม');
     expect(t('rooms.status.VACANT_CLEAN')).toBe('ว่างสะอาด (VC)');
+    expect(t('folios.charge.success')).toBe('ลงค่าใช้จ่ายแล้ว');
+    expect(t('folios.void.title')).toBe('ยกเลิกรายการ');
   });
 });

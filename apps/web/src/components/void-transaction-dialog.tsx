@@ -18,6 +18,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { reasonCodesAPI, type ReasonCode } from '@/lib/api/reason-codes';
 import { foliosAPI } from '@/lib/api/folios';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { toastPostingError } from '@/lib/posting';
 
@@ -58,7 +59,7 @@ export function VoidTransactionDialog({
       } catch (err) {
         if (!isCancelled) {
           toast.error(
-            `Failed to load reason codes: ${(err as Error).message ?? ''}`,
+            `${t('folios.void.loadReasonsFailed')}: ${(err as Error).message ?? ''}`,
           );
         }
       } finally {
@@ -89,11 +90,11 @@ export function VoidTransactionDialog({
         remark: remark || undefined,
       } as unknown as Parameters<typeof foliosAPI.voidTransaction>[1]);
 
-      toast.success('Transaction voided successfully');
+      toast.success(t('folios.void.success'));
       onSuccess();
       onClose();
     } catch (err) {
-      toastPostingError(err, 'Failed to void transaction');
+      toastPostingError(err, t('folios.void.error'));
     } finally {
       setSubmitting(false);
     }
@@ -106,11 +107,8 @@ export function VoidTransactionDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Void Transaction</DialogTitle>
-          <DialogDescription>
-            This will create a correcting entry and mark the original
-            transaction as void. A reason code is required for audit trail.
-          </DialogDescription>
+          <DialogTitle>{t('folios.void.title')}</DialogTitle>
+          <DialogDescription>{t('folios.void.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="py-2 space-y-4">
@@ -119,15 +117,15 @@ export function VoidTransactionDialog({
               htmlFor="void-reason"
               className="font-medium text-foreground text-sm"
             >
-              Reason code
+              {t('folios.void.reasonCode')}
             </label>
             <Select
               disabled={loading || submitting}
               value={selectedReasonId}
               onValueChange={setSelectedReasonId}
             >
-              <SelectTrigger id="void-reason">
-                <SelectValue placeholder="Select a reason" />
+              <SelectTrigger id="void-reason" name="reasonCode">
+                <SelectValue placeholder={t('folios.void.selectReason')} />
               </SelectTrigger>
               <SelectContent>
                 {reasonCodes.map((reason) => (
@@ -144,10 +142,11 @@ export function VoidTransactionDialog({
               htmlFor="void-remark"
               className="font-medium text-foreground text-sm"
             >
-              Remark (optional)
+              {t('folios.void.remarkOptional')}
             </label>
             <Textarea
               id="void-remark"
+              name="remark"
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
               rows={3}
@@ -163,7 +162,7 @@ export function VoidTransactionDialog({
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             type="button"
@@ -171,7 +170,9 @@ export function VoidTransactionDialog({
             disabled={disableConfirm}
             className="bg-destructive hover:opacity-90"
           >
-            {submitting ? 'Voiding...' : 'Confirm Void'}
+            {submitting
+              ? t('folios.void.submitting')
+              : t('folios.void.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { FolioDetail } from './folio-detail';
 import { foliosAPI } from '@/lib/api/folios';
 import { statusToneInk } from '@/lib/design/status-tone';
+import { t } from '@/lib/i18n';
 
 vi.mock('@/lib/api/folios', () => ({
   foliosAPI: {
@@ -136,7 +137,7 @@ describe('FolioDetail', () => {
       new Promise(() => {}),
     );
     render(<FolioDetail reservationId="res1" />);
-    expect(screen.getByText('Loading billing data...')).toBeInTheDocument();
+    expect(screen.getByText(t('billing.loadingFolio'))).toBeInTheDocument();
   });
 
   it('renders no folio found', async () => {
@@ -144,7 +145,7 @@ describe('FolioDetail', () => {
     render(<FolioDetail reservationId="res1" />);
 
     await waitFor(() => {
-      expect(screen.getByText('No Folio Found')).toBeInTheDocument();
+      expect(screen.getByText(t('billing.noFolioTitle'))).toBeInTheDocument();
     });
   });
 
@@ -182,9 +183,7 @@ describe('FolioDetail', () => {
     await user.click(window2Tab);
 
     await waitFor(() => {
-      expect(
-        screen.getByText('No transactions found in this window.'),
-      ).toBeInTheDocument();
+      expect(screen.getByText(t('billing.noTransactions'))).toBeInTheDocument();
     });
   });
 
@@ -222,7 +221,7 @@ describe('FolioDetail', () => {
       expect(screen.getByText('Folio 1001 (GUEST)')).toBeInTheDocument(),
     );
 
-    await user.click(screen.getByText('Post Charge'));
+    await user.click(screen.getByText(t('billing.postCharge')));
     expect(screen.getByTestId('charge-dialog')).toBeInTheDocument();
 
     await user.click(screen.getByText('Close Charge'));
@@ -236,7 +235,7 @@ describe('FolioDetail', () => {
       expect(screen.getByText('Folio 1001 (GUEST)')).toBeInTheDocument(),
     );
 
-    await user.click(screen.getByText('Post Charge'));
+    await user.click(screen.getByText(t('billing.postCharge')));
     await user.click(screen.getByText('Success Charge'));
 
     // Should call getByReservationId again
@@ -250,13 +249,13 @@ describe('FolioDetail', () => {
       expect(screen.getByText('Folio 1001 (GUEST)')).toBeInTheDocument(),
     );
 
-    await user.click(screen.getByText('Post Payment'));
+    await user.click(screen.getByText(t('billing.postPayment')));
     expect(screen.getByTestId('payment-dialog')).toBeInTheDocument();
 
     await user.click(screen.getByText('Close Payment'));
     expect(screen.queryByTestId('payment-dialog')).not.toBeInTheDocument();
 
-    await user.click(screen.getByText('Post Payment'));
+    await user.click(screen.getByText(t('billing.postPayment')));
     await user.click(screen.getByText('Success Payment'));
     expect(foliosAPI.getByReservationId).toHaveBeenCalledTimes(3);
   });
