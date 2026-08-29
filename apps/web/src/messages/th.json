@@ -109,6 +109,24 @@
     "switchToLight": "สลับเป็นธีมสว่าง",
     "switchToDark": "สลับเป็นธีมมืด"
   },
+  "density": {
+    "label": "ความหนาแน่นตาราง",
+    "comfortable": "สบายตา",
+    "compact": "กระชับ",
+    "switchToComfortable": "สลับเป็นตารางแบบสบายตา",
+    "switchToCompact": "สลับเป็นตารางแบบกระชับ"
+  },
+  "login": {
+    "title": "เข้าสู่ระบบ",
+    "subtitle": "ระบบบริหารจัดการโรงแรม",
+    "password": "รหัสผ่าน",
+    "submit": "เข้าสู่ระบบ",
+    "submitting": "กำลังเข้าสู่ระบบ...",
+    "failed": "เข้าสู่ระบบไม่สำเร็จ",
+    "demoTitle": "บัญชีทดลอง:",
+    "demoEmail": "อีเมล: {email}",
+    "demoPassword": "รหัสผ่าน: {password}"
+  },
   "property": {
     "label": "โรงแรม",
     "select": "เลือกโรงแรม",

@@ -7,6 +7,7 @@ describe('useUIStore', () => {
 
     expect(result.current.sidebarOpen).toBe(true);
     expect(result.current.theme).toBe('light');
+    expect(result.current.tableDensity).toBe('default');
   });
 
   it('should toggle sidebar', () => {
@@ -75,6 +76,22 @@ describe('useUIStore', () => {
     });
 
     expect(result.current.theme).toBe('light');
+  });
+
+  it('should persist table density preference', () => {
+    const { result } = renderHook(() => useUIStore());
+
+    act(() => {
+      result.current.setTableDensity('compact');
+    });
+
+    expect(result.current.tableDensity).toBe('compact');
+
+    act(() => {
+      result.current.toggleTableDensity();
+    });
+
+    expect(result.current.tableDensity).toBe('default');
   });
 
   it('should set active property ID', () => {

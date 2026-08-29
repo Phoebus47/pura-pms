@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import type { TransactionCode } from '@/lib/api/transaction-codes';
 import { submitFolioTransaction } from '@/lib/posting';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
 
 interface PostChargeDialogProps {
@@ -39,6 +40,7 @@ export function PostChargeDialog({
   onSuccess,
   transactionCodes,
 }: PostChargeDialogProps) {
+  const userId = useAuthStore((state) => state.user?.id) ?? 'CURRENT_USER';
   const [loading, setLoading] = useState(false);
   const [trxCodeId, setTrxCodeId] = useState('');
   const [amountNet, setAmountNet] = useState('');
@@ -67,7 +69,7 @@ export function PostChargeDialog({
           amountNet: Number.parseFloat(amountNet),
           reference,
           remark,
-          userId: 'CURRENT_USER', // Replace with actual auth user
+          userId,
           businessDate: new Date().toISOString().slice(0, 10),
         },
         successMessage: t('folios.charge.success'),

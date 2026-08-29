@@ -18,6 +18,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { reasonCodesAPI, type ReasonCode } from '@/lib/api/reason-codes';
 import { foliosAPI } from '@/lib/api/folios';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { toastPostingError } from '@/lib/posting';
@@ -35,6 +36,7 @@ export function VoidTransactionDialog({
   transactionId,
   onSuccess,
 }: VoidTransactionDialogProps) {
+  const userId = useAuthStore((state) => state.user?.id) ?? 'CURRENT_USER';
   const [reasonCodes, setReasonCodes] = useState<ReasonCode[]>([]);
   const [selectedReasonId, setSelectedReasonId] = useState<string>('');
   const [remark, setRemark] = useState('');
@@ -85,7 +87,7 @@ export function VoidTransactionDialog({
     try {
       setSubmitting(true);
       await foliosAPI.voidTransaction(transactionId, {
-        userId: 'CURRENT_USER',
+        userId,
         reasonCodeId: selectedReasonId,
         remark: remark || undefined,
       } as unknown as Parameters<typeof foliosAPI.voidTransaction>[1]);

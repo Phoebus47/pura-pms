@@ -1270,6 +1270,42 @@ describe('ReservationsService', () => {
 
       const result = await service.checkOut('res-1');
       expect(result.status).toBe(ReservationStatus.CHECKED_OUT);
+      expect(mockPrismaService.room.update).toHaveBeenCalledWith({
+        where: { id: 'room-1' },
+        data: {
+          status: 'VACANT_DIRTY',
+          hkStage: 'DIRTY',
+          guestRequest: 'NONE',
+          guestRequestNote: null,
+          guestRequestUpdatedAt: expect.any(Date),
+          guestRequestUpdatedBy: null,
+        },
+      });
+    });
+
+    it('clears DND/MUR guest request when checking out', async () => {
+      mockPrismaService.reservation.findUnique.mockResolvedValue({
+        id: 'res-1',
+        status: ReservationStatus.CHECKED_IN,
+        roomId: 'room-dnd',
+      });
+      mockPrismaService.reservation.update.mockResolvedValue({
+        id: 'res-1',
+        status: ReservationStatus.CHECKED_OUT,
+      });
+      mockPrismaService.room.update.mockResolvedValue({});
+
+      await service.checkOut('res-1');
+
+      expect(mockPrismaService.room.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'room-dnd' },
+          data: expect.objectContaining({
+            guestRequest: 'NONE',
+            guestRequestNote: null,
+          }),
+        }),
+      );
     });
 
     it('should throw BadRequestException if not checked in', async () => {

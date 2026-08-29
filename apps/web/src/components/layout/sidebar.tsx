@@ -6,6 +6,7 @@ import { navigationGroups } from '@/config/navigation';
 import { t } from '@/lib/i18n';
 import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { DensityToggle } from '@/components/density-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Sidebar() {
@@ -61,6 +62,7 @@ export function Sidebar() {
       <div className="border-t border-white/10 p-4 space-y-4">
         <LocaleSwitcher appearance="onDark" className="[&_button]:min-h-9" />
         <ThemeToggle appearance="onDark" className="justify-center w-full" />
+        <DensityToggle appearance="onDark" className="justify-center w-full" />
         <div>
           <p className="font-semibold text-white text-xs">PURA PMS</p>
           <p className="mt-1 text-2xs text-white/60">v1.0.0 • Enterprise</p>

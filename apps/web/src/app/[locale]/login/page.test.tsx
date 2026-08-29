@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useRouter } from '@/i18n/navigation';
 import LoginPage from './page';
 import { authAPI } from '@/lib/api';
+import { formatMessage, t } from '@/lib/i18n';
 
 vi.mock('@/i18n/navigation', () => ({
   useRouter: vi.fn(),
@@ -52,20 +53,30 @@ describe('LoginPage', () => {
     render(<LoginPage />);
 
     expect(screen.getByText('PURA PMS')).toBeInTheDocument();
-    const signInTexts = screen.getAllByText('Sign In');
+    const signInTexts = screen.getAllByText(t('login.title'));
     expect(signInTexts.length).toBeGreaterThan(0);
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    const signInButtons = screen.getAllByRole('button', { name: /sign in/i });
+    expect(screen.getByLabelText(t('common.email'))).toBeInTheDocument();
+    expect(screen.getByLabelText(t('login.password'))).toBeInTheDocument();
+    const signInButtons = screen.getAllByRole('button', {
+      name: t('login.submit'),
+    });
     expect(signInButtons.length).toBeGreaterThan(0);
   });
 
   it('should display demo credentials', () => {
     render(<LoginPage />);
 
-    expect(screen.getByText('Demo Credentials:')).toBeInTheDocument();
-    expect(screen.getByText(/admin@pura.com/)).toBeInTheDocument();
-    expect(screen.getByText(/admin123/)).toBeInTheDocument();
+    expect(screen.getByText(t('login.demoTitle'))).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        formatMessage('login.demoEmail', { email: 'admin@pura.com' }),
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        formatMessage('login.demoPassword', { password: 'admin123' }),
+      ),
+    ).toBeInTheDocument();
   });
 
   it('should handle successful login', async () => {
@@ -82,9 +93,11 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
+    const emailInput = screen.getByLabelText(t('common.email'));
+    const passwordInput = screen.getByLabelText(t('login.password'));
+    const submitButton = screen.getAllByRole('button', {
+      name: t('login.submit'),
+    })[0];
 
     fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
     fireEvent.change(passwordInput, { target: { value: 'admin123' } });
@@ -109,9 +122,11 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
+    const emailInput = screen.getByLabelText(t('common.email'));
+    const passwordInput = screen.getByLabelText(t('login.password'));
+    const submitButton = screen.getAllByRole('button', {
+      name: t('login.submit'),
+    })[0];
 
     fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
     fireEvent.change(passwordInput, { target: { value: 'wrong-password' } });
@@ -127,16 +142,18 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
+    const emailInput = screen.getByLabelText(t('common.email'));
+    const passwordInput = screen.getByLabelText(t('login.password'));
+    const submitButton = screen.getAllByRole('button', {
+      name: t('login.submit'),
+    })[0];
 
     fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
     fireEvent.change(passwordInput, { target: { value: 'wrong-password' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Login failed')).toBeInTheDocument();
+      expect(screen.getByText(t('login.failed'))).toBeInTheDocument();
     });
   });
 
@@ -147,16 +164,18 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getAllByRole('button', { name: /sign in/i })[0];
+    const emailInput = screen.getByLabelText(t('common.email'));
+    const passwordInput = screen.getByLabelText(t('login.password'));
+    const submitButton = screen.getAllByRole('button', {
+      name: t('login.submit'),
+    })[0];
 
     fireEvent.change(emailInput, { target: { value: 'admin@pura.com' } });
     fireEvent.change(passwordInput, { target: { value: 'admin123' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Signing in...')).toBeInTheDocument();
+      expect(screen.getByText(t('login.submitting'))).toBeInTheDocument();
     });
     expect(submitButton).toBeDisabled();
   });
@@ -164,8 +183,8 @@ describe('LoginPage', () => {
   it('should require email and password', () => {
     render(<LoginPage />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(t('common.email'));
+    const passwordInput = screen.getByLabelText(t('login.password'));
 
     expect(emailInput).toBeRequired();
     expect(passwordInput).toBeRequired();

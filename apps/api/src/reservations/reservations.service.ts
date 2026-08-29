@@ -790,7 +790,14 @@ export class ReservationsService {
 
     await this.prisma.room.update({
       where: { id: reservation.roomId },
-      data: { status: 'VACANT_DIRTY', hkStage: 'DIRTY' },
+      data: {
+        status: 'VACANT_DIRTY',
+        hkStage: 'DIRTY',
+        guestRequest: 'NONE',
+        guestRequestNote: null,
+        guestRequestUpdatedAt: new Date(),
+        guestRequestUpdatedBy: null,
+      },
     });
 
     return updated;
