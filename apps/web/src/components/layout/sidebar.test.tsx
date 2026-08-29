@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { usePathname } from '@/i18n/navigation';
 import { Sidebar } from './sidebar';
+import { t } from '@/lib/i18n';
 
 vi.mock('next-intl', () => ({
   useLocale: () => 'en',
@@ -77,6 +78,14 @@ describe('Sidebar', () => {
 
     const reservationsLink = screen.getByText('Reservations').closest('a');
     expect(reservationsLink).toHaveClass('bg-white', 'text-pura-blue');
+  });
+
+  it('should render table density preference control', () => {
+    render(<Sidebar />);
+
+    expect(
+      screen.getByRole('button', { name: t('density.switchToCompact') }),
+    ).toBeInTheDocument();
   });
 
   it('should render version information', () => {

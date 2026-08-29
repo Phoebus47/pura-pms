@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { VoidTransactionDialog } from './void-transaction-dialog';
 import { reasonCodesAPI } from '@/lib/api/reason-codes';
 import { foliosAPI } from '@/lib/api/folios';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
@@ -61,6 +62,19 @@ describe('VoidTransactionDialog', () => {
     vi.spyOn(toast, 'success').mockImplementation(() => {});
     vi.spyOn(toast, 'error').mockImplementation(() => {});
     vi.mocked(reasonCodesAPI.list).mockResolvedValue(mockReasons as any);
+    useAuthStore.setState({
+      token: 'token',
+      user: {
+        id: 'usr-1',
+        email: 'fo@pura.com',
+        name: 'FO Agent',
+        role: 'FRONT_DESK',
+      },
+    });
+  });
+
+  afterEach(() => {
+    useAuthStore.setState({ token: null, user: null });
   });
 
   it('loads and renders reason codes', async () => {
@@ -101,7 +115,7 @@ describe('VoidTransactionDialog', () => {
       expect(foliosAPI.voidTransaction).toHaveBeenCalledWith(
         'trx-1',
         expect.objectContaining({
-          userId: 'CURRENT_USER',
+          userId: 'usr-1',
           reasonCodeId: 'reason-1',
           remark: 'Test remark',
         }),
@@ -256,7 +270,7 @@ describe('VoidTransactionDialog', () => {
       expect(foliosAPI.voidTransaction).toHaveBeenCalledWith(
         'trx-1',
         expect.objectContaining({
-          userId: 'CURRENT_USER',
+          userId: 'usr-1',
           reasonCodeId: 'reason-1',
           remark: undefined,
         }),

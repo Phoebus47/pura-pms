@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useUIStore } from '@/lib/stores/use-ui-store';
 import {
   DataTable,
   type DataTableColumn,
@@ -40,6 +41,10 @@ function renderTable(props?: Partial<DataTableProps<TestRow>>) {
 }
 
 describe('DataTable', () => {
+  beforeEach(() => {
+    useUIStore.setState({ tableDensity: 'default' });
+  });
+
   it('renders a table with an sr-only caption', () => {
     renderTable();
 
@@ -94,6 +99,24 @@ describe('DataTable', () => {
 
     expect(screen.getAllByRole('row')[1]).toHaveClass(
       'h-(--table-row-h-compact)',
+    );
+  });
+
+  it('uses the persisted density preference when no density prop is set', () => {
+    useUIStore.setState({ tableDensity: 'compact' });
+    renderTable();
+
+    expect(screen.getAllByRole('row')[1]).toHaveClass(
+      'h-(--table-row-h-compact)',
+    );
+  });
+
+  it('lets an explicit density prop override the stored preference', () => {
+    useUIStore.setState({ tableDensity: 'compact' });
+    renderTable({ density: 'default' });
+
+    expect(screen.getAllByRole('row')[1]).toHaveClass(
+      'h-(--table-row-h-default)',
     );
   });
 

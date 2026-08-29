@@ -24,6 +24,8 @@ describe('i18n bridge', () => {
     expect(t('folios.void.title')).toBe('Void Transaction');
     expect(t('header.logOut')).toBe('Log out');
     expect(t('common.goHome')).toBe('Go to home');
+    expect(t('login.title')).toBe('Sign In');
+    expect(t('density.compact')).toBe('Compact');
   });
 
   it('returns Thai messages when active locale messages are set', () => {
@@ -77,5 +79,7 @@ describe('i18n bridge', () => {
     expect(t('folios.void.title')).toBe('ยกเลิกรายการ');
     expect(t('header.logOut')).toBe('ออกจากระบบ');
     expect(t('common.goHome')).toBe('กลับหน้าแรก');
+    expect(t('login.title')).toBe('เข้าสู่ระบบ');
+    expect(t('density.compact')).toBe('กระชับ');
   });
 });

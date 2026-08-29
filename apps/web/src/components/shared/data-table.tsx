@@ -1,6 +1,7 @@
 'use client';
 
 import type { KeyboardEvent, ReactNode } from 'react';
+import { useUIStore } from '@/lib/stores/use-ui-store';
 import { cn } from '@/lib/utils';
 
 export type DataTableDensity = 'default' | 'compact';
@@ -55,12 +56,14 @@ export function DataTable<Row>({
   columns,
   rows,
   rowKey,
-  density = 'default',
+  density: densityOverride,
   stickyHeader = false,
   onRowClick,
   emptyState,
   className,
 }: DataTableProps<Row>) {
+  const storedDensity = useUIStore((state) => state.tableDensity);
+  const density = densityOverride ?? storedDensity;
   const isClickable = Boolean(onRowClick);
 
   const handleKeyDown = (

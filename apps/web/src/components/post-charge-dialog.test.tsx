@@ -10,6 +10,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import { PostChargeDialog } from './post-charge-dialog';
 import { foliosAPI, type FolioTransaction } from '@/lib/api/folios';
+import { useAuthStore } from '@/lib/stores/use-auth-store';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
@@ -72,6 +73,19 @@ describe('PostChargeDialog', () => {
     vi.clearAllMocks();
     vi.spyOn(toast, 'success').mockImplementation(() => {});
     vi.spyOn(toast, 'error').mockImplementation(() => {});
+    useAuthStore.setState({
+      token: 'token',
+      user: {
+        id: 'usr-1',
+        email: 'fo@pura.com',
+        name: 'FO Agent',
+        role: 'FRONT_DESK',
+      },
+    });
+  });
+
+  afterEach(() => {
+    useAuthStore.setState({ token: null, user: null });
   });
 
   it('renders correctly and filters charge codes', () => {
@@ -124,6 +138,7 @@ describe('PostChargeDialog', () => {
           amountNet: 100,
           reference: '',
           remark: '',
+          userId: 'usr-1',
           businessDate: expect.any(String),
         }),
       );

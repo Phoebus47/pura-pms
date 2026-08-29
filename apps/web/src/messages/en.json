@@ -109,6 +109,24 @@
     "switchToLight": "Switch to light appearance",
     "switchToDark": "Switch to dark appearance"
   },
+  "density": {
+    "label": "Table density",
+    "comfortable": "Comfortable",
+    "compact": "Compact",
+    "switchToComfortable": "Switch to comfortable table density",
+    "switchToCompact": "Switch to compact table density"
+  },
+  "login": {
+    "title": "Sign In",
+    "subtitle": "Property Management System",
+    "password": "Password",
+    "submit": "Sign In",
+    "submitting": "Signing in...",
+    "failed": "Login failed",
+    "demoTitle": "Demo Credentials:",
+    "demoEmail": "Email: {email}",
+    "demoPassword": "Password: {password}"
+  },
   "property": {
     "label": "Property",
     "select": "Select property",
