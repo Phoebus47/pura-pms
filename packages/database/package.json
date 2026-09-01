@@ -22,7 +22,7 @@
     "test:isolated": "vitest run --pool=forks"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.2"
+    "@prisma/client": "^6.19.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
