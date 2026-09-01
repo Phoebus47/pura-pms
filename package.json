@@ -22,13 +22,13 @@
     "test:e2e": "pnpm --filter web test:e2e"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.4.2",
-    "sharp": "0.35.3",
-    "turbo": "^2.9.14"
+    "lint-staged": "^17.4.1",
+    "prettier": "^3.9.6",
+    "sharp": "0.35.4",
+    "turbo": "^2.10.12"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -62,7 +62,7 @@
       "path-to-regexp@^8.0.0": "8.4.2",
       "path-to-regexp@~0.1.0": "0.1.13",
       "effect": "3.20.0",
-      "sharp": "0.35.3",
+      "sharp": "0.35.4",
       "yaml": "2.8.4",
       "serialize-javascript": ">=7.0.5",
       "flatted": ">=3.4.0",

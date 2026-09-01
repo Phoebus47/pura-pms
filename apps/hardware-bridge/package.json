@@ -13,9 +13,9 @@
     "dev": "npx tsx src/main.ts"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
-    "vitest": "^4.1.10"
+    "@types/node": "^26.4.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
