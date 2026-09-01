@@ -19,7 +19,16 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
+    # Prisma 7 is a breaking schema/client migration, not a weekly bump.
+    ignore:
+      - dependency-name: 'prisma'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@prisma/client'
+        update-types: ['version-update:semver-major']
     groups:
       dependencies:
         patterns:
           - '*'
+        exclude-patterns:
+          - 'prisma'
+          - '@prisma/client'
